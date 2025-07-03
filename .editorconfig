@@ -1,0 +1,102 @@
+# EditorConfig est un fichier pour standardiser le style de code
+# https://editorconfig.org
+
+root = true
+
+# Règles par défaut pour tous les fichiers
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# ---------------------------------------------------
+# JavaScript / JSX / TSX (React / React Native)
+[*.{js,jsx,ts,tsx}]
+indent_size = 2
+indent_style = space
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------
+# HTML
+[*.html]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------
+# CSS, SCSS, LESS
+[*.{css,scss,less}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------
+# Java (backend)
+[*.java]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------
+# SQL
+[*.sql]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------
+# JSON, YAML, Markdown (docs, config)
+[*.{json,yml,yaml,md}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = off
+
+# ---------------------------------------------------
+# Dockerfile
+[Dockerfile]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ---------------------------------------------------
+# Git commit message files
+[.gitcommit]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = false
+max_line_length = 72
+
