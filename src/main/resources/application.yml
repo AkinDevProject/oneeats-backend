@@ -1,0 +1,54 @@
+# Configuration principale OneEats Backend
+# Application Quarkus avec intégration React via Quinoa
+
+quarkus:
+  # Informations de l'application
+  application:
+    name: oneeats-backend
+    version: 1.0.0
+
+  # Configuration HTTP
+  http:
+    port: 8080
+    host: 0.0.0.0
+    cors:
+      origins: "http://localhost:5173,http://localhost:3000"
+      headers: "accept, authorization, content-type, x-requested-with"
+      methods: "GET, POST, PUT, DELETE, OPTIONS"
+      exposed-headers: "Content-Disposition"
+      access-control-max-age: 24H
+      access-control-allow-credentials: true
+
+  # Configuration OpenAPI/Swagger
+  swagger-ui:
+    always-include: true
+    path: /api-docs
+    title: "OneEats API Documentation"
+
+  smallrye-openapi:
+    info-title: "OneEats API"
+    info-version: "1.0.0"
+    info-description: "API REST pour l'application de livraison OneEats"
+    servers:
+      - url: "http://localhost:8080"
+        description: "Serveur de développement"
+
+  # Configuration de la sécurité JWT
+  smallrye-jwt:
+    enabled: true
+    auth:
+      public-key-location: META-INF/resources/publicKey.pem
+    token:
+      lifespan: 3600
+
+  # Configuration du cache
+  cache:
+    caffeine:
+      "user-cache":
+        initial-capacity: 100
+        maximum-size: 1000
+        expire-after-write: 600S
+      "restaurant-cache":
+        initial-capacity: 50
+        maximum-size: 500
+        expire-after-write: 1800S

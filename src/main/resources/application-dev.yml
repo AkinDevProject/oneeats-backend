@@ -1,0 +1,51 @@
+# Configuration de développement pour OneEats Backend
+
+quarkus:
+  # Configuration de la base de données PostgreSQL
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USERNAME:oneeats_user}
+    password: ${DB_PASSWORD:oneeats_password}
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/oneeats_dev
+      min-size: 5
+      max-size: 20
+      acquisition-timeout: 10s
+
+  # Configuration Hibernate ORM
+  hibernate-orm:
+    database:
+      generation: update
+    sql-load-script: import.sql
+    log:
+      sql: true
+      bind-parameters: true
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Configuration des logs pour développement
+  log:
+    level: DEBUG
+    category:
+      "io.quarkus": DEBUG
+      "org.hibernate": WARN
+      "org.hibernate.SQL": DEBUG
+    console:
+      enable: true
+
+  # Configuration Quinoa pour développement
+  quinoa:
+    enabled: true
+    ui-dir: apps/web
+    dev-script: "npm run dev"
+    dev-port: 5173
+    dev-server-auto-start: true
+    dev-server-timeout: 60
+    spa-routing: true
+    spa-routing-path: "/"
+    spa-routing-ignored-paths: "/api/*,/q/*,/metrics,/health"
+    dev-server-proxy:
+      "/api": "http://localhost:8080"
+
+  # Live reload activé
+  live-reload:
+    enabled: true

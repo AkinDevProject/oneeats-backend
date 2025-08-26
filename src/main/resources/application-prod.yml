@@ -1,0 +1,46 @@
+# Configuration de production pour OneEats Backend
+
+quarkus:
+  # Configuration de la base de données PostgreSQL
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    jdbc:
+      url: ${DATABASE_URL}
+      min-size: 10
+      max-size: 50
+      acquisition-timeout: 30s
+
+  # Configuration Hibernate ORM
+  hibernate-orm:
+    database:
+      generation: validate
+    log:
+      sql: false
+      bind-parameters: false
+
+  # Configuration des logs pour production
+  log:
+    level: INFO
+    category:
+      "io.quarkus": INFO
+      "org.hibernate": WARN
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+
+  # Configuration Quinoa pour production
+  quinoa:
+    enabled: true
+    ui-dir: apps/web
+    build-script: "npm run build"
+    build-dir: dist
+    spa-routing: true
+    spa-routing-path: "/"
+    spa-routing-ignored-paths: "/api/*,/q/*,/metrics,/health"
+
+  # Sécurité renforcée
+  http:
+    cors:
+      origins: ${ALLOWED_ORIGINS}

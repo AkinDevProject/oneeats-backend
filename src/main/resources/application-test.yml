@@ -1,0 +1,26 @@
+# Configuration de test pour OneEats Backend
+
+quarkus:
+  # Base de données H2 en mémoire pour les tests
+  datasource:
+    db-kind: h2
+    jdbc:
+      url: jdbc:h2:mem:testdb
+
+  # Hibernate ORM pour tests
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+    log:
+      sql: false
+
+  # Logs minimaux pour les tests
+  log:
+    level: INFO
+    category:
+      "io.quarkus": INFO
+      "org.hibernate": WARN
+
+  # Quinoa désactivé pour les tests
+  quinoa:
+    enabled: false
