@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, ChefHat, Tag, DollarSign, Package, Filter, Search, ImageIcon } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -13,6 +13,7 @@ const MenuPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -24,9 +25,19 @@ const MenuPage: React.FC = () => {
 
   const categories = ['all', ...Array.from(new Set(menuItems.map(item => item.category)))];
 
-  const filteredItems = selectedCategory === 'all' 
-    ? menuItems 
-    : menuItems.filter(item => item.category === selectedCategory);
+  const filteredItems = menuItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const stats = {
+    total: menuItems.length,
+    available: menuItems.filter(item => item.available).length,
+    unavailable: menuItems.filter(item => !item.available).length,
+    categories: categories.length - 1
+  };
 
   const handleOpenModal = (item?: MenuItem) => {
     if (item) {
@@ -102,34 +113,101 @@ const MenuPage: React.FC = () => {
   }, {} as Record<string, MenuItem[]>);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestion du menu</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Gérez vos plats et catégories</p>
+          <p className="text-gray-600 text-sm sm:text-base flex items-center space-x-2">
+            <ChefHat className="h-4 w-4" />
+            <span>Créez et gérez votre carte</span>
+          </p>
         </div>
-        <Button onClick={() => handleOpenModal()}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          onClick={() => handleOpenModal()}
+          variant="primary"
+          icon={<Plus className="h-4 w-4" />}
+          className="shadow-lg hover:shadow-xl"
+        >
           Ajouter un plat
         </Button>
       </div>
 
-      {/* Category Filter */}
-      <Card>
-        <div className="flex space-x-2 overflow-x-auto pb-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {category === 'all' ? 'Toutes les catégories' : category}
-            </button>
-          ))}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card hover className="text-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
+          <div className="flex items-center justify-center mb-2">
+            <Package className="h-6 w-6 text-primary-600" />
+          </div>
+          <div className="text-2xl font-bold text-primary-700">{stats.total}</div>
+          <div className="text-xs text-primary-600">Total plats</div>
+        </Card>
+        <Card hover className="text-center p-4 bg-gradient-to-br from-success-50 to-success-100 border-success-200">
+          <div className="flex items-center justify-center mb-2">
+            <Eye className="h-6 w-6 text-success-600" />
+          </div>
+          <div className="text-2xl font-bold text-success-700">{stats.available}</div>
+          <div className="text-xs text-success-600">Disponibles</div>
+        </Card>
+        <Card hover className="text-center p-4 bg-gradient-to-br from-danger-50 to-danger-100 border-danger-200">
+          <div className="flex items-center justify-center mb-2">
+            <EyeOff className="h-6 w-6 text-danger-600" />
+          </div>
+          <div className="text-2xl font-bold text-danger-700">{stats.unavailable}</div>
+          <div className="text-xs text-danger-600">Indisponibles</div>
+        </Card>
+        <Card hover className="text-center p-4 bg-gradient-to-br from-secondary-50 to-secondary-100 border-secondary-200">
+          <div className="flex items-center justify-center mb-2">
+            <Tag className="h-6 w-6 text-secondary-600" />
+          </div>
+          <div className="text-2xl font-bold text-secondary-700">{stats.categories}</div>
+          <div className="text-xs text-secondary-600">Catégories</div>
+        </Card>
+      </div>
+
+      {/* Search and Filters */}
+      <Card variant="glass" className="backdrop-blur-sm">
+        <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                placeholder="Rechercher un plat par nom ou description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-field pl-12"
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-primary-500" />
+              <span className="text-sm font-medium text-gray-700">Catégories:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => {
+                const count = category === 'all' ? stats.total : menuItems.filter(item => item.category === category).length;
+                return (
+                  <Button
+                    key={category}
+                    size="sm"
+                    variant={selectedCategory === category ? 'primary' : 'ghost'}
+                    onClick={() => setSelectedCategory(category)}
+                    className="relative"
+                  >
+                    {category === 'all' ? 'Toutes' : category}
+                    <Badge 
+                      size="sm" 
+                      variant={selectedCategory === category ? 'secondary' : 'info'}
+                      className="ml-1"
+                    >
+                      {count}
+                    </Badge>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -168,8 +246,39 @@ const MenuPage: React.FC = () => {
       )}
 
       {filteredItems.length === 0 && (
-        <Card className="text-center py-12">
-          <p className="text-gray-500">Aucun plat dans cette catégorie</p>
+        <Card className="text-center py-16 animate-fade-in">
+          <div className="flex flex-col items-center space-y-4">
+            <ChefHat className="h-16 w-16 text-gray-300" />
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'Aucun plat trouvé' : 'Aucun plat dans cette catégorie'}
+              </h3>
+              <p className="text-gray-500">
+                {searchTerm 
+                  ? 'Essayez de modifier votre recherche' 
+                  : 'Commencez par ajouter vos premiers plats'
+                }
+              </p>
+            </div>
+            {searchTerm ? (
+              <Button 
+                variant="outline" 
+                onClick={() => setSearchTerm('')}
+                className="mt-4"
+              >
+                Effacer la recherche
+              </Button>
+            ) : (
+              <Button 
+                variant="primary" 
+                icon={<Plus className="h-4 w-4" />}
+                onClick={() => handleOpenModal()}
+                className="mt-4"
+              >
+                Ajouter votre premier plat
+              </Button>
+            )}
+          </div>
         </Card>
       )}
 
@@ -250,30 +359,80 @@ const MenuItemCard: React.FC<{
   onToggleAvailability: () => void;
 }> = ({ item, onEdit, onDelete, onToggleAvailability }) => {
   return (
-    <Card className={`${!item.available ? 'opacity-75' : ''}`}>
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
+    <Card 
+      hover
+      className={`transition-all duration-300 ${
+        !item.available 
+          ? 'opacity-75 border-gray-300 bg-gray-50' 
+          : 'border-gray-200 hover:border-primary-200'
+      }`}
+    >
+      <div className="space-y-4">
+        {/* Image placeholder */}
+        <div className="relative">
+          <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+            <ImageIcon className="h-12 w-12 text-gray-400" />
+          </div>
+          <div className="absolute top-2 right-2">
+            <Badge 
+              variant={item.available ? 'success' : 'danger'} 
+              size="sm"
+              className="shadow-sm"
+            >
+              {item.available ? 'Disponible' : 'Indisponible'}
+            </Badge>
+          </div>
         </div>
-        <Badge variant={item.available ? 'success' : 'danger'} className="ml-2 flex-shrink-0">
-          {item.available ? 'Disponible' : 'Indisponible'}
-        </Badge>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <div className="text-lg font-bold text-gray-900">
-          {item.price.toFixed(2)} €
+
+        {/* Content */}
+        <div className="space-y-2">
+          <div className="flex items-start justify-between">
+            <h3 className="font-semibold text-gray-900 flex-1">{item.name}</h3>
+            <Badge variant="secondary" size="sm" className="ml-2">
+              {item.category}
+            </Badge>
+          </div>
+          
+          <p className="text-sm text-gray-600 line-clamp-2">
+            {item.description}
+          </p>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1">
+              <DollarSign className="h-4 w-4 text-success-600" />
+              <span className="text-xl font-bold text-success-600">
+                {item.price.toFixed(2)} €
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-1">
-          <Button size="sm" variant="secondary" onClick={onEdit}>
-            <Edit2 className="h-4 w-4" />
+
+        {/* Actions */}
+        <div className="flex space-x-2 pt-2 border-t border-gray-100">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            icon={<Edit2 className="h-4 w-4" />}
+            onClick={onEdit}
+            className="flex-1"
+          >
+            Modifier
           </Button>
-          <Button size="sm" variant="secondary" onClick={onToggleAvailability}>
-            {item.available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          <Button 
+            size="sm" 
+            variant={item.available ? 'warning' : 'success'}
+            icon={item.available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            onClick={onToggleAvailability}
+          >
+            {item.available ? 'Masquer' : 'Afficher'}
           </Button>
-          <Button size="sm" variant="danger" onClick={onDelete}>
-            <Trash2 className="h-4 w-4" />
+          <Button 
+            size="sm" 
+            variant="danger"
+            icon={<Trash2 className="h-4 w-4" />}
+            onClick={onDelete}
+          >
+            Supprimer
           </Button>
         </div>
       </div>

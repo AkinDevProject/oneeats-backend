@@ -4,26 +4,46 @@ import { clsx } from 'clsx';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
-  padding?: 'sm' | 'md' | 'lg';
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'default' | 'elevated' | 'outlined' | 'glass';
+  hover?: boolean;
+  onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({ 
   children, 
   className,
-  padding = 'md'
+  padding = 'md',
+  variant = 'default',
+  hover = false,
+  onClick
 }) => {
   const paddingClasses = {
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
+    none: '',
+    sm: 'p-3',
+    md: 'p-4 sm:p-6',
+    lg: 'p-6 sm:p-8',
+    xl: 'p-8 sm:p-10'
+  };
+
+  const variantClasses = {
+    default: 'card',
+    elevated: 'bg-white rounded-xl border border-gray-200/60 shadow-medium',
+    outlined: 'bg-white rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors duration-200',
+    glass: 'glass rounded-xl shadow-soft'
   };
 
   return (
-    <div className={clsx(
-      'bg-white rounded-lg shadow-sm border border-gray-200',
-      paddingClasses[padding],
-      className
-    )}>
+    <div 
+      className={clsx(
+        variantClasses[variant],
+        paddingClasses[padding],
+        hover && 'card-hover cursor-pointer',
+        onClick && 'cursor-pointer',
+        className
+      )}
+      onClick={onClick}
+    >
       {children}
     </div>
   );

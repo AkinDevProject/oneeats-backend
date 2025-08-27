@@ -14,6 +14,7 @@ import RestaurantDashboard from './pages/restaurant/RestaurantDashboard';
 import MenuPage from './pages/restaurant/MenuPage';
 import RestaurantStatsPage from './pages/restaurant/RestaurantStatsPage';
 import RestaurantSettingsPage from './pages/restaurant/RestaurantSettingsPage';
+import OrdersManagementPage from './pages/restaurant/OrdersManagementPage';
 
 function App() {
   const auth = useAuthProvider();
@@ -44,6 +45,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<RestaurantDashboard />} />
+            <Route path="orders" element={<OrdersManagementPage />} />
             <Route path="menu" element={<MenuPage />} />
             <Route path="stats" element={<RestaurantStatsPage />} />
             <Route path="settings" element={<RestaurantSettingsPage />} />

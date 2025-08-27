@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
+  ShoppingCart, 
   Menu as MenuIcon, 
   BarChart3, 
   Settings, 
@@ -18,7 +19,8 @@ const RestaurantLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigation = [
-    { name: 'Commandes', href: '/restaurant', icon: Home },
+    { name: 'Vue d\'ensemble', href: '/restaurant', icon: Home },
+    { name: 'Gestion des commandes', href: '/restaurant/orders', icon: ShoppingCart },
     { name: 'Menu', href: '/restaurant/menu', icon: MenuIcon },
     { name: 'Statistiques', href: '/restaurant/stats', icon: BarChart3 },
     { name: 'Paramètres', href: '/restaurant/settings', icon: Settings },
@@ -43,12 +45,12 @@ const RestaurantLayout: React.FC = () => {
         )}
 
         {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-sm border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md shadow-strong border-r border-gray-200/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:bg-white lg:backdrop-blur-none ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
           <div className="flex items-center justify-between p-6 border-b border-gray-200 lg:justify-start">
             <div className="flex items-center space-x-2">
-              <ChefHat className="h-8 w-8 text-blue-600" />
+              <ChefHat className="h-8 w-8 text-primary-600 animate-bounce-gentle" />
               <h1 className="text-xl font-bold text-gray-900">DelishGo</h1>
             </div>
             <button
@@ -66,10 +68,10 @@ const RestaurantLayout: React.FC = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-6 py-3 text-sm font-medium transition-colors duration-200 ${
+                className={`sidebar-item ${
                   isActive(item.href)
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'sidebar-item-active'
+                    : 'sidebar-item-inactive'
                 }`}
               >
                 <item.icon className="h-5 w-5 mr-3" />
@@ -82,7 +84,7 @@ const RestaurantLayout: React.FC = () => {
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
-          <header className="bg-white shadow-sm border-b border-gray-200">
+          <header className="bg-white/95 backdrop-blur-md shadow-soft border-b border-gray-200/60">
             <div className="flex items-center justify-between px-4 sm:px-6 py-4">
               <div className="flex items-center space-x-4">
                 <button
@@ -111,7 +113,7 @@ const RestaurantLayout: React.FC = () => {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 p-4 sm:p-6 overflow-auto">
+          <main className="flex-1 p-4 sm:p-6 overflow-auto animate-fade-in">
             <Outlet />
           </main>
         </div>

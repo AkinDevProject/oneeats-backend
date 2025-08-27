@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, TrendingDown, Store, DollarSign, ShoppingCart, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Store, DollarSign, ShoppingCart, AlertCircle, Users, Clock, Activity, Zap, CheckCircle2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { mockDashboardStats, mockRestaurants, mockOrders } from '../../data/mockData';
 
 const AdminDashboard: React.FC = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isRealTime, setIsRealTime] = useState(true);
+  
+  useEffect(() => {
+    if (isRealTime) {
+      const interval = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isRealTime]);
+  
   const stats = mockDashboardStats;
   const inactiveRestaurants = mockRestaurants.filter(r => !r.isOpen);
   const pendingOrders = mockOrders.filter(o => o.status === 'pending');
+  const activeOrders = mockOrders.filter(o => ['accepted', 'preparing'].includes(o.status));
+  const todayOrders = mockOrders.filter(o => {
+    const today = new Date();
+    const orderDate = new Date(o.createdAt);
+    return orderDate.toDateString() === today.toDateString();
+  });
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = 'blue' }: any) => (
     <Card className="p-4 sm:p-6">
