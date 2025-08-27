@@ -1,54 +1,63 @@
-import { useEffect } from 'react';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider } from '@/context/AuthContext';
-import { CartProvider } from '@/context/CartContext';
-import { OrderProvider } from '@/context/OrderContext';
-import { useFonts } from 'expo-font';
-import { SplashScreen } from 'expo-router';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold
-} from '@expo-google-fonts/inter';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import 'react-native-reanimated';
 
-SplashScreen.preventAutoHideAsync();
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AuthProvider } from '../src/contexts/AuthContext';
+import { CartProvider } from '../src/contexts/CartContext';
+import { OrderProvider } from '../src/contexts/OrderContext';
+import { NotificationProvider } from '../src/contexts/NotificationContext';
+
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 export default function RootLayout() {
-  useFrameworkReady();
-  
-  const [fontsLoaded, fontError] = useFonts({
-    'Inter-Regular': Inter_400Regular,
-    'Inter-Medium': Inter_500Medium,
-    'Inter-SemiBold': Inter_600SemiBold,
-    'Inter-Bold': Inter_700Bold,
+  const colorScheme = useColorScheme();
+  const [loaded] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError) {
+  if (!loaded) {
+    // Async font loading only occurs in development.
     return null;
   }
 
   return (
-    <AuthProvider>
-      <CartProvider>
-        <OrderProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </OrderProvider>
-      </CartProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <PaperProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <CartProvider>
+                <OrderProvider>
+                  <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <Stack>
+                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      <Stack.Screen name="auth" options={{ headerShown: false }} />
+                      <Stack.Screen name="restaurant/[id]" options={{ headerShown: false }} />
+                      <Stack.Screen name="order/[id]" options={{ headerShown: false }} />
+                      <Stack.Screen name="+not-found" />
+                    </Stack>
+                    <StatusBar style="auto" />
+                  </ThemeProvider>
+                </OrderProvider>
+              </CartProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </PaperProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

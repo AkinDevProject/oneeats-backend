@@ -1,157 +1,348 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
+  StyleSheet,
   Image,
-  SafeAreaView,
+  Pressable,
+  FlatList,
+  RefreshControl,
+  Dimensions,
 } from 'react-native';
-import { Search, MapPin, Star, Clock, Filter } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  interpolate,
+  FadeIn,
+  SlideInRight,
+} from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { Card, Chip, Button } from 'react-native-paper';
 import { router } from 'expo-router';
 
-interface Restaurant {
-  id: string;
-  name: string;
-  image: string;
-  rating: number;
-  distance: string;
-  deliveryTime: string;
-  category: string;
-  isOpen: boolean;
-}
+import { mockRestaurants, cuisineCategories, Restaurant } from '../../src/data/mockData';
+import { useAuth } from '../../src/contexts/AuthContext';
+import { useNotification } from '../../src/contexts/NotificationContext';
 
-const restaurants: Restaurant[] = [
-  {
-    id: '1',
-    name: 'Bella Italia',
-    image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-    rating: 4.5,
-    distance: '0.5 km',
-    deliveryTime: '15-20 min',
-    category: 'Italian',
-    isOpen: true,
-  },
-  {
-    id: '2',
-    name: 'Sushi Express',
-    image: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-    rating: 4.8,
-    distance: '1.2 km',
-    deliveryTime: '25-30 min',
-    category: 'Japanese',
-    isOpen: true,
-  },
-  {
-    id: '3',
-    name: 'Burger House',
-    image: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-    rating: 4.2,
-    distance: '0.8 km',
-    deliveryTime: '10-15 min',
-    category: 'Fast Food',
-    isOpen: false,
-  },
-  {
-    id: '4',
-    name: 'Tandoori Palace',
-    image: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-    rating: 4.6,
-    distance: '1.5 km',
-    deliveryTime: '20-25 min',
-    category: 'Indian',
-    isOpen: true,
-  },
-];
+const { width } = Dimensions.get('window');
 
-export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredRestaurants, setFilteredRestaurants] = useState(restaurants);
+const FEATURED_CARD_WIDTH = width * 0.8;
+const RESTAURANT_CARD_WIDTH = width * 0.45;
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim() === '') {
-      setFilteredRestaurants(restaurants);
+export default function RestaurantsScreen() {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
+  const [featuredRestaurants, setFeaturedRestaurants] = useState<Restaurant[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const { user } = useAuth();
+  const { unreadCount } = useNotification();
+
+  const headerScale = useSharedValue(0);
+  const contentOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    loadData();
+    animateEntrance();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setRestaurants(mockRestaurants);
+      setFeaturedRestaurants(mockRestaurants.filter(r => r.featured));
+    } catch (error) {
+      console.error('Error loading restaurants:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const animateEntrance = () => {
+    headerScale.value = withSpring(1, { damping: 15 });
+    contentOpacity.value = withTiming(1, { duration: 800 });
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const filterRestaurants = (category: string) => {
+    setSelectedCategory(category);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    if (category === 'all') {
+      setRestaurants(mockRestaurants);
     } else {
-      const filtered = restaurants.filter(
-        restaurant =>
-          restaurant.name.toLowerCase().includes(query.toLowerCase()) ||
-          restaurant.category.toLowerCase().includes(query.toLowerCase())
+      const filtered = mockRestaurants.filter(r => 
+        r.cuisine.toLowerCase() === category.toLowerCase()
       );
-      setFilteredRestaurants(filtered);
+      setRestaurants(filtered);
     }
   };
 
   const handleRestaurantPress = (restaurant: Restaurant) => {
-    router.push(`/restaurant/${restaurant.id}`);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(`/restaurant/${restaurant.id}` as any);
   };
+
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: headerScale.value }],
+    opacity: interpolate(headerScale.value, [0, 1], [0, 1]),
+  }));
+
+  const contentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+  }));
+
+  const renderHeader = () => (
+    <Animated.View style={[styles.header, headerAnimatedStyle]}>
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={styles.headerGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <BlurView intensity={20} style={styles.headerBlur}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerTop}>
+              <View>
+                <Text style={styles.greeting}>
+                  Bonjour {user?.isGuest ? 'Invité' : user?.name?.split(' ')[0] || 'Ami'} 👋
+                </Text>
+                <Text style={styles.subtitle}>
+                  Que souhaitez-vous manger aujourd'hui ?
+                </Text>
+              </View>
+              
+              <Pressable 
+                style={styles.notificationButton}
+                onPress={() => router.push('/profile')}
+              >
+                <Ionicons name="notifications" size={24} color="white" />
+                {unreadCount > 0 && (
+                  <View style={styles.notificationBadge}>
+                    <Text style={styles.notificationBadgeText}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+
+            <View style={styles.searchContainer}>
+              <Pressable 
+                style={styles.searchButton}
+                onPress={() => router.push('/search')}
+              >
+                <Ionicons name="search" size={20} color="#666" />
+                <Text style={styles.searchPlaceholder}>
+                  Rechercher un restaurant...
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </BlurView>
+      </LinearGradient>
+    </Animated.View>
+  );
+
+  const renderCategories = () => (
+    <View style={styles.categoriesSection}>
+      <Text style={styles.sectionTitle}>Catégories</Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContainer}
+      >
+        <Chip
+          key="all"
+          selected={selectedCategory === 'all'}
+          onPress={() => filterRestaurants('all')}
+          style={[
+            styles.categoryChip,
+            selectedCategory === 'all' && styles.selectedCategoryChip
+          ]}
+          textStyle={[
+            styles.categoryChipText,
+            selectedCategory === 'all' && styles.selectedCategoryChipText
+          ]}
+        >
+          Tous
+        </Chip>
+        
+        {cuisineCategories.map((category) => (
+          <Chip
+            key={category.id}
+            selected={selectedCategory === category.id}
+            onPress={() => filterRestaurants(category.id)}
+            style={[
+              styles.categoryChip,
+              selectedCategory === category.id && styles.selectedCategoryChip
+            ]}
+            textStyle={[
+              styles.categoryChipText,
+              selectedCategory === category.id && styles.selectedCategoryChipText
+            ]}
+          >
+            {category.icon} {category.name}
+          </Chip>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
+  const renderFeaturedRestaurant = ({ item, index }: { item: Restaurant; index: number }) => (
+    <Animated.View entering={SlideInRight.delay(200 + index * 100).springify()}>
+      <Pressable
+        style={styles.featuredCard}
+        onPress={() => handleRestaurantPress(item)}
+      >
+        <Card style={styles.featuredCardInner}>
+          <View style={styles.featuredImageContainer}>
+            <Image source={{ uri: item.image }} style={styles.featuredImage} />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.7)']}
+              style={styles.featuredImageOverlay}
+            />
+            
+            {!item.isOpen && (
+              <View style={styles.closedOverlay}>
+                <Text style={styles.closedText}>Fermé</Text>
+              </View>
+            )}
+            
+            <View style={styles.featuredContent}>
+              <Text style={styles.featuredName}>{item.name}</Text>
+              <Text style={styles.featuredCuisine}>{item.cuisine}</Text>
+              
+              <View style={styles.featuredInfo}>
+                <View style={styles.infoItem}>
+                  <Ionicons name="star" size={16} color="#FFD700" />
+                  <Text style={styles.infoText}>{item.rating}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Ionicons name="time" size={16} color="white" />
+                  <Text style={styles.infoText}>{item.deliveryTime}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Card>
+      </Pressable>
+    </Animated.View>
+  );
+
+  const renderRestaurant = ({ item, index }: { item: Restaurant; index: number }) => (
+    <Animated.View 
+      entering={FadeIn.delay(300 + index * 50).duration(500)}
+      style={styles.restaurantCardContainer}
+    >
+      <Pressable
+        style={styles.restaurantCard}
+        onPress={() => handleRestaurantPress(item)}
+      >
+        <Card style={styles.restaurantCardInner}>
+          <View style={styles.restaurantImageContainer}>
+            <Image source={{ uri: item.image }} style={styles.restaurantImage} />
+            
+            {!item.isOpen && (
+              <View style={styles.restaurantClosedOverlay}>
+                <Text style={styles.restaurantClosedText}>Fermé</Text>
+              </View>
+            )}
+            
+            <View style={styles.restaurantRating}>
+              <Ionicons name="star" size={12} color="#FFD700" />
+              <Text style={styles.restaurantRatingText}>{item.rating}</Text>
+            </View>
+          </View>
+          
+          <View style={styles.restaurantInfo}>
+            <Text style={styles.restaurantName} numberOfLines={1}>
+              {item.name}
+            </Text>
+            <Text style={styles.restaurantCuisine} numberOfLines={1}>
+              {item.cuisine}
+            </Text>
+            
+            <View style={styles.restaurantDetails}>
+              <Text style={styles.restaurantTime}>{item.deliveryTime}</Text>
+              <Text style={styles.restaurantDistance}>{item.distance}</Text>
+            </View>
+          </View>
+        </Card>
+      </Pressable>
+    </Animated.View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.location}>
-          <MapPin color="#1E90FF" size={20} />
-          <Text style={styles.locationText}>Current Location</Text>
-        </View>
-        <Text style={styles.greeting}>Good morning!</Text>
-        <Text style={styles.subtitle}>What would you like to eat today?</Text>
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Search color="#6B7280" size={20} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search restaurants or cuisines"
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-        </View>
-        <TouchableOpacity style={styles.filterButton}>
-          <Filter color="#1E90FF" size={20} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Nearby Restaurants</Text>
+      <StatusBar style="light" />
+      
+      {renderHeader()}
+      
+      <Animated.View style={[styles.content, contentAnimatedStyle]}>
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {renderCategories()}
           
-          {filteredRestaurants.map(restaurant => (
-            <TouchableOpacity
-              key={restaurant.id}
-              style={styles.restaurantCard}
-              onPress={() => handleRestaurantPress(restaurant)}
-            >
-              <Image source={{ uri: restaurant.image }} style={styles.restaurantImage} />
-              <View style={styles.restaurantInfo}>
-                <View style={styles.restaurantHeader}>
-                  <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: restaurant.isOpen ? '#4CAF50' : '#F44336' }]}>
-                    <Text style={styles.statusText}>{restaurant.isOpen ? 'Open' : 'Closed'}</Text>
-                  </View>
-                </View>
-                <Text style={styles.restaurantCategory}>{restaurant.category}</Text>
-                <View style={styles.restaurantMeta}>
-                  <View style={styles.rating}>
-                    <Star color="#FFC107" size={14} fill="#FFC107" />
-                    <Text style={styles.ratingText}>{restaurant.rating}</Text>
-                  </View>
-                  <View style={styles.distance}>
-                    <MapPin color="#6B7280" size={14} />
-                    <Text style={styles.distanceText}>{restaurant.distance}</Text>
-                  </View>
-                  <View style={styles.deliveryTime}>
-                    <Clock color="#6B7280" size={14} />
-                    <Text style={styles.deliveryTimeText}>{restaurant.deliveryTime}</Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+          {/* Featured Restaurants */}
+          {featuredRestaurants.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>En vedette</Text>
+              <FlatList
+                data={featuredRestaurants}
+                renderItem={renderFeaturedRestaurant}
+                keyExtractor={(item) => `featured-${item.id}`}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.featuredList}
+                snapToInterval={FEATURED_CARD_WIDTH + 16}
+                decelerationRate="fast"
+              />
+            </View>
+          )}
+          
+          {/* All Restaurants */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {selectedCategory === 'all' ? 'Tous les restaurants' : 
+               cuisineCategories.find(c => c.id === selectedCategory)?.name || 'Restaurants'}
+            </Text>
+            
+            <FlatList
+              data={restaurants}
+              renderItem={renderRestaurant}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              scrollEnabled={false}
+              columnWrapperStyle={styles.restaurantRow}
+              contentContainerStyle={styles.restaurantsList}
+            />
+          </View>
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -159,158 +350,269 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#f8f9fa',
   },
   header: {
-    paddingHorizontal: 20,
+    height: 200,
+  },
+  headerGradient: {
+    flex: 1,
+  },
+  headerBlur: {
+    flex: 1,
     paddingTop: 20,
-    paddingBottom: 20,
   },
-  location: {
+  headerContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+  },
+  headerTop: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  locationText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#1E90FF',
-    marginLeft: 5,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   greeting: {
     fontSize: 24,
-    fontFamily: 'Inter-Bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: 'white',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '500',
+  },
+  notificationButton: {
+    position: 'relative',
+    padding: 8,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notificationBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
   },
   searchContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
     marginBottom: 20,
   },
-  searchBar: {
-    flex: 1,
+  searchButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    backgroundColor: 'white',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  searchInput: {
-    flex: 1,
-    marginLeft: 10,
+  searchPlaceholder: {
+    marginLeft: 12,
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#1F2937',
-  },
-  filterButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
+    color: '#666',
+    flex: 1,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    marginTop: -20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: '#f8f9fa',
   },
-  section: {
-    marginBottom: 20,
+  scrollView: {
+    flex: 1,
+  },
+  categoriesSection: {
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: 'Inter-Bold',
-    color: '#1F2937',
+    fontWeight: '700',
+    color: '#2d3748',
+    marginHorizontal: 20,
     marginBottom: 16,
   },
-  restaurantCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 16,
+  categoriesContainer: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  categoryChip: {
+    backgroundColor: 'white',
+    marginRight: 8,
+  },
+  selectedCategoryChip: {
+    backgroundColor: '#667eea',
+  },
+  categoryChipText: {
+    color: '#666',
+    fontWeight: '500',
+  },
+  selectedCategoryChipText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  section: {
+    paddingVertical: 20,
+  },
+  featuredList: {
+    paddingLeft: 20,
+    gap: 16,
+  },
+  featuredCard: {
+    width: FEATURED_CARD_WIDTH,
+  },
+  featuredCardInner: {
+    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    elevation: 4,
+  },
+  featuredImageContainer: {
+    position: 'relative',
+  },
+  featuredImage: {
+    width: '100%',
+    height: 200,
+  },
+  featuredImageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  closedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closedText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  featuredContent: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+  },
+  featuredName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 4,
+  },
+  featuredCuisine: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: 12,
+  },
+  featuredInfo: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  infoText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  restaurantRow: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  restaurantsList: {
+    paddingBottom: 20,
+  },
+  restaurantCardContainer: {
+    width: RESTAURANT_CARD_WIDTH,
+  },
+  restaurantCard: {
+    flex: 1,
+  },
+  restaurantCardInner: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 2,
+  },
+  restaurantImageContainer: {
+    position: 'relative',
   },
   restaurantImage: {
     width: '100%',
-    height: 160,
+    height: 120,
+  },
+  restaurantClosedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restaurantClosedText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  restaurantRating: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  restaurantRatingText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
   restaurantInfo: {
-    padding: 16,
+    padding: 12,
   },
-  restaurantHeader: {
+  restaurantName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: 4,
+  },
+  restaurantCuisine: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  restaurantDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  restaurantName: {
-    fontSize: 18,
-    fontFamily: 'Inter-Bold',
-    color: '#1F2937',
-    flex: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusText: {
+  restaurantTime: {
     fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#FFFFFF',
+    color: '#4a5568',
+    fontWeight: '500',
   },
-  restaurantCategory: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    marginBottom: 8,
-  },
-  restaurantMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  ratingText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: '#1F2937',
-    marginLeft: 4,
-  },
-  distance: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  distanceText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    marginLeft: 4,
-  },
-  deliveryTime: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  deliveryTimeText: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    marginLeft: 4,
+  restaurantDistance: {
+    fontSize: 12,
+    color: '#4a5568',
+    fontWeight: '500',
   },
 });

@@ -1,112 +1,166 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, Search, ShoppingCart, Clock, User } from 'lucide-react-native';
-import { useCart } from '@/context/CartContext';
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { Platform, View } from 'react-native';
+import { HapticTab } from '@/components/HapticTab';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import TabBarBackground from '@/components/ui/TabBarBackground';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useCart } from '../../src/contexts/CartContext';
+import { useOrder } from '../../src/contexts/OrderContext';
+import { useNotification } from '../../src/contexts/NotificationContext';
+import { Badge } from 'react-native-paper';
 
-function TabBarBadge({ count }: { count: number }) {
+// Custom badge component for tab bar
+const TabBadge = ({ count, color }: { count: number; color: string }) => {
   if (count === 0) return null;
   
   return (
-    <View style={styles.badge}>
-      <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
+    <View style={{
+      position: 'absolute',
+      right: -6,
+      top: -3,
+      backgroundColor: color,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
+    }}>
+      <Badge 
+        size={16} 
+        style={{ 
+          backgroundColor: color, 
+          color: 'white',
+          fontSize: 10,
+          fontWeight: 'bold'
+        }}
+      >
+        {count > 99 ? '99+' : count.toString()}
+      </Badge>
     </View>
   );
-}
+};
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
   const { totalItems } = useCart();
+  const { currentOrder } = useOrder();
+  const { unreadCount } = useNotification();
 
   return (
     <Tabs
       screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarActiveTintColor: '#1E90FF',
-        tabBarInactiveTintColor: '#6B7280',
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 10,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontFamily: 'Inter-Medium',
-          marginTop: 4,
-        },
-      }}
-    >
+        tabBarButton: HapticTab,
+        tabBarBackground: TabBarBackground,
+        tabBarStyle: Platform.select({
+          ios: {
+            position: 'absolute',
+          },
+          default: {},
+        }),
+      }}>
+      
+      {/* Restaurants Tab */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Home color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => (
-            <Search color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="cart"
-        options={{
-          title: 'Cart',
-          tabBarIcon: ({ color, size }) => (
-            <View style={styles.cartIconContainer}>
-              <ShoppingCart color={color} size={size} />
-              <TabBarBadge count={totalItems} />
+          title: 'Restaurants',
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              <IconSymbol 
+                size={28} 
+                name={focused ? 'house.fill' : 'house'} 
+                color={color} 
+              />
             </View>
           ),
         }}
       />
+
+      {/* Search Tab */}
       <Tabs.Screen
-        name="orders"
+        name="search"
         options={{
-          title: 'Orders',
-          tabBarIcon: ({ color, size }) => (
-            <Clock color={color} size={size} />
+          title: 'Recherche',
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              <IconSymbol 
+                size={28} 
+                name={focused ? 'magnifyingglass.circle.fill' : 'magnifyingglass'} 
+                color={color} 
+              />
+            </View>
           ),
         }}
       />
+
+      {/* Cart Tab */}
+      <Tabs.Screen
+        name="cart"
+        options={{
+          title: 'Panier',
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              <IconSymbol 
+                size={28} 
+                name={focused ? 'cart.fill' : 'cart'} 
+                color={color} 
+              />
+              <TabBadge count={totalItems} color="#FF6B6B" />
+            </View>
+          ),
+        }}
+      />
+
+      {/* Orders Tab */}
+      <Tabs.Screen
+        name="orders"
+        options={{
+          title: 'Commandes',
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              <IconSymbol 
+                size={28} 
+                name={focused ? 'list.clipboard.fill' : 'list.clipboard'} 
+                color={color} 
+              />
+              {currentOrder && (
+                <TabBadge count={1} color="#4ECDC4" />
+              )}
+            </View>
+          ),
+        }}
+      />
+
+      {/* Profile Tab */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <User color={color} size={size} />
+          title: 'Profil',
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              <IconSymbol 
+                size={28} 
+                name={focused ? 'person.circle.fill' : 'person.circle'} 
+                color={color} 
+              />
+              <TabBadge count={unreadCount} color="#9B59B6" />
+            </View>
           ),
+        }}
+      />
+
+      {/* Hide explore tab */}
+      <Tabs.Screen
+        name="explore"
+        options={{
+          href: null, // This hides the tab
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  cartIconContainer: {
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    backgroundColor: '#F44336',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontFamily: 'Inter-Bold',
-  },
-});
