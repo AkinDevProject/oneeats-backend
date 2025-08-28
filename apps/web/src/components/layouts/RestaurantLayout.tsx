@@ -10,7 +10,13 @@ import {
   ChefHat,
   Menu as HamburgerMenu,
   X,
-  Palette
+  Palette,
+  Bell,
+  Zap,
+  TrendingUp,
+  Clock,
+  Eye,
+  User
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -19,6 +25,8 @@ interface NavigationItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   isSpecial?: boolean;
+  badge?: string | number;
+  description?: string;
 }
 
 const RestaurantLayout: React.FC = () => {
@@ -26,13 +34,38 @@ const RestaurantLayout: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navigation = [
-    { name: 'Vue d\'ensemble', href: '/restaurant', icon: Home },
-    { name: 'Designs Dashboard', href: '/restaurant/dashboard-designs', icon: Palette, isSpecial: true },
-    { name: 'Gestion des commandes', href: '/restaurant/orders', icon: ShoppingCart },
-    { name: 'Menu', href: '/restaurant/menu', icon: MenuIcon },
-    { name: 'Statistiques', href: '/restaurant/stats', icon: BarChart3 },
-    { name: 'Paramètres', href: '/restaurant/settings', icon: Settings },
+  const navigation: NavigationItem[] = [
+    { 
+      name: 'Analytics Dashboard', 
+      href: '/restaurant', 
+      icon: Home,
+      description: 'Vue d\'ensemble et métriques'
+    },
+    { 
+      name: 'Gestion des commandes', 
+      href: '/restaurant/orders', 
+      icon: ShoppingCart,
+      badge: 3,
+      description: 'Traitement des commandes'
+    },
+    { 
+      name: 'Menu', 
+      href: '/restaurant/menu', 
+      icon: MenuIcon,
+      description: 'Gestion du menu'
+    },
+    { 
+      name: 'Analytics avancées', 
+      href: '/restaurant/stats', 
+      icon: BarChart3,
+      description: 'Statistiques détaillées'
+    },
+    { 
+      name: 'Paramètres', 
+      href: '/restaurant/settings', 
+      icon: Settings,
+      description: 'Configuration'
+    },
   ];
 
   const isActive = (path: string) => {
@@ -42,8 +75,13 @@ const RestaurantLayout: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  const getActivePageTitle = () => {
+    const activePage = navigation.find(item => isActive(item.href));
+    return activePage?.name || 'Analytics Dashboard';
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <div className="flex">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
@@ -53,97 +91,193 @@ const RestaurantLayout: React.FC = () => {
           />
         )}
 
-        {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md shadow-strong border-r border-gray-200/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:bg-white lg:backdrop-blur-none ${
+        {/* Sidebar - Style Data-Driven */}
+        <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 lg:justify-start">
-            <div className="flex items-center space-x-2">
-              <ChefHat className="h-8 w-8 text-primary-600 animate-bounce-gentle" />
-              <h1 className="text-xl font-bold text-gray-900">DelishGo</h1>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-          <p className="text-sm text-gray-500 px-6 pb-4">Restaurateur</p>
-          
-          <nav className="flex-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
+          {/* Sidebar Header - Style Data-Driven */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 border-b border-blue-500">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <ChefHat className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white">DelishGo</h1>
+                  <p className="text-blue-100 text-sm">Analytics Dashboard</p>
+                </div>
+              </div>
+              <button
                 onClick={() => setSidebarOpen(false)}
-                className={`sidebar-item ${
-                  isActive(item.href)
-                    ? 'sidebar-item-active'
-                    : 'sidebar-item-inactive'
-                } ${
-                  item.isSpecial 
-                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 hover:from-purple-100 hover:to-blue-100' 
-                    : ''
-                }`}
+                className="lg:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-white/10"
               >
-                <item.icon className={`h-5 w-5 mr-3 ${
-                  item.isSpecial ? 'text-purple-600' : ''
-                }`} />
-                <span className={item.isSpecial ? 'text-purple-700 font-medium' : ''}>
-                  {item.name}
-                </span>
-                {item.isSpecial && (
-                  <span className="ml-auto px-2 py-1 text-xs bg-purple-100 text-purple-600 rounded-full font-medium">
-                    Nouveau
-                  </span>
-                )}
-              </Link>
-            ))}
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Quick Stats in Sidebar */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4 text-green-300" />
+                  <div>
+                    <div className="text-white font-bold text-lg">€342</div>
+                    <div className="text-blue-100 text-xs">Aujourd'hui</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-orange-300" />
+                  <div>
+                    <div className="text-white font-bold text-lg">3</div>
+                    <div className="text-blue-100 text-xs">En attente</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Navigation - Style Data-Driven */}
+          <nav className="flex-1 p-6">
+            <div className="space-y-3">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`group flex items-center justify-between p-4 rounded-xl transition-all duration-200 ${
+                    isActive(item.href)
+                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm border border-blue-200'
+                      : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-2 rounded-lg transition-colors ${
+                      isActive(item.href) 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600'
+                    }`}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className={`font-medium ${
+                        isActive(item.href) ? 'text-blue-700' : 'text-gray-900'
+                      }`}>
+                        {item.name}
+                      </div>
+                      {item.description && (
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {item.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {item.badge && (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {item.badge}
+                      </div>
+                    </div>
+                  )}
+                  {isActive(item.href) && (
+                    <div className="w-2 h-8 bg-blue-500 rounded-l-full absolute right-0"></div>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* Sidebar Footer */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Temps réel</div>
+                    <div className="text-xs text-gray-600">Données synchronisées</div>
+                  </div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
           </nav>
         </div>
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
-          <header className="bg-white/95 backdrop-blur-md shadow-soft border-b border-gray-200/60">
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                >
-                  <HamburgerMenu className="h-6 w-6" />
-                </button>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Espace Restaurateur
-                </h2>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <Link
-                  to="/restaurant/dashboard-designs"
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-                  title="Changer le design du dashboard"
-                >
-                  <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">Designs</span>
-                </Link>
-                <span className="text-sm text-gray-700 hidden sm:block">
-                  {user?.name}
-                </span>
-                <button
-                  onClick={logout}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">Déconnexion</span>
-                </button>
+          {/* Header - Style Data-Driven */}
+          <header className="bg-white border-b border-gray-200 shadow-sm">
+            <div className="px-8 py-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                  >
+                    <HamburgerMenu className="h-6 w-6" />
+                  </button>
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">{getActivePageTitle()}</h1>
+                    <p className="text-gray-600 mt-1">
+                      Interface de gestion restaurant • Données en temps réel
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  {/* Real-time indicator */}
+                  <div className="hidden md:flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-green-700">Temps réel</span>
+                  </div>
+
+                  {/* Notifications */}
+                  <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <Bell className="h-5 w-5 text-gray-600" />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">3</span>
+                    </div>
+                  </button>
+
+                  {/* User menu */}
+                  <div className="flex items-center space-x-3">
+                    <div className="hidden sm:block text-right">
+                      <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                      <div className="text-xs text-gray-600">Restaurateur</div>
+                    </div>
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center space-x-2">
+                    <Link
+                      to="/restaurant/dashboard-designs"
+                      className="hidden sm:flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                      title="Changer le design du dashboard"
+                    >
+                      <Palette className="h-4 w-4" />
+                      <span>Styles</span>
+                    </Link>
+                    
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span className="hidden sm:inline">Déconnexion</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </header>
 
           {/* Page content */}
-          <main className="flex-1 p-4 sm:p-6 overflow-auto animate-fade-in">
+          <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
         </div>
