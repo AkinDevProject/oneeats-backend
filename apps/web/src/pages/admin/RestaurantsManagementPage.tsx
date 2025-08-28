@@ -5,7 +5,8 @@ import {
   Store, Search, Filter, Eye, Edit3, Trash2, Check, X, 
   AlertCircle, ChevronDown, MapPin, Phone, Mail, Star,
   Calendar, Users, Award, TrendingUp, Clock, Settings,
-  CheckCircle, XCircle, AlertTriangle, MoreVertical
+  CheckCircle, XCircle, AlertTriangle, MoreVertical,
+  BarChart3, Download, RefreshCcw, EyeOff
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -84,97 +85,167 @@ const RestaurantsManagementPage: React.FC = () => {
   const blockedCount = restaurants.filter(r => r.status === 'blocked').length;
 
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            🏪 Gestion des Restaurants
-          </h1>
-          <p className="text-gray-600 mt-1">Supervisez et validez les restaurants partenaires</p>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header - Style Data-Driven */}
+      <div className="bg-white border-b border-gray-200 px-8 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Gestion Restaurants</h1>
+            <p className="text-gray-600 mt-1">
+              Supervision avancée • Validation intelligente • Métriques partenaires
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            {/* Analytics Controls */}
+            <div className="hidden md:flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                  <Eye className="h-4 w-4 text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+              <div className="w-px h-6 bg-gray-300"></div>
+              <select className="bg-transparent text-sm font-medium text-gray-700 border-none focus:outline-none">
+                <option>Tous les statuts</option>
+                <option>En attente</option>
+                <option>Approuvés</option>
+                <option>Bloqués</option>
+              </select>
+            </div>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+              <RefreshCcw className="h-4 w-4 text-gray-600" />
+              <span className="hidden sm:inline text-sm font-medium text-gray-700">Actualiser</span>
+            </button>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline text-sm font-medium">Export</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <div className="text-3xl font-bold text-blue-600">{restaurants.length}</div>
-          <div className="text-sm text-gray-600 font-medium">Total restaurants</div>
-          <div className="text-xs text-blue-600 mt-1">Dans la plateforme</div>
-        </Card>
+      <div className="p-8 space-y-6">
 
-        <Card className={`p-4 text-center transition-all duration-300 hover:scale-105 ${
-          pendingCount > 0 
-            ? 'bg-gradient-to-br from-orange-50 to-yellow-100 border-orange-200 animate-pulse' 
-            : 'bg-gradient-to-br from-gray-50 to-gray-100'
-        }`}>
-          <div className={`text-3xl font-bold ${pendingCount > 0 ? 'text-orange-600' : 'text-gray-400'}`}>
-            {pendingCount}
-          </div>
-          <div className="text-sm text-gray-600 font-medium">En attente</div>
-          {pendingCount > 0 && (
-            <div className="text-xs text-orange-600 font-bold animate-pulse">Action requise!</div>
-          )}
-        </Card>
+        {/* Analytics Metrics - Style Data-Driven */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Total Restaurants</p>
+                  <p className="text-3xl font-bold">{restaurants.length}</p>
+                  <p className="text-purple-200 text-xs mt-1">Partenaires actifs</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Store className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">En Attente</p>
+                  <p className="text-3xl font-bold">{pendingCount}</p>
+                  <p className="text-blue-200 text-xs mt-1">{pendingCount > 0 ? 'Action requise!' : 'Tout traité'}</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Clock className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Approuvés</p>
+                  <p className="text-3xl font-bold">{approvedCount}</p>
+                  <p className="text-green-200 text-xs mt-1">Actifs plateforme</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-gray-700 to-gray-800 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm font-medium">Bloqués</p>
+                  <p className="text-3xl font-bold">{blockedCount}</p>
+                  <p className="text-gray-400 text-xs mt-1">Suspendus temp.</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <XCircle className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
 
-        <Card className="p-4 text-center bg-gradient-to-br from-green-50 to-emerald-100 border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <div className="text-3xl font-bold text-green-600">{approvedCount}</div>
-          <div className="text-sm text-gray-600 font-medium">Approuvés</div>
-          <div className="text-xs text-green-600 mt-1">Actifs sur la plateforme</div>
-        </Card>
-
-        <Card className="p-4 text-center bg-gradient-to-br from-red-50 to-pink-100 border-red-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <div className="text-3xl font-bold text-red-600">{blockedCount}</div>
-          <div className="text-sm text-gray-600 font-medium">Bloqués</div>
-          <div className="text-xs text-red-600 mt-1">Suspendus temporairement</div>
-        </Card>
-      </div>
-
-      {/* Filtres et Recherche */}
-      <Card className="p-6">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="🔍 Rechercher par nom, email ou catégorie..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:w-80 pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-              />
+        {/* Analytics Section - Filtres et Contrôles */}
+        <Card className="bg-white shadow-sm border border-gray-200">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Filter className="h-4 w-4 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Filtres et Recherche Avancée</h3>
+              </div>
             </div>
             
-            {/* Filters */}
-            <div className="flex space-x-2">
-              {[
-                { key: 'all', label: 'Tous', count: filteredRestaurants.length },
-                { key: 'pending', label: 'En attente', count: pendingCount },
-                { key: 'approved', label: 'Approuvés', count: approvedCount },
-                { key: 'blocked', label: 'Bloqués', count: blockedCount }
-              ].map(({ key, label, count }) => (
-                <button
-                  key={key}
-                  onClick={() => setStatusFilter(key as any)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 flex items-center space-x-2 ${
-                    statusFilter === key
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300'
-                  }`}
-                >
-                  <span>{label}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    statusFilter === key ? 'bg-white bg-opacity-20' : 'bg-gray-100'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              ))}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher par nom, email ou catégorie..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex space-x-2">
+                  {[
+                    { key: 'all', label: 'Tous', count: filteredRestaurants.length },
+                    { key: 'pending', label: 'En attente', count: pendingCount },
+                    { key: 'approved', label: 'Approuvés', count: approvedCount },
+                    { key: 'blocked', label: 'Bloqués', count: blockedCount }
+                  ].map(({ key, label, count }) => (
+                    <button
+                      key={key}
+                      onClick={() => setStatusFilter(key as any)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 flex items-center space-x-2 ${
+                        statusFilter === key
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <span>{label}</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                        statusFilter === key ? 'bg-white bg-opacity-20' : 'bg-white'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
 
       {/* Liste des Restaurants */}
       <div className="space-y-4">
@@ -512,6 +583,7 @@ const RestaurantsManagementPage: React.FC = () => {
           </div>
         )}
       </Modal>
+      </div>
     </div>
   );
 };

@@ -69,10 +69,49 @@ const RestaurantStatsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header with Controls */}
+      {/* Header with Responsive Controls */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+          {/* Mobile Header */}
+          <div className="flex flex-col space-y-4 lg:hidden">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Statistiques Avancées</h1>
+              <p className="text-sm text-gray-600 mt-1">Analytics • Performance • Temps réel</p>
+            </div>
+            
+            {/* Mobile Controls Row */}
+            <div className="flex items-center justify-between space-x-2">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as any)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 max-w-xs"
+              >
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Semaine</option>
+                <option value="month">Mois</option>
+              </select>
+              
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={showAnalytics ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className="px-2 py-2"
+                >
+                  {showAnalytics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </Button>
+                <Button variant="ghost" size="sm" className="px-2 py-2">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button onClick={handleExport} variant="ghost" size="sm" className="px-2 py-2">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Statistiques</h1>
               <p className="text-gray-600 mt-1">Données en temps réel et analyses de performance</p>
@@ -106,74 +145,83 @@ const RestaurantStatsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-8">
+      {/* Main Content with Responsive Padding */}
+      <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
 
-        {/* Key Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <DollarSign className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">€{totalRevenue.toFixed(0)}</div>
-                <div className="text-blue-100 font-medium">Chiffre d'affaires</div>
+        {/* Key Metrics Row - Mobile Optimized */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 lg:mb-8">
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="text-right min-w-0">
+                <div className="text-2xl sm:text-3xl font-bold truncate">€{totalRevenue.toFixed(0)}</div>
+                <div className="text-blue-100 font-medium text-xs sm:text-sm">Chiffre d'affaires</div>
               </div>
             </div>
-            <div className="flex items-center text-blue-100 text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+15.3% vs semaine dernière</span>
+            <div className="flex items-center text-blue-100 text-xs sm:text-sm">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+              <span className="truncate">+15.3% vs semaine dernière</span>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <ShoppingCart className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">{totalOrders}</div>
-                <div className="text-green-100 font-medium">Commandes</div>
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="text-right min-w-0">
+                <div className="text-2xl sm:text-3xl font-bold">{totalOrders}</div>
+                <div className="text-green-100 font-medium text-xs sm:text-sm">Commandes</div>
               </div>
             </div>
-            <div className="flex items-center text-green-100 text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+8.7% vs semaine dernière</span>
+            <div className="flex items-center text-green-100 text-xs sm:text-sm">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+              <span className="truncate">+8.7% vs semaine dernière</span>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <Users className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">€{avgOrderValue.toFixed(0)}</div>
-                <div className="text-purple-100 font-medium">Panier moyen</div>
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="text-right min-w-0">
+                <div className="text-2xl sm:text-3xl font-bold truncate">€{avgOrderValue.toFixed(0)}</div>
+                <div className="text-purple-100 font-medium text-xs sm:text-sm">Panier moyen</div>
               </div>
             </div>
-            <div className="flex items-center text-purple-100 text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+3.2% vs semaine dernière</span>
+            <div className="flex items-center text-purple-100 text-xs sm:text-sm">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+              <span className="truncate">+3.2% vs semaine dernière</span>
             </div>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <Clock className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">{analytics.performanceMetrics.avgPreparationTime}</div>
-                <div className="text-orange-100 font-medium">Temps préparation (min)</div>
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
+              <div className="text-right min-w-0">
+                <div className="text-2xl sm:text-3xl font-bold truncate">{analytics.performanceMetrics.avgPreparationTime}</div>
+                <div className="text-orange-100 font-medium text-xs sm:text-sm">Temps préparation (min)</div>
               </div>
             </div>
-            <div className="flex items-center text-orange-100 text-sm">
-              <TrendingDown className="h-4 w-4 mr-1" />
-              <span>-2.1min vs semaine dernière</span>
+            <div className="flex items-center text-orange-100 text-xs sm:text-sm">
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+              <span className="truncate">-2.1min vs semaine dernière</span>
             </div>
           </Card>
         </div>
 
         {/* Analytics Section */}
         {showAnalytics && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-8">
             {/* Status Distribution */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Distribution des statuts</h3>
+            <Card className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
+                <h3 className="text-lg lg:text-xl font-bold text-gray-900">Distribution des statuts</h3>
                 <PieChart className="h-5 w-5 text-green-500" />
               </div>
               
@@ -204,9 +252,9 @@ const RestaurantStatsPage: React.FC = () => {
             </Card>
 
             {/* Performance KPIs */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Indicateurs de Performance</h3>
+            <Card className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
+                <h3 className="text-lg lg:text-xl font-bold text-gray-900">Indicateurs de Performance</h3>
                 <Target className="h-5 w-5 text-purple-500" />
               </div>
               
@@ -259,9 +307,9 @@ const RestaurantStatsPage: React.FC = () => {
             </Card>
 
             {/* Top Selling Items */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Articles les plus vendus</h3>
+            <Card className="p-4 lg:p-6">
+              <div className="flex items-center justify-between mb-4 lg:mb-6">
+                <h3 className="text-lg lg:text-xl font-bold text-gray-900">Articles les plus vendus</h3>
                 <Zap className="h-5 w-5 text-yellow-500" />
               </div>
               
@@ -291,13 +339,13 @@ const RestaurantStatsPage: React.FC = () => {
         )}
 
         {/* Charts */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Commandes - 7 derniers jours</h3>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-8 mb-6 lg:mb-8">
+          <Card className="p-4 lg:p-6">
+            <div className="flex items-center justify-between mb-4 lg:mb-6">
+              <h3 className="text-lg lg:text-xl font-bold text-gray-900">Commandes - 7 derniers jours</h3>
               <BarChart3 className="h-5 w-5 text-blue-500" />
             </div>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" fontSize={12} />
@@ -308,12 +356,12 @@ const RestaurantStatsPage: React.FC = () => {
             </ResponsiveContainer>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Chiffre d'affaires - 7 derniers jours</h3>
+          <Card className="p-4 lg:p-6">
+            <div className="flex items-center justify-between mb-4 lg:mb-6">
+              <h3 className="text-lg lg:text-xl font-bold text-gray-900">Chiffre d'affaires - 7 derniers jours</h3>
               <Activity className="h-5 w-5 text-green-500" />
             </div>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" fontSize={12} />

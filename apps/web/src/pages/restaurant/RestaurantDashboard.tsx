@@ -70,10 +70,43 @@ const RestaurantDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header with Controls */}
+      {/* Header with Responsive Controls */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+          {/* Mobile Header */}
+          <div className="flex flex-col space-y-4 lg:hidden">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+              <p className="text-sm text-gray-600 mt-1">Vue d'ensemble • Temps réel</p>
+            </div>
+            <div className="flex items-center justify-between">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as any)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 max-w-xs"
+              >
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+              </select>
+              <div className="flex items-center space-x-2 ml-4">
+                <Button
+                  variant={showAnalytics ? "primary" : "ghost"}
+                  size="sm"
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className="px-2 py-2"
+                >
+                  {showAnalytics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </Button>
+                <Button variant="ghost" size="sm" className="px-2 py-2">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Vue d'ensemble</h1>
               <p className="text-gray-600 mt-1">Métriques business et performance en temps réel</p>
@@ -107,9 +140,10 @@ const RestaurantDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-8">
-        {/* Quick Metrics */}
-        <div className="mb-8">
+      {/* Main Content with Responsive Padding */}
+      <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+        {/* Quick Metrics - Responsive Grid */}
+        <div className="mb-6 lg:mb-8">
           <QuickMetrics
             totalRevenue={totalRevenue}
             revenueChange="+15.3%"
@@ -121,25 +155,26 @@ const RestaurantDashboard: React.FC = () => {
           />
         </div>
 
-        {/* Urgent Actions Required */}
+        {/* Urgent Actions Required - Mobile Optimized */}
         {urgentOrders.length > 0 && (
-          <Card className="p-6 bg-red-50 border-red-200 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-                <div>
-                  <h3 className="text-lg font-bold text-red-900">Action urgente requise</h3>
-                  <p className="text-red-700">
+          <Card className="p-4 lg:p-6 bg-red-50 border-red-200 mb-6 lg:mb-8">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div className="flex items-start sm:items-center space-x-3">
+                <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-red-900">Action urgente requise</h3>
+                  <p className="text-sm sm:text-base text-red-700">
                     {urgentOrders.length} commande{urgentOrders.length > 1 ? 's' : ''} en attente depuis plus de 15 minutes
                   </p>
                 </div>
               </div>
               <Button
                 variant="primary"
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                 icon={<ArrowRight className="h-4 w-4" />}
               >
-                Gérer les commandes
+                <span className="sm:hidden">Gérer</span>
+                <span className="hidden sm:inline">Gérer les commandes</span>
               </Button>
             </div>
           </Card>

@@ -194,8 +194,8 @@ const RestaurantsPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Restaurants Grid */}
-      {filteredRestaurants.length === 0 ? (
+        {/* Restaurants Grid */}
+        {filteredRestaurants.length === 0 ? (
         <Card className="text-center py-16 animate-fade-in">
           <div className="flex flex-col items-center space-y-4">
             <Store className="h-16 w-16 text-gray-300" />

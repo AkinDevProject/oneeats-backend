@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Search, Download, Ban, Eye, Users, UserPlus, Shield, User, Activity, Calendar, Mail, TrendingUp } from 'lucide-react';
+import { Search, Download, Ban, Eye, Users, UserPlus, Shield, User, Activity, Calendar, Mail, TrendingUp, BarChart3, RefreshCcw, EyeOff, Filter } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -55,88 +55,164 @@ const UsersPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-          <p className="text-gray-600 flex items-center space-x-2">
-            <Users className="h-4 w-4" />
-            <span>Gérez les utilisateurs de votre plateforme</span>
-          </p>
-        </div>
-        <Button variant="primary" icon={<UserPlus className="h-4 w-4" />}>
-          Nouvel utilisateur
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card hover className="text-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
-          <div className="flex items-center justify-center mb-2">
-            <Users className="h-6 w-6 text-primary-600" />
+    <div className="min-h-screen bg-gray-100">
+      {/* Header - Style Data-Driven */}
+      <div className="bg-white border-b border-gray-200 px-8 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Gestion Utilisateurs</h1>
+            <p className="text-gray-600 mt-1">
+              Supervision intelligente • Gestion avancée • Analyse comportementale
+            </p>
           </div>
-          <div className="text-2xl font-bold text-primary-700">{stats.total}</div>
-          <div className="text-xs text-primary-600">Total</div>
-        </Card>
-        <Card hover className="text-center p-4 bg-gradient-to-br from-secondary-50 to-secondary-100 border-secondary-200">
-          <div className="flex items-center justify-center mb-2">
-            <Shield className="h-6 w-6 text-secondary-600" />
-          </div>
-          <div className="text-2xl font-bold text-secondary-700">{stats.admins}</div>
-          <div className="text-xs text-secondary-600">Admins</div>
-        </Card>
-        <Card hover className="text-center p-4 bg-gradient-to-br from-warning-50 to-warning-100 border-warning-200">
-          <div className="flex items-center justify-center mb-2">
-            <User className="h-6 w-6 text-warning-600" />
-          </div>
-          <div className="text-2xl font-bold text-warning-700">{stats.restaurants}</div>
-          <div className="text-xs text-warning-600">Restaurants</div>
-        </Card>
-        <Card hover className="text-center p-4 bg-gradient-to-br from-success-50 to-success-100 border-success-200">
-          <div className="flex items-center justify-center mb-2">
-            <Activity className="h-6 w-6 text-success-600" />
-          </div>
-          <div className="text-2xl font-bold text-success-700">{stats.active}</div>
-          <div className="text-xs text-success-600">Actifs</div>
-        </Card>
-        <Card hover className="text-center p-4 bg-gradient-to-br from-danger-50 to-danger-100 border-danger-200">
-          <div className="flex items-center justify-center mb-2">
-            <Ban className="h-6 w-6 text-danger-600" />
-          </div>
-          <div className="text-2xl font-bold text-danger-700">{stats.inactive}</div>
-          <div className="text-xs text-danger-600">Inactifs</div>
-        </Card>
-      </div>
-
-      {/* Filters and actions */}
-      <Card variant="glass" className="backdrop-blur-sm">
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                placeholder="Rechercher par nom, email ou rôle..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-12"
-              />
+          <div className="flex items-center space-x-4">
+            {/* Analytics Controls */}
+            <div className="hidden md:flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                  <Eye className="h-4 w-4 text-gray-600" />
+                </button>
+                <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+              <div className="w-px h-6 bg-gray-300"></div>
+              <select className="bg-transparent text-sm font-medium text-gray-700 border-none focus:outline-none">
+                <option>Tous les rôles</option>
+                <option>Administrateurs</option>
+                <option>Restaurateurs</option>
+              </select>
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="text-sm text-gray-500">
-              {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''}
-            </div>
-            <Button 
-              onClick={handleExportCSV} 
-              variant="outline"
-              icon={<Download className="h-4 w-4" />}
-            >
-              Export CSV
+            <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+              <RefreshCcw className="h-4 w-4 text-gray-600" />
+              <span className="hidden sm:inline text-sm font-medium text-gray-700">Actualiser</span>
+            </button>
+            <Button variant="primary" icon={<UserPlus className="h-4 w-4" />}>
+              Nouvel utilisateur
             </Button>
+            <button 
+              onClick={handleExportCSV} 
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline text-sm font-medium">Export</span>
+            </button>
           </div>
         </div>
-      </Card>
+      </div>
+
+      <div className="p-8 space-y-6">
+
+        {/* Analytics Metrics - Style Data-Driven */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">Total Utilisateurs</p>
+                  <p className="text-3xl font-bold">{stats.total}</p>
+                  <p className="text-purple-200 text-xs mt-1">Base utilisateurs</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Users className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Administrateurs</p>
+                  <p className="text-3xl font-bold">{stats.admins}</p>
+                  <p className="text-blue-200 text-xs mt-1">Super utilisateurs</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Shield className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Restaurateurs</p>
+                  <p className="text-3xl font-bold">{stats.restaurants}</p>
+                  <p className="text-green-200 text-xs mt-1">Partenaires actifs</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <User className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm font-medium">Actifs</p>
+                  <p className="text-3xl font-bold">{stats.active}</p>
+                  <p className="text-orange-200 text-xs mt-1">En ligne récemment</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Activity className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-gray-700 to-gray-800 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-300 text-sm font-medium">Inactifs</p>
+                  <p className="text-3xl font-bold">{stats.inactive}</p>
+                  <p className="text-gray-400 text-xs mt-1">Comptes suspendus</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <Ban className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Analytics Section - Filtres et Contrôles */}
+        <Card className="bg-white shadow-sm border border-gray-200">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Filter className="h-4 w-4 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Recherche et Filtres Avancés</h3>
+              </div>
+            </div>
+            
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Rechercher par nom, email ou rôle..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="input-field pl-12"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <div className="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
+                  {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''} trouvé{filteredUsers.length > 1 ? 's' : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
 
       {/* Users Grid */}
       {filteredUsers.length === 0 ? (
@@ -264,6 +340,7 @@ const UsersPage: React.FC = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };
