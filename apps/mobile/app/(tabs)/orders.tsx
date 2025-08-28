@@ -23,7 +23,7 @@ import Animated, {
   SlideInRight,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Card, Chip, Button, Badge, ProgressBar } from 'react-native-paper';
 import { router } from 'expo-router';
 
@@ -36,42 +36,42 @@ const statusConfig = {
     label: 'En attente',
     color: '#f59e0b',
     bgColor: '#fef3c7',
-    icon: 'time-outline',
+    icon: 'schedule',
     progress: 0.2,
   },
   confirmed: {
     label: 'Confirmée',
-    color: '#3b82f6',
-    bgColor: '#dbeafe', 
-    icon: 'checkmark-circle-outline',
+    color: '#667eea',
+    bgColor: 'rgba(102, 126, 234, 0.15)', 
+    icon: 'check-circle',
     progress: 0.4,
   },
   preparing: {
     label: 'En préparation',
     color: '#f97316',
     bgColor: '#fed7aa',
-    icon: 'restaurant-outline',
+    icon: 'restaurant',
     progress: 0.7,
   },
   ready: {
     label: 'Prête',
     color: '#22c55e',
     bgColor: '#dcfce7',
-    icon: 'bag-check-outline',
+    icon: 'shopping-bag',
     progress: 1.0,
   },
   completed: {
     label: 'Récupérée',
     color: '#6b7280',
     bgColor: '#f3f4f6',
-    icon: 'checkmark-done-outline',
+    icon: 'done-all',
     progress: 1.0,
   },
   cancelled: {
     label: 'Annulée',
     color: '#ef4444',
     bgColor: '#fecaca',
-    icon: 'close-circle-outline',
+    icon: 'cancel',
     progress: 0,
   },
 };
@@ -127,16 +127,22 @@ export default function OrdersScreen() {
   const renderHeader = () => (
     <Animated.View style={[styles.header, headerAnimatedStyle]}>
       <LinearGradient
-        colors={['#8b5cf6', '#a855f7']}
+        colors={['#667eea', '#764ba2']}
         style={styles.headerGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <BlurView intensity={20} style={styles.headerBlur}>
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Commandes 📋</Text>
+            <View style={styles.headerBadge}>
+              <MaterialIcons name="receipt-long" size={16} color="#667eea" />
+              <Text style={styles.headerBadgeText}>Commandes</Text>
+            </View>
+            <Text style={styles.headerTitle}>
+              {currentOrder ? 'Suivez votre commande' : 'Vos commandes'}
+            </Text>
             <Text style={styles.headerSubtitle}>
-              {currentOrder ? 'Suivez votre commande' : 'Historique des commandes'}
+              {currentOrder ? 'Mise à jour en temps réel' : 'Historique et détails'}
             </Text>
           </View>
         </BlurView>
@@ -190,7 +196,7 @@ export default function OrdersScreen() {
     if (!currentOrder) {
       return (
         <Animated.View entering={FadeIn.delay(300)} style={styles.noCurrentOrder}>
-          <Ionicons name="receipt-outline" size={80} color="#cbd5e1" />
+          <MaterialIcons name="receipt-long" size={80} color="#cbd5e1" />
           <Text style={styles.noCurrentOrderTitle}>Aucune commande active</Text>
           <Text style={styles.noCurrentOrderText}>
             Passez une commande pour la suivre en temps réel !
@@ -233,7 +239,7 @@ export default function OrdersScreen() {
               </View>
               
               <View style={[styles.statusBadge, { backgroundColor: config.bgColor }]}>
-                <Ionicons name={config.icon as any} size={16} color={config.color} />
+                <MaterialIcons name={config.icon as any} size={16} color={config.color} />
                 <Text style={[styles.statusText, { color: config.color }]}>
                   {config.label}
                 </Text>
@@ -373,7 +379,7 @@ export default function OrdersScreen() {
                     labelStyle={styles.reorderButtonText}
                     compact
                   >
-                    <Ionicons name="refresh-outline" size={14} color="#8b5cf6" />
+                    <MaterialIcons name="refresh" size={14} color="#667eea" />
                     {' '}Recommander
                   </Button>
                 </View>
@@ -387,7 +393,7 @@ export default function OrdersScreen() {
 
   const renderNotAuthenticated = () => (
     <Animated.View entering={FadeIn.delay(300)} style={styles.notAuthenticated}>
-      <Ionicons name="log-in-outline" size={80} color="#cbd5e1" />
+      <MaterialIcons name="login" size={80} color="#cbd5e1" />
       <Text style={styles.notAuthTitle}>Connexion requise</Text>
       <Text style={styles.notAuthText}>
         Connectez-vous pour voir vos commandes et suivre leur statut.
@@ -438,7 +444,7 @@ export default function OrdersScreen() {
             <RefreshControl 
               refreshing={refreshing} 
               onRefresh={onRefresh}
-              colors={['#8b5cf6']}
+              colors={['#667eea']}
             />
           }
           contentContainerStyle={styles.ordersList}
@@ -446,7 +452,7 @@ export default function OrdersScreen() {
           ListEmptyComponent={
             activeTab === 'history' ? (
               <Animated.View entering={FadeIn.delay(300)} style={styles.emptyHistory}>
-                <Ionicons name="time-outline" size={80} color="#cbd5e1" />
+                <MaterialIcons name="history" size={80} color="#cbd5e1" />
                 <Text style={styles.emptyHistoryTitle}>Aucun historique</Text>
                 <Text style={styles.emptyHistoryText}>
                   Vos commandes terminées apparaîtront ici.
@@ -463,13 +469,14 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f1f5f9',
   },
   header: {
-    height: 140,
+    height: 160,
   },
   headerGradient: {
     flex: 1,
+    paddingTop: 20,
   },
   headerBlur: {
     flex: 1,
@@ -477,13 +484,32 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  headerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+    gap: 6,
+  },
+  headerBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#667eea',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
     color: 'white',
-    marginBottom: 4,
+    marginBottom: 8,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   headerSubtitle: {
     fontSize: 16,
@@ -493,9 +519,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginTop: -20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    backgroundColor: '#f8f9fa',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: '#f1f5f9',
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -517,7 +543,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeTab: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#667eea',
+    elevation: 4,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   tabText: {
     fontSize: 16,
@@ -560,7 +591,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   orderButton: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#667eea',
     borderRadius: 25,
   },
   orderButtonText: {
@@ -644,7 +675,7 @@ const styles = StyleSheet.create({
   },
   orderItemsMore: {
     fontSize: 14,
-    color: '#8b5cf6',
+    color: '#667eea',
     fontWeight: '500',
     fontStyle: 'italic',
   },
@@ -655,10 +686,10 @@ const styles = StyleSheet.create({
   },
   trackButton: {
     flex: 1,
-    borderColor: '#8b5cf6',
+    borderColor: '#667eea',
   },
   trackButtonText: {
-    color: '#8b5cf6',
+    color: '#667eea',
     fontWeight: '600',
   },
   readyButton: {
@@ -749,17 +780,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailsButton: {
-    borderColor: '#8b5cf6',
+    borderColor: '#667eea',
   },
   detailsButtonText: {
-    color: '#8b5cf6',
+    color: '#667eea',
     fontSize: 12,
   },
   reorderButton: {
     // Styles for reorder button
   },
   reorderButtonText: {
-    color: '#8b5cf6',
+    color: '#667eea',
     fontSize: 12,
   },
 
@@ -805,7 +836,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   loginButton: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: '#667eea',
     borderRadius: 25,
   },
   loginButtonText: {

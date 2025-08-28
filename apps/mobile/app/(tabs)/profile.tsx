@@ -23,7 +23,7 @@ import Animated, {
   SlideInRight,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Card, Button, Divider, Badge } from 'react-native-paper';
 import { router } from 'expo-router';
 
@@ -234,7 +234,7 @@ export default function ProfileScreen() {
   const renderHeader = () => (
     <Animated.View style={[styles.header, headerAnimatedStyle]}>
       <LinearGradient
-        colors={['#ec4899', '#f97316']}
+        colors={['#667eea', '#764ba2']}
         style={styles.headerGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -253,7 +253,7 @@ export default function ProfileScreen() {
 
   const renderNotAuthenticated = () => (
     <Animated.View entering={FadeIn.delay(300)} style={styles.notAuthenticated}>
-      <Ionicons name="person-circle-outline" size={100} color="#cbd5e1" />
+      <MaterialIcons name="account-circle" size={100} color="#cbd5e1" />
       <Text style={styles.notAuthTitle}>Non connecté</Text>
       <Text style={styles.notAuthText}>
         Connectez-vous pour accéder à votre profil, suivre vos commandes et profiter d'avantages exclusifs.
@@ -287,7 +287,7 @@ export default function ProfileScreen() {
     <Animated.View entering={ZoomIn.delay(200).springify()} style={styles.profileSection}>
       <Card style={styles.profileCard}>
         <LinearGradient
-          colors={['rgba(236, 72, 153, 0.1)', 'rgba(249, 115, 22, 0.1)']}
+          colors={['rgba(102, 126, 234, 0.1)', 'rgba(118, 75, 162, 0.1)']}
           style={styles.profileGradient}
         >
           <View style={styles.profileContent}>
@@ -339,8 +339,8 @@ export default function ProfileScreen() {
     >
       <View style={styles.statsGrid}>
         <View style={styles.statItem}>
-          <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
-            <Ionicons name="receipt-outline" size={24} color="#3b82f6" />
+          <View style={[styles.statIcon, { backgroundColor: 'rgba(102, 126, 234, 0.15)' }]}>
+            <MaterialIcons name="receipt" size={24} color="#667eea" />
           </View>
           <Text style={styles.statValue}>{stats.totalOrders}</Text>
           <Text style={styles.statLabel}>Commandes</Text>
@@ -348,7 +348,7 @@ export default function ProfileScreen() {
         
         <View style={styles.statItem}>
           <View style={[styles.statIcon, { backgroundColor: '#fecaca' }]}>
-            <Ionicons name="heart" size={24} color="#ef4444" />
+            <MaterialIcons name="favorite" size={24} color="#ef4444" />
           </View>
           <Text style={styles.statValue}>{stats.favoriteRestaurants}</Text>
           <Text style={styles.statLabel}>Favoris</Text>

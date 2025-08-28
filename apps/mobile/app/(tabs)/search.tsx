@@ -22,7 +22,7 @@ import Animated, {
   SlideInRight,
   ZoomIn,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Searchbar, Chip, Card, Button } from 'react-native-paper';
 import { router } from 'expo-router';
 
@@ -150,15 +150,19 @@ export default function SearchScreen() {
   const renderHeader = () => (
     <Animated.View style={[styles.header, headerAnimatedStyle]}>
       <LinearGradient
-        colors={['#4facfe', '#00f2fe']}
+        colors={['#667eea', '#764ba2']}
         style={styles.headerGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Recherche 🔍</Text>
+          <View style={styles.headerBadge}>
+            <MaterialIcons name="search" size={16} color="#667eea" />
+            <Text style={styles.headerBadgeText}>Recherche</Text>
+          </View>
+          <Text style={styles.headerTitle}>Trouvez vos plats préférés</Text>
           <Text style={styles.headerSubtitle}>
-            Trouvez vos plats préférés
+            Restaurants, plats, cuisines du monde
           </Text>
         </View>
       </LinearGradient>
@@ -184,10 +188,10 @@ export default function SearchScreen() {
         ]}
         onPress={toggleFilters}
       >
-        <Ionicons 
-          name={showFilters ? "close" : "options"} 
+        <MaterialIcons 
+          name={showFilters ? "close" : "tune"} 
           size={24} 
-          color={showFilters ? "white" : "#666"} 
+          color={showFilters ? "white" : "#667eea"} 
         />
       </Pressable>
     </View>
@@ -266,7 +270,7 @@ export default function SearchScreen() {
                 style={styles.recentSearchChip}
                 onPress={() => handleRecentSearchPress(search)}
               >
-                <Ionicons name="time" size={16} color="#666" />
+                <MaterialIcons name="history" size={16} color="#667eea" />
                 <Text style={styles.recentSearchText}>{search}</Text>
               </Pressable>
             </Animated.View>
@@ -292,7 +296,7 @@ export default function SearchScreen() {
                 style={styles.popularSearchChip}
                 onPress={() => handleRecentSearchPress(search)}
               >
-                <Ionicons name="trending-up" size={16} color="#4facfe" />
+                <MaterialIcons name="trending-up" size={16} color="#667eea" />
                 <Text style={styles.popularSearchText}>{search}</Text>
               </Pressable>
             </Animated.View>
@@ -321,7 +325,7 @@ export default function SearchScreen() {
               
               <View style={styles.resultDetails}>
                 <View style={styles.resultRating}>
-                  <Ionicons name="star" size={14} color="#FFD700" />
+                  <MaterialIcons name="star" size={14} color="#FFD700" />
                   <Text style={styles.resultRatingText}>{item.rating}</Text>
                 </View>
                 
@@ -381,7 +385,7 @@ export default function SearchScreen() {
     if (!hasResults) {
       return (
         <Animated.View entering={FadeIn.delay(300)} style={styles.noResults}>
-          <Ionicons name="search" size={64} color="#ccc" />
+          <MaterialIcons name="search-off" size={64} color="#ccc" />
           <Text style={styles.noResultsTitle}>Aucun résultat</Text>
           <Text style={styles.noResultsText}>
             Essayez de modifier vos critères de recherche
@@ -455,24 +459,44 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f1f5f9',
   },
   header: {
-    height: 140,
+    height: 160,
   },
   headerGradient: {
     flex: 1,
     justifyContent: 'center',
+    paddingTop: 20,
   },
   headerContent: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  headerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+    gap: 6,
+  },
+  headerBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#667eea',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
     color: 'white',
-    marginBottom: 4,
+    marginBottom: 8,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   headerSubtitle: {
     fontSize: 16,
@@ -482,9 +506,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginTop: -20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    backgroundColor: '#f8f9fa',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: '#f1f5f9',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -508,10 +532,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 3,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   filterButtonActive: {
-    backgroundColor: '#4facfe',
+    backgroundColor: '#667eea',
   },
   filtersContainer: {
     backgroundColor: 'white',
@@ -537,7 +565,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filterChip: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    borderColor: '#667eea',
   },
   filterChipText: {
     fontSize: 12,
@@ -575,28 +604,32 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     gap: 8,
-    elevation: 1,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   recentSearchText: {
     fontSize: 14,
-    color: '#4a5568',
+    color: '#1f2937',
     fontWeight: '500',
   },
   popularSearchChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff6ff',
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#bfdbfe',
+    borderColor: '#667eea',
   },
   popularSearchText: {
     fontSize: 14,
-    color: '#1e40af',
-    fontWeight: '500',
+    color: '#667eea',
+    fontWeight: '600',
   },
   results: {
     flex: 1,
@@ -605,8 +638,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultCardInner: {
-    elevation: 1,
-    borderRadius: 12,
+    elevation: 3,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   restaurantResult: {
     // Styles for restaurant result pressable
@@ -647,7 +684,7 @@ const styles = StyleSheet.create({
   },
   resultRestaurant: {
     fontSize: 12,
-    color: '#4facfe',
+    color: '#667eea',
     fontWeight: '500',
     marginBottom: 8,
   },
@@ -677,7 +714,7 @@ const styles = StyleSheet.create({
   resultPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#2d3748',
+    color: '#667eea',
   },
   closedIndicator: {
     position: 'absolute',
