@@ -9,9 +9,17 @@ import {
   LogOut,
   ChefHat,
   Menu as HamburgerMenu,
-  X
+  X,
+  Palette
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isSpecial?: boolean;
+}
 
 const RestaurantLayout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -20,6 +28,7 @@ const RestaurantLayout: React.FC = () => {
 
   const navigation = [
     { name: 'Vue d\'ensemble', href: '/restaurant', icon: Home },
+    { name: 'Designs Dashboard', href: '/restaurant/dashboard-designs', icon: Palette, isSpecial: true },
     { name: 'Gestion des commandes', href: '/restaurant/orders', icon: ShoppingCart },
     { name: 'Menu', href: '/restaurant/menu', icon: MenuIcon },
     { name: 'Statistiques', href: '/restaurant/stats', icon: BarChart3 },
@@ -72,10 +81,23 @@ const RestaurantLayout: React.FC = () => {
                   isActive(item.href)
                     ? 'sidebar-item-active'
                     : 'sidebar-item-inactive'
+                } ${
+                  item.isSpecial 
+                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 hover:from-purple-100 hover:to-blue-100' 
+                    : ''
                 }`}
               >
-                <item.icon className="h-5 w-5 mr-3" />
-                {item.name}
+                <item.icon className={`h-5 w-5 mr-3 ${
+                  item.isSpecial ? 'text-purple-600' : ''
+                }`} />
+                <span className={item.isSpecial ? 'text-purple-700 font-medium' : ''}>
+                  {item.name}
+                </span>
+                {item.isSpecial && (
+                  <span className="ml-auto px-2 py-1 text-xs bg-purple-100 text-purple-600 rounded-full font-medium">
+                    Nouveau
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
@@ -98,6 +120,14 @@ const RestaurantLayout: React.FC = () => {
                 </h2>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4">
+                <Link
+                  to="/restaurant/dashboard-designs"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                  title="Changer le design du dashboard"
+                >
+                  <Palette className="h-4 w-4" />
+                  <span className="hidden sm:inline">Designs</span>
+                </Link>
                 <span className="text-sm text-gray-700 hidden sm:block">
                   {user?.name}
                 </span>

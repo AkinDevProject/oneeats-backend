@@ -11,6 +11,7 @@ import UsersPage from './pages/admin/UsersPage';
 import OrdersPage from './pages/admin/OrdersPage';
 import StatsPage from './pages/admin/StatsPage';
 import RestaurantDashboard from './pages/restaurant/RestaurantDashboard';
+import DashboardDesignSelector from './pages/restaurant/DashboardDesignSelector';
 import MenuPage from './pages/restaurant/MenuPage';
 import RestaurantStatsPage from './pages/restaurant/RestaurantStatsPage';
 import RestaurantSettingsPage from './pages/restaurant/RestaurantSettingsPage';
@@ -45,6 +46,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<RestaurantDashboard />} />
+            <Route path="dashboard-designs" element={<DashboardDesignSelector />} />
             <Route path="orders" element={<OrdersManagementPage />} />
             <Route path="menu" element={<MenuPage />} />
             <Route path="stats" element={<RestaurantStatsPage />} />

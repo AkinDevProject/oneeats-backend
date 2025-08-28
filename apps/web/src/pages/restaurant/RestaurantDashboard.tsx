@@ -1,255 +1,358 @@
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, subHours, subDays, startOfDay, endOfDay, eachHourOfInterval } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Check, X, Clock, Bell, Filter, AlertCircle, CheckCircle2, Timer, Users } from 'lucide-react';
+import { 
+  BarChart3, PieChart, TrendingUp, TrendingDown, Activity,
+  DollarSign, Users, ShoppingCart, Star, Target, Zap,
+  Calendar, Download, RefreshCw, Eye, EyeOff, ArrowRight,
+  Clock, AlertTriangle
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { mockOrders } from '../../data/mockData';
 import { Order } from '../../types';
 
+// Import des composants réutilisables
+import QuickMetrics from './components/QuickMetrics';
+
 const RestaurantDashboard: React.FC = () => {
   const [orders, setOrders] = useState(mockOrders);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'preparing' | 'ready'>('all');
-  const [newOrderSound, setNewOrderSound] = useState(false);
+  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
+  const [showAnalytics, setShowAnalytics] = useState(true);
 
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate new order notification
-      const hasNewOrder = Math.random() > 0.8;
-      if (hasNewOrder) {
-        setNewOrderSound(true);
-        setTimeout(() => setNewOrderSound(false), 3000);
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const filteredOrders = orders.filter(order => {
-    if (filter === 'all') return true;
-    return order.status === filter;
-  });
-
-  const handleOrderAction = (orderId: string, action: 'accept' | 'reject' | 'ready') => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        switch (action) {
-          case 'accept':
-            return { ...order, status: 'accepted' };
-          case 'reject':
-            return { ...order, status: 'cancelled' };
-          case 'ready':
-            return { ...order, status: 'ready' };
-          default:
-            return order;
-        }
-      }
-      return order;
-    }));
+  // Analytics Data
+  const analytics = {
+    hourlyData: eachHourOfInterval({
+      start: startOfDay(new Date()),
+      end: endOfDay(new Date())
+    }).map(hour => ({
+      hour: format(hour, 'HH:mm'),
+      orders: Math.floor(Math.random() * 8) + 1,
+      revenue: Math.floor(Math.random() * 400) + 100
+    })),
+    
+    statusDistribution: [
+      { status: 'En attente', count: orders.filter(o => o.status === 'pending').length, color: '#f59e0b' },
+      { status: 'En préparation', count: orders.filter(o => o.status === 'preparing' || o.status === 'accepted').length, color: '#3b82f6' },
+      { status: 'Prêtes', count: orders.filter(o => o.status === 'ready').length, color: '#10b981' },
+      { status: 'Terminées', count: orders.filter(o => o.status === 'completed').length, color: '#6b7280' }
+    ],
+    
+    performanceMetrics: {
+      avgPreparationTime: 18.5,
+      customerSatisfaction: 4.7,
+      orderAccuracy: 97.8,
+      deliveryOnTime: 94.2
+    },
+    
+    topItems: [
+      { name: 'Pizza Margherita', orders: 23, revenue: 345 },
+      { name: 'Burger Classic', orders: 18, revenue: 270 },
+      { name: 'Salade César', orders: 15, revenue: 195 },
+      { name: 'Pâtes Carbonara', orders: 12, revenue: 168 }
+    ]
   };
 
-  const getStatusBadge = (status: Order['status']) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="warning">En attente</Badge>;
-      case 'accepted':
-        return <Badge variant="success">Acceptée</Badge>;
-      case 'preparing':
-        return <Badge variant="default">En préparation</Badge>;
-      case 'ready':
-        return <Badge variant="success">Prête</Badge>;
-      case 'cancelled':
-        return <Badge variant="danger">Annulée</Badge>;
-      default:
-        return <Badge>Inconnu</Badge>;
-    }
-  };
-
+  const totalRevenue = orders.reduce((sum, order) => order.status !== 'cancelled' ? sum + order.total : sum, 0);
+  const totalOrders = orders.filter(o => o.status !== 'cancelled').length;
+  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const pendingOrdersCount = orders.filter(o => o.status === 'pending').length;
 
+  // Urgent orders (> 15 minutes old)
+  const urgentOrders = orders.filter(order => {
+    if (order.status !== 'pending' && order.status !== 'accepted') return false;
+    const orderTime = new Date(order.createdAt);
+    const minutesAgo = (new Date().getTime() - orderTime.getTime()) / (1000 * 60);
+    return minutesAgo > 15;
+  });
+
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Commandes en direct</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Gérez vos commandes en temps réel</p>
-        </div>
-        {newOrderSound && (
-          <Card variant="glass" className="flex items-center space-x-2 bg-primary-50 text-primary-700 px-4 py-2 animate-pulse-glow border-primary-200">
-            <Bell className="h-5 w-5 animate-bounce" />
-            <span className="text-sm font-medium">Nouvelle commande reçue !</span>
-          </Card>
-        )}
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card hover className="text-center p-3 sm:p-4 border-warning-200 bg-gradient-to-br from-warning-50 to-warning-100">
-          <div className="flex items-center justify-center mb-2">
-            <AlertCircle className="h-6 w-6 text-warning-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-warning-700">{pendingOrdersCount}</div>
-          <div className="text-xs sm:text-sm text-warning-600">En attente</div>
-        </Card>
-        <Card hover className="text-center p-3 sm:p-4 border-success-200 bg-gradient-to-br from-success-50 to-success-100">
-          <div className="flex items-center justify-center mb-2">
-            <CheckCircle2 className="h-6 w-6 text-success-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-success-700">
-            {orders.filter(o => o.status === 'accepted').length}
-          </div>
-          <div className="text-xs sm:text-sm text-success-600">Acceptées</div>
-        </Card>
-        <Card hover className="text-center p-3 sm:p-4 border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
-          <div className="flex items-center justify-center mb-2">
-            <Timer className="h-6 w-6 text-primary-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-primary-700">
-            {orders.filter(o => o.status === 'preparing').length}
-          </div>
-          <div className="text-xs sm:text-sm text-primary-600">En préparation</div>
-        </Card>
-        <Card hover className="text-center p-3 sm:p-4 border-secondary-200 bg-gradient-to-br from-secondary-50 to-secondary-100">
-          <div className="flex items-center justify-center mb-2">
-            <Users className="h-6 w-6 text-secondary-600" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold text-secondary-700">
-            {orders.filter(o => o.status === 'ready').length}
-          </div>
-          <div className="text-xs sm:text-sm text-secondary-600">Prêtes</div>
-        </Card>
-      </div>
-
-      {/* Filter */}
-      <Card variant="glass" className="backdrop-blur-sm">
-        <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-4">
-          <div className="flex items-center space-x-2">
-            <Filter className="h-5 w-5 text-primary-500" />
-            <span className="font-medium text-gray-700">Filtrer par statut</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {['all', 'pending', 'accepted', 'preparing', 'ready'].map((status) => (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header with Controls */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Vue d'ensemble</h1>
+              <p className="text-gray-600 mt-1">Métriques business et performance en temps réel</p>
+            </div>
+            <div className="flex items-center space-x-4">
               <Button
-                key={status}
+                variant={showAnalytics ? "primary" : "ghost"}
                 size="sm"
-                variant={filter === status ? 'primary' : 'ghost'}
-                onClick={() => setFilter(status as any)}
-                className="transition-all duration-200"
+                onClick={() => setShowAnalytics(!showAnalytics)}
+                icon={showAnalytics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               >
-                {status === 'all' ? 'Toutes' : status === 'pending' ? 'En attente' : 
-                 status === 'accepted' ? 'Acceptées' : status === 'preparing' ? 'En préparation' : 'Prêtes'}
+                {showAnalytics ? 'Masquer Analytics' : 'Afficher Analytics'}
               </Button>
-            ))}
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as any)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+              </select>
+              <Button variant="ghost" size="sm" icon={<RefreshCw className="h-4 w-4" />}>
+                Actualiser
+              </Button>
+              <Button variant="ghost" size="sm" icon={<Download className="h-4 w-4" />}>
+                Exporter
+              </Button>
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Orders List */}
-      <div className="space-y-4">
-        {filteredOrders.length === 0 ? (
-          <Card className="text-center py-12 animate-fade-in">
-            <div className="flex flex-col items-center space-y-3">
-              <Clock className="h-12 w-12 text-gray-300" />
-              <p className="text-gray-500 text-lg font-medium">Aucune commande pour le moment</p>
-              <p className="text-gray-400 text-sm">Les nouvelles commandes apparaîtront ici en temps réel</p>
+      <div className="p-8">
+        {/* Quick Metrics */}
+        <div className="mb-8">
+          <QuickMetrics
+            totalRevenue={totalRevenue}
+            revenueChange="+15.3%"
+            totalOrders={totalOrders}
+            ordersChange="+8.7%"
+            avgOrderValue={avgOrderValue}
+            avgOrderChange="+3.2%"
+            pendingOrdersCount={pendingOrdersCount}
+          />
+        </div>
+
+        {/* Urgent Actions Required */}
+        {urgentOrders.length > 0 && (
+          <Card className="p-6 bg-red-50 border-red-200 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div>
+                  <h3 className="text-lg font-bold text-red-900">Action urgente requise</h3>
+                  <p className="text-red-700">
+                    {urgentOrders.length} commande{urgentOrders.length > 1 ? 's' : ''} en attente depuis plus de 15 minutes
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                className="bg-red-600 hover:bg-red-700"
+                icon={<ArrowRight className="h-4 w-4" />}
+              >
+                Gérer les commandes
+              </Button>
             </div>
           </Card>
-        ) : (
-          filteredOrders.map((order, index) => (
-            <Card 
-              key={order.id} 
-              hover
-              className={`${
-                order.status === 'pending' ? 'border-warning-200 bg-warning-50 animate-pulse-glow' : 
-                order.status === 'ready' ? 'border-success-200 bg-success-50' :
-                'border-gray-200'
-              } transition-all duration-300`}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 space-y-2 sm:space-y-0">
-                    <h3 className="font-semibold text-gray-900">#{order.id}</h3>
-                    {getStatusBadge(order.status)}
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {format(order.createdAt, 'HH:mm')}
-                    </div>
-                  </div>
-                  
-                  <div className="mb-3">
-                    <p className="font-medium text-gray-900">{order.clientName}</p>
-                    <p className="text-sm text-gray-500">{order.clientEmail}</p>
-                  </div>
+        )}
 
-                  <div className="space-y-1 mb-3">
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span>{(item.price * item.quantity).toFixed(2)} €</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-                    <div className="font-semibold text-lg">
-                      Total: {order.total.toFixed(2)} €
+        {/* Analytics Section */}
+        {showAnalytics && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            {/* Status Distribution */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Distribution des statuts</h3>
+                <PieChart className="h-5 w-5 text-green-500" />
+              </div>
+              
+              <div className="space-y-4">
+                {analytics.statusDistribution.map((item) => (
+                  <div key={item.status} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm font-medium text-gray-900">{item.status}</span>
                     </div>
-                    {order.estimatedTime && (
-                      <div className="text-sm text-gray-500">
-                        Temps estimé: {order.estimatedTime} min
-                      </div>
-                    )}
+                    <span className="text-2xl font-bold" style={{ color: item.color }}>
+                      {item.count}
+                    </span>
                   </div>
-                </div>
-
-                <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-4">
-                  {order.status === 'pending' && (
-                    <>
-                      <Button 
-                        size="sm" 
-                        variant="success"
-                        icon={<Check className="h-4 w-4" />}
-                        onClick={() => handleOrderAction(order.id, 'accept')}
-                        className="flex-1 lg:flex-none shadow-sm hover:shadow-md"
-                      >
-                        Accepter
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="danger"
-                        icon={<X className="h-4 w-4" />}
-                        onClick={() => handleOrderAction(order.id, 'reject')}
-                        className="flex-1 lg:flex-none shadow-sm hover:shadow-md"
-                      >
-                        Refuser
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'accepted' && (
-                    <Button 
-                      size="sm" 
-                      variant="primary"
-                      icon={<CheckCircle2 className="h-4 w-4" />}
-                      onClick={() => handleOrderAction(order.id, 'ready')}
-                      className="w-full lg:w-auto shadow-sm hover:shadow-md animate-pulse"
-                    >
-                      Marquer prête
-                    </Button>
-                  )}
-                  {order.status === 'ready' && (
-                    <div className="flex items-center space-x-2 text-success-600">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span className="text-sm font-medium">Prête pour retrait</span>
-                    </div>
-                  )}
+                ))}
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="text-sm text-gray-600">
+                  Total: <span className="font-medium text-gray-900">
+                    {analytics.statusDistribution.reduce((sum, item) => sum + item.count, 0)} commandes
+                  </span>
                 </div>
               </div>
             </Card>
-          ))
+
+            {/* Performance KPIs */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Indicateurs de Performance</h3>
+                <Target className="h-5 w-5 text-purple-500" />
+              </div>
+              
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {analytics.performanceMetrics.customerSatisfaction}/5
+                  </div>
+                  <div className="text-sm text-gray-600">Satisfaction Client</div>
+                  <div className="flex items-center mt-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`h-4 w-4 ${
+                          i < Math.floor(analytics.performanceMetrics.customerSatisfaction) 
+                            ? 'text-yellow-400 fill-current' 
+                            : 'text-gray-300'
+                        }`} 
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">
+                    {analytics.performanceMetrics.orderAccuracy}%
+                  </div>
+                  <div className="text-sm text-gray-600">Précision Commandes</div>
+                  <div className="mt-2 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${analytics.performanceMetrics.orderAccuracy}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                    {analytics.performanceMetrics.deliveryOnTime}%
+                  </div>
+                  <div className="text-sm text-gray-600">Livraison à temps</div>
+                  <div className="mt-2 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${analytics.performanceMetrics.deliveryOnTime}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Top Selling Items */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Articles les plus vendus</h3>
+                <Zap className="h-5 w-5 text-yellow-500" />
+              </div>
+              
+              <div className="space-y-4">
+                {analytics.topItems.map((item, index) => (
+                  <div key={item.name} className="flex items-center space-x-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                      index === 0 ? 'bg-yellow-500' : 
+                      index === 1 ? 'bg-gray-400' :
+                      index === 2 ? 'bg-orange-600' : 'bg-gray-300'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-600">{item.orders} commandes</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-gray-900">€{item.revenue}</div>
+                      <div className="text-sm text-gray-600">CA</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         )}
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Commandes par heure - Aujourd'hui</h3>
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.hourlyData.slice(8, 22)}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hour" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip />
+                <Bar dataKey="orders" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Chiffre d'affaires par heure</h3>
+              <Activity className="h-5 w-5 text-green-500" />
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analytics.hourlyData.slice(8, 22)}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hour" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip />
+                <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <ShoppingCart className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Gérer les commandes</h4>
+                <p className="text-sm text-gray-600">Traiter les commandes en attente</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Analytics détaillées</h4>
+                <p className="text-sm text-gray-600">Voir les statistiques complètes</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Gestion du menu</h4>
+                <p className="text-sm text-gray-600">Modifier les articles et prix</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <Target className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900">Paramètres</h4>
+                <p className="text-sm text-gray-600">Configuration du restaurant</p>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
