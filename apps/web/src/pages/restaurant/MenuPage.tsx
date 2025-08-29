@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Plus, Edit2, Trash2, Eye, EyeOff, ChefHat, Tag, DollarSign, Package, Filter, Search, ImageIcon,
-  BarChart3, PieChart, TrendingUp, TrendingDown, Activity, Users, ShoppingCart, Star, Target, Zap,
-  Calendar, Download, RefreshCw
+  Plus, Edit2, Trash2, Eye, EyeOff, DollarSign, Search, ImageIcon, Activity
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -19,8 +17,6 @@ const MenuPage: React.FC = () => {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAnalytics, setShowAnalytics] = useState(true);
-  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,28 +43,6 @@ const MenuPage: React.FC = () => {
     categories: categories.length - 1
   };
 
-  // Analytics Data
-  const analytics = {
-    popularItems: [
-      { name: 'Pizza Margherita', orders: 142, revenue: 1420 },
-      { name: 'Burger Classic', orders: 98, revenue: 1470 },
-      { name: 'Salade César', orders: 87, revenue: 1044 },
-      { name: 'Pâtes Carbonara', orders: 76, revenue: 912 }
-    ],
-    categoryDistribution: categories.slice(1).map(category => ({
-      category,
-      count: menuItems.filter(item => item.category === category).length,
-      color: category === 'Entrées' ? '#3b82f6' :
-             category === 'Plats' ? '#10b981' :
-             category === 'Desserts' ? '#f59e0b' : '#8b5cf6'
-    })),
-    performanceMetrics: {
-      avgRating: 4.3,
-      totalOrders: 403,
-      revenue: 5846,
-      topCategory: categories.slice(1)[0] || 'Plats'
-    }
-  };
 
   const handleOpenModal = (item?: MenuItem) => {
     if (item) {
@@ -152,53 +126,10 @@ const MenuPage: React.FC = () => {
       {/* Header with Responsive Controls */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-          {/* Mobile Header */}
-          <div className="flex flex-col space-y-4 lg:hidden">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestion du Menu</h1>
-              <p className="text-sm text-gray-600 mt-1">Analytics • Temps réel</p>
-            </div>
-            
-            {/* Mobile Actions Row */}
-            <div className="flex items-center justify-between space-x-2">
-              <Button
-                onClick={() => handleOpenModal()}
-                variant="primary"
-                size="sm"
-                icon={<Plus className="h-4 w-4" />}
-                className="flex-1"
-              >
-                <span className="sm:hidden">Ajouter</span>
-                <span className="hidden sm:inline">Ajouter un plat</span>
-              </Button>
-              
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={showAnalytics ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => setShowAnalytics(!showAnalytics)}
-                  className="px-2 py-2"
-                >
-                  {showAnalytics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                </Button>
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value as any)}
-                  className="border border-gray-300 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="today">Aujourd'hui</option>
-                  <option value="week">Semaine</option>
-                  <option value="month">Mois</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Header */}
-          <div className="hidden lg:flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Gestion du Menu</h1>
-              <p className="text-gray-600 mt-1">Données en temps réel et analyses de performance</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Gestion du Menu</h1>
+              <p className="text-gray-600 mt-1">Gérez vos plats et catégories</p>
             </div>
             <div className="flex items-center space-x-4">
               <Button
@@ -208,29 +139,6 @@ const MenuPage: React.FC = () => {
               >
                 Ajouter un plat
               </Button>
-              <Button
-                variant={showAnalytics ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setShowAnalytics(!showAnalytics)}
-                icon={showAnalytics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              >
-                {showAnalytics ? 'Masquer Analytics' : 'Afficher Analytics'}
-              </Button>
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as any)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="today">Aujourd'hui</option>
-                <option value="week">Cette semaine</option>
-                <option value="month">Ce mois</option>
-              </select>
-              <Button variant="ghost" size="sm" icon={<RefreshCw className="h-4 w-4" />}>
-                Actualiser
-              </Button>
-              <Button variant="ghost" size="sm" icon={<Download className="h-4 w-4" />}>
-                Exporter
-              </Button>
             </div>
           </div>
         </div>
@@ -238,144 +146,6 @@ const MenuPage: React.FC = () => {
 
       {/* Main Content with Responsive Padding */}
       <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
-
-        {/* Key Metrics Row - Mobile Optimized */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 lg:mb-8">
-          <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
-              </div>
-              <div className="text-right min-w-0">
-                <div className="text-2xl sm:text-3xl font-bold">{analytics.performanceMetrics.totalOrders}</div>
-                <div className="text-blue-100 font-medium text-xs sm:text-sm">Commandes totales</div>
-              </div>
-            </div>
-            <div className="flex items-center text-blue-100 text-xs sm:text-sm">
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-              <span className="truncate">+12.5% vs semaine dernière</span>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <DollarSign className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">€{analytics.performanceMetrics.revenue}</div>
-                <div className="text-green-100 font-medium">Chiffre d'affaires</div>
-              </div>
-            </div>
-            <div className="flex items-center text-green-100 text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+18.2% vs semaine dernière</span>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <ChefHat className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">{stats.total}</div>
-                <div className="text-purple-100 font-medium">Plats au menu</div>
-              </div>
-            </div>
-            <div className="flex items-center text-purple-100 text-sm">
-              <div className="w-4 h-4 mr-1 rounded bg-green-400 opacity-75" />
-              <span>{stats.available} disponibles</span>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <div className="flex items-center justify-between mb-4">
-              <Star className="h-8 w-8" />
-              <div className="text-right">
-                <div className="text-3xl font-bold">{analytics.performanceMetrics.avgRating}</div>
-                <div className="text-orange-100 font-medium">Note moyenne</div>
-              </div>
-            </div>
-            <div className="flex items-center text-orange-100 text-sm">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+0.2 vs semaine dernière</span>
-            </div>
-          </Card>
-        </div>
-
-        {/* Analytics Section */}
-        {showAnalytics && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Popular Items */}
-            <Card className="p-6 lg:col-span-2">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Articles les plus populaires</h3>
-                <div className="flex items-center space-x-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  <span className="text-sm text-gray-600">Cette semaine</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {analytics.popularItems.map((item, index) => (
-                  <div key={item.name} className="flex items-center space-x-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white ${
-                      index === 0 ? 'bg-yellow-500' :
-                      index === 1 ? 'bg-gray-400' :
-                      index === 2 ? 'bg-orange-600' : 'bg-gray-300'
-                    }`}>
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <div className="font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-500">{item.orders} commandes</div>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${(item.orders / Math.max(...analytics.popularItems.map(i => i.orders))) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-gray-900">€{item.revenue}</div>
-                      <div className="text-sm text-gray-600">CA</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Category Distribution */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Répartition par catégorie</h3>
-                <PieChart className="h-5 w-5 text-green-500" />
-              </div>
-
-              <div className="space-y-4">
-                {analytics.categoryDistribution.map((item) => (
-                  <div key={item.category} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-sm font-medium text-gray-900">{item.category}</span>
-                    </div>
-                    <span className="text-2xl font-bold" style={{ color: item.color }}>
-                      {item.count}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600">
-                  Total: <span className="font-medium text-gray-900">{stats.total} plats</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
 
         {/* Menu Management */}
         <Card className="bg-white mb-8">

@@ -34,7 +34,7 @@ const AnalyticsPage: React.FC = () => {
     { day: 'Lun', orders: 25, revenue: 1800, satisfaction: 4.2 },
     { day: 'Mar', orders: 32, revenue: 2100, satisfaction: 4.5 },
     { day: 'Mer', orders: 28, revenue: 1950, satisfaction: 4.3 },
-    { day: 'Jeu', orders: 38, revenue: 2650, satisfaction: 4.7 },
+    { day: 'Jeu', orders: 38, revenue: 2650, satisfaction: 4.4 },
     { day: 'Ven', orders: 45, revenue: 3200, satisfaction: 4.8 },
     { day: 'Sam', orders: 52, revenue: 4100, satisfaction: 4.9 },
     { day: 'Dim', orders: 34, revenue: 2450, satisfaction: 4.6 }

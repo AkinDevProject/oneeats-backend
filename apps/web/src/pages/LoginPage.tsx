@@ -96,7 +96,7 @@ const LoginPage: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <Activity className="h-8 w-8 text-orange-300" />
                 <div>
-                  <div className="text-white font-bold text-2xl">156</div>
+                  <div className="text-white font-bold text-2xl">87</div>
                   <div className="text-blue-100 text-sm">Commandes</div>
                 </div>
               </div>

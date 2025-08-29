@@ -62,7 +62,7 @@ const TableauDashboard: React.FC = () => {
     
     performanceMetrics: {
       avgPreparationTime: 18.5,
-      customerSatisfaction: 4.7,
+      customerSatisfaction: 4.5,
       orderAccuracy: 97.8,
       deliveryOnTime: 94.2
     },

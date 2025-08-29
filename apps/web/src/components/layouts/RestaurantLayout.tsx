@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
-  Home, 
   ShoppingCart, 
   Menu as MenuIcon, 
-  BarChart3, 
   Settings, 
   LogOut,
   ChefHat,
@@ -13,9 +11,6 @@ import {
   Palette,
   Bell,
   Zap,
-  TrendingUp,
-  Clock,
-  Eye,
   User
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -36,12 +31,6 @@ const RestaurantLayout: React.FC = () => {
 
   const navigation: NavigationItem[] = [
     { 
-      name: 'Analytics Dashboard', 
-      href: '/restaurant', 
-      icon: Home,
-      description: 'Vue d\'ensemble et métriques'
-    },
-    { 
       name: 'Gestion des commandes', 
       href: '/restaurant/orders', 
       icon: ShoppingCart,
@@ -55,12 +44,6 @@ const RestaurantLayout: React.FC = () => {
       description: 'Gestion du menu'
     },
     { 
-      name: 'Analytics avancées', 
-      href: '/restaurant/stats', 
-      icon: BarChart3,
-      description: 'Statistiques détaillées'
-    },
-    { 
       name: 'Paramètres', 
       href: '/restaurant/settings', 
       icon: Settings,
@@ -69,15 +52,15 @@ const RestaurantLayout: React.FC = () => {
   ];
 
   const isActive = (path: string) => {
-    if (path === '/restaurant') {
-      return location.pathname === '/restaurant';
+    if (path === '/restaurant/orders') {
+      return location.pathname === '/restaurant' || location.pathname.startsWith('/restaurant/orders');
     }
     return location.pathname.startsWith(path);
   };
 
   const getActivePageTitle = () => {
     const activePage = navigation.find(item => isActive(item.href));
-    return activePage?.name || 'Analytics Dashboard';
+    return activePage?.name || 'Gestion des commandes';
   };
 
   return (
@@ -104,7 +87,7 @@ const RestaurantLayout: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">DelishGo</h1>
-                  <p className="text-blue-100 text-sm">Analytics Dashboard</p>
+                  <p className="text-blue-100 text-sm">Gestion Restaurant</p>
                 </div>
               </div>
               <button
@@ -115,27 +98,6 @@ const RestaurantLayout: React.FC = () => {
               </button>
             </div>
 
-            {/* Quick Stats in Sidebar */}
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-green-300" />
-                  <div>
-                    <div className="text-white font-bold text-lg">€342</div>
-                    <div className="text-blue-100 text-xs">Aujourd'hui</div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-orange-300" />
-                  <div>
-                    <div className="text-white font-bold text-lg">3</div>
-                    <div className="text-blue-100 text-xs">En attente</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
           
           {/* Navigation - Style Data-Driven */}
@@ -221,17 +183,12 @@ const RestaurantLayout: React.FC = () => {
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900">{getActivePageTitle()}</h1>
                     <p className="text-gray-600 mt-1">
-                      Interface de gestion restaurant • Données en temps réel
+                      Interface de gestion restaurant
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  {/* Real-time indicator */}
-                  <div className="hidden md:flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-700">Temps réel</span>
-                  </div>
 
                   {/* Notifications */}
                   <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">

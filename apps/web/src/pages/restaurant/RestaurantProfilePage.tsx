@@ -28,7 +28,7 @@ const RestaurantProfilePage: React.FC = () => {
     category: 'Italien',
     priceRange: '€€',
     rating: 4.8,
-    reviewsCount: 156,
+    reviewsCount: 127,
     isOpen: true,
     openingSince: '1985',
     specialties: ['Pizza', 'Pasta', 'Risotto', 'Desserts italiens'],

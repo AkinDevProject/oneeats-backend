@@ -3,7 +3,7 @@ import { format, formatDistance } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
   Bell, Volume2, RefreshCw, Search, Filter, 
-  Eye, EyeOff, BarChart3, Download, Check, X,
+  Download, Check, X,
   Clock, User, MapPin, Phone, Truck, AlertTriangle
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
@@ -13,14 +13,12 @@ import { mockOrders } from '../../data/mockData';
 import { Order } from '../../types';
 
 // Import des composants réutilisables
-import QuickMetrics from './components/QuickMetrics';
 import OrderDetailModal from './components/OrderDetailModal';
 
 const OrdersManagementPage: React.FC = () => {
   const [orders, setOrders] = useState(mockOrders);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'preparing' | 'ready'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showQuickMetrics, setShowQuickMetrics] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -103,11 +101,6 @@ const OrdersManagementPage: React.FC = () => {
     }
   };
 
-  // Calculate metrics
-  const totalRevenue = orders.reduce((sum, order) => order.status !== 'cancelled' ? sum + order.total : sum, 0);
-  const totalOrders = orders.filter(o => o.status !== 'cancelled').length;
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-  const pendingOrdersCount = orders.filter(o => o.status === 'pending').length;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -200,14 +193,6 @@ const OrdersManagementPage: React.FC = () => {
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
                 <Button
-                  variant={showQuickMetrics ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => setShowQuickMetrics(!showQuickMetrics)}
-                  className="px-2 py-2"
-                >
-                  {showQuickMetrics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                </Button>
-                <Button
                   variant={soundEnabled ? "primary" : "ghost"}
                   size="sm"
                   onClick={() => setSoundEnabled(!soundEnabled)}
@@ -236,20 +221,12 @@ const OrdersManagementPage: React.FC = () => {
           {/* Desktop Header */}
           <div className="hidden lg:flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard - Gestion des Commandes</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Gestion des Commandes</h1>
               <p className="text-gray-600 mt-1">
                 Interface opérationnelle pour traiter les commandes en temps réel
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button
-                variant={showQuickMetrics ? "primary" : "ghost"}
-                size="sm"
-                onClick={() => setShowQuickMetrics(!showQuickMetrics)}
-                icon={showQuickMetrics ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-              >
-                {showQuickMetrics ? 'Masquer métriques' : 'Afficher métriques'}
-              </Button>
               <Button
                 variant={soundEnabled ? "primary" : "ghost"}
                 size="sm"
@@ -286,20 +263,6 @@ const OrdersManagementPage: React.FC = () => {
           </div>
         )}
 
-        {/* Quick Metrics - Responsive */}
-        {showQuickMetrics && (
-          <div className="mb-6 lg:mb-8">
-            <QuickMetrics
-              totalRevenue={totalRevenue}
-              revenueChange="+15.3%"
-              totalOrders={totalOrders}
-              ordersChange="+8.7%"
-              avgOrderValue={avgOrderValue}
-              avgOrderChange="+3.2%"
-              pendingOrdersCount={pendingOrdersCount}
-            />
-          </div>
-        )}
 
         {/* Orders Management Section - Responsive */}
         <Card className="bg-white shadow-sm">
