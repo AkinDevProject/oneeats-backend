@@ -146,7 +146,32 @@ export const mockMenuItems: MenuItem[] = [
     price: 12.50,
     category: 'Pizzas',
     available: true,
-    restaurantId: '1'
+    restaurantId: '1',
+    options: [
+      {
+        id: 'remove-ingredients',
+        name: 'Retirer des ingrédients',
+        type: 'remove',
+        isRequired: false,
+        choices: [
+          { id: 'no-tomato', name: 'Sans tomate', price: 0 },
+          { id: 'no-mozzarella', name: 'Sans mozzarella', price: 0 },
+          { id: 'no-basil', name: 'Sans basilic', price: 0 }
+        ]
+      },
+      {
+        id: 'extra-ingredients',
+        name: 'Ingrédients supplémentaires',
+        type: 'extra',
+        isRequired: false,
+        choices: [
+          { id: 'extra-cheese', name: 'Supplément fromage', price: 2.00 },
+          { id: 'pepperoni', name: 'Pepperoni', price: 3.00 },
+          { id: 'mushrooms', name: 'Champignons', price: 2.50 },
+          { id: 'olives', name: 'Olives', price: 2.00 }
+        ]
+      }
+    ]
   },
   {
     id: '2',
@@ -168,12 +193,48 @@ export const mockMenuItems: MenuItem[] = [
   },
   {
     id: '4',
-    name: 'Pasta Carbonara',
-    description: 'Pâtes fraîches, lardons, crème, parmesan',
-    price: 14.00,
-    category: 'Pâtes',
-    available: false,
-    restaurantId: '1'
+    name: 'Kebab',
+    description: 'Viande grillée, crudités, sauce au choix',
+    price: 8.50,
+    category: 'Fast Food',
+    available: true,
+    restaurantId: '3',
+    options: [
+      {
+        id: 'sauce-choice',
+        name: 'Choix de sauce',
+        type: 'choice',
+        isRequired: true,
+        maxChoices: 1,
+        choices: [
+          { id: 'blanche', name: 'Sauce blanche', price: 0 },
+          { id: 'harissa', name: 'Sauce harissa', price: 0 },
+          { id: 'ketchup', name: 'Ketchup', price: 0 },
+          { id: 'mayo', name: 'Mayonnaise', price: 0 }
+        ]
+      },
+      {
+        id: 'remove-vegetables',
+        name: 'Retirer des légumes',
+        type: 'remove',
+        isRequired: false,
+        choices: [
+          { id: 'no-onions', name: 'Sans oignons', price: 0 },
+          { id: 'no-tomatoes', name: 'Sans tomates', price: 0 },
+          { id: 'no-lettuce', name: 'Sans salade', price: 0 },
+          { id: 'no-pickles', name: 'Sans cornichons', price: 0 }
+        ]
+      },
+      {
+        id: 'extra-meat',
+        name: 'Supplément viande',
+        type: 'extra',
+        isRequired: false,
+        choices: [
+          { id: 'extra-meat', name: 'Supplément viande', price: 3.00 }
+        ]
+      }
+    ]
   }
 ];
 

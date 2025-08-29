@@ -24,6 +24,21 @@ export interface Restaurant {
   };
 }
 
+export interface MenuItemOption {
+  id: string;
+  name: string;
+  type: 'remove' | 'choice' | 'extra';
+  isRequired?: boolean;
+  maxChoices?: number;
+  choices: MenuItemChoice[];
+}
+
+export interface MenuItemChoice {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -33,6 +48,7 @@ export interface MenuItem {
   image?: string;
   available: boolean;
   restaurantId: string;
+  options?: MenuItemOption[];
 }
 
 export interface Order {
@@ -48,12 +64,24 @@ export interface Order {
   estimatedTime?: number;
 }
 
+export interface OrderItemOption {
+  optionId: string;
+  optionName: string;
+  choices: {
+    choiceId: string;
+    choiceName: string;
+    price: number;
+  }[];
+}
+
 export interface OrderItem {
   id: string;
   menuItemId: string;
   name: string;
   quantity: number;
   price: number;
+  options?: OrderItemOption[];
+  totalPrice: number;
 }
 
 export interface DashboardStats {

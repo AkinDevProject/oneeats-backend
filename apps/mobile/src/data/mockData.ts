@@ -12,6 +12,21 @@ export interface Restaurant {
   description: string;
 }
 
+export interface MenuItemOption {
+  id: string;
+  name: string;
+  type: 'remove' | 'choice' | 'extra';
+  isRequired?: boolean;
+  maxChoices?: number;
+  choices: MenuItemChoice[];
+}
+
+export interface MenuItemChoice {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface MenuItem {
   id: string;
   restaurantId: string;
@@ -22,6 +37,17 @@ export interface MenuItem {
   category: string;
   popular: boolean;
   available: boolean;
+  options?: MenuItemOption[];
+}
+
+export interface CartItemOption {
+  optionId: string;
+  optionName: string;
+  choices: {
+    choiceId: string;
+    choiceName: string;
+    price: number;
+  }[];
 }
 
 export interface CartItem {
@@ -29,6 +55,8 @@ export interface CartItem {
   menuItem: MenuItem;
   quantity: number;
   specialInstructions?: string;
+  options?: CartItemOption[];
+  totalPrice: number;
 }
 
 export interface Order {
@@ -149,6 +177,31 @@ export const mockMenuItems: MenuItem[] = [
     category: 'Pizza',
     popular: true,
     available: true,
+    options: [
+      {
+        id: 'remove-ingredients',
+        name: 'Retirer des ingrédients',
+        type: 'remove',
+        isRequired: false,
+        choices: [
+          { id: 'no-tomato', name: 'Sans tomate', price: 0 },
+          { id: 'no-mozzarella', name: 'Sans mozzarella', price: 0 },
+          { id: 'no-basil', name: 'Sans basilic', price: 0 }
+        ]
+      },
+      {
+        id: 'extra-ingredients',
+        name: 'Ingrédients supplémentaires',
+        type: 'extra',
+        isRequired: false,
+        choices: [
+          { id: 'extra-cheese', name: 'Supplément fromage', price: 2.00 },
+          { id: 'pepperoni', name: 'Pepperoni', price: 3.00 },
+          { id: 'mushrooms', name: 'Champignons', price: 2.50 },
+          { id: 'olives', name: 'Olives', price: 2.00 }
+        ]
+      }
+    ]
   },
   {
     id: '2',
@@ -206,6 +259,42 @@ export const mockMenuItems: MenuItem[] = [
     category: 'Burger',
     popular: true,
     available: true,
+    options: [
+      {
+        id: 'cuisson',
+        name: 'Cuisson de la viande',
+        type: 'choice',
+        isRequired: true,
+        maxChoices: 1,
+        choices: [
+          { id: 'saignant', name: 'Saignant', price: 0 },
+          { id: 'a-point', name: 'À point', price: 0 },
+          { id: 'bien-cuit', name: 'Bien cuit', price: 0 }
+        ]
+      },
+      {
+        id: 'remove-vegetables',
+        name: 'Retirer des légumes',
+        type: 'remove',
+        isRequired: false,
+        choices: [
+          { id: 'no-onions', name: 'Sans oignons', price: 0 },
+          { id: 'no-tomatoes', name: 'Sans tomates', price: 0 },
+          { id: 'no-lettuce', name: 'Sans salade', price: 0 }
+        ]
+      },
+      {
+        id: 'extra-toppings',
+        name: 'Suppléments',
+        type: 'extra',
+        isRequired: false,
+        choices: [
+          { id: 'bacon', name: 'Bacon', price: 2.50 },
+          { id: 'avocado', name: 'Avocat', price: 2.00 },
+          { id: 'extra-cheese', name: 'Fromage supplémentaire', price: 1.50 }
+        ]
+      }
+    ]
   },
   {
     id: '7',

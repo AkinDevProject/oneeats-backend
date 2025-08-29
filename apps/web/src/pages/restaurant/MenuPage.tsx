@@ -9,8 +9,9 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
+import { MenuItemOptionsForm } from '../../components/forms/MenuItemOptionsForm';
 import { mockMenuItems } from '../../data/mockData';
-import { MenuItem } from '../../types';
+import { MenuItem, MenuItemOption } from '../../types';
 
 const MenuPage: React.FC = () => {
   const [menuItems, setMenuItems] = useState(mockMenuItems);
@@ -26,7 +27,8 @@ const MenuPage: React.FC = () => {
     description: '',
     price: '',
     category: '',
-    available: true
+    available: true,
+    options: [] as MenuItemOption[]
   });
 
   const categories = ['all', ...Array.from(new Set(menuItems.map(item => item.category)))];
@@ -76,7 +78,8 @@ const MenuPage: React.FC = () => {
         description: item.description,
         price: item.price.toString(),
         category: item.category,
-        available: item.available
+        available: item.available,
+        options: item.options || []
       });
     } else {
       setEditingItem(null);
@@ -85,7 +88,8 @@ const MenuPage: React.FC = () => {
         description: '',
         price: '',
         category: '',
-        available: true
+        available: true,
+        options: []
       });
     }
     setShowModal(true);
@@ -104,7 +108,8 @@ const MenuPage: React.FC = () => {
               description: formData.description,
               price: parseFloat(formData.price),
               category: formData.category,
-              available: formData.available
+              available: formData.available,
+              options: formData.options
             }
           : item
       ));
@@ -117,7 +122,8 @@ const MenuPage: React.FC = () => {
         price: parseFloat(formData.price),
         category: formData.category,
         available: formData.available,
-        restaurantId: '1'
+        restaurantId: '1',
+        options: formData.options
       };
       setMenuItems(prev => [...prev, newItem]);
     }
@@ -522,6 +528,15 @@ const MenuPage: React.FC = () => {
               Disponible
             </label>
           </div>
+
+          {/* Options du plat */}
+          <div className="border-t border-gray-200 pt-6">
+            <MenuItemOptionsForm
+              options={formData.options}
+              onChange={(options) => setFormData({...formData, options})}
+            />
+          </div>
+
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>
               Annuler

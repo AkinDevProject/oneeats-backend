@@ -25,7 +25,8 @@ import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCart } from '../../src/contexts/CartContext';
-import { mockRestaurants, mockMenuItems, MenuItem, Restaurant } from '../../src/data/mockData';
+import { mockRestaurants, mockMenuItems, MenuItem, Restaurant, CartItemOption } from '../../src/data/mockData';
+import { MenuItemOptions } from '../../components/MenuItemOptions';
 import RNAnimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -54,6 +55,8 @@ const RestaurantDetailScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [customizations, setCustomizations] = useState<string>('');
+  const [selectedOptions, setSelectedOptions] = useState<CartItemOption[]>([]);
+  const [quantity, setQuantity] = useState(1);
 
   const scrollY = useSharedValue(0);
   const headerOpacity = useSharedValue(1);
@@ -158,7 +161,43 @@ const RestaurantDetailScreen = () => {
 
   const handleItemPress = (item: MenuItem) => {
     setSelectedItem(item);
+    setSelectedOptions([]);
+    setQuantity(1);
     setModalVisible(true);
+  };
+
+  const calculateTotalPrice = (): number => {
+    if (!selectedItem) return 0;
+    
+    let basePrice = selectedItem.price;
+    let optionsPrice = 0;
+    
+    selectedOptions.forEach(option => {
+      option.choices.forEach(choice => {
+        optionsPrice += choice.price;
+      });
+    });
+    
+    return (basePrice + optionsPrice) * quantity;
+  };
+
+  const handleAddToCartWithOptions = () => {
+    if (!selectedItem) return;
+    
+    const totalPrice = calculateTotalPrice();
+    
+    // Add item with options to cart
+    addItem({
+      ...selectedItem,
+      options: selectedOptions,
+      totalPrice,
+      quantity,
+    });
+    
+    setModalVisible(false);
+    setSelectedOptions([]);
+    setQuantity(1);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handleFavoriteToggle = () => {
@@ -400,14 +439,41 @@ const RestaurantDetailScreen = () => {
               <View style={styles.modalInfo}>
                 <Text style={styles.modalTitle}>{selectedItem.name}</Text>
                 <Text style={styles.modalDescription}>{selectedItem.description}</Text>
-                <Text style={styles.modalPrice}>{selectedItem.price}€</Text>
+                <Text style={styles.modalPrice}>{selectedItem.price.toFixed(2)}€</Text>
 
                 <Divider style={styles.modalDivider} />
 
-                <Text style={styles.customizationTitle}>Personnalisation</Text>
-                <Text style={styles.customizationDescription}>
-                  Ajoutez des instructions spéciales pour ce plat
-                </Text>
+                {/* Options de personnalisation */}
+                {selectedItem.options && selectedItem.options.length > 0 && (
+                  <>
+                    <MenuItemOptions
+                      item={selectedItem}
+                      selectedOptions={selectedOptions}
+                      onOptionsChange={setSelectedOptions}
+                    />
+                    <Divider style={styles.modalDivider} />
+                  </>
+                )}
+
+                {/* Contrôles de quantité */}
+                <View style={styles.quantitySection}>
+                  <Text style={styles.customizationTitle}>Quantité</Text>
+                  <View style={styles.quantityControls}>
+                    <TouchableOpacity
+                      style={[styles.quantityButton, styles.quantityButtonMinus]}
+                      onPress={() => setQuantity(Math.max(1, quantity - 1))}
+                    >
+                      <MaterialIcons name="remove" size={20} color="#ef4444" />
+                    </TouchableOpacity>
+                    <Text style={styles.quantityText}>{quantity}</Text>
+                    <TouchableOpacity
+                      style={[styles.quantityButton, styles.quantityButtonPlus]}
+                      onPress={() => setQuantity(quantity + 1)}
+                    >
+                      <MaterialIcons name="add" size={20} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
                 <View style={styles.modalActions}>
                   <Button
@@ -419,13 +485,10 @@ const RestaurantDetailScreen = () => {
                   </Button>
                   <Button
                     mode="contained"
-                    onPress={() => {
-                      handleAddToCart(selectedItem);
-                      setModalVisible(false);
-                    }}
+                    onPress={handleAddToCartWithOptions}
                     style={styles.modalAddButton}
                   >
-                    Ajouter {selectedItem.price}€
+                    Ajouter {calculateTotalPrice().toFixed(2)}€
                   </Button>
                 </View>
               </View>
@@ -878,6 +941,9 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 16,
     lineHeight: 20,
+  },
+  quantitySection: {
+    marginBottom: 20,
   },
   modalActions: {
     flexDirection: 'row',

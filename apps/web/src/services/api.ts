@@ -35,7 +35,10 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error(`API request failed: ${url}`, error);
+      // Log error silently in production, detailed in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`API request failed: ${url}`, error);
+      }
       throw error;
     }
   }
