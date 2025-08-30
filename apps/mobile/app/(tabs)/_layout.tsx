@@ -64,11 +64,11 @@ export default function TabLayout() {
         }),
       }}>
       
-      {/* Restaurants Tab */}
+      {/* Accueil Tab - Restaurants avec recherche intégrée */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Restaurants',
+          title: 'Accueil',
           tabBarIcon: ({ color, focused }) => (
             <View>
               <IconSymbol 
@@ -81,28 +81,11 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Search Tab */}
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Recherche',
-          tabBarIcon: ({ color, focused }) => (
-            <View>
-              <IconSymbol 
-                size={28} 
-                name={focused ? 'magnifyingglass.circle.fill' : 'magnifyingglass'} 
-                color={color} 
-              />
-            </View>
-          ),
-        }}
-      />
-
-      {/* Cart Tab */}
+      {/* Panier/Commandes Tab - Fusionné */}
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Panier',
+          title: 'Commandes',
           tabBarIcon: ({ color, focused }) => (
             <View>
               <IconSymbol 
@@ -110,33 +93,13 @@ export default function TabLayout() {
                 name={focused ? 'cart.fill' : 'cart'} 
                 color={color} 
               />
-              <TabBadge count={totalItems} color="#FF6B6B" />
+              <TabBadge count={totalItems + (currentOrder ? 1 : 0)} color="#FF6B6B" />
             </View>
           ),
         }}
       />
 
-      {/* Orders Tab */}
-      <Tabs.Screen
-        name="orders"
-        options={{
-          title: 'Commandes',
-          tabBarIcon: ({ color, focused }) => (
-            <View>
-              <IconSymbol 
-                size={28} 
-                name={focused ? 'list.clipboard.fill' : 'list.clipboard'} 
-                color={color} 
-              />
-              {currentOrder && (
-                <TabBadge count={1} color="#4ECDC4" />
-              )}
-            </View>
-          ),
-        }}
-      />
-
-      {/* Profile Tab */}
+      {/* Profil Tab - Avec favoris intégrés */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -154,11 +117,23 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Hide explore tab */}
+      {/* Hide unused tabs */}
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null, // Recherche intégrée dans l'accueil
+        }}
+      />
+      <Tabs.Screen
+        name="orders"
+        options={{
+          href: null, // Fusionné avec le panier
+        }}
+      />
       <Tabs.Screen
         name="explore"
         options={{
-          href: null, // This hides the tab
+          href: null, // Tab non utilisé
         }}
       />
     </Tabs>

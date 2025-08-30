@@ -67,10 +67,11 @@ export default function CartScreen() {
   const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showTrending, setShowTrending] = useState(true);
+  const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart');
 
   const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart, createOrder } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { addOrder } = useOrder();
+  const { addOrder, orders } = useOrder();
   const { sendOrderNotification } = useNotification();
 
   const headerScale = useSharedValue(0);
@@ -199,9 +200,14 @@ export default function CartScreen() {
               <MaterialIcons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
             <View style={styles.headerCenter}>
-              <Text style={styles.headerTitle}>Mon Panier</Text>
+              <Text style={styles.headerTitle}>
+                {activeTab === 'cart' ? 'Mon Panier' : 'Mes Commandes'}
+              </Text>
               <Text style={styles.headerSubtitle}>
-                {totalItems} article{totalItems > 1 ? 's' : ''} • {totalPrice.toFixed(2)} €
+                {activeTab === 'cart' 
+                  ? `${totalItems} article${totalItems > 1 ? 's' : ''} • ${totalPrice.toFixed(2)} €`
+                  : `${orders?.length || 0} commande${(orders?.length || 0) > 1 ? 's' : ''}`
+                }
               </Text>
             </View>
             <TouchableOpacity 
@@ -220,9 +226,115 @@ export default function CartScreen() {
               <MaterialIcons name="clear-all" size={20} color="white" />
             </TouchableOpacity>
           </View>
+          
+          {/* Onglets Panier/Commandes */}
+          <View style={styles.tabsContainer}>
+            <TouchableOpacity 
+              style={[styles.tab, activeTab === 'cart' && styles.activeTab]}
+              onPress={() => {
+                setActiveTab('cart');
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            >
+              <MaterialIcons 
+                name="shopping-cart" 
+                size={20} 
+                color={activeTab === 'cart' ? 'white' : 'rgba(255,255,255,0.7)'} 
+              />
+              <Text style={[styles.tabText, activeTab === 'cart' && styles.activeTabText]}>
+                Panier ({totalItems})
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.tab, activeTab === 'orders' && styles.activeTab]}
+              onPress={() => {
+                setActiveTab('orders');
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            >
+              <MaterialIcons 
+                name="receipt-long" 
+                size={20} 
+                color={activeTab === 'orders' ? 'white' : 'rgba(255,255,255,0.7)'} 
+              />
+              <Text style={[styles.tabText, activeTab === 'orders' && styles.activeTabText]}>
+                Commandes ({orders?.length || 0})
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </LinearGradient>
     </Animated.View>
+  );
+
+  // Render Orders List
+  const renderOrderItem = ({ item }: { item: any }) => (
+    <Animated.View entering={FadeIn} style={styles.orderItem}>
+      <LinearGradient
+        colors={['#ffffff', '#f8fafc']}
+        style={styles.orderCard}
+      >
+        <View style={styles.orderHeader}>
+          <View style={styles.orderInfo}>
+            <Text style={styles.orderNumber}>Commande #{item.id}</Text>
+            <Text style={styles.orderDate}>{item.createdAt}</Text>
+          </View>
+          <View style={[styles.orderStatus, { backgroundColor: getOrderStatusColor(item.status) }]}>
+            <Text style={styles.orderStatusText}>{item.status}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.orderDetails}>
+          <Text style={styles.orderRestaurant}>{item.restaurant}</Text>
+          <Text style={styles.orderItems}>
+            {item.items?.length || 0} article{(item.items?.length || 0) > 1 ? 's' : ''}
+          </Text>
+          <Text style={styles.orderTotal}>{item.total?.toFixed(2) || '0.00'} €</Text>
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.orderActionButton}
+          onPress={() => {
+            // Voir détails de la commande
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
+        >
+          <Text style={styles.orderActionText}>Voir détails</Text>
+          <MaterialIcons name="chevron-right" size={20} color="#667eea" />
+        </TouchableOpacity>
+      </LinearGradient>
+    </Animated.View>
+  );
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status) {
+      case 'En préparation': return '#f59e0b';
+      case 'En livraison': return '#3b82f6';
+      case 'Livrée': return '#10b981';
+      case 'Annulée': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const renderOrdersList = () => (
+    <FlatList
+      data={orders || []}
+      renderItem={renderOrderItem}
+      keyExtractor={(item) => item.id}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.ordersContainer}
+      ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+      ListEmptyComponent={() => (
+        <View style={styles.emptyState}>
+          <MaterialIcons name="receipt-long" size={64} color="#d1d5db" />
+          <Text style={styles.emptyStateTitle}>Aucune commande</Text>
+          <Text style={styles.emptyStateMessage}>
+            Vos commandes apparaîtront ici
+          </Text>
+        </View>
+      )}
+    />
   );
 
   // Trending Section (Liste Organisée Style)
@@ -607,18 +719,29 @@ export default function CartScreen() {
       {renderHeader()}
       
       <Animated.View style={[styles.content, contentAnimatedStyle]}>
-        <FlatList
-          data={items}
-          renderItem={renderCartItem}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.cartList}
-          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-          ListHeaderComponent={renderTrendingSection}
-        />
+        {activeTab === 'cart' ? (
+          items.length === 0 ? (
+            <>
+              {renderTrendingSection()}
+              {renderEmptyCart()}
+            </>
+          ) : (
+            <FlatList
+              data={items}
+              renderItem={renderCartItem}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.cartList}
+              ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+              ListHeaderComponent={renderTrendingSection}
+            />
+          )
+        ) : (
+          renderOrdersList()
+        )}
       </Animated.View>
 
-      {renderCheckoutSection()}
+      {activeTab === 'cart' && items.length > 0 && renderCheckoutSection()}
     </SafeAreaView>
   );
 }
@@ -1186,5 +1309,133 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6b7280',
     fontWeight: '500',
+  },
+  
+  // Styles pour les onglets
+  tabsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    gap: 8,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    gap: 8,
+  },
+  activeTab: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.7)',
+  },
+  activeTabText: {
+    color: 'white',
+  },
+  
+  // Styles pour les commandes
+  ordersContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+  orderItem: {
+    marginBottom: 12,
+  },
+  orderCard: {
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  orderInfo: {
+    flex: 1,
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  orderDate: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  orderStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  orderStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
+  },
+  orderDetails: {
+    marginBottom: 12,
+  },
+  orderRestaurant: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 4,
+  },
+  orderItems: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  orderTotal: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1f2937',
+  },
+  orderActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  orderActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#667eea',
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateMessage: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
   },
 });
