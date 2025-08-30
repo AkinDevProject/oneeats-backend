@@ -34,6 +34,9 @@ const RestaurantLayout: React.FC = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Check if we're on settings page (has fixed footer)
+  const isSettingsPage = location.pathname.includes('/settings');
+
   const navigation: NavigationItem[] = [
     { 
       name: 'Gestion des commandes', 
@@ -80,7 +83,7 @@ const RestaurantLayout: React.FC = () => {
         )}
 
         {/* Sidebar - Style Data-Driven */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        <div className={`fixed top-0 ${isSettingsPage ? 'bottom-32' : 'bottom-0'} lg:bottom-auto lg:inset-y-0 left-0 z-50 w-72 bg-white shadow-xl border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
           {/* Sidebar Header - Style Data-Driven */}
@@ -106,49 +109,47 @@ const RestaurantLayout: React.FC = () => {
           </div>
           
           {/* Navigation - Style Data-Driven */}
-          <nav className="flex-1 p-6">
-            <div className="space-y-3">
+          <nav className={`flex-1 p-6 overflow-y-auto ${isSettingsPage ? 'pb-12' : 'pb-6'} lg:pb-6`}>
+            <div className="space-y-1">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`group flex items-center justify-between p-4 rounded-xl transition-all duration-200 ${
+                  className={`group flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
                     isActive(item.href)
-                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm border border-blue-200'
-                      : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm'
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-lg transition-colors ${
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-md transition-colors ${
                       isActive(item.href) 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600'
+                        ? 'bg-blue-100 text-blue-600' 
+                        : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
                     }`}>
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <div>
-                      <div className={`font-medium ${
+                    <div className="min-w-0 flex-1">
+                      <div className={`font-medium text-sm ${
                         isActive(item.href) ? 'text-blue-700' : 'text-gray-900'
                       }`}>
                         {item.name}
                       </div>
                       {item.description && (
-                        <div className="text-xs text-gray-500 mt-0.5">
+                        <div className={`text-xs mt-0.5 ${
+                          isActive(item.href) ? 'text-blue-500' : 'text-gray-500'
+                        }`}>
                           {item.description}
                         </div>
                       )}
                     </div>
                   </div>
+                  
                   {item.badge && (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {item.badge}
-                      </div>
+                    <div className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      {item.badge}
                     </div>
-                  )}
-                  {isActive(item.href) && (
-                    <div className="w-2 h-8 bg-blue-500 rounded-l-full absolute right-0"></div>
                   )}
                 </Link>
               ))}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Camera, Clock, MapPin, Phone, Mail, Settings, Save, Upload, Store, Palette, Bell
+  Camera, Clock, MapPin, Phone, Mail, Settings, Save, Upload, Store, Palette, Bell,
+  Power
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -48,11 +49,22 @@ const RestaurantSettingsPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              <div className={`px-2 py-1 rounded-full text-xs font-bold ${
-                isOpen ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}>
-                {isOpen ? 'Ouvert' : 'Fermé'}
-              </div>
+              <button
+                onClick={handleToggleOpen}
+                className={`group relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 overflow-hidden ${
+                  isOpen 
+                    ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105' 
+                    : 'bg-gradient-to-r from-red-400 to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
+                }`}
+              >
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                <div className="relative flex items-center space-x-1">
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${
+                    isOpen ? 'bg-green-200' : 'bg-red-200'
+                  }`}></div>
+                  <span>{isOpen ? 'Ouvert' : 'Fermé'}</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -82,11 +94,22 @@ const RestaurantSettingsPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isOpen ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
-              }`}>
-                Restaurant {isOpen ? 'Ouvert' : 'Fermé'}
-              </div>
+              <button
+                onClick={handleToggleOpen}
+                className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 overflow-hidden border-2 ${
+                  isOpen 
+                    ? 'bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white border-green-400 shadow-lg shadow-green-500/40 hover:shadow-green-500/60 hover:scale-105' 
+                    : 'bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white border-red-400 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105'
+                }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div className="relative flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full animate-pulse shadow-md ${
+                    isOpen ? 'bg-green-200' : 'bg-red-200'
+                  }`}></div>
+                  <span>Restaurant {isOpen ? 'Ouvert' : 'Fermé'}</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -127,11 +150,22 @@ const RestaurantSettingsPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className={`px-4 py-2 rounded-lg text-sm font-medium border ${
-                isOpen ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
-              }`}>
-                Restaurant {isOpen ? 'Ouvert' : 'Fermé'}
-              </div>
+              <button
+                onClick={handleToggleOpen}
+                className={`group relative px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden border-2 ${
+                  isOpen 
+                    ? 'bg-gradient-to-br from-green-400 via-green-500 to-green-600 text-white border-green-300 shadow-xl shadow-green-500/50 hover:shadow-green-500/70 hover:scale-105' 
+                    : 'bg-gradient-to-br from-red-400 via-red-500 to-red-600 text-white border-red-300 shadow-xl shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105'
+                }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                <div className="relative flex items-center space-x-2">
+                  <Power className={`w-5 h-5 ${
+                    isOpen ? 'animate-pulse' : 'opacity-75'
+                  }`} />
+                  <span>{isOpen ? 'OUVERT' : 'FERMÉ'}</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -141,28 +175,6 @@ const RestaurantSettingsPage: React.FC = () => {
       {/* Main Content - Responsive Optimized */}
       <div className="px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
 
-        {/* Restaurant Status - Enhanced Responsive */}
-        <div className="mb-4 sm:mb-6 lg:mb-8">
-          <Card className={`p-3 sm:p-4 lg:p-6 max-w-full sm:max-w-md ${isOpen ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-gradient-to-br from-red-500 to-red-600'} text-white shadow-lg hover:shadow-xl transition-shadow`}>
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-white bg-opacity-20 rounded-lg sm:rounded-xl flex items-center justify-center">
-                <Store className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
-              </div>
-              <div className="text-right min-w-0">
-                <div className="text-lg sm:text-xl lg:text-2xl font-bold truncate">{isOpen ? 'OUVERT' : 'FERMÉ'}</div>
-                <div className={`${isOpen ? 'text-green-100' : 'text-red-100'} font-medium text-xs sm:text-sm`}>Statut du restaurant</div>
-              </div>
-            </div>
-            <Button
-              onClick={handleToggleOpen}
-              variant="ghost"
-              size="sm"
-              className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white border-white/30 text-xs sm:text-sm transition-all duration-200"
-            >
-              {isOpen ? 'Fermer le restaurant' : 'Ouvrir le restaurant'}
-            </Button>
-          </Card>
-        </div>
 
 
         {/* Restaurant Information - Enhanced Responsive */}
