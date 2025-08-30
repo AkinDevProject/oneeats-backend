@@ -1,54 +1,158 @@
-# Configuration principale OneEats Backend
-# Application Quarkus avec intégration React via Quinoa
-
 quarkus:
-  # Informations de l'application
   application:
-    name: oneeats-backend
-    version: 1.0.0
-
-  # Configuration HTTP
+    name: OneEats Backend
+    version: 1.0.0-SNAPSHOT
+  
+  # Serveur HTTP
   http:
     port: 8080
-    host: 0.0.0.0
     cors:
-      origins: "http://localhost:5173,http://localhost:3000"
-      headers: "accept, authorization, content-type, x-requested-with"
-      methods: "GET, POST, PUT, DELETE, OPTIONS"
-      exposed-headers: "Content-Disposition"
-      access-control-max-age: 24H
-      access-control-allow-credentials: true
-
-  # Configuration OpenAPI/Swagger
-  swagger-ui:
-    always-include: true
-    path: /api-docs
-    title: "OneEats API Documentation"
-
+      ~: true
+      origins: 
+        - http://localhost:3000
+        - http://localhost:5173
+        - http://localhost:8081
+      methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      headers: accept,authorization,content-type,x-requested-with
+      access-control-max-age: 86400
+  
+  # Base de données
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USER:oneeats_user}
+    password: ${DB_PASSWORD:oneeats_password}
+    jdbc:
+      url: ${DB_URL:jdbc:postgresql://localhost:5432/oneeats_dev}
+      max-size: 20
+      min-size: 2
+  
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: false
+    metrics:
+      enabled: true
+  
+  # Configuration Panache
+  hibernate-orm-panache:
+    enable-implicit-dirty-checking: true
+  
+  # Sérialisation Jackson
+  jackson:
+    serialization-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      write-durations-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+  
+  # Logs
+  log:
+    level: INFO
+    category:
+      "com.oneeats": DEBUG
+      "org.hibernate.SQL": DEBUG
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+  
+  # Santé et métriques
+  smallrye-health:
+    ui:
+      enable: true
+  
+  micrometer:
+    export:
+      prometheus:
+        enabled: true
+        path: /metrics
+  
+  # Documentation OpenAPI
   smallrye-openapi:
-    info-title: "OneEats API"
-    info-version: "1.0.0"
-    info-description: "API REST pour l'application de livraison OneEats"
+    info-title: OneEats API
+    info-version: 1.0.0
+    info-description: API pour la plateforme OneEats - Commandes de restauration
     servers:
-      - url: "http://localhost:8080"
-        description: "Serveur de développement"
-
-  # Configuration de la sécurité JWT
-  smallrye-jwt:
-    enabled: true
-    auth:
-      public-key-location: META-INF/resources/publicKey.pem
+      - url: http://localhost:8080
+        description: Serveur de développement
+  
+  # Sécurité OIDC/Keycloak
+  oidc:
+    auth-server-url: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
+    client-id: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
+    credentials:
+      secret: ${KEYCLOAK_CLIENT_SECRET:}
+    tls:
+      verification: none  # Uniquement pour le développement
     token:
-      lifespan: 3600
-
-  # Configuration du cache
-  cache:
-    caffeine:
-      "user-cache":
-        initial-capacity: 100
-        maximum-size: 1000
-        expire-after-write: 600S
-      "restaurant-cache":
-        initial-capacity: 50
-        maximum-size: 500
-        expire-after-write: 1800S
+      issuer: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
+      audience: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
+    
+  # Autorisation basée sur les rôles
+  keycloak:
+    policy-enforcer:
+      enable: true
+      lazy-load-paths: true
+      paths:
+        - name: Admin API
+          path: /api/admin/*
+          methods:
+            - method: GET
+              scopes: ['admin:read']
+            - method: POST
+              scopes: ['admin:write']
+            - method: PUT
+              scopes: ['admin:write']
+            - method: DELETE
+              scopes: ['admin:delete']
+        - name: Restaurant API
+          path: /api/restaurants/*
+          methods:
+            - method: GET
+              scopes: ['restaurant:read']
+            - method: PUT
+              scopes: ['restaurant:write']
+        - name: Orders API
+          path: /api/orders/*
+          methods:
+            - method: GET
+              scopes: ['order:read']
+            - method: POST
+              scopes: ['order:create']
+            - method: PUT
+              scopes: ['order:write']
+  
+  # Frontend intégration (Quinoa)
+  quinoa:
+    package-manager-install: true
+    package-manager: npm
+    build-dir: dist
+    dev-server:
+      port: 5173
+      host: localhost
+    
+# Configuration métier OneEats
+oneeats:
+  business:
+    order:
+      max-items-per-order: 50
+      default-preparation-time-minutes: 20
+      max-preparation-time-minutes: 120
+      pickup-reminder-minutes: 5
+    restaurant:
+      max-distance-km: 50
+      default-rating: 0.0
+    notification:
+      enabled: true
+      email-enabled: false  # Désactivé en dev
+      sms-enabled: false    # Désactivé en dev
+  
+  # Limites et sécurité
+  api:
+    rate-limit:
+      enabled: false  # À activer en production
+      requests-per-minute: 60
+    pagination:
+      default-page-size: 20
+      max-page-size: 100

@@ -4,6 +4,8 @@
     <groupId>com.oneeats</groupId>
     <artifactId>oneeats-backend</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <name>OneEats - Backend Monolith</name>
+    <description>Backend monolithique avec architecture modulaire pour OneEats</description>
 
     <properties>
         <compiler-plugin.version>3.14.0</compiler-plugin.version>
@@ -30,41 +32,17 @@
     </dependencyManagement>
 
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>io.quarkus</groupId>-->
-        <!--            <artifactId>quarkus-rest</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.quarkus</groupId>-->
-        <!--            <artifactId>quarkus-resteasy</artifactId>-->
-        <!--        </dependency>-->
-        <!--        -->
-        <!--        ⚠️ Ne pas activer quarkus-rest et quarkus-resteasy en même temps !-->
-        <!--        Pour Quarkus 3.x, privilégier quarkus-rest-jackson (REST moderne).-->
-      <!-- https://mvnrepository.com/artifact/io.quarkiverse.quinoa/quarkus-quinoa -->
-      <dependency>
-        <groupId>io.quarkiverse.quinoa</groupId>
-        <artifactId>quarkus-quinoa</artifactId>
-        <version>2.6.2</version>
-      </dependency>
-      <!-- https://mvnrepository.com/artifact/io.quarkus/quarkus-config-yaml -->
-      <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-config-yaml</artifactId>
-        <version>3.26.0</version>
-      </dependency>
+        <!-- Quarkus Core -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-validator</artifactId>
+            <artifactId>quarkus-arc</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jacoco</artifactId>
-        </dependency>
+        
+        <!-- Database -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm-panache</artifactId>
@@ -73,14 +51,47 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
+        
+        <!-- Configuration -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc</artifactId>
+            <artifactId>quarkus-config-yaml</artifactId>
+        </dependency>
+        
+        <!-- Frontend Integration -->
+        <dependency>
+            <groupId>io.quarkiverse.quinoa</groupId>
+            <artifactId>quarkus-quinoa</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        
+        <!-- Security with Keycloak -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-orm</artifactId>
+            <artifactId>quarkus-keycloak-authorization</artifactId>
         </dependency>
+        
+        <!-- Validation -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+        
+        <!-- Health & Metrics -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
+        </dependency>
+        
+        <!-- Tests -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
@@ -89,6 +100,11 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jacoco</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

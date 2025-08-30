@@ -1,51 +1,68 @@
-# Configuration de développement pour OneEats Backend
-
 quarkus:
-  # Configuration de la base de données PostgreSQL
+  # Mode développement
+  live-reload:
+    enabled: true
+  
+  # Hot reload pour les changements
+  dev:
+    instrumentation: true
+  
+  # Base de données développement
   datasource:
-    db-kind: postgresql
-    username: ${DB_USERNAME:oneeats_user}
-    password: ${DB_PASSWORD:oneeats_password}
     jdbc:
       url: jdbc:postgresql://localhost:5432/oneeats_dev
-      min-size: 5
-      max-size: 20
-      acquisition-timeout: 10s
-
-  # Configuration Hibernate ORM
+    username: oneeats_user
+    password: oneeats_password
+  
   hibernate-orm:
     database:
-      generation: update
-    sql-load-script: import.sql
+      generation: drop-and-create
+    sql-load-script: import-dev.sql
     log:
       sql: true
-      bind-parameters: true
-    dialect: org.hibernate.dialect.PostgreSQLDialect
-
-  # Configuration des logs pour développement
+      format-sql: true
+    statistics: true
+  
+  # Logs détaillés
   log:
     level: DEBUG
     category:
-      "io.quarkus": DEBUG
-      "org.hibernate": WARN
-      "org.hibernate.SQL": DEBUG
-    console:
-      enable: true
-
-  # Configuration Quinoa pour développement
+      "com.oneeats": DEBUG
+      "org.hibernate": DEBUG
+      "io.quarkus.hibernate.orm": DEBUG
+      "jakarta.transaction": DEBUG
+  
+  # Quinoa développement
   quinoa:
-    enabled: true
-    ui-dir: apps/web
-    dev-script: "npm run dev"
-    dev-port: 5173
-    dev-server-auto-start: true
-    dev-server-timeout: 60
-    spa-routing: true
-    spa-routing-path: "/"
-    spa-routing-ignored-paths: "/api/*,/q/*,/metrics,/health"
-    dev-server-proxy:
-      "/api": "http://localhost:8080"
-
-  # Live reload activé
-  live-reload:
-    enabled: true
+    dev-server:
+      port: 5173
+      host: localhost
+      check-timeout: 1000ms
+    package-manager-install: true
+    package-manager-install-dir: ../../apps/web
+  
+  # Debug et profiling
+  package:
+    type: fast-jar
+  
+  # Sécurité désactivée en dev pour faciliter les tests
+  oidc:
+    tenant-enabled: false  # Désactive l'authentification en dev
+  
+  keycloak:
+    policy-enforcer:
+      enable: false  # Désactive l'autorisation en dev
+  
+# Configuration développement OneEats
+oneeats:
+  business:
+    notification:
+      enabled: true
+      # En dev, on log seulement
+      email-enabled: false
+      sms-enabled: false
+  
+  debug:
+    log-requests: true
+    log-responses: true
+    fake-data: true  # Pour charger des données de test
