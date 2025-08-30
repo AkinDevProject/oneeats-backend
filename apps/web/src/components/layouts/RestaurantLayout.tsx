@@ -11,7 +11,10 @@ import {
   Palette,
   Bell,
   Zap,
-  User
+  User,
+  Volume2,
+  RefreshCw,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -28,6 +31,8 @@ const RestaurantLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   const navigation: NavigationItem[] = [
     { 
@@ -149,8 +154,76 @@ const RestaurantLayout: React.FC = () => {
               ))}
             </div>
 
-            {/* Sidebar Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* Restaurant Controls Section */}
+            <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
+              {/* Control Section Title */}
+              <div className="flex items-center space-x-2 mb-4">
+                <Settings className="h-4 w-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Contrôles Restaurant</span>
+              </div>
+              
+              {/* Sound Control */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    soundEnabled ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    <Bell className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Notifications sonores</div>
+                    <div className="text-xs text-gray-500">Alertes nouvelles commandes</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    soundEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                    soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+              
+              {/* Auto Refresh Control */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    autoRefresh ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Actualisation auto</div>
+                    <div className="text-xs text-gray-500">Mise à jour temps réel</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    autoRefresh ? 'bg-green-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                    autoRefresh ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+              
+              {/* Export Data */}
+              <button className="w-full flex items-center space-x-3 p-3 rounded-xl bg-gray-50 hover:bg-purple-50 hover:border-purple-200 border border-transparent transition-all group">
+                <div className="p-2 rounded-lg bg-gray-100 text-gray-500 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors">
+                  <Download className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-gray-900 group-hover:text-purple-700">Exporter données</div>
+                  <div className="text-xs text-gray-500">Rapport des commandes</div>
+                </div>
+              </button>
+              
+              {/* Live Status */}
               <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -163,6 +236,49 @@ const RestaurantLayout: React.FC = () => {
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
+            </div>
+            
+            {/* Profile & Logout Section */}
+            <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
+              {/* Profile Section */}
+              <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                  <div className="text-xs text-blue-600 font-medium">Restaurateur</div>
+                </div>
+              </div>
+              
+              {/* Style Button */}
+              <Link
+                to="/restaurant/dashboard-designs"
+                className="w-full flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border border-purple-200 transition-all group"
+                title="Changer le design du dashboard"
+              >
+                <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                  <Palette className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-gray-900">Changer le style</div>
+                  <div className="text-xs text-purple-600">Personnaliser l'interface</div>
+                </div>
+              </Link>
+              
+              {/* Logout Button */}
+              <button
+                onClick={logout}
+                className="w-full flex items-center space-x-3 p-3 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 transition-all group"
+              >
+                <div className="p-2 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200">
+                  <LogOut className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-red-700">Déconnexion</div>
+                  <div className="text-xs text-red-500">Fermer la session</div>
+                </div>
+              </button>
             </div>
           </nav>
         </div>
@@ -188,45 +304,10 @@ const RestaurantLayout: React.FC = () => {
                   </div>
                 </div>
                 
+                {/* Simplified header - minimal controls only */}
                 <div className="flex items-center space-x-4">
-
-                  {/* Notifications */}
-                  <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <Bell className="h-5 w-5 text-gray-600" />
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">3</span>
-                    </div>
-                  </button>
-
-                  {/* User menu */}
-                  <div className="flex items-center space-x-3">
-                    <div className="hidden sm:block text-right">
-                      <div className="text-sm font-medium text-gray-900">{user?.name}</div>
-                      <div className="text-xs text-gray-600">Restaurateur</div>
-                    </div>
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      to="/restaurant/dashboard-designs"
-                      className="hidden sm:flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                      title="Changer le design du dashboard"
-                    >
-                      <Palette className="h-4 w-4" />
-                      <span>Styles</span>
-                    </Link>
-                    
-                    <button
-                      onClick={logout}
-                      className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span className="hidden sm:inline">Déconnexion</span>
-                    </button>
+                  <div className="text-sm text-gray-500">
+                    Contrôles disponibles dans la barre latérale
                   </div>
                 </div>
               </div>
