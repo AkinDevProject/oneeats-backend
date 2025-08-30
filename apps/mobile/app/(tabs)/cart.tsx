@@ -37,34 +37,20 @@ import { useOrder } from '../../src/contexts/OrderContext';
 import { useNotification } from '../../src/contexts/NotificationContext';
 import { CartItem, mockRestaurants } from '../../src/data/mockData';
 
-const promoSchema = yup.object({
-  promoCode: yup.string(),
+// Schéma simplifié pour MVP
+const mvpSchema = yup.object({
   specialInstructions: yup.string().max(200, 'Instructions trop longues'),
 });
 
-interface PromoCode {
-  code: string;
-  discount: number;
-  type: 'percentage' | 'fixed';
-  description: string;
-}
-
-const validPromoCodes: PromoCode[] = [
-  { code: 'DELISH20', discount: 20, type: 'percentage', description: '20% de réduction' },
-  { code: 'WELCOME10', discount: 10, type: 'fixed', description: '10€ de réduction' },
-  { code: 'FIRST5', discount: 5, type: 'fixed', description: '5€ de réduction' },
-];
-
-// Trending searches from Liste Organisée design
-const TRENDING_ITEMS = [
-  { name: 'Pizza Margherita', popularity: '2.3k commandes' },
-  { name: 'Burger Classique', popularity: '1.8k commandes' },
-  { name: 'Sushi Saumon', popularity: '1.5k commandes' },
-  { name: 'Pad Thaï', popularity: '1.2k commandes' },
+// Articles populaires pour MVP
+const POPULAR_ITEMS = [
+  { name: 'Pizza Margherita' },
+  { name: 'Burger Classique' },
+  { name: 'Sushi Saumon' },
+  { name: 'Pad Thaï' },
 ];
 
 export default function CartScreen() {
-  const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showTrending, setShowTrending] = useState(true);
   const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart');
@@ -115,39 +101,12 @@ export default function CartScreen() {
     );
   };
 
-  const applyPromoCode = (code: string) => {
-    const promo = validPromoCodes.find(p => p.code.toLowerCase() === code.toLowerCase());
-    if (promo) {
-      setAppliedPromo(promo);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      return true;
-    } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Code invalide', 'Ce code promo n\'est pas valide ou a expiré.');
-      return false;
-    }
-  };
 
-  const removePromoCode = () => {
-    setAppliedPromo(null);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
+  const deliveryFee = 0; // MVP: pas de frais
+  const discount = 0; // MVP: pas de codes promo
+  const finalTotal = totalPrice;
 
-  const calculateDiscount = () => {
-    if (!appliedPromo) return 0;
-    
-    if (appliedPromo.type === 'percentage') {
-      return totalPrice * (appliedPromo.discount / 100);
-    } else {
-      return Math.min(appliedPromo.discount, totalPrice);
-    }
-  };
-
-  const deliveryFee = 2.99;
-  const discount = calculateDiscount();
-  const finalTotal = Math.max(0, totalPrice + deliveryFee - discount);
-
-  const handleCheckout = async (values: { promoCode: string; specialInstructions: string }) => {
+  const handleCheckout = async (values: { specialInstructions: string }) => {
     if (!items.length) return;
 
     if (!isAuthenticated) {
@@ -309,9 +268,10 @@ export default function CartScreen() {
 
   const getOrderStatusColor = (status: string) => {
     switch (status) {
+      case 'En attente de confirmation': return '#6b7280';
       case 'En préparation': return '#f59e0b';
-      case 'En livraison': return '#3b82f6';
-      case 'Livrée': return '#10b981';
+      case 'Prête': return '#10b981';
+      case 'Récupérée': return '#059669';
       case 'Annulée': return '#ef4444';
       default: return '#6b7280';
     }
@@ -356,11 +316,10 @@ export default function CartScreen() {
         <Text style={styles.trendingSubtitle}>
           Ces plats sont très demandés aujourd'hui !
         </Text>
-        <View style={styles.trendingTags}>
-          {TRENDING_ITEMS.map((item, index) => (
-            <View key={index} style={styles.trendingTag}>
-              <Text style={styles.trendingTagText}>{item.name}</Text>
-              <Text style={styles.trendingTagPopularity}>{item.popularity}</Text>
+        <View style={styles.popularTags}>
+          {POPULAR_ITEMS.map((item, index) => (
+            <View key={index} style={styles.popularTag}>
+              <Text style={styles.popularTagText}>{item.name}</Text>
             </View>
           ))}
         </View>
@@ -486,10 +445,10 @@ export default function CartScreen() {
             <Text style={styles.emptyTrendingSubtitle}>
               Ces plats sont très populaires aujourd'hui
             </Text>
-            <View style={styles.trendingTags}>
-              {TRENDING_ITEMS.slice(0, 4).map((item, index) => (
-                <View key={index} style={styles.trendingTag}>
-                  <Text style={styles.trendingTagText}>{item.name}</Text>
+            <View style={styles.popularTags}>
+              {POPULAR_ITEMS.slice(0, 4).map((item, index) => (
+                <View key={index} style={styles.popularTag}>
+                  <Text style={styles.popularTagText}>{item.name}</Text>
                 </View>
               ))}
             </View>
@@ -529,8 +488,8 @@ export default function CartScreen() {
           </View>
         
           <Formik
-            initialValues={{ promoCode: '', specialInstructions: '' }}
-            validationSchema={promoSchema}
+            initialValues={{ specialInstructions: '' }}
+            validationSchema={mvpSchema}
             onSubmit={handleCheckout}
           >
             {({ handleChange, handleSubmit, values, errors, touched }) => (
@@ -546,53 +505,22 @@ export default function CartScreen() {
                     <Text style={styles.summaryText}>25-35 min</Text>
                   </View>
                   <View style={styles.summaryItem}>
-                    <MaterialIcons name="location-on" size={20} color="#667eea" />
-                    <Text style={styles.summaryText}>Livraison</Text>
+                    <MaterialIcons name="store" size={20} color="#667eea" />
+                    <Text style={styles.summaryText}>À emporter</Text>
                   </View>
                 </View>
 
-                {/* Promo Code Section */}
-                <View style={styles.promoSection}>
+                {/* MVP Notice */}
+                <View style={styles.mvpSection}>
                   <View style={styles.sectionHeader}>
-                    <MaterialIcons name="local-offer" size={20} color="#667eea" />
-                    <Text style={styles.sectionTitle}>Code promo</Text>
+                    <MaterialIcons name="info" size={20} color="#667eea" />
+                    <Text style={styles.sectionTitle}>Mode MVP</Text>
                   </View>
-                  {!appliedPromo ? (
-                    <View style={styles.promoInputContainer}>
-                      <TextInput
-                        mode="outlined"
-                        placeholder="DELISH20, WELCOME10..."
-                        value={values.promoCode}
-                        onChangeText={handleChange('promoCode')}
-                        style={styles.promoInput}
-                        outlineStyle={styles.promoInputOutline}
-                        contentStyle={styles.promoInputContent}
-                        right={
-                          <TextInput.Icon 
-                            icon="ticket-percent" 
-                            iconColor="#667eea"
-                            onPress={() => {
-                              if (values.promoCode.trim()) {
-                                applyPromoCode(values.promoCode);
-                              }
-                            }}
-                          />
-                        }
-                      />
-                    </View>
-                  ) : (
-                    <View style={styles.appliedPromo}>
-                      <View style={styles.appliedPromoInfo}>
-                        <MaterialIcons name="check-circle" size={20} color="#10b981" />
-                        <Text style={styles.appliedPromoText}>
-                          {appliedPromo.code} - {appliedPromo.description}
-                        </Text>
-                      </View>
-                      <TouchableOpacity onPress={removePromoCode}>
-                        <MaterialIcons name="close" size={20} color="#ef4444" />
-                      </TouchableOpacity>
-                    </View>
-                  )}
+                  <View style={styles.mvpNotice}>
+                    <Text style={styles.mvpNoticeText}>
+                      Paiement sur place uniquement • Pas de codes promo pour le moment
+                    </Text>
+                  </View>
                 </View>
 
                 {/* Special Instructions */}
@@ -632,31 +560,15 @@ export default function CartScreen() {
                       </View>
                       
                       <View style={styles.priceRow}>
-                        <View style={styles.priceRowLeft}>
-                          <MaterialIcons name="delivery-dining" size={16} color="#6b7280" />
-                          <Text style={styles.priceLabel}>Frais de livraison</Text>
-                        </View>
-                        <Text style={styles.priceValue}>{deliveryFee.toFixed(2)} €</Text>
+                        <Text style={styles.priceLabel}>Frais supplémentaires</Text>
+                        <Text style={styles.priceValue}>0.00 €</Text>
                       </View>
 
-                      {discount > 0 && (
-                        <View style={styles.priceRow}>
-                          <View style={styles.priceRowLeft}>
-                            <MaterialIcons name="local-offer" size={16} color="#10b981" />
-                            <Text style={[styles.priceLabel, styles.discountLabel]}>
-                              Réduction ({appliedPromo?.code})
-                            </Text>
-                          </View>
-                          <Text style={[styles.priceValue, styles.discountValue]}>
-                            -{discount.toFixed(2)} €
-                          </Text>
-                        </View>
-                      )}
 
                       <View style={styles.totalDivider} />
                       
                       <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Total à payer</Text>
+                        <Text style={styles.totalLabel}>Total à payer sur place</Text>
                         <Text style={styles.totalValue}>{finalTotal.toFixed(2)} €</Text>
                       </View>
                     </View>
@@ -679,17 +591,17 @@ export default function CartScreen() {
                       </View>
                     ) : (
                       <View style={styles.checkoutButtonContent}>
-                        <MaterialIcons name="payment" size={24} color="white" />
+                        <MaterialIcons name="shopping-bag" size={24} color="white" />
                         <Text style={styles.checkoutButtonText}>Commander • {finalTotal.toFixed(2)} €</Text>
                       </View>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
 
-                {/* Security Notice */}
+                {/* MVP Notice */}
                 <View style={styles.securityNotice}>
-                  <MaterialIcons name="verified-user" size={16} color="#10b981" />
-                  <Text style={styles.securityText}>Paiement sécurisé SSL</Text>
+                  <MaterialIcons name="info" size={16} color="#667eea" />
+                  <Text style={styles.securityText}>Paiement sur place uniquement</Text>
                 </View>
               </View>
             )}
@@ -840,26 +752,21 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     marginBottom: 12,
   },
-  trendingTags: {
+  popularTags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  trendingTag: {
+  popularTag: {
     backgroundColor: '#f3f4f6',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },
-  trendingTagText: {
+  popularTagText: {
     fontSize: 13,
     color: '#4b5563',
     fontWeight: '500',
-  },
-  trendingTagPopularity: {
-    fontSize: 11,
-    color: '#9ca3af',
-    marginTop: 2,
   },
 
   cartList: {
@@ -1133,8 +1040,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4c51bf',
   },
-  promoSection: {
+  mvpSection: {
     marginBottom: 24,
+  },
+  mvpNotice: {
+    backgroundColor: '#f0f9ff',
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#667eea',
+  },
+  mvpNoticeText: {
+    fontSize: 14,
+    color: '#1e40af',
+    fontWeight: '500',
+    lineHeight: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1146,42 +1066,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#374151',
-  },
-  promoInputContainer: {
-    marginBottom: 8,
-  },
-  promoInput: {
-    backgroundColor: 'white',
-    fontSize: 14,
-  },
-  promoInputOutline: {
-    borderRadius: 16,
-    borderColor: '#e5e7eb',
-  },
-  promoInputContent: {
-    paddingRight: 50,
-  },
-  appliedPromo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    borderColor: '#86efac',
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  appliedPromoInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 8,
-  },
-  appliedPromoText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#15803d',
   },
   instructionsSection: {
     marginBottom: 24,

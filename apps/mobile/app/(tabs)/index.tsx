@@ -34,15 +34,12 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2; // 2 columns with proper spacing
 
 const SORT_OPTIONS = [
-  { id: 'rating', label: 'Note', icon: 'star' },
-  { id: 'time', label: 'Temps', icon: 'access-time' },
   { id: 'distance', label: 'Distance', icon: 'location-on' },
+  { id: 'time', label: 'Temps de préparation', icon: 'access-time' },
 ];
 
 const FILTER_OPTIONS = [
   { id: 'open_now', label: 'Ouvert maintenant', icon: 'schedule' },
-  { id: 'fast_delivery', label: 'Livraison rapide', icon: 'flash-on' },
-  { id: 'top_rated', label: 'Bien noté', icon: 'thumb-up' },
 ];
 
 export default function RestaurantsHome() {
@@ -96,20 +93,12 @@ export default function RestaurantsHome() {
         case 'open_now':
           filtered = filtered.filter(r => r.isOpen);
           break;
-        case 'fast_delivery':
-          filtered = filtered.filter(r => parseInt(r.deliveryTime) <= 30);
-          break;
-        case 'top_rated':
-          filtered = filtered.filter(r => r.rating >= 4.5);
-          break;
       }
     });
 
     // Sort
     filtered.sort((a, b) => {
       switch (selectedSort) {
-        case 'rating':
-          return b.rating - a.rating;
         case 'time':
           return parseInt(a.deliveryTime) - parseInt(b.deliveryTime);
         case 'distance':
@@ -368,9 +357,9 @@ export default function RestaurantsHome() {
               </View>
             </View>
             
-            {/* Delivery Fee */}
-            <View style={styles.deliveryFee}>
-              <Text style={styles.deliveryText}>Livraison 2.99€</Text>
+            {/* Pickup Info */}
+            <View style={styles.pickupInfo}>
+              <Text style={styles.pickupText}>À emporter</Text>
             </View>
           </View>
         </LinearGradient>
@@ -781,16 +770,16 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontWeight: '500',
   },
-  deliveryFee: {
-    backgroundColor: '#f0fdf4',
+  pickupInfo: {
+    backgroundColor: '#fef3c7',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     alignSelf: 'flex-start',
   },
-  deliveryText: {
+  pickupText: {
     fontSize: 11,
-    color: '#15803d',
+    color: '#92400e',
     fontWeight: '600',
   },
 });

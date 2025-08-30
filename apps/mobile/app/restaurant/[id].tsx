@@ -123,12 +123,12 @@ const RestaurantDetailScreen = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  // Liste Organisée Style - Trending categories
-  const TRENDING_CATEGORIES = [
-    { name: 'Entrées', icon: 'restaurant-menu', popular: true },
-    { name: 'Plats', icon: 'dining', popular: true },
-    { name: 'Desserts', icon: 'cake', popular: false },
-    { name: 'Boissons', icon: 'local-drink', popular: false },
+  // Catégories simplifiées pour MVP
+  const MENU_CATEGORIES = [
+    { name: 'Entrées', icon: 'restaurant-menu' },
+    { name: 'Plats', icon: 'dining' },
+    { name: 'Desserts', icon: 'cake' },
+    { name: 'Boissons', icon: 'local-drink' },
   ];
 
   const getMenuBySection = () => {
@@ -233,8 +233,8 @@ const RestaurantDetailScreen = () => {
             <Text style={styles.infoText}>{restaurant.rating}</Text>
           </View>
           <View style={styles.infoItem}>
-            <MaterialIcons name="access-time" size={16} color="rgba(255,255,255,0.8)" />
-            <Text style={styles.infoText}>{restaurant.deliveryTime}</Text>
+            <MaterialIcons name="schedule" size={16} color="rgba(255,255,255,0.8)" />
+            <Text style={styles.infoText}>Préparation: {restaurant.deliveryTime}</Text>
           </View>
           <View style={styles.infoItem}>
             <MaterialIcons name="location-on" size={16} color="rgba(255,255,255,0.8)" />
@@ -254,13 +254,12 @@ const RestaurantDetailScreen = () => {
         <Text style={styles.quickFiltersTitle}>Filtres rapides</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickFiltersContainer}>
-        {TRENDING_CATEGORIES.map((category, index) => (
-          <TouchableOpacity key={index} style={[styles.quickFilter, category.popular && styles.quickFilterPopular]}>
-            <MaterialIcons name={category.icon as any} size={20} color={category.popular ? "#667eea" : "#6b7280"} />
-            <Text style={[styles.quickFilterText, category.popular && styles.quickFilterTextPopular]}>
+        {MENU_CATEGORIES.map((category, index) => (
+          <TouchableOpacity key={index} style={styles.quickFilter}>
+            <MaterialIcons name={category.icon as any} size={20} color="#667eea" />
+            <Text style={styles.quickFilterText}>
               {category.name}
             </Text>
-            {category.popular && <View style={styles.popularDot} />}
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -387,9 +386,6 @@ const RestaurantDetailScreen = () => {
                   color={isFavorite ? "#ff6b6b" : "white"}
                 />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <MaterialIcons name="share" size={24} color="white" />
-              </TouchableOpacity>
             </View>
           </BlurView>
         </LinearGradient>
@@ -406,9 +402,6 @@ const RestaurantDetailScreen = () => {
               size={24} 
               color={isFavorite ? "#ff6b6b" : "white"}
             />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButtonFloating}>
-            <MaterialIcons name="share" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -443,17 +436,14 @@ const RestaurantDetailScreen = () => {
 
                 <Divider style={styles.modalDivider} />
 
-                {/* Options de personnalisation */}
-                {selectedItem.options && selectedItem.options.length > 0 && (
-                  <>
-                    <MenuItemOptions
-                      item={selectedItem}
-                      selectedOptions={selectedOptions}
-                      onOptionsChange={setSelectedOptions}
-                    />
-                    <Divider style={styles.modalDivider} />
-                  </>
-                )}
+                {/* Message MVP - Personnalisation à l'emporter */}
+                <View style={styles.mvpNotice}>
+                  <MaterialIcons name="info" size={20} color="#667eea" />
+                  <Text style={styles.mvpNoticeText}>
+                    La personnalisation se fera lors de la récupération
+                  </Text>
+                </View>
+                <Divider style={styles.modalDivider} />
 
                 {/* Contrôles de quantité */}
                 <View style={styles.quantitySection}>
@@ -944,6 +934,22 @@ const styles = StyleSheet.create({
   },
   quantitySection: {
     marginBottom: 20,
+  },
+  mvpNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f9ff',
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 16,
+  },
+  mvpNoticeText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1e40af',
+    fontWeight: '500',
+    lineHeight: 20,
   },
   modalActions: {
     flexDirection: 'row',
