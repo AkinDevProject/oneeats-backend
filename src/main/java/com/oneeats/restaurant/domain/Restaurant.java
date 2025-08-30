@@ -115,4 +115,6 @@ public class Restaurant extends BaseEntity {
     // Setters pour propriétés modifiables
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCuisineType(String cuisineType) { this.cuisineType = cuisineType; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public void setEmail(String email) { this.email = email; }
 }

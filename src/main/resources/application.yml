@@ -123,14 +123,14 @@ quarkus:
             - method: PUT
               scopes: ['order:write']
   
-  # Frontend intégration (Quinoa)
-  quinoa:
-    package-manager-install: true
-    package-manager: npm
-    build-dir: dist
-    dev-server:
-      port: 5173
-      host: localhost
+  # Frontend intégration (Quinoa) - Désactivé temporairement
+  # quinoa:
+  #   package-manager-install: false
+  #   package-manager: npm
+  #   build-dir: dist
+  #   dev-server:
+  #     port: 5173
+  #     host: localhost
     
 # Configuration métier OneEats
 oneeats:

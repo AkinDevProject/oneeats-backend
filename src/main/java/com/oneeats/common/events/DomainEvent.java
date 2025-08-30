@@ -17,15 +17,19 @@ public interface DomainEvent {
     /**
      * Timestamp de création de l'événement
      */
-    LocalDateTime getOccurredOn();
+    LocalDateTime getOccurredAt();
     
     /**
      * Type d'événement (utilisé pour le routage)
      */
-    String getEventType();
+    default String getEventType() {
+        return this.getClass().getSimpleName();
+    }
     
     /**
      * Données de l'événement sérialisées en JSON
      */
-    String getEventData();
+    default String getEventData() {
+        return "{}"; // Implémentation par défaut
+    }
 }

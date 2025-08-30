@@ -2,18 +2,18 @@ quarkus:
   # Mode développement
   live-reload:
     enabled: true
-  
+
   # Hot reload pour les changements
   dev:
     instrumentation: true
-  
+
   # Base de données développement
   datasource:
     jdbc:
       url: jdbc:postgresql://localhost:5432/oneeats_dev
     username: oneeats_user
     password: oneeats_password
-  
+
   hibernate-orm:
     database:
       generation: drop-and-create
@@ -22,7 +22,7 @@ quarkus:
       sql: true
       format-sql: true
     statistics: true
-  
+
   # Logs détaillés
   log:
     level: DEBUG
@@ -31,28 +31,38 @@ quarkus:
       "org.hibernate": DEBUG
       "io.quarkus.hibernate.orm": DEBUG
       "jakarta.transaction": DEBUG
-  
-  # Quinoa développement
+
+
+
+
+  # Quinoa désactivé temporairement pour les tests backend
+  # quinoa:
+  #   ui-dir: apps/web
+  #   dev-server:
+  #     port: 5173
+  #     host: localhost
+  #     check-timeout: 1000
+  #   package-manager-install: false
+  #   package-manager-install-dir: ../../apps/web
+  #   node-version: 20.10.0
+
   quinoa:
-    dev-server:
-      port: 5173
-      host: localhost
-      check-timeout: 1000ms
-    package-manager-install: true
-    package-manager-install-dir: ../../apps/web
-  
-  # Debug et profiling
-  package:
-    type: fast-jar
-  
-  # Sécurité désactivée en dev pour faciliter les tests
-  oidc:
-    tenant-enabled: false  # Désactive l'authentification en dev
-  
+    enabled: true
+    ui-dir: apps/web
+    dev-script: "npm run dev"
+    dev-port: 5173
+    dev-server-auto-start: true
+    dev-server-timeout: 60
+    spa-routing: true
+    spa-routing-path: "/"
+    spa-routing-ignored-paths: "/api/*,/q/*,/metrics,/health"
+    dev-server-proxy:
+      "/api": "http://localhost:8080"
+
   keycloak:
     policy-enforcer:
       enable: false  # Désactive l'autorisation en dev
-  
+
 # Configuration développement OneEats
 oneeats:
   business:
@@ -61,7 +71,7 @@ oneeats:
       # En dev, on log seulement
       email-enabled: false
       sms-enabled: false
-  
+
   debug:
     log-requests: true
     log-responses: true

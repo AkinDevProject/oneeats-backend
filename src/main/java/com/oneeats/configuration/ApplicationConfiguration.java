@@ -1,6 +1,5 @@
 package com.oneeats.configuration;
 
-import io.quarkus.arc.config.ConfigProperties;
 import jakarta.enterprise.context.ApplicationScoped;
 
 /**
@@ -8,7 +7,6 @@ import jakarta.enterprise.context.ApplicationScoped;
  * Regroupe toutes les propriétés métier
  */
 @ApplicationScoped
-@ConfigProperties(prefix = "oneeats")
 public class ApplicationConfiguration {
     
     /**

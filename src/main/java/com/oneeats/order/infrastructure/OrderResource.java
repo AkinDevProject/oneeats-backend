@@ -126,7 +126,7 @@ public class OrderResource {
             orders = orderRepository.findByRestaurantId(restaurantId);
         } else {
             // Administration - toutes les commandes avec pagination
-            orders = orderRepository.findPaginated(page, size, 
+            orders = orderRepository.findWithPagination(page, size, 
                 io.quarkus.panache.common.Sort.by("createdAt").descending());
         }
         
@@ -233,11 +233,66 @@ public class OrderResource {
     }
     
     /**
+     * Statistiques détaillées pour le dashboard
+     * GET /api/orders/restaurant/{id}/stats/today
+     */
+    @GET
+    @Path("/restaurant/{id}/stats/today")
+    public Response getTodayDetailedStats(@PathParam("id") UUID restaurantId) {
+        try {
+            long totalOrders = orderRepository.countTodayOrdersByRestaurant(restaurantId);
+            long pendingOrders = orderRepository.countByRestaurantIdAndStatus(restaurantId, OrderStatus.EN_ATTENTE);
+            long preparingOrders = orderRepository.countByRestaurantIdAndStatus(restaurantId, OrderStatus.EN_PREPARATION);
+            long readyOrders = orderRepository.countByRestaurantIdAndStatus(restaurantId, OrderStatus.PRETE);
+            long deliveredOrders = orderRepository.countByRestaurantIdAndStatus(restaurantId, OrderStatus.RECUPEREE);
+            
+            // Calculer un faux chiffre d'affaires pour le mock (à remplacer par vraie logique)
+            double mockRevenue = totalOrders * 23.50; // Prix moyen fictif
+            double avgOrderValue = totalOrders > 0 ? mockRevenue / totalOrders : 0.0;
+            
+            var detailedStats = new DetailedRestaurantStats(
+                totalOrders, pendingOrders, preparingOrders, readyOrders, 
+                deliveredOrders, mockRevenue, avgOrderValue
+            );
+            return Response.ok(detailedStats).build();
+            
+        } catch (Exception e) {
+            LOG.errorf(e, "Erreur lors du calcul des statistiques détaillées: %s", e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * Obtenir les commandes en attente d'un restaurant
+     * GET /api/orders/restaurant/{id}/pending
+     */
+    @GET
+    @Path("/restaurant/{id}/pending")
+    public Response getPendingOrders(@PathParam("id") UUID restaurantId) {
+        List<Order> pendingOrders = orderRepository.findByRestaurantIdAndStatus(restaurantId, OrderStatus.EN_ATTENTE);
+        List<OrderDto> orderDtos = orderMapper.toSummaryDtoList(pendingOrders);
+        return Response.ok(orderDtos).build();
+    }
+    
+    /**
      * Record pour les statistiques restaurant
      */
     public record RestaurantStats(
         long ordersToday,
         long activeOrders,
         long overdueOrders
+    ) {}
+    
+    /**
+     * Record pour les statistiques détaillées
+     */
+    public record DetailedRestaurantStats(
+        long total,
+        long pending,
+        long preparing,
+        long ready,
+        long delivered,
+        double revenue,
+        double avgOrderValue
     ) {}
 }
