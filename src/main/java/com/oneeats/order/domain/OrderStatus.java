@@ -39,8 +39,9 @@ public enum OrderStatus {
         return switch (this) {
             case EN_ATTENTE -> Set.of(EN_PREPARATION, ANNULEE);
             case EN_PREPARATION -> Set.of(PRETE, ANNULEE);
-            case PRETE -> Set.of(RECUPEREE);
-            case RECUPEREE, ANNULEE -> Set.of(); // États finaux
+            case PRETE -> Set.of(RECUPEREE, ANNULEE);
+            case RECUPEREE -> Set.of(); // État final
+            case ANNULEE -> Set.of(EN_PREPARATION); // Peut être réactivée
         };
     }
     

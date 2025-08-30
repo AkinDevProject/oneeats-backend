@@ -142,7 +142,24 @@ class ApiService {
       }),
     
     updateStatus: (id: string, status: string): Promise<Order> => 
-      this.request(`/api/orders/${id}/status?status=${status}`, {
+      this.request(`/api/orders/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ newStatus: status, reason: null }),
+      }),
+    
+    // Actions spécialisées plus simples
+    confirm: (id: string): Promise<Order> => 
+      this.request(`/api/orders/${id}/confirm`, {
+        method: 'PUT',
+      }),
+    
+    markReady: (id: string): Promise<Order> => 
+      this.request(`/api/orders/${id}/ready`, {
+        method: 'PUT',
+      }),
+    
+    cancel: (id: string, reason?: string): Promise<Order> => 
+      this.request(`/api/orders/${id}/cancel${reason ? `?reason=${encodeURIComponent(reason)}` : ''}`, {
         method: 'PUT',
       }),
     

@@ -8,17 +8,17 @@ const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Pizza Palace ID
 const mapOrderStatus = (backendStatus: string): Order['status'] => {
   switch (backendStatus) {
     case 'EN_ATTENTE':
-      return 'pending';
+      return 'en_attente';
     case 'EN_PREPARATION':
-      return 'preparing';
+      return 'en_preparation';
     case 'PRETE':
-      return 'ready';
+      return 'prete';
     case 'RECUPEREE':
-      return 'delivered';
+      return 'recuperee';
     case 'ANNULEE':
-      return 'cancelled';
+      return 'annulee';
     default:
-      return 'pending';
+      return 'en_attente';
   }
 };
 
@@ -28,7 +28,7 @@ const transformBackendOrder = (backendOrder: any): Order => ({
     orderNumber: backendOrder.orderNumber,
     restaurantId: backendOrder.restaurantId,
     restaurantName: backendOrder.restaurantName || 'Pizza Palace',
-    clientName: backendOrder.clientName || backendOrder.userName || 'Client',
+    clientName: backendOrder.clientName || 'Client',
     clientEmail: backendOrder.clientEmail || backendOrder.userEmail || '',
   items: (backendOrder.items || []).map((item: any) => ({
     id: item.id,
@@ -86,9 +86,12 @@ export const useRestaurantData = () => {
   // Update order status
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      await apiService.orders.updateStatus(orderId, status);
+      console.log('useRestaurantData: Updating order status', { orderId, status });
+      const updatedOrder = await apiService.orders.updateStatus(orderId, status);
+      console.log('useRestaurantData: Order status updated', updatedOrder);
       
       // Refresh orders after update
+      console.log('useRestaurantData: Refreshing orders...');
       const updatedOrders = await apiService.orders.getByRestaurant(RESTAURANT_ID);
       const transformedOrders = updatedOrders.map(transformBackendOrder);
       setOrders(transformedOrders);

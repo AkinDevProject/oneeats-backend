@@ -36,14 +36,15 @@ public class OrderRepository extends BaseRepository<Order> {
      * Trouver les commandes d'un restaurant
      */
     public List<Order> findByRestaurantId(UUID restaurantId) {
-        return find("restaurantId = :restaurantId", Parameters.with("restaurantId", restaurantId)).list();
+        return find("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.restaurantId = :restaurantId ORDER BY o.createdAt DESC", 
+                   Parameters.with("restaurantId", restaurantId)).list();
     }
     
     /**
      * Trouver les commandes d'un restaurant par statut
      */
     public List<Order> findByRestaurantIdAndStatus(UUID restaurantId, OrderStatus status) {
-        return find("restaurantId = :restaurantId AND status = :status", 
+        return find("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.restaurantId = :restaurantId AND o.status = :status ORDER BY o.createdAt DESC", 
                    Parameters.with("restaurantId", restaurantId).and("status", status)).list();
     }
     
@@ -111,6 +112,21 @@ public class OrderRepository extends BaseRepository<Order> {
         String term = "%" + searchTerm.toLowerCase() + "%";
         return find("LOWER(specialInstructions) LIKE :term", 
                    Parameters.with("term", term)).list();
+    }
+    
+    /**
+     * Rechercher par ID avec les items chargés
+     */
+    public Order findByIdWithItems(UUID orderId) {
+        return find("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.id = ?1", orderId).firstResult();
+    }
+    
+    /**
+     * Rechercher par ID avec items - remplace findById
+     */
+    public Order findByIdEager(UUID id) {
+        if (id == null) return null;
+        return findByIdWithItems(id);
     }
     
     /**

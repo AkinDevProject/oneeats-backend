@@ -93,7 +93,7 @@ public class OrderResource {
     public Response getOrder(@PathParam("id") UUID orderId) {
         LOG.debugf("Récupération de la commande %s", orderId);
         
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findByIdEager(orderId);
         if (order == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -146,14 +146,15 @@ public class OrderResource {
         LOG.infof("Mise à jour du statut de la commande %s vers %s", orderId, request.newStatus());
         
         try {
+            Order updatedOrder;
             if (request.newStatus() == OrderStatus.ANNULEE && request.reason() != null) {
                 orderService.cancelOrder(orderId, request.reason());
+                updatedOrder = orderRepository.findByIdEager(orderId);
             } else {
-                orderService.updateOrderStatus(orderId, request.newStatus());
+                updatedOrder = orderService.updateOrderStatus(orderId, request.newStatus());
             }
             
             // Retourner la commande mise à jour
-            Order updatedOrder = orderRepository.findById(orderId);
             OrderDto orderDto = orderMapper.toDto(updatedOrder);
             return Response.ok(orderDto).build();
             
@@ -167,8 +168,9 @@ public class OrderResource {
                 .build();
         } catch (Exception e) {
             LOG.errorf(e, "Erreur lors de la mise à jour du statut: %s", e.getMessage());
+            e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity("Erreur lors de la mise à jour")
+                .entity("Erreur lors de la mise à jour: " + e.getMessage())
                 .build();
         }
     }
@@ -189,7 +191,7 @@ public class OrderResource {
                                   @QueryParam("pickupMinutes") @DefaultValue("5") int pickupMinutes) {
         try {
             orderService.markOrderReady(orderId, pickupMinutes);
-            Order order = orderRepository.findById(orderId);
+            Order order = orderRepository.findByIdEager(orderId);
             return Response.ok(orderMapper.toDto(order)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)

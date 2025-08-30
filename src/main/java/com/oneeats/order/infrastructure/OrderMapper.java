@@ -4,7 +4,10 @@ import com.oneeats.order.api.CreateOrderRequest;
 import com.oneeats.order.api.OrderDto;
 import com.oneeats.order.domain.Order;
 import com.oneeats.order.domain.OrderItem;
+import com.oneeats.user.domain.User;
+import com.oneeats.user.infrastructure.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,6 +18,9 @@ import java.util.List;
 @ApplicationScoped
 public class OrderMapper {
     
+    @Inject
+    UserRepository userRepository;
+    
     /**
      * Convertir une entité Order vers un DTO
      */
@@ -22,6 +28,11 @@ public class OrderMapper {
         if (order == null) {
             return null;
         }
+        
+        // Récupérer les informations utilisateur
+        User user = userRepository.findById(order.getUserId());
+        String clientName = user != null ? user.getFirstName() + " " + user.getLastName() : "Client inconnu";
+        String clientEmail = user != null ? user.getEmail() : "";
         
         List<OrderDto.OrderItemDto> itemDtos = order.getItems().stream()
             .map(this::toItemDto)
@@ -31,6 +42,8 @@ public class OrderMapper {
             order.getId(),
             order.getOrderNumber(),
             order.getUserId(),
+            clientName,
+            clientEmail,
             order.getRestaurantId(),
             order.getStatus(),
             order.getTotalAmount(),
@@ -129,6 +142,11 @@ public class OrderMapper {
      * Créer un résumé simple pour les listes
      */
     public OrderDto toSummaryDto(Order order) {
+        // Récupérer les informations utilisateur
+        User user = userRepository.findById(order.getUserId());
+        String clientName = user != null ? user.getFirstName() + " " + user.getLastName() : "Client inconnu";
+        String clientEmail = user != null ? user.getEmail() : "";
+        
         // Version avec items pour l'affichage complet
         List<OrderDto.OrderItemDto> itemDtos = order.getItems().stream()
             .map(this::toItemDto)
@@ -138,6 +156,8 @@ public class OrderMapper {
             order.getId(),
             order.getOrderNumber(),
             order.getUserId(),
+            clientName,
+            clientEmail,
             order.getRestaurantId(),
             order.getStatus(),
             order.getTotalAmount(),

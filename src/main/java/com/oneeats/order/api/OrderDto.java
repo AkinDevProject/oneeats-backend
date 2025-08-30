@@ -15,6 +15,8 @@ public record OrderDto(
     UUID id,
     String orderNumber,
     UUID userId,
+    String clientName,
+    String clientEmail,
     UUID restaurantId,
     OrderStatus status,
     BigDecimal totalAmount,

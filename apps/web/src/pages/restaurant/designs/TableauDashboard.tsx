@@ -24,7 +24,7 @@ const TableauDashboard: React.FC = () => {
     return order.status === filter;
   });
 
-  const handleOrderAction = async (orderId: string, action: 'accept' | 'reject' | 'ready') => {
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'reject' | 'ready' | 'delivered') => {
     try {
       let status: string;
       switch (action) {
@@ -36,6 +36,9 @@ const TableauDashboard: React.FC = () => {
           break;
         case 'ready':
           status = 'PRETE';
+          break;
+        case 'delivered':
+          status = 'RECUPEREE';
           break;
         default:
           return;

@@ -1,6 +1,20 @@
 -- Script de données de développement pour OneEats
 -- Ce fichier contient toutes les données nécessaires pour le développement et les tests
 
+-- Mise à jour des colonnes version pour avoir une valeur par défaut (pour corriger le problème Hibernate)
+ALTER TABLE orders ALTER COLUMN version SET DEFAULT 0;
+ALTER TABLE restaurant ALTER COLUMN version SET DEFAULT 0;  
+ALTER TABLE menu_item ALTER COLUMN version SET DEFAULT 0;
+ALTER TABLE user_account ALTER COLUMN version SET DEFAULT 0;
+ALTER TABLE order_items ALTER COLUMN version SET DEFAULT 0;
+
+-- Mise à jour des champs version null existants
+UPDATE orders SET version = 0 WHERE version IS NULL;
+UPDATE restaurant SET version = 0 WHERE version IS NULL;  
+UPDATE menu_item SET version = 0 WHERE version IS NULL;
+UPDATE user_account SET version = 0 WHERE version IS NULL;
+UPDATE order_items SET version = 0 WHERE version IS NULL;
+
 -- Restaurants
 INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_type, rating, image_url, is_open, is_active, created_at, updated_at) VALUES
 ('11111111-1111-1111-1111-111111111111', 'Pizza Palace', 'Les meilleures pizzas italiennes de la ville', '123 Rue de la Pizza', '0123456789', 'contact@pizzapalace.fr', 'PIZZA', 4.5, 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b', true, true, NOW(), NOW()),
@@ -9,7 +23,7 @@ INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_ty
 
 -- Utilisateurs
 INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, is_active) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), true),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), true),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), true),
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), true);
 

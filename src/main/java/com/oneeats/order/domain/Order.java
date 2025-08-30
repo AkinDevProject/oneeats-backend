@@ -199,4 +199,8 @@ public class Order extends BaseEntity {
     public void setEstimatedPickupTime(LocalDateTime estimatedPickupTime) {
         this.estimatedPickupTime = estimatedPickupTime;
     }
+    
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
 }

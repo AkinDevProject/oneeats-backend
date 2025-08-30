@@ -43,8 +43,11 @@ public class OrderService {
         
         LOG.infof("Création d'une nouvelle commande pour l'utilisateur %s au restaurant %s", userId, restaurantId);
         
+        // Générer un numéro de commande
+        String orderNumber = generateOrderNumber();
+        
         // Créer la commande
-        Order order = new Order(userId, restaurantId, totalAmount, specialInstructions);
+        Order order = new Order(orderNumber, userId, restaurantId, totalAmount, specialInstructions);
         
         // Persister
         orderRepository.persist(order);
@@ -61,39 +64,40 @@ public class OrderService {
      * Changer le statut d'une commande
      */
     @Transactional
-    public void updateOrderStatus(UUID orderId, OrderStatus newStatus) {
+    public Order updateOrderStatus(UUID orderId, OrderStatus newStatus) {
         Objects.requireNonNull(orderId, "L'ID de la commande ne peut pas être null");
         Objects.requireNonNull(newStatus, "Le nouveau statut ne peut pas être null");
         
         LOG.infof("Changement de statut pour la commande %s vers %s", orderId, newStatus);
         
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findByIdEager(orderId);
         if (order == null) {
             throw new OrderNotFoundException("Commande non trouvée: " + orderId);
         }
         
         OrderStatus previousStatus = order.getStatus();
         
-        // Validation métier spécifique
-        validateStatusTransition(order, newStatus);
+        // Validation des transitions d'état
+        if (!previousStatus.canTransitionTo(newStatus)) {
+            throw new IllegalStateException("Transition invalide de " + previousStatus + " vers " + newStatus);
+        }
         
-        // Changer le statut
-        order.changeStatus(newStatus);
+        // Changer le statut directement
+        LOG.infof("Changing status from %s to %s", order.getStatus(), newStatus);
+        order.setStatus(newStatus);
         
-        // Publier l'événement (temporairement désactivé)
-        // OrderStatusChangedEvent event = new OrderStatusChangedEvent(
-        //     orderId, order.getUserId(), order.getRestaurantId(), previousStatus, newStatus);
-        // eventPublisher.publish(event);
-        
+        // La persistance est automatique grâce à @Transactional
         LOG.infof("Statut de la commande %s changé de %s vers %s", orderId, previousStatus, newStatus);
+        
+        return order;
     }
     
     /**
      * Confirmer une commande (passage en préparation)
      */
     @Transactional
-    public void confirmOrder(UUID orderId) {
-        updateOrderStatus(orderId, OrderStatus.EN_PREPARATION);
+    public Order confirmOrder(UUID orderId) {
+        return updateOrderStatus(orderId, OrderStatus.EN_PREPARATION);
     }
     
     /**
@@ -114,8 +118,8 @@ public class OrderService {
      * Marquer une commande comme récupérée
      */
     @Transactional
-    public void markOrderPickedUp(UUID orderId) {
-        updateOrderStatus(orderId, OrderStatus.RECUPEREE);
+    public Order markOrderPickedUp(UUID orderId) {
+        return updateOrderStatus(orderId, OrderStatus.RECUPEREE);
     }
     
     /**
@@ -178,7 +182,7 @@ public class OrderService {
     // Méthodes utilitaires
     
     private Order findOrderById(UUID orderId) {
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findByIdEager(orderId);
         if (order == null) {
             throw new OrderNotFoundException("Commande non trouvée: " + orderId);
         }
@@ -202,6 +206,17 @@ public class OrderService {
                 }
             }
         }
+    }
+    
+    /**
+     * Générer un numéro de commande unique
+     * TODO: Améliorer avec un service de génération de séquences en base
+     */
+    private String generateOrderNumber() {
+        // Pour l'instant, génération simple basée sur le timestamp
+        // Dans une vraie application, utiliser un service avec séquence en base
+        long timestamp = System.currentTimeMillis();
+        return "CMD-" + String.format("%03d", (timestamp % 1000) + 1);
     }
     
     /**

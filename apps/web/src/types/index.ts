@@ -60,7 +60,7 @@ export interface Order {
   clientEmail: string;
   items: OrderItem[];
   total: number;
-  status: 'pending' | 'accepted' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'en_attente' | 'en_preparation' | 'prete' | 'recuperee' | 'annulee';
   createdAt: Date;
   estimatedTime?: number;
 }

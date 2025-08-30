@@ -183,10 +183,8 @@ export const formatChange = (
 export const formatStatus = (status: string): string => {
   const statusMap: Record<string, string> = {
     pending: 'En attente',
-    accepted: 'Acceptée',
     preparing: 'En préparation', 
     ready: 'Prête',
-    completed: 'Terminée',
     cancelled: 'Annulée',
     delivered: 'Livrée'
   };
