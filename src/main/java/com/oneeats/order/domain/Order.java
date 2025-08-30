@@ -20,6 +20,10 @@ import java.util.UUID;
 public class Order extends BaseEntity {
     
     @NotNull
+    @Column(name = "order_number", unique = true, nullable = false, length = 20)
+    private String orderNumber;
+    
+    @NotNull
     @Column(name = "user_id", nullable = false)
     private UUID userId;
     
@@ -54,7 +58,8 @@ public class Order extends BaseEntity {
         // JPA constructor
     }
     
-    public Order(UUID userId, UUID restaurantId, BigDecimal totalAmount, String specialInstructions) {
+    public Order(String orderNumber, UUID userId, UUID restaurantId, BigDecimal totalAmount, String specialInstructions) {
+        this.orderNumber = Objects.requireNonNull(orderNumber, "Le numéro de commande ne peut pas être null");
         this.userId = Objects.requireNonNull(userId, "L'ID utilisateur ne peut pas être null");
         this.restaurantId = Objects.requireNonNull(restaurantId, "L'ID restaurant ne peut pas être null");
         this.totalAmount = Objects.requireNonNull(totalAmount, "Le montant total ne peut pas être null");
@@ -150,6 +155,10 @@ public class Order extends BaseEntity {
     }
     
     // Getters
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+    
     public UUID getUserId() {
         return userId;
     }

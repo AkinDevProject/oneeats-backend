@@ -10,11 +10,11 @@ import {
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
-import { mockOrders } from '../../../data/mockData';
 import { Order } from '../../../types';
+import { useRestaurantData } from '../../../hooks/useRestaurantData';
 
 const TableauDashboard: React.FC = () => {
-  const [orders, setOrders] = useState(mockOrders);
+  const { orders, stats, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'preparing' | 'ready'>('all');
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today');
   const [showAnalytics, setShowAnalytics] = useState(true);
@@ -24,22 +24,26 @@ const TableauDashboard: React.FC = () => {
     return order.status === filter;
   });
 
-  const handleOrderAction = (orderId: string, action: 'accept' | 'reject' | 'ready') => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        switch (action) {
-          case 'accept':
-            return { ...order, status: 'preparing' };
-          case 'reject':
-            return { ...order, status: 'cancelled' };
-          case 'ready':
-            return { ...order, status: 'ready' };
-          default:
-            return order;
-        }
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'reject' | 'ready') => {
+    try {
+      let status: string;
+      switch (action) {
+        case 'accept':
+          status = 'EN_PREPARATION';
+          break;
+        case 'reject':
+          status = 'ANNULEE';
+          break;
+        case 'ready':
+          status = 'PRETE';
+          break;
+        default:
+          return;
       }
-      return order;
-    }));
+      await updateOrderStatus(orderId, status);
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour:', err);
+    }
   };
 
   // Analytics Data
@@ -75,9 +79,25 @@ const TableauDashboard: React.FC = () => {
     ]
   };
 
-  const totalRevenue = orders.reduce((sum, order) => order.status !== 'cancelled' ? sum + order.total : sum, 0);
-  const totalOrders = orders.filter(o => o.status !== 'cancelled').length;
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const totalRevenue = stats?.totalRevenue || 0;
+  const totalOrders = stats?.totalOrders || 0;
+  const avgOrderValue = stats?.avgOrderValue || 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Chargement...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">Erreur: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -107,7 +127,7 @@ const TableauDashboard: React.FC = () => {
                 <option value="week">Cette semaine</option>
                 <option value="month">Ce mois</option>
               </select>
-              <Button variant="ghost" size="sm" icon={<RefreshCw className="h-4 w-4" />}>
+              <Button variant="ghost" size="sm" icon={<RefreshCw className="h-4 w-4" />} onClick={refetch}>
                 Actualiser
               </Button>
               <Button variant="ghost" size="sm" icon={<Download className="h-4 w-4" />}>

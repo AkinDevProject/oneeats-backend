@@ -96,13 +96,14 @@ export const mockUsers: User[] = [
 export const mockOrders: Order[] = [
   {
     id: 'ORD-001',
+    orderNumber: 'CMD-001',
     restaurantId: '1',
     restaurantName: 'Chez Luigi',
     clientName: 'Sophie Dubois',
     clientEmail: 'sophie@email.com',
     items: [
-      { id: '1', menuItemId: '1', name: 'Pizza Margherita', quantity: 1, price: 12.50 },
-      { id: '2', menuItemId: '2', name: 'Tiramisu', quantity: 1, price: 6.00 }
+      { id: '1', menuItemId: '1', name: 'Pizza Margherita', quantity: 1, price: 12.50, totalPrice: 12.50 },
+      { id: '2', menuItemId: '2', name: 'Tiramisu', quantity: 1, price: 6.00, totalPrice: 6.00 }
     ],
     total: 18.50,
     status: 'pending',
@@ -111,12 +112,13 @@ export const mockOrders: Order[] = [
   },
   {
     id: 'ORD-002',
+    orderNumber: 'CMD-002',
     restaurantId: '2',
     restaurantName: 'Sakura Sushi',
     clientName: 'Thomas Moreau',
     clientEmail: 'thomas@email.com',
     items: [
-      { id: '3', menuItemId: '3', name: 'Sashimi Saumon', quantity: 2, price: 15.00 }
+      { id: '3', menuItemId: '3', name: 'Sashimi Saumon', quantity: 2, price: 15.00, totalPrice: 30.00 }
     ],
     total: 30.00,
     status: 'preparing',
@@ -125,12 +127,13 @@ export const mockOrders: Order[] = [
   },
   {
     id: 'ORD-003',
+    orderNumber: 'CMD-003',
     restaurantId: '1',
     restaurantName: 'Chez Luigi',
     clientName: 'Emma Rousseau',
     clientEmail: 'emma@email.com',
     items: [
-      { id: '4', menuItemId: '4', name: 'Pasta Carbonara', quantity: 1, price: 14.00 }
+      { id: '4', menuItemId: '4', name: 'Pasta Carbonara', quantity: 1, price: 14.00, totalPrice: 14.00 }
     ],
     total: 14.00,
     status: 'ready',

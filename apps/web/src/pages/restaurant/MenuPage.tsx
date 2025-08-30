@@ -9,11 +9,12 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { MenuItemOptionsForm } from '../../components/forms/MenuItemOptionsForm';
-import { mockMenuItems } from '../../data/mockData';
 import { MenuItem, MenuItemOption } from '../../types';
+import { useRestaurantData } from '../../hooks/useRestaurantData';
+import apiService from '../../services/api';
 
 const MenuPage: React.FC = () => {
-  const [menuItems, setMenuItems] = useState(mockMenuItems);
+  const { menuItems, loading, error, refetch } = useRestaurantData();
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

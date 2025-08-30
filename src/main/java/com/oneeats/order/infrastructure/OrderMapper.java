@@ -29,6 +29,7 @@ public class OrderMapper {
         
         return new OrderDto(
             order.getId(),
+            order.getOrderNumber(),
             order.getUserId(),
             order.getRestaurantId(),
             order.getStatus(),
@@ -83,8 +84,11 @@ public class OrderMapper {
             .map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         
+        // Générer un numéro de commande (pour l'instant simple, à améliorer avec un service)
+        String orderNumber = generateOrderNumber();
+        
         // Créer la commande
-        Order order = new Order(userId, request.restaurantId(), totalAmount, request.specialInstructions());
+        Order order = new Order(orderNumber, userId, request.restaurantId(), totalAmount, request.specialInstructions());
         
         // Ajouter les items
         request.items().forEach(itemRequest -> {
@@ -125,9 +129,14 @@ public class OrderMapper {
      * Créer un résumé simple pour les listes
      */
     public OrderDto toSummaryDto(Order order) {
-        // Version simplifiée sans les items pour les listes
+        // Version avec items pour l'affichage complet
+        List<OrderDto.OrderItemDto> itemDtos = order.getItems().stream()
+            .map(this::toItemDto)
+            .toList();
+            
         return new OrderDto(
             order.getId(),
+            order.getOrderNumber(),
             order.getUserId(),
             order.getRestaurantId(),
             order.getStatus(),
@@ -137,7 +146,7 @@ public class OrderMapper {
             order.getUpdatedAt(),
             order.getEstimatedPickupTime(),
             order.getActualPickupTime(),
-            List.of(), // Pas d'items dans le résumé
+            itemDtos, // Items inclus dans le résumé
             order.getItems().size(),
             order.getStatus().getDescription(),
             order.canBeCancelled(),
@@ -152,5 +161,15 @@ public class OrderMapper {
         return orders.stream()
             .map(this::toSummaryDto)
             .toList();
+    }
+    
+    /**
+     * Générer un numéro de commande simple (TODO: améliorer avec un service dédié)
+     */
+    private String generateOrderNumber() {
+        // Pour l'instant, génération simple basée sur le timestamp
+        // Dans une vraie application, utiliser un service avec séquence en base
+        long timestamp = System.currentTimeMillis();
+        return "CMD-" + String.format("%03d", timestamp % 1000);
     }
 }

@@ -19,7 +19,10 @@ public class MenuItemRepository extends BaseRepository<MenuItem> {
      * Trouver tous les items d'un restaurant
      */
     public List<MenuItem> findByRestaurantId(UUID restaurantId) {
-        return list("restaurantId", restaurantId, Sort.by("category", "name"));
+        return find("restaurantId = :restaurantId", 
+                   Sort.by("category", "name"), 
+                   Parameters.with("restaurantId", restaurantId))
+               .list();
     }
     
     /**
@@ -99,7 +102,7 @@ public class MenuItemRepository extends BaseRepository<MenuItem> {
      * Compter les items d'un restaurant
      */
     public long countByRestaurantId(UUID restaurantId) {
-        return count("restaurantId", restaurantId);
+        return count("restaurantId = :restaurantId", Parameters.with("restaurantId", restaurantId));
     }
     
     /**

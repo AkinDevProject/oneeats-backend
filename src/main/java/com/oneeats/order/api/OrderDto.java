@@ -13,6 +13,7 @@ import java.util.UUID;
  */
 public record OrderDto(
     UUID id,
+    String orderNumber,
     UUID userId,
     UUID restaurantId,
     OrderStatus status,

@@ -217,7 +217,7 @@ const OrdersPage: React.FC = () => {
                           <ShoppingCart className="h-5 w-5 text-primary-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">#{order.id}</h3>
+                          <h3 className="font-semibold text-gray-900">{order.orderNumber}</h3>
                           <p className="text-sm text-gray-500">{order.restaurantName}</p>
                         </div>
                       </div>

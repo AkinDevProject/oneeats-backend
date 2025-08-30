@@ -10,17 +10,16 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { mockOrders } from '../../data/mockData';
 import { Order } from '../../types';
+import { useRestaurantData } from '../../hooks/useRestaurantData';
 
 // Import des composants réutilisables
 import OrderDetailModal from './components/OrderDetailModal';
 
 const OrdersManagementPage: React.FC = () => {
-  const [orders, setOrders] = useState(mockOrders);
+  const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [filter, setFilter] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  // Note: Sound and auto-refresh controls moved to sidebar
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newOrderSound, setNewOrderSound] = useState(false);
@@ -39,28 +38,32 @@ const OrdersManagementPage: React.FC = () => {
       (filter === 'preparing' && (order.status === 'preparing' || order.status === 'accepted')) ||
       order.status === filter;
     const matchesSearch = order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.id.toLowerCase().includes(searchTerm.toLowerCase());
+                         order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
 
-  const handleOrderAction = (orderId: string, action: 'accept' | 'reject' | 'ready' | 'preparing') => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        switch (action) {
-          case 'accept':
-            return { ...order, status: 'preparing' };
-          case 'reject':
-            return { ...order, status: 'cancelled' };
-          case 'preparing':
-            return { ...order, status: 'preparing' };
-          case 'ready':
-            return { ...order, status: 'ready' };
-          default:
-            return order;
-        }
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'reject' | 'ready' | 'preparing') => {
+    try {
+      let status: string;
+      switch (action) {
+        case 'accept':
+        case 'preparing':
+          status = 'EN_PREPARATION';
+          break;
+        case 'reject':
+          status = 'ANNULEE';
+          break;
+        case 'ready':
+          status = 'PRETE';
+          break;
+        default:
+          return;
       }
-      return order;
-    }));
+      await updateOrderStatus(orderId, status);
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour:', err);
+    }
   };
 
   const handleViewDetails = (order: Order) => {
@@ -601,7 +604,7 @@ const OrdersManagementPage: React.FC = () => {
                             <div className={`w-3 h-3 ${config.dot} rounded-full animate-pulse`} />
                             <div>
                               <div className="flex items-center space-x-2">
-                                <span className="font-bold text-gray-900">#{order.id}</span>
+                                <span className="font-bold text-gray-900">{order.orderNumber || `#${order.id.substring(0, 8)}...`}</span>
                                 <Badge 
                                   variant={order.status === 'pending' ? 'warning' : (order.status === 'preparing' || order.status === 'accepted') ? 'primary' : 'success'}
                                   size="sm"

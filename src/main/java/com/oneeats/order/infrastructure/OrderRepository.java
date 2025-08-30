@@ -22,7 +22,7 @@ public class OrderRepository extends BaseRepository<Order> {
      * Trouver les commandes d'un utilisateur
      */
     public List<Order> findByUserId(UUID userId) {
-        return find("userId", userId).list();
+        return find("userId = :userId", Parameters.with("userId", userId)).list();
     }
     
     /**
@@ -36,7 +36,7 @@ public class OrderRepository extends BaseRepository<Order> {
      * Trouver les commandes d'un restaurant
      */
     public List<Order> findByRestaurantId(UUID restaurantId) {
-        return find("restaurantId", restaurantId).list();
+        return find("restaurantId = :restaurantId", Parameters.with("restaurantId", restaurantId)).list();
     }
     
     /**
@@ -61,7 +61,7 @@ public class OrderRepository extends BaseRepository<Order> {
      * Trouver les commandes par statut
      */
     public List<Order> findByStatus(OrderStatus status) {
-        return find("status", status).list();
+        return find("status = :status", Parameters.with("status", status)).list();
     }
     
     /**

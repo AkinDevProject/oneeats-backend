@@ -135,7 +135,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         <div className={`p-6 border-b border-gray-200 ${urgency.bg}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <h2 className="text-2xl font-bold text-gray-900">Commande #{order.id}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Commande {order.orderNumber || `#${order.id.substring(0, 8)}...`}</h2>
               {getStatusBadge(order.status)}
             </div>
             <button 

@@ -2,6 +2,7 @@ package com.oneeats.user.infrastructure;
 
 import com.oneeats.user.domain.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
@@ -19,21 +20,21 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
      * Trouver un utilisateur par email
      */
     public Optional<User> findByEmail(String email) {
-        return find("email", email).firstResultOptional();
+        return find("email = :email", Parameters.with("email", email)).firstResultOptional();
     }
     
     /**
      * Vérifier si un email existe déjà
      */
     public boolean existsByEmail(String email) {
-        return count("email", email) > 0;
+        return count("email = :email", Parameters.with("email", email)) > 0;
     }
     
     /**
      * Trouver tous les utilisateurs actifs
      */
     public List<User> findActiveUsers() {
-        return list("isActive", true);
+        return find("isActive = :isActive", Parameters.with("isActive", true)).list();
     }
     
     /**
@@ -47,7 +48,7 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
      * Compter les utilisateurs actifs
      */
     public long countActiveUsers() {
-        return count("isActive", true);
+        return count("isActive = :isActive", Parameters.with("isActive", true));
     }
     
     /**

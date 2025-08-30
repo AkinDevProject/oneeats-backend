@@ -127,7 +127,7 @@ class ApiService {
       this.request(`/api/orders/${id}`),
     
     getByRestaurant: (restaurantId: string): Promise<Order[]> => 
-      this.request(`/api/orders/restaurant/${restaurantId}`),
+      this.request(`/api/orders?restaurantId=${restaurantId}`),
     
     getPendingByRestaurant: (restaurantId: string): Promise<Order[]> => 
       this.request(`/api/orders/restaurant/${restaurantId}/pending`),
@@ -152,7 +152,7 @@ class ApiService {
         body: JSON.stringify(data),
       }),
     
-    getTodayStats: (restaurantId: string): Promise<{ todayOrdersCount: number }> => 
+    getTodayStats: (restaurantId: string): Promise<any> => 
       this.request(`/api/orders/restaurant/${restaurantId}/stats/today`),
   };
 

@@ -1,0 +1,124 @@
+import { useState, useEffect } from 'react';
+import apiService from '../services/api';
+import { Order, Restaurant, MenuItem } from '../types';
+
+const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Pizza Palace ID from backend
+
+// Helper function to convert backend order status to frontend status
+const mapOrderStatus = (backendStatus: string): Order['status'] => {
+  switch (backendStatus) {
+    case 'EN_ATTENTE':
+      return 'pending';
+    case 'EN_PREPARATION':
+      return 'preparing';
+    case 'PRETE':
+      return 'ready';
+    case 'RECUPEREE':
+      return 'delivered';
+    case 'ANNULEE':
+      return 'cancelled';
+    default:
+      return 'pending';
+  }
+};
+
+// Helper function to convert backend data to frontend format
+const transformBackendOrder = (backendOrder: any): Order => ({
+    id: backendOrder.id,
+    orderNumber: backendOrder.orderNumber,
+    restaurantId: backendOrder.restaurantId,
+    restaurantName: backendOrder.restaurantName || 'Pizza Palace',
+    clientName: backendOrder.clientName || backendOrder.userName || 'Client',
+    clientEmail: backendOrder.clientEmail || backendOrder.userEmail || '',
+  items: (backendOrder.items || []).map((item: any) => ({
+    id: item.id,
+    menuItemId: item.menuItemId,
+    name: item.menuItemName || item.name,
+    quantity: item.quantity,
+    price: item.unitPrice || item.price,
+    totalPrice: item.totalPrice || (item.quantity * (item.unitPrice || item.price))
+  })),
+  total: backendOrder.totalAmount || backendOrder.total,
+  status: mapOrderStatus(backendOrder.status),
+  createdAt: new Date(backendOrder.createdAt),
+  estimatedTime: backendOrder.estimatedPreparationTime
+});
+
+export const useRestaurantData = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch all restaurant data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch restaurant info
+      const restaurantData = await apiService.restaurants.getById(RESTAURANT_ID);
+      setRestaurant(restaurantData);
+
+      // Fetch menu items
+      const menuData = await apiService.menuItems.getByRestaurant(RESTAURANT_ID);
+      setMenuItems(menuData);
+
+      // Fetch all orders for the restaurant (not just pending)
+      const ordersData = await apiService.orders.getByRestaurant(RESTAURANT_ID);
+      const transformedOrders = ordersData.map(transformBackendOrder);
+      setOrders(transformedOrders);
+
+      // Fetch stats
+      const statsData = await apiService.orders.getTodayStats(RESTAURANT_ID);
+      setStats(statsData);
+
+    } catch (err) {
+      console.error('Error fetching restaurant data:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await apiService.orders.updateStatus(orderId, status);
+      
+      // Refresh orders after update
+      const updatedOrders = await apiService.orders.getByRestaurant(RESTAURANT_ID);
+      const transformedOrders = updatedOrders.map(transformBackendOrder);
+      setOrders(transformedOrders);
+      
+      // Refresh stats
+      const statsData = await apiService.orders.getTodayStats(RESTAURANT_ID);
+      setStats(statsData);
+      
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      throw err;
+    }
+  };
+
+  // Auto-refresh data every 30 seconds
+  useEffect(() => {
+    fetchData();
+    
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    orders,
+    restaurant,
+    menuItems,
+    stats,
+    loading,
+    error,
+    refetch: fetchData,
+    updateOrderStatus
+  };
+};

@@ -27,7 +27,10 @@ public class RestaurantRepository extends BaseRepository<Restaurant> {
      * Trouver les restaurants par type de cuisine
      */
     public List<Restaurant> findByCuisineType(String cuisineType) {
-        return list("cuisineType", cuisineType, Sort.by("rating").descending());
+        return find("cuisineType = :cuisineType", 
+                   Sort.by("rating").descending(),
+                   Parameters.with("cuisineType", cuisineType))
+               .list();
     }
     
     /**
@@ -41,7 +44,7 @@ public class RestaurantRepository extends BaseRepository<Restaurant> {
      * Trouver par email
      */
     public Optional<Restaurant> findByEmail(String email) {
-        return find("email", email).firstResultOptional();
+        return find("email = :email", Parameters.with("email", email)).firstResultOptional();
     }
     
     /**
@@ -104,6 +107,6 @@ public class RestaurantRepository extends BaseRepository<Restaurant> {
      * Vérifier si un email existe déjà
      */
     public boolean existsByEmail(String email) {
-        return count("email", email) > 0;
+        return count("email = :email", Parameters.with("email", email)) > 0;
     }
 }
