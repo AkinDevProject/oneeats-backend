@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, CheckCircle, AlertCircle, ChefHat, Phone, MessageCircle, MoreVertical, Timer, Euro } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChefHat, Phone, MessageCircle, MoreVertical, Timer, Euro, Zap, Flame, Sparkles } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
@@ -104,91 +104,145 @@ const CompactListView: React.FC = () => {
             </div>
           </div>
 
-          {/* Enhanced Tabs with Colors and Icons */}
-          <div className="grid grid-cols-4 gap-2">
+          {/* Ultra Colorful Enhanced Status Tabs */}
+          <div className="grid grid-cols-4 gap-3">
             {tabs.map((tab) => {
               const getTabConfig = (key: string) => {
                 switch(key) {
                   case 'all':
                     return { 
-                      icon: '🎯', 
-                      color: 'from-gray-500 to-gray-600',
-                      bgColor: 'bg-gray-50',
-                      textColor: 'text-gray-700',
-                      activeColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
+                      icon: Sparkles,
+                      emoji: '🎯',
+                      gradient: 'from-slate-500 via-slate-600 to-slate-700',
+                      bgGradient: 'from-slate-50 to-slate-100',
+                      textColor: 'text-slate-700',
+                      activeGradient: 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700',
+                      shadowColor: 'shadow-slate-300',
+                      glowColor: 'shadow-slate-500/50'
                     };
                   case 'pending':
                     return { 
-                      icon: '⏳', 
-                      color: 'from-orange-500 to-red-500',
-                      bgColor: 'bg-orange-50',
-                      textColor: 'text-orange-700',
-                      activeColor: 'bg-gradient-to-r from-orange-500 to-red-500'
+                      icon: AlertCircle,
+                      emoji: '⚠️',
+                      gradient: 'from-amber-400 via-orange-500 to-red-500',
+                      bgGradient: 'from-orange-50 via-amber-50 to-red-50',
+                      textColor: 'text-orange-800',
+                      activeGradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-500',
+                      shadowColor: 'shadow-orange-200',
+                      glowColor: 'shadow-orange-500/50'
                     };
                   case 'preparing':
                     return { 
-                      icon: '👨‍🍳', 
-                      color: 'from-blue-500 to-purple-500',
-                      bgColor: 'bg-blue-50',
-                      textColor: 'text-blue-700',
-                      activeColor: 'bg-gradient-to-r from-blue-500 to-purple-500'
+                      icon: Flame,
+                      emoji: '🔥',
+                      gradient: 'from-blue-400 via-indigo-500 to-purple-600',
+                      bgGradient: 'from-blue-50 via-indigo-50 to-purple-50',
+                      textColor: 'text-blue-800',
+                      activeGradient: 'bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600',
+                      shadowColor: 'shadow-blue-200',
+                      glowColor: 'shadow-blue-500/50'
                     };
                   case 'ready':
                     return { 
-                      icon: '✅', 
-                      color: 'from-green-500 to-emerald-500',
-                      bgColor: 'bg-green-50',
-                      textColor: 'text-green-700',
-                      activeColor: 'bg-gradient-to-r from-green-500 to-emerald-500'
+                      icon: Zap,
+                      emoji: '⚡',
+                      gradient: 'from-emerald-400 via-green-500 to-teal-600',
+                      bgGradient: 'from-emerald-50 via-green-50 to-teal-50',
+                      textColor: 'text-green-800',
+                      activeGradient: 'bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600',
+                      shadowColor: 'shadow-green-200',
+                      glowColor: 'shadow-green-500/50'
                     };
                   default:
                     return { 
-                      icon: '📋', 
-                      color: 'from-gray-500 to-gray-600',
-                      bgColor: 'bg-gray-50',
+                      icon: Clock,
+                      emoji: '📋',
+                      gradient: 'from-gray-400 to-gray-600',
+                      bgGradient: 'from-gray-50 to-gray-100',
                       textColor: 'text-gray-700',
-                      activeColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
+                      activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600',
+                      shadowColor: 'shadow-gray-200',
+                      glowColor: 'shadow-gray-500/50'
                     };
                 }
               };
 
               const config = getTabConfig(tab.key);
               const isActive = activeTab === tab.key;
+              const IconComponent = config.icon;
 
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`relative overflow-hidden rounded-xl p-4 text-center transition-all duration-300 transform hover:scale-105 ${
+                  className={`group relative overflow-hidden rounded-2xl p-5 text-center transition-all duration-500 transform hover:scale-110 hover:-translate-y-1 ${
                     isActive 
-                      ? `${config.activeColor} text-white shadow-lg` 
-                      : `${config.bgColor} hover:shadow-md border-2 border-transparent hover:border-opacity-20`
+                      ? `${config.activeGradient} text-white shadow-2xl ${config.glowColor} ring-2 ring-white ring-opacity-50` 
+                      : `bg-gradient-to-br ${config.bgGradient} hover:shadow-xl ${config.shadowColor} border-2 border-white hover:border-opacity-60`
                   }`}
                 >
-                  <div className="space-y-2">
-                    <div className="text-2xl">{config.icon}</div>
-                    <div className={`font-bold text-sm ${isActive ? 'text-white' : config.textColor}`}>
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-2 right-2 text-6xl opacity-20">{config.emoji}</div>
+                  </div>
+                  
+                  <div className="relative space-y-3">
+                    {/* Icon with Animation */}
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-full mx-auto transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-white bg-opacity-20 scale-110' 
+                        : `bg-gradient-to-br ${config.gradient} group-hover:scale-105`
+                    }`}>
+                      <IconComponent className={`h-6 w-6 transition-all duration-300 ${
+                        isActive ? 'text-white' : 'text-white'
+                      }`} />
+                    </div>
+                    
+                    {/* Label */}
+                    <div className={`font-bold text-sm transition-all duration-300 ${
+                      isActive ? 'text-white' : config.textColor
+                    }`}>
                       {tab.label}
                     </div>
-                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs ${
+                    
+                    {/* Count Badge with Pulse Effect */}
+                    <div className={`relative inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 ${
                       isActive 
-                        ? 'bg-white bg-opacity-20 text-white' 
-                        : 'bg-white shadow-sm ' + config.textColor
+                        ? 'bg-white bg-opacity-20 text-white scale-110' 
+                        : `bg-white shadow-lg ${config.textColor} group-hover:scale-105`
                     }`}>
                       {tab.count}
+                      
+                      {/* Pulse ring for active tab */}
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-ping" />
+                      )}
                     </div>
                   </div>
                   
-                  {/* Active indicator */}
+                  {/* Shimmer Effect */}
                   {isActive && (
-                    <div className="absolute inset-0 bg-white bg-opacity-10 rounded-xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 -skew-x-12 animate-pulse" />
                   )}
                   
-                  {/* Urgent indicator for pending */}
+                  {/* Urgent Notification */}
                   {tab.key === 'pending' && tab.count > 0 && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-bounce">
-                      <div className="w-2 h-2 bg-white rounded-full absolute top-1 left-1" />
+                    <div className="absolute -top-2 -right-2 flex items-center justify-center">
+                      <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-bounce shadow-lg">
+                        <div className="w-3 h-3 bg-white rounded-full absolute top-1.5 left-1.5 animate-pulse" />
+                      </div>
+                      <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
                     </div>
+                  )}
+                  
+                  {/* Preparing Active Indicator */}
+                  {tab.key === 'preparing' && tab.count > 0 && (
+                    <div className="absolute top-1 left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                  )}
+                  
+                  {/* Ready Indicator */}
+                  {tab.key === 'ready' && tab.count > 0 && (
+                    <div className="absolute top-1 right-1 w-3 h-3 bg-green-400 rounded-full animate-bounce" />
                   )}
                 </button>
               );

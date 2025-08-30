@@ -4,7 +4,8 @@ import { fr } from 'date-fns/locale';
 import { 
   Bell, Volume2, RefreshCw, Search, Filter, 
   Download, Check, X,
-  Clock, User, MapPin, Phone, Truck, AlertTriangle
+  Clock, User, MapPin, Phone, Truck, AlertTriangle,
+  Zap, Flame, Sparkles, ChefHat, AlertCircle, CheckCircle, MoreVertical, MessageCircle, Timer
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -17,7 +18,7 @@ import OrderDetailModal from './components/OrderDetailModal';
 
 const OrdersManagementPage: React.FC = () => {
   const [orders, setOrders] = useState(mockOrders);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'preparing' | 'ready'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'preparing' | 'ready'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -60,7 +61,9 @@ const OrdersManagementPage: React.FC = () => {
   }, [autoRefresh, soundEnabled]);
 
   const filteredOrders = orders.filter(order => {
-    const matchesFilter = filter === 'all' || order.status === filter;
+    const matchesFilter = filter === 'all' || 
+      (filter === 'preparing' && (order.status === 'preparing' || order.status === 'accepted')) ||
+      order.status === filter;
     const matchesSearch = order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
@@ -103,22 +106,82 @@ const OrdersManagementPage: React.FC = () => {
 
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge className="bg-orange-100 text-orange-800">⏳ En attente</Badge>;
-      case 'accepted':
-        return <Badge className="bg-blue-100 text-blue-800">✓ Acceptée</Badge>;
-      case 'preparing':
-        return <Badge className="bg-yellow-100 text-yellow-800">👨‍🍳 En préparation</Badge>;
-      case 'ready':
-        return <Badge className="bg-green-100 text-green-800">✅ Prête</Badge>;
-      case 'completed':
-        return <Badge className="bg-gray-100 text-gray-800">✅ Livrée</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-100 text-red-800">❌ Annulée</Badge>;
-      default:
-        return <Badge variant="default">{status}</Badge>;
-    }
+    const getStatusConfig = (status: string) => {
+      switch (status) {
+        case 'pending':
+          return {
+            gradient: 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500',
+            textColor: 'text-white',
+            icon: '⚠️',
+            label: 'En attente',
+            shadow: 'shadow-orange-300',
+            glow: 'shadow-orange-500/50'
+          };
+        case 'accepted':
+          return {
+            gradient: 'bg-gradient-to-r from-cyan-400 via-teal-500 to-blue-600',
+            textColor: 'text-white',
+            icon: '✅',
+            label: 'Acceptée',
+            shadow: 'shadow-cyan-300',
+            glow: 'shadow-cyan-500/50'
+          };
+        case 'preparing':
+          return {
+            gradient: 'bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600',
+            textColor: 'text-white',
+            icon: '🔥',
+            label: 'En préparation',
+            shadow: 'shadow-blue-300',
+            glow: 'shadow-blue-500/50'
+          };
+        case 'ready':
+          return {
+            gradient: 'bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600',
+            textColor: 'text-white',
+            icon: '⚡',
+            label: 'Prête',
+            shadow: 'shadow-green-300',
+            glow: 'shadow-green-500/50'
+          };
+        case 'completed':
+          return {
+            gradient: 'bg-gradient-to-r from-slate-400 via-gray-500 to-slate-600',
+            textColor: 'text-white',
+            icon: '✅',
+            label: 'Livrée',
+            shadow: 'shadow-gray-300',
+            glow: 'shadow-gray-500/50'
+          };
+        case 'cancelled':
+          return {
+            gradient: 'bg-gradient-to-r from-red-400 via-rose-500 to-pink-600',
+            textColor: 'text-white',
+            icon: '❌',
+            label: 'Annulée',
+            shadow: 'shadow-red-300',
+            glow: 'shadow-red-500/50'
+          };
+        default:
+          return {
+            gradient: 'bg-gradient-to-r from-gray-400 to-gray-600',
+            textColor: 'text-white',
+            icon: '📋',
+            label: status,
+            shadow: 'shadow-gray-300',
+            glow: 'shadow-gray-500/50'
+          };
+      }
+    };
+
+    const config = getStatusConfig(status);
+    
+    return (
+      <div className={`inline-flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 hover:scale-105 ${config.gradient} ${config.textColor} ${config.shadow} hover:${config.glow} animate-pulse`}>
+        <span className="text-base">{config.icon}</span>
+        <span>{config.label}</span>
+      </div>
+    );
   };
 
   const getOrderActions = (order: Order) => {
@@ -300,28 +363,154 @@ const OrdersManagementPage: React.FC = () => {
               </div>
             </div>
             
-            {/* Filtres par statut - Mobile Responsive */}
-            <div className="flex flex-wrap items-center gap-2 sm:space-x-2 sm:gap-0 bg-gray-100 rounded-lg p-2 sm:p-1">
+            {/* Ultra Colorful Enhanced Status Tabs - Exact CompactListView Style */}
+            <div className="grid grid-cols-4 gap-3">
               {[
-                { key: 'all', label: 'Toutes', count: filteredOrders.length, shortLabel: 'Tous' },
-                { key: 'pending', label: 'En attente', count: orders.filter(o => o.status === 'pending').length, shortLabel: 'Attente' },
-                { key: 'accepted', label: 'Acceptées', count: orders.filter(o => o.status === 'accepted').length, shortLabel: 'OK' },
-                { key: 'preparing', label: 'En cours', count: orders.filter(o => o.status === 'preparing').length, shortLabel: 'Cours' },
-                { key: 'ready', label: 'Prêtes', count: orders.filter(o => o.status === 'ready').length, shortLabel: 'Prêtes' }
-              ].map((option) => (
-                <button
-                  key={option.key}
-                  onClick={() => setFilter(option.key as any)}
-                  className={`flex-1 sm:flex-none px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                    filter === option.key
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="sm:hidden">{option.shortLabel} ({option.count})</span>
-                  <span className="hidden sm:inline">{option.label} ({option.count})</span>
-                </button>
-              ))}
+                { key: 'all', label: 'Toutes', count: orders.length },
+                { key: 'pending', label: 'En attente', count: orders.filter(o => o.status === 'pending').length },
+                { key: 'preparing', label: 'En cours', count: orders.filter(o => o.status === 'preparing' || o.status === 'accepted').length },
+                { key: 'ready', label: 'Prêtes', count: orders.filter(o => o.status === 'ready').length },
+              ].map((tab) => {
+                const getTabConfig = (key: string) => {
+                  switch(key) {
+                    case 'all':
+                      return { 
+                        icon: Sparkles,
+                        emoji: '🎯',
+                        gradient: 'from-slate-500 via-slate-600 to-slate-700',
+                        bgGradient: 'from-slate-50 to-slate-100',
+                        textColor: 'text-slate-700',
+                        activeGradient: 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700',
+                        shadowColor: 'shadow-slate-300',
+                        glowColor: 'shadow-slate-500/50'
+                      };
+                    case 'pending':
+                      return { 
+                        icon: AlertCircle,
+                        emoji: '⚠️',
+                        gradient: 'from-amber-400 via-orange-500 to-red-500',
+                        bgGradient: 'from-orange-50 via-amber-50 to-red-50',
+                        textColor: 'text-orange-800',
+                        activeGradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-red-500',
+                        shadowColor: 'shadow-orange-200',
+                        glowColor: 'shadow-orange-500/50'
+                      };
+                    case 'preparing':
+                      return { 
+                        icon: Flame,
+                        emoji: '🔥',
+                        gradient: 'from-blue-400 via-indigo-500 to-purple-600',
+                        bgGradient: 'from-blue-50 via-indigo-50 to-purple-50',
+                        textColor: 'text-blue-800',
+                        activeGradient: 'bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600',
+                        shadowColor: 'shadow-blue-200',
+                        glowColor: 'shadow-blue-500/50'
+                      };
+                    case 'ready':
+                      return { 
+                        icon: Zap,
+                        emoji: '⚡',
+                        gradient: 'from-emerald-400 via-green-500 to-teal-600',
+                        bgGradient: 'from-emerald-50 via-green-50 to-teal-50',
+                        textColor: 'text-green-800',
+                        activeGradient: 'bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600',
+                        shadowColor: 'shadow-green-200',
+                        glowColor: 'shadow-green-500/50'
+                      };
+                    default:
+                      return { 
+                        icon: Clock,
+                        emoji: '📋',
+                        gradient: 'from-gray-400 to-gray-600',
+                        bgGradient: 'from-gray-50 to-gray-100',
+                        textColor: 'text-gray-700',
+                        activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600',
+                        shadowColor: 'shadow-gray-200',
+                        glowColor: 'shadow-gray-500/50'
+                      };
+                  }
+                };
+
+                const config = getTabConfig(tab.key);
+                const isActive = filter === tab.key;
+                const IconComponent = config.icon;
+
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setFilter(tab.key as any)}
+                    className={`group relative overflow-hidden rounded-2xl p-5 text-center transition-all duration-500 transform hover:scale-110 hover:-translate-y-1 ${
+                      isActive 
+                        ? `${config.activeGradient} text-white shadow-2xl ${config.glowColor} ring-2 ring-white ring-opacity-50` 
+                        : `bg-gradient-to-br ${config.bgGradient} hover:shadow-xl ${config.shadowColor} border-2 border-white hover:border-opacity-60`
+                    }`}
+                  >
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-2 right-2 text-6xl opacity-20">{config.emoji}</div>
+                    </div>
+                    
+                    <div className="relative space-y-3">
+                      {/* Icon with Animation */}
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-full mx-auto transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-white bg-opacity-20 scale-110' 
+                          : `bg-gradient-to-br ${config.gradient} group-hover:scale-105`
+                      }`}>
+                        <IconComponent className={`h-6 w-6 transition-all duration-300 ${
+                          isActive ? 'text-white' : 'text-white'
+                        }`} />
+                      </div>
+                      
+                      {/* Label */}
+                      <div className={`font-bold text-sm transition-all duration-300 ${
+                        isActive ? 'text-white' : config.textColor
+                      }`}>
+                        {tab.label}
+                      </div>
+                      
+                      {/* Count Badge with Pulse Effect */}
+                      <div className={`relative inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-white bg-opacity-20 text-white scale-110' 
+                          : `bg-white shadow-lg ${config.textColor} group-hover:scale-105`
+                      }`}>
+                        {tab.count}
+                        
+                        {/* Pulse ring for active tab */}
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-ping" />
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Shimmer Effect */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 -skew-x-12 animate-pulse" />
+                    )}
+                    
+                    {/* Urgent Notification for pending */}
+                    {tab.key === 'pending' && tab.count > 0 && (
+                      <div className="absolute -top-2 -right-2 flex items-center justify-center">
+                        <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-bounce shadow-lg">
+                          <div className="w-3 h-3 bg-white rounded-full absolute top-1.5 left-1.5 animate-pulse" />
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
+                      </div>
+                    )}
+                    
+                    {/* Preparing Active Indicator */}
+                    {tab.key === 'preparing' && tab.count > 0 && (
+                      <div className="absolute top-1 left-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                    )}
+                    
+                    {/* Ready Indicator */}
+                    {tab.key === 'ready' && tab.count > 0 && (
+                      <div className="absolute top-1 right-1 w-3 h-3 bg-green-400 rounded-full animate-bounce" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -334,103 +523,170 @@ const OrdersManagementPage: React.FC = () => {
                 <p className="text-sm sm:text-base text-gray-500">Les commandes apparaîtront ici en temps réel</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="space-y-3">
                 {filteredOrders.map((order) => {
-                  const orderTime = new Date(order.createdAt);
-                  const minutesAgo = (new Date().getTime() - orderTime.getTime()) / (1000 * 60);
-                  const isUrgent = minutesAgo > 15;
-                  
+                  const getStatusConfig = (status: string) => {
+                    switch (status) {
+                      case 'pending':
+                        return { 
+                          color: 'bg-orange-500', 
+                          label: 'En attente',
+                          textColor: 'text-orange-600',
+                          bgColor: 'bg-orange-50',
+                          icon: AlertCircle,
+                          dot: 'bg-orange-400'
+                        };
+                      case 'accepted':
+                      case 'preparing':
+                        return { 
+                          color: 'bg-blue-500', 
+                          label: order.status === 'accepted' ? 'Acceptée' : 'En préparation',
+                          textColor: 'text-blue-600',
+                          bgColor: 'bg-blue-50',
+                          icon: ChefHat,
+                          dot: 'bg-blue-400'
+                        };
+                      case 'ready':
+                        return { 
+                          color: 'bg-green-500', 
+                          label: 'Prête',
+                          textColor: 'text-green-600',
+                          bgColor: 'bg-green-50',
+                          icon: CheckCircle,
+                          dot: 'bg-green-400'
+                        };
+                      default:
+                        return { 
+                          color: 'bg-gray-500', 
+                          label: status,
+                          textColor: 'text-gray-600',
+                          bgColor: 'bg-gray-50',
+                          icon: Clock,
+                          dot: 'bg-gray-400'
+                        };
+                    }
+                  };
+
+                  const getNextStatus = (currentStatus: string) => {
+                    switch (currentStatus) {
+                      case 'pending': return 'preparing';
+                      case 'accepted': return 'preparing';
+                      case 'preparing': return 'ready';
+                      case 'ready': return 'completed';
+                      default: return currentStatus;
+                    }
+                  };
+
+                  const getActionLabel = (status: string) => {
+                    switch (status) {
+                      case 'pending': return 'Accepter';
+                      case 'accepted': return 'Commencer';
+                      case 'preparing': return 'Prêt';
+                      case 'ready': return 'Livrer';
+                      default: return 'Action';
+                    }
+                  };
+
+                  const config = getStatusConfig(order.status);
+                  const StatusIcon = config.icon;
+                  const nextStatus = getNextStatus(order.status);
+                  const actionLabel = getActionLabel(order.status);
+
                   return (
-                    <Card 
-                      key={order.id} 
-                      className={`p-3 sm:p-4 border-2 hover:shadow-lg transition-all cursor-pointer ${
-                        isUrgent && (order.status === 'pending' || order.status === 'accepted')
-                          ? 'border-red-300 bg-red-50 animate-pulse' 
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      {/* En-tête de commande - Mobile Optimized */}
-                      <div className="flex items-start justify-between mb-3 sm:mb-4">
-                        <div className="min-w-0 flex-1 mr-3">
-                          <div className="font-bold text-base sm:text-lg text-gray-900 truncate">#{order.id}</div>
-                          <div className="text-xs sm:text-sm text-gray-500 flex items-center space-x-1 sm:space-x-2">
-                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="truncate">
-                              {formatDistance(orderTime, new Date(), { 
-                                addSuffix: true, 
-                                locale: fr 
-                              })}
-                            </span>
-                            {isUrgent && (
-                              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="font-bold text-lg sm:text-xl text-gray-900">€{order.total.toFixed(2)}</div>
-                          <div className="text-xs sm:text-sm text-gray-500">{order.items.length} article{order.items.length > 1 ? 's' : ''}</div>
-                        </div>
-                      </div>
-
-                      {/* Statut */}
-                      <div className="mb-4">
-                        {getStatusBadge(order.status)}
-                      </div>
-
-                      {/* Informations client */}
-                      <div className="mb-4 space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <User className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm font-medium text-gray-900">{order.clientName}</span>
-                        </div>
-                        
-                        {order.deliveryAddress ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <Truck className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm text-blue-700 font-medium">Livraison</span>
-                            </div>
-                            <div className="text-xs text-gray-600 pl-6">{order.deliveryAddress}</div>
-                            {order.clientPhone && (
+                    <Card key={order.id} className="bg-white hover:shadow-md transition-shadow">
+                      <div className="p-4">
+                        {/* Order Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 ${config.dot} rounded-full animate-pulse`} />
+                            <div>
                               <div className="flex items-center space-x-2">
-                                <Phone className="h-4 w-4 text-gray-500" />
-                                <span className="text-xs text-gray-600">{order.clientPhone}</span>
+                                <span className="font-bold text-gray-900">#{order.id}</span>
+                                <Badge 
+                                  variant={order.status === 'pending' ? 'warning' : (order.status === 'preparing' || order.status === 'accepted') ? 'primary' : 'success'}
+                                  size="sm"
+                                >
+                                  {config.label}
+                                </Badge>
                               </div>
+                              <div className="text-sm text-gray-600">{order.clientName}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-right">
+                              <div className="font-bold text-gray-900">€{order.total.toFixed(2)}</div>
+                              <div className="text-xs text-gray-600 flex items-center">
+                                <Timer className="h-3 w-3 mr-1" />
+                                {order.estimatedTime || 30}min
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1"
+                              icon={<MoreVertical className="h-4 w-4" />}
+                              onClick={() => handleViewDetails(order)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Order Items - Collapsed */}
+                        <div className="mb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600">
+                              {order.items.length} article{order.items.length > 1 ? 's' : ''}:
+                            </span>
+                            <div className="flex-1 text-sm text-gray-700 truncate">
+                              {order.items.map(item => `${item.quantity}x ${item.name}`).join(', ')}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Time and Actions */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Clock className="h-4 w-4 mr-1" />
+                              {Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)}min
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-2 text-blue-600 hover:bg-blue-50"
+                                icon={<Phone className="h-4 w-4" />}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-2 text-green-600 hover:bg-green-50"
+                                icon={<MessageCircle className="h-4 w-4" />}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            {(order.status !== 'completed' && order.status !== 'cancelled') && (
+                              <Button
+                                onClick={() => handleOrderAction(order.id, order.status === 'pending' ? 'accept' : order.status === 'accepted' ? 'preparing' : order.status === 'preparing' ? 'ready' : 'preparing')}
+                                variant={order.status === 'pending' ? 'primary' : (order.status === 'preparing' || order.status === 'accepted') ? 'success' : 'outline'}
+                                size="sm"
+                                className="min-w-[80px]"
+                                icon={
+                                  order.status === 'pending' ? <ChefHat className="h-4 w-4" /> :
+                                  (order.status === 'preparing' || order.status === 'accepted') ? <CheckCircle className="h-4 w-4" /> :
+                                  <CheckCircle className="h-4 w-4" />
+                                }
+                              >
+                                {actionLabel}
+                              </Button>
                             )}
                           </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="h-4 w-4 text-green-500" />
-                            <span className="text-sm text-green-700 font-medium">Sur place</span>
-                          </div>
-                        )}
+                        </div>
                       </div>
 
-                      {/* Aperçu des articles */}
-                      <div className="mb-4 text-sm text-gray-600">
-                        {order.items.slice(0, 2).map((item, idx) => (
-                          <span key={idx}>
-                            {item.quantity}x {item.name}
-                            {idx < Math.min(order.items.length - 1, 1) && ', '}
-                          </span>
-                        ))}
-                        {order.items.length > 2 && (
-                          <span className="text-gray-500"> +{order.items.length - 2} autre{order.items.length - 2 > 1 ? 's' : ''}</span>
-                        )}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex justify-between items-center" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewDetails(order)}
-                        >
-                          Voir détails
-                        </Button>
-                        {getOrderActions(order)}
-                      </div>
+                      {/* Status Indicator Bar */}
+                      <div className={`h-1 ${config.color} w-full`} />
                     </Card>
                   );
                 })}
