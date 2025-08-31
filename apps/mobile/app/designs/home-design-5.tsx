@@ -37,28 +37,14 @@ import {
 } from 'react-native-paper';
 
 import { mockRestaurants, cuisineCategories, Restaurant } from '../../src/data/mockData';
-import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useAppTheme, colorThemes } from '../../src/contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
-// Fonction pour créer le thème dynamiquement
-const createCustomTheme = (currentTheme: any) => ({
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    ...currentTheme.colors,
-    // Couleurs système
-    inverseSurface: '#313033',
-    inverseOnSurface: '#F4EFF4',
-    inversePrimary: currentTheme.colors.primaryContainer,
-    shadow: '#000000',
-    scrim: '#000000',
-    surfaceTint: currentTheme.colors.primary,
-  },
-});
 
-// Page d'accueil avec design home-design-5
-export default function HomeIndex() {
+
+// Design 5: Material Design 3 avec React Native Paper
+export default function HomeDesign5() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(mockRestaurants);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -66,14 +52,12 @@ export default function HomeIndex() {
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  
   // Utiliser le thème global
-  const { currentTheme: globalTheme, setSelectedTheme: setGlobalTheme, selectedTheme, themeMetadata } = useAppTheme();
-  const customTheme = createCustomTheme(globalTheme);
+  const { currentTheme, setSelectedTheme, selectedTheme, themeMetadata } = useAppTheme();
   
   // Synchroniser avec le thème global quand on change
   const handleThemeChange = async (themeKey: string) => {
-    await setGlobalTheme(themeKey as any);
+    await setSelectedTheme(themeKey as any);
   };
 
   const headerOpacity = useSharedValue(0);
@@ -137,7 +121,7 @@ export default function HomeIndex() {
 
   const renderHeader = () => (
     <Animated.View style={[baseStyles.header, headerAnimatedStyle]}>
-      <Surface style={[baseStyles.headerSurface, { backgroundColor: globalTheme.colors.surface }]} elevation={2}>
+      <Surface style={baseStyles.headerSurface} elevation={2}>
         <View style={baseStyles.headerContent}>
           <Avatar.Icon 
             size={48} 
@@ -164,7 +148,7 @@ export default function HomeIndex() {
             <IconButton
               icon="palette"
               size={24}
-              iconColor={customTheme.colors.primary}
+              iconColor={currentTheme.colors.primary}
               onPress={() => router.push('/designs/design-selector')}
             />
           </View>
@@ -181,11 +165,11 @@ export default function HomeIndex() {
         value={searchQuery}
         icon="magnify"
         clearIcon="close"
-        style={[baseStyles.searchBar, { backgroundColor: customTheme.colors.surface }]}
-        inputStyle={[baseStyles.searchInput, { color: customTheme.colors.onSurface }]}
-        iconColor={customTheme.colors.primary}
-        rippleColor={customTheme.colors.primaryContainer}
-        placeholderTextColor={customTheme.colors.onSurfaceVariant}
+        style={[baseStyles.searchBar, { backgroundColor: currentTheme.colors.surface }]}
+        inputStyle={[baseStyles.searchInput, { color: currentTheme.colors.onSurface }]}
+        iconColor={currentTheme.colors.primary}
+        rippleColor={currentTheme.colors.primaryContainer}
+        placeholderTextColor={currentTheme.colors.onSurfaceVariant}
       />
     </View>
   );
@@ -197,7 +181,7 @@ export default function HomeIndex() {
         <Button
           mode="text"
           onPress={() => setFilterVisible(true)}
-          textColor={customTheme.colors.primary}
+          textColor={currentTheme.colors.primary}
         >
           Tous les filtres
         </Button>
@@ -210,9 +194,9 @@ export default function HomeIndex() {
             onPress={() => toggleFilter('open_now')}
             icon="clock-outline"
             style={baseStyles.filterChip}
-            selectedColor={customTheme.colors.onPrimaryContainer}
-            backgroundColor={selectedFilters.includes('open_now') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-            textStyle={{ color: selectedFilters.includes('open_now') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            selectedColor={currentTheme.colors.onPrimaryContainer}
+            backgroundColor={selectedFilters.includes('open_now') ? currentTheme.colors.primaryContainer : currentTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('open_now') ? currentTheme.colors.onPrimaryContainer : currentTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
             Ouvert maintenant
@@ -223,9 +207,9 @@ export default function HomeIndex() {
             onPress={() => toggleFilter('high_rated')}
             icon="star"
             style={baseStyles.filterChip}
-            selectedColor={customTheme.colors.onPrimaryContainer}
-            backgroundColor={selectedFilters.includes('high_rated') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-            textStyle={{ color: selectedFilters.includes('high_rated') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            selectedColor={currentTheme.colors.onPrimaryContainer}
+            backgroundColor={selectedFilters.includes('open_now') ? currentTheme.colors.primaryContainer : currentTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('open_now') ? currentTheme.colors.onPrimaryContainer : currentTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
             Très bien noté
@@ -236,9 +220,9 @@ export default function HomeIndex() {
             onPress={() => toggleFilter('fast_delivery')}
             icon="lightning-bolt"
             style={baseStyles.filterChip}
-            selectedColor={customTheme.colors.onPrimaryContainer}
-            backgroundColor={selectedFilters.includes('fast_delivery') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-            textStyle={{ color: selectedFilters.includes('fast_delivery') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            selectedColor={currentTheme.colors.onPrimaryContainer}
+            backgroundColor={selectedFilters.includes('open_now') ? currentTheme.colors.primaryContainer : currentTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('open_now') ? currentTheme.colors.onPrimaryContainer : currentTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
             Livraison rapide
@@ -324,7 +308,7 @@ export default function HomeIndex() {
       entering={FadeIn.delay(index * 100).duration(600)}
       style={baseStyles.restaurantCard}
     >
-      <Card style={[baseStyles.card, { backgroundColor: customTheme.colors.surface }]} elevation={2}>
+      <Card style={baseStyles.card} elevation={2}>
         <TouchableRipple
           onPress={() => handleRestaurantPress(restaurant)}
           borderless
@@ -344,16 +328,12 @@ export default function HomeIndex() {
             )}
             
             <View style={baseStyles.cardBadges}>
-              <Badge style={[baseStyles.ratingBadge, { backgroundColor: customTheme.colors.surface }]}>
-                <Text style={{ color: customTheme.colors.onSurface, fontSize: 12, fontWeight: '600' }}>
-                  ⭐ {restaurant.rating}
-                </Text>
+              <Badge style={[baseStyles.ratingBadge, dynamicStyles.ratingBadge]}>
+                ⭐ {restaurant.rating}
               </Badge>
               {restaurant.featured && (
-                <Badge style={[baseStyles.featuredBadge, { backgroundColor: customTheme.colors.tertiaryContainer }]}>
-                  <Text style={{ color: customTheme.colors.onTertiaryContainer, fontSize: 12, fontWeight: '600' }}>
-                    ⚡ Populaire
-                  </Text>
+                <Badge style={[baseStyles.featuredBadge, dynamicStyles.featuredBadge]}>
+                  ⚡ Populaire
                 </Badge>
               )}
             </View>
@@ -379,21 +359,15 @@ export default function HomeIndex() {
             </Card.Content>
             
             <Card.Actions style={baseStyles.cardActions}>
-              <Chip 
-                icon="walk" 
-                compact 
-                style={baseStyles.pickupChip}
-                backgroundColor={customTheme.colors.secondaryContainer}
-                textStyle={{ color: customTheme.colors.onSecondaryContainer }}
-              >
+              <Chip icon="walk" compact style={[baseStyles.pickupChip, dynamicStyles.pickupChip]}>
                 À emporter
               </Chip>
               <Button
                 mode="contained"
                 onPress={() => handleRestaurantPress(restaurant)}
                 style={baseStyles.viewButton}
-                buttonColor={customTheme.colors.primaryContainer}
-                textColor={customTheme.colors.onPrimaryContainer}
+                buttonColor={currentTheme.colors.primaryContainer}
+                textColor={currentTheme.colors.onPrimaryContainer}
               >
                 Voir le menu
               </Button>
@@ -417,11 +391,7 @@ export default function HomeIndex() {
             <TouchableRipple onPress={() => toggleFilter('open_now')}>
               <View style={baseStyles.modalItem}>
                 <Text>Ouvert maintenant</Text>
-                <Chip 
-                  selected={selectedFilters.includes('open_now')}
-                  backgroundColor={selectedFilters.includes('open_now') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-                  textStyle={{ color: selectedFilters.includes('open_now') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
-                >
+                <Chip selected={selectedFilters.includes('open_now')}>
                   {selectedFilters.includes('open_now') ? 'Activé' : 'Désactivé'}
                 </Chip>
               </View>
@@ -433,15 +403,55 @@ export default function HomeIndex() {
             <TouchableRipple onPress={() => toggleFilter('high_rated')}>
               <View style={baseStyles.modalItem}>
                 <Text>Très bien noté (4.5+)</Text>
-                <Chip 
-                  selected={selectedFilters.includes('high_rated')}
-                  backgroundColor={selectedFilters.includes('high_rated') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-                  textStyle={{ color: selectedFilters.includes('high_rated') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
-                >
+                <Chip selected={selectedFilters.includes('high_rated')}>
                   {selectedFilters.includes('high_rated') ? 'Activé' : 'Désactivé'}
                 </Chip>
               </View>
             </TouchableRipple>
+          </View>
+          
+          <View style={baseStyles.modalSection}>
+            <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>🎨 Thème de couleur</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={baseStyles.themeScroll}>
+              <View style={baseStyles.themesContainer}>
+                {Object.entries(themeMetadata).map(([themeKey, metadata]) => (
+                  <Surface
+                    key={themeKey}
+                    style={[
+                      baseStyles.themeCard,
+                      selectedTheme === themeKey && baseStyles.activeThemeCard
+                    ]}
+                    elevation={selectedTheme === themeKey ? 4 : 1}
+                  >
+                    <TouchableRipple
+                      onPress={() => {
+                        handleThemeChange(themeKey);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      style={baseStyles.themeTouchable}
+                      borderless
+                    >
+                      <View style={baseStyles.themeContent}>
+                        <View style={[
+                          baseStyles.colorPreview,
+                          { backgroundColor: colorThemes[themeKey].primary }
+                        ]} />
+                        <Text style={baseStyles.themeEmoji}>{metadata.emoji}</Text>
+                        <Text style={[
+                          baseStyles.themeName,
+                          selectedTheme === themeKey && { color: colorThemes[themeKey].primary }
+                        ]} numberOfLines={2}>
+                          {metadata.name}
+                        </Text>
+                        <Text style={baseStyles.themeDescription} numberOfLines={1}>
+                          {metadata.description}
+                        </Text>
+                      </View>
+                    </TouchableRipple>
+                  </Surface>
+                ))}
+              </View>
+            </ScrollView>
           </View>
           
           <View style={baseStyles.modalActions}>
@@ -454,12 +464,12 @@ export default function HomeIndex() {
     );
   };
 
-  const dynamicStyles = getDynamicStyles(customTheme);
+  const dynamicStyles = getDynamicStyles(currentTheme);
   
   return (
-    <PaperProvider theme={customTheme} key={selectedTheme}>
+    <PaperProvider theme={currentTheme} key={selectedTheme}>
       <SafeAreaView style={[baseStyles.container, dynamicStyles.container]}>
-        <StatusBar style="dark" backgroundColor={customTheme.colors.background} />
+        <StatusBar style="dark" backgroundColor={currentTheme.colors.background} />
         
         <ScrollView
           style={baseStyles.scrollView}
@@ -468,8 +478,8 @@ export default function HomeIndex() {
             <RefreshControl 
               refreshing={refreshing} 
               onRefresh={onRefresh}
-              colors={[customTheme.colors.primary]}
-              tintColor={customTheme.colors.primary}
+              colors={[currentTheme.colors.primary]}
+              tintColor={currentTheme.colors.primary}
             />
           }
         >
@@ -495,7 +505,7 @@ export default function HomeIndex() {
           icon="tune"
           style={[baseStyles.fab, dynamicStyles.fab]}
           onPress={() => setFilterVisible(true)}
-          color={customTheme.colors.onPrimary}
+          color={currentTheme.colors.onPrimary}
         />
       </SafeAreaView>
     </PaperProvider>
@@ -758,6 +768,55 @@ const baseStyles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+  },
+  // Styles pour le sélecteur de thème
+  themeScroll: {
+    marginVertical: 8,
+  },
+  themesContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  themeCard: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginRight: 8,
+    minWidth: 100,
+  },
+  activeThemeCard: {
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  themeTouchable: {
+    padding: 12,
+  },
+  themeContent: {
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  colorPreview: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  themeEmoji: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  themeName: {
+    fontSize: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  themeDescription: {
+    fontSize: 9,
+    opacity: 0.7,
+    textAlign: 'center',
   },
 });
 

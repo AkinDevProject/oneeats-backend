@@ -15,83 +15,99 @@ import { router } from 'expo-router';
 const DESIGNS = [
   {
     id: 'design-1',
-    title: 'Grid Moderne',
-    subtitle: 'Filtres avancés & recherche',
-    description: 'Interface épurée avec système de filtres complet, tri dynamique et recherche en temps réel.',
-    colors: ['#667eea', '#764ba2'],
-    icon: 'grid-view',
+    title: 'Minimaliste & Moderne',
+    subtitle: 'Design épuré avec typographie élégante',
+    description: 'Interface clean et moderne avec focus sur le contenu. Parfait pour une expérience utilisateur sans distraction.',
+    colors: ['#FFFFFF', '#F8F8F8'],
+    icon: 'auto-awesome',
     features: [
-      'Filtres avancés extensibles',
-      'Tri par note, temps, distance',
-      'Recherche en temps réel',
-      'Grid 2 colonnes optimisé',
-      'Design minimaliste'
+      'Design épuré et élégant',
+      'Typographie moderne',
+      'Focus sur le contenu',
+      'Interface sans distraction',
+      'Optimisé pour la lisibilité'
     ],
-    route: '/designs/restaurants-design-1'
+    route: '/designs/home-design-1'
   },
   {
     id: 'design-2',
-    title: 'Liste Organisée',
-    subtitle: 'Catégories & sections',
-    description: 'Navigation par sections avec filtres rapides et organisation claire par type de cuisine.',
-    colors: ['#f093fb', '#f5576c'],
-    icon: 'view-list',
+    title: 'Coloré & Festif',
+    subtitle: 'Interface vive avec dégradés colorés',
+    description: 'Design joyeux et dynamique avec des couleurs vibrantes et des dégradés festifs pour une expérience énergique.',
+    colors: ['#FF6B6B', '#4ECDC4'],
+    icon: 'palette',
     features: [
-      'Navigation flottante par sections',
-      'Recherches tendances',
-      'Filtres rapides colorés',
-      'Cartes horizontales détaillées',
-      'Organisation par catégories'
+      'Couleurs vibrantes et joyeuses',
+      'Dégradés festifs',
+      'Interface énergique',
+      'Emojis et éléments fun',
+      'Expérience dynamique'
     ],
-    route: '/designs/restaurants-design-2'
+    route: '/designs/home-design-2'
   },
   {
     id: 'design-3',
-    title: 'Carousel Immersif',
-    subtitle: 'Expérience visuelle riche',
-    description: 'Interface moderne type social media avec carousels, stories et sélection par humeur.',
-    colors: ['#4facfe', '#00f2fe'],
-    icon: 'view-carousel',
+    title: 'Sombre & Élégant',
+    subtitle: 'Thème premium avec accents dorés',
+    description: 'Mode sombre sophistiqué avec des accents dorés pour un look premium et luxueux. Parfait pour le soir.',
+    colors: ['#0a0a0a', '#D4AF37'],
+    icon: 'nights-stay',
     features: [
-      'Stories découverte automatiques',
-      'Sélecteur d\'humeur interactif',
-      'Hero carousel immersif',
-      'Cartes météo contextuelles',
-      'Animations riches'
+      'Mode sombre élégant',
+      'Accents dorés premium',
+      'Look sophistiqué',
+      'Interface luxueuse',
+      'Optimisé pour la nuit'
     ],
-    route: '/designs/restaurants-design-3'
+    route: '/designs/home-design-3'
   },
   {
     id: 'design-4',
-    title: 'Borne Interactive',
-    subtitle: 'Style McDonald\'s',
-    description: 'Interface inspirée des bornes de commande avec processus step-by-step et guidage utilisateur.',
-    colors: ['#ffcc02', '#da020e'],
-    icon: 'touch-app',
+    title: 'Fun & Playful',
+    subtitle: 'Design ludique avec emojis et illustrations',
+    description: 'Interface amusante et créative avec des emojis, animations et éléments ludiques pour une expérience joyeuse.',
+    colors: ['#FFE082', '#FF9800'],
+    icon: 'emoji-emotions',
     features: [
-      'Processus de commande guidé',
-      'Interface type borne tactile',
-      'Barre de progression claire',
-      'Catégories visuelles grandes',
-      'Boutons d\'aide intégrés'
+      'Emojis et illustrations',
+      'Animations amusantes',
+      'Interface ludique',
+      'Expérience créative',
+      'Design plein de joie'
     ],
-    route: '/designs/restaurants-design-4'
+    route: '/designs/home-design-4'
   },
   {
     id: 'design-5',
-    title: 'Fusion Parfaite',
-    subtitle: 'McDonald\'s + Organisation',
-    description: 'Le meilleur des deux mondes : simplicité kiosk + découverte organisée par sections.',
-    colors: ['#ffcc02', '#3498db'],
-    icon: 'auto-awesome',
+    title: 'Material Design 3',
+    subtitle: 'React Native Paper - Design System Google',
+    description: 'Interface basée sur Material Design 3 avec React Native Paper. Composants officiels Google pour une expérience cohérente.',
+    colors: ['#6750A4', '#EADDFF'],
+    icon: 'apps',
     features: [
-      'Guidage McDonald\'s simplifié',
-      'Navigation par sections fluide',
-      'Tendances et recommandations',
-      'Interface accessible et moderne',
-      'Découverte optimisée'
+      'Material Design 3 officiel',
+      'Composants React Native Paper',
+      'Thème Material You',
+      'FAB et modales intégrées',
+      'Design system complet'
     ],
-    route: '/designs/restaurants-design-5'
+    route: '/designs/home-design-5'
+  },
+  {
+    id: 'design-6',
+    title: 'NativeBase Modern',
+    subtitle: 'Librairie UI complète avec composants riches',
+    description: 'Interface utilisant NativeBase avec des composants avancés, thème personnalisable et expérience mobile optimale.',
+    colors: ['#2196F3', '#FF9800'],
+    icon: 'dashboard-customize',
+    features: [
+      'Composants NativeBase riches',
+      'Thème personnalisé avancé',
+      'Filtres et modales natives',
+      'Design responsive optimal',
+      'Animations fluides intégrées'
+    ],
+    route: '/designs/home-design-6-simple'
   }
 ];
 
@@ -165,10 +181,11 @@ export default function DesignSelector() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.introSection}>
-          <Text style={styles.introTitle}>🎨 5 Designs Uniques</Text>
+          <Text style={styles.introTitle}>🥪 6 Designs Complets</Text>
           <Text style={styles.introText}>
-            Explorez différentes approches pour votre page restaurants. 
-            Chaque design offre une expérience utilisateur unique avec ses propres avantages.
+            Explorez 6 designs différents pour votre app de commande de sandwiches, 
+            incluant 2 designs utilisant des librairies UI opensource populaires. 
+            Chaque style offre une expérience unique adaptée à vos préférences.
           </Text>
         </View>
 
