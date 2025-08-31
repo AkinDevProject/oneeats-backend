@@ -64,15 +64,15 @@ export default function TabLayout() {
         }),
       }}>
       
-      {/* Accueil Tab - Restaurants avec recherche intégrée */}
+      {/* 🏠 ACCUEIL - Découverte restaurants */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Accueil',
+          title: 'Restaurants',
           tabBarIcon: ({ color, focused }) => (
             <View>
               <IconSymbol 
-                size={28} 
+                size={26} 
                 name={focused ? 'house.fill' : 'house'} 
                 color={color} 
               />
@@ -81,61 +81,46 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Panier/Commandes Tab - Fusionné */}
+      {/* 🛒 PANIER & COMMANDES - Unifié pour MVP */}
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Commandes',
+          title: 'Mes Commandes',
           tabBarIcon: ({ color, focused }) => (
-            <View>
+            <View style={{ position: 'relative' }}>
               <IconSymbol 
-                size={28} 
-                name={focused ? 'cart.fill' : 'cart'} 
+                size={26} 
+                name={focused ? 'bag.fill' : 'bag'} 
                 color={color} 
               />
-              <TabBadge count={totalItems + (currentOrder ? 1 : 0)} color="#FF6B6B" />
+              {(totalItems > 0 || currentOrder) && (
+                <TabBadge count={totalItems + (currentOrder ? 1 : 0)} color="#00CCBC" />
+              )}
             </View>
           ),
         }}
       />
 
-      {/* Profil Tab - Avec favoris intégrés */}
+      {/* 👤 PROFIL - Personnel & Paramètres */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
+          title: 'Mon Compte',
           tabBarIcon: ({ color, focused }) => (
-            <View>
+            <View style={{ position: 'relative' }}>
               <IconSymbol 
-                size={28} 
-                name={focused ? 'person.circle.fill' : 'person.circle'} 
+                size={26} 
+                name={focused ? 'person.crop.circle.fill' : 'person.crop.circle'} 
                 color={color} 
               />
-              <TabBadge count={unreadCount} color="#9B59B6" />
+              {unreadCount > 0 && (
+                <TabBadge count={unreadCount} color="#FF6D00" />
+              )}
             </View>
           ),
         }}
       />
 
-      {/* Hide unused tabs */}
-      <Tabs.Screen
-        name="search"
-        options={{
-          href: null, // Recherche intégrée dans l'accueil
-        }}
-      />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          href: null, // Fusionné avec le panier
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          href: null, // Tab non utilisé
-        }}
-      />
     </Tabs>
   );
 }

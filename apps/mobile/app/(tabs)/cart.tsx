@@ -2,31 +2,34 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  Alert,
   ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
-  interpolate,
   FadeIn,
-  SlideInRight,
-  SlideOutRight,
-  ZoomIn,
 } from 'react-native-reanimated';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Card, Button, TextInput, Divider } from 'react-native-paper';
+import {
+  Card,
+  Button,
+  TextInput,
+  Divider,
+  Surface,
+  Chip,
+  Avatar,
+  IconButton,
+} from 'react-native-paper';
 import { router } from 'expo-router';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -34,56 +37,72 @@ import * as yup from 'yup';
 import { useCart } from '../../src/contexts/CartContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useOrder } from '../../src/contexts/OrderContext';
-import { useNotification } from '../../src/contexts/NotificationContext';
-import { CartItem, mockRestaurants } from '../../src/data/mockData';
+import { useAppTheme } from '../../src/contexts/ThemeContext';
 
-// Schéma simplifié pour MVP
-const mvpSchema = yup.object({
+// Types pour les onglets MVP
+type MVPTabType = 'cart' | 'current' | 'history';
+
+// Schéma de validation pour la commande
+const orderSchema = yup.object({
+  customerName: yup.string().required('Nom requis'),
+  phoneNumber: yup.string().required('Téléphone requis'),
+  pickupTime: yup.string().required('Heure de récupération requise'),
   specialInstructions: yup.string().max(200, 'Instructions trop longues'),
 });
 
-// Articles populaires pour MVP
-const POPULAR_ITEMS = [
-  { name: 'Pizza Margherita' },
-  { name: 'Burger Classique' },
-  { name: 'Sushi Saumon' },
-  { name: 'Pad Thaï' },
-];
+// Créneaux horaires disponibles (tous les 15min, 8 créneaux)
+const getAvailableTimeSlots = () => {
+  const now = new Date();
+  const slots = [];
+  
+  for (let i = 1; i <= 8; i++) {
+    const time = new Date(now.getTime() + (i * 15 * 60000));
+    const hours = time.getHours().toString().padStart(2, '0');
+    const minutes = time.getMinutes().toString().padStart(2, '0');
+    slots.push({
+      value: `${hours}:${minutes}`,
+      label: `${hours}h${minutes}`,
+      available: true,
+    });
+  }
+  
+  return slots;
+};
 
-export default function CartScreen() {
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [showTrending, setShowTrending] = useState(true);
-  const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart');
+export default function CartMVP() {
+  const [activeTab, setActiveTab] = useState<MVPTabType>('cart');
+  const [availableSlots] = useState(getAvailableTimeSlots());
+  const [selectedPickupTime, setSelectedPickupTime] = useState(availableSlots[2]?.value);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Référence au ScrollView
+  const scrollViewRef = React.useRef<ScrollView>(null);
 
   const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart, createOrder } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { addOrder, orders } = useOrder();
-  const { sendOrderNotification } = useNotification();
+  const { addOrder, orders, currentOrder } = useOrder();
+  const { currentTheme } = useAppTheme();
 
-  const headerScale = useSharedValue(0);
-  const contentOpacity = useSharedValue(0);
-  const checkoutScale = useSharedValue(0);
+  const headerOpacity = useSharedValue(0);
 
   useEffect(() => {
-    headerScale.value = withSpring(1, { damping: 15 });
-    contentOpacity.value = withTiming(1, { duration: 800 });
-    checkoutScale.value = withSpring(1, { damping: 15, mass: 0.8 });
+    headerOpacity.value = withTiming(1, { duration: 600 });
   }, []);
 
+  // Fonction pour faire défiler vers un champ
+  const scrollToInput = (yOffset: number) => {
+    scrollViewRef.current?.scrollTo({
+      x: 0,
+      y: yOffset,
+      animated: true,
+    });
+  };
+
   const headerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: headerScale.value }],
-    opacity: interpolate(headerScale.value, [0, 1], [0, 1]),
+    opacity: headerOpacity.value,
   }));
 
-  const contentAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: contentOpacity.value,
-  }));
-
-  const checkoutAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: checkoutScale.value }],
-    opacity: interpolate(checkoutScale.value, [0, 1], [0, 1]),
-  }));
-
+  // Actions
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     updateQuantity(itemId, newQuantity);
@@ -93,7 +112,7 @@ export default function CartScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Supprimer l\'article',
-      'Êtes-vous sûr de vouloir supprimer cet article du panier ?',
+      'Êtes-vous sûr ?',
       [
         { text: 'Annuler', style: 'cancel' },
         { text: 'Supprimer', style: 'destructive', onPress: () => removeItem(itemId) },
@@ -101,559 +120,423 @@ export default function CartScreen() {
     );
   };
 
-
-  const deliveryFee = 0; // MVP: pas de frais
-  const discount = 0; // MVP: pas de codes promo
-  const finalTotal = totalPrice;
-
-  const handleCheckout = async (values: { specialInstructions: string }) => {
+  const handleCreateOrder = async (values: any) => {
     if (!items.length) return;
 
     if (!isAuthenticated) {
       Alert.alert(
         'Connexion requise',
-        'Vous devez être connecté pour passer commande.',
+        'Vous devez être connecté pour commander.',
         [
           { text: 'Annuler', style: 'cancel' },
-          { text: 'Se connecter', onPress: () => router.push('/auth' as any) },
+          { text: 'Se connecter', onPress: () => router.push('/auth/login' as any) },
         ]
       );
       return;
     }
 
-    setIsCheckingOut(true);
+    setIsLoading(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     try {
       const restaurantId = items[0]?.menuItem.restaurantId;
-      if (!restaurantId) throw new Error('Restaurant ID not found');
+      if (!restaurantId) throw new Error('Restaurant non trouvé');
 
-      const order = await createOrder(restaurantId, values.specialInstructions);
-      if (!order) throw new Error('Failed to create order');
+      const orderData = {
+        ...values,
+        pickupTime: selectedPickupTime,
+        items: items,
+        total: totalPrice,
+      };
+
+      const order = await createOrder(restaurantId, JSON.stringify(orderData));
+      if (!order) throw new Error('Erreur création commande');
 
       addOrder(order);
-      await sendOrderNotification(order.id, 'pending', order.restaurant.name);
+      
+      // Navigation directe vers la page de suivi de commande
+      console.log('✅ Commande créée avec succès, navigation vers order/', order.id);
       router.push(`/order/${order.id}`);
       
     } catch (error) {
-      console.error('Checkout error:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la commande.');
+      console.error('Erreur commande:', error);
+      Alert.alert('Erreur', 'Impossible de créer la commande.');
     } finally {
-      setIsCheckingOut(false);
+      setIsLoading(false);
     }
   };
 
-  // Liste Organisée Style Header
-  const renderHeader = () => (
-    <Animated.View style={[styles.header, headerAnimatedStyle]}>
-      <LinearGradient
-        colors={['#667eea', '#764ba2']}
-        style={styles.headerGradient}
-      >
-        <View style={styles.headerContent}>
-          <View style={styles.headerTop}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <MaterialIcons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <View style={styles.headerCenter}>
-              <Text style={styles.headerTitle}>
-                {activeTab === 'cart' ? 'Mon Panier' : 'Mes Commandes'}
-              </Text>
-              <Text style={styles.headerSubtitle}>
-                {activeTab === 'cart' 
-                  ? `${totalItems} article${totalItems > 1 ? 's' : ''} • ${totalPrice.toFixed(2)} €`
-                  : `${orders?.length || 0} commande${(orders?.length || 0) > 1 ? 's' : ''}`
-                }
-              </Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.clearButton}
-              onPress={() => {
-                Alert.alert(
-                  'Vider le panier',
-                  'Êtes-vous sûr de vouloir vider votre panier ?',
-                  [
-                    { text: 'Annuler', style: 'cancel' },
-                    { text: 'Vider', style: 'destructive', onPress: clearCart },
-                  ]
-                );
-              }}
-            >
-              <MaterialIcons name="clear-all" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
-          
-          {/* Onglets Panier/Commandes */}
-          <View style={styles.tabsContainer}>
-            <TouchableOpacity 
-              style={[styles.tab, activeTab === 'cart' && styles.activeTab]}
-              onPress={() => {
-                setActiveTab('cart');
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-            >
-              <MaterialIcons 
-                name="shopping-cart" 
-                size={20} 
-                color={activeTab === 'cart' ? 'white' : 'rgba(255,255,255,0.7)'} 
-              />
-              <Text style={[styles.tabText, activeTab === 'cart' && styles.activeTabText]}>
-                Panier ({totalItems})
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.tab, activeTab === 'orders' && styles.activeTab]}
-              onPress={() => {
-                setActiveTab('orders');
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-            >
-              <MaterialIcons 
-                name="receipt-long" 
-                size={20} 
-                color={activeTab === 'orders' ? 'white' : 'rgba(255,255,255,0.7)'} 
-              />
-              <Text style={[styles.tabText, activeTab === 'orders' && styles.activeTabText]}>
-                Commandes ({orders?.length || 0})
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </LinearGradient>
-    </Animated.View>
-  );
-
-  // Render Orders List
-  const renderOrderItem = ({ item }: { item: any }) => (
-    <Animated.View entering={FadeIn} style={styles.orderItem}>
-      <LinearGradient
-        colors={['#ffffff', '#f8fafc']}
-        style={styles.orderCard}
-      >
-        <View style={styles.orderHeader}>
-          <View style={styles.orderInfo}>
-            <Text style={styles.orderNumber}>Commande #{item.id}</Text>
-            <Text style={styles.orderDate}>{item.createdAt}</Text>
-          </View>
-          <View style={[styles.orderStatus, { backgroundColor: getOrderStatusColor(item.status) }]}>
-            <Text style={styles.orderStatusText}>{item.status}</Text>
-          </View>
-        </View>
-        
-        <View style={styles.orderDetails}>
-          <Text style={styles.orderRestaurant}>{item.restaurant}</Text>
-          <Text style={styles.orderItems}>
-            {item.items?.length || 0} article{(item.items?.length || 0) > 1 ? 's' : ''}
-          </Text>
-          <Text style={styles.orderTotal}>{item.total?.toFixed(2) || '0.00'} €</Text>
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.orderActionButton}
-          onPress={() => {
-            // Voir détails de la commande
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-        >
-          <Text style={styles.orderActionText}>Voir détails</Text>
-          <MaterialIcons name="chevron-right" size={20} color="#667eea" />
-        </TouchableOpacity>
-      </LinearGradient>
-    </Animated.View>
-  );
-
-  const getOrderStatusColor = (status: string) => {
-    switch (status) {
-      case 'En attente de confirmation': return '#6b7280';
-      case 'En préparation': return '#f59e0b';
-      case 'Prête': return '#10b981';
-      case 'Récupérée': return '#059669';
-      case 'Annulée': return '#ef4444';
-      default: return '#6b7280';
-    }
-  };
-
-  const renderOrdersList = () => (
-    <FlatList
-      data={orders || []}
-      renderItem={renderOrderItem}
-      keyExtractor={(item) => item.id}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.ordersContainer}
-      ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-      ListEmptyComponent={() => (
-        <View style={styles.emptyState}>
-          <MaterialIcons name="receipt-long" size={64} color="#d1d5db" />
-          <Text style={styles.emptyStateTitle}>Aucune commande</Text>
-          <Text style={styles.emptyStateMessage}>
-            Vos commandes apparaîtront ici
-          </Text>
-        </View>
-      )}
-    />
-  );
-
-  // Trending Section (Liste Organisée Style)
-  const renderTrendingSection = () => {
-    if (!showTrending) return null;
-    
-    return (
-      <Animated.View 
-        entering={FadeIn.delay(200)}
-        style={styles.trendingSection}
-      >
-        <View style={styles.trendingHeader}>
-          <MaterialIcons name="trending-up" size={20} color="#667eea" />
-          <Text style={styles.trendingTitle}>Articles populaires</Text>
-          <TouchableOpacity onPress={() => setShowTrending(false)}>
-            <MaterialIcons name="close" size={20} color="#9ca3af" />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.trendingSubtitle}>
-          Ces plats sont très demandés aujourd'hui !
-        </Text>
-        <View style={styles.popularTags}>
-          {POPULAR_ITEMS.map((item, index) => (
-            <View key={index} style={styles.popularTag}>
-              <Text style={styles.popularTagText}>{item.name}</Text>
-            </View>
-          ))}
-        </View>
-      </Animated.View>
-    );
-  };
-
-  const renderCartItem = ({ item, index }: { item: CartItem; index: number }) => {
-    const restaurant = mockRestaurants.find(r => r.id === item.menuItem.restaurantId);
-    
-    return (
-      <Animated.View
-        entering={SlideInRight.delay(200 + index * 100).springify()}
-        exiting={SlideOutRight.springify()}
-        style={styles.cartItem}
-      >
-        <View style={styles.cartItemCard}>
-          <LinearGradient
-            colors={['#ffffff', '#f8fafc']}
-            style={styles.cartItemGradient}
-          >
-            <View style={styles.cartItemContent}>
-              <View style={styles.imageContainer}>
-                <Image 
-                  source={{ uri: item.menuItem.image }} 
-                  style={styles.cartItemImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.quantityBadge}>
-                  <Text style={styles.quantityBadgeText}>{item.quantity}</Text>
-                </View>
-              </View>
-
-              <View style={styles.cartItemInfo}>
-                <View style={styles.cartItemHeader}>
-                  <View style={styles.cartItemTitleContainer}>
-                    <Text style={styles.cartItemName} numberOfLines={2}>
-                      {item.menuItem.name}
-                    </Text>
-                    <View style={styles.restaurantRow}>
-                      <MaterialIcons name="restaurant" size={14} color="#9ca3af" />
-                      <Text style={styles.cartItemRestaurant} numberOfLines={1}>
-                        {restaurant?.name}
-                      </Text>
-                    </View>
-                    {item.specialInstructions && (
-                      <View style={styles.instructionsRow}>
-                        <MaterialIcons name="note" size={14} color="#6b7280" />
-                        <Text style={styles.specialInstructions} numberOfLines={2}>
-                          {item.specialInstructions}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-
-                <View style={styles.cartItemFooter}>
-                  <View style={styles.priceContainer}>
-                    <Text style={styles.unitPrice}>
-                      {item.menuItem.price.toFixed(2)} € × {item.quantity}
-                    </Text>
-                    <Text style={styles.cartItemPrice}>
-                      {(item.menuItem.price * item.quantity).toFixed(2)} €
-                    </Text>
-                  </View>
-
-                  <View style={styles.itemActions}>
-                    <View style={styles.quantityControls}>
-                      <TouchableOpacity
-                        style={[styles.quantityButton, { backgroundColor: '#f3f4f6' }]}
-                        onPress={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
-                      >
-                        <MaterialIcons name="remove" size={18} color="#6b7280" />
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={[styles.quantityButton, { backgroundColor: '#667eea' }]}
-                        onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
-                      >
-                        <MaterialIcons name="add" size={18} color="white" />
-                      </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity 
-                      style={styles.removeButton}
-                      onPress={() => handleRemoveItem(item.id)}
-                    >
-                      <MaterialIcons name="delete-outline" size={20} color="#ef4444" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-      </Animated.View>
-    );
-  };
-
-  const renderEmptyCart = () => (
-    <Animated.View entering={FadeIn.duration(500)} style={styles.emptyCart}>
-      <LinearGradient
-        colors={['#f8fafc', '#ffffff']}
-        style={styles.emptyCartGradient}
-      >
-        <View style={styles.emptyCartContent}>
-          <View style={styles.emptyCartIconContainer}>
-            <LinearGradient
-              colors={['#667eea', '#764ba2']}
-              style={styles.emptyCartIconGradient}
-            >
-              <MaterialIcons name="shopping-cart" size={60} color="white" />
-            </LinearGradient>
-          </View>
-          <Text style={styles.emptyCartTitle}>Votre panier est vide</Text>
-          <Text style={styles.emptyCartText}>
-            Découvrez nos délicieux restaurants et ajoutez vos plats préférés !
-          </Text>
-          
-          {/* Trending Section for Empty Cart */}
-          <View style={styles.emptyTrendingSection}>
-            <Text style={styles.emptyTrendingTitle}>🔥 Tendances du moment</Text>
-            <Text style={styles.emptyTrendingSubtitle}>
-              Ces plats sont très populaires aujourd'hui
-            </Text>
-            <View style={styles.popularTags}>
-              {POPULAR_ITEMS.slice(0, 4).map((item, index) => (
-                <View key={index} style={styles.popularTag}>
-                  <Text style={styles.popularTagText}>{item.name}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-          
+  // Rendu des onglets
+  const renderTabs = () => (
+    <Surface style={styles.tabsContainer} elevation={1}>
+      <View style={styles.tabs}>
+        {[
+          { key: 'cart' as MVPTabType, title: 'Panier', count: totalItems },
+          { key: 'current' as MVPTabType, title: 'En cours', count: currentOrder ? 1 : 0 },
+          { key: 'history' as MVPTabType, title: 'Historique', count: orders.length },
+        ].map(({ key, title, count }) => (
           <TouchableOpacity
-            style={styles.emptyCartButton}
-            onPress={() => router.push('/(tabs)/')}
+            key={key}
+            style={[
+              styles.tab,
+              activeTab === key && { backgroundColor: currentTheme.colors.primaryContainer }
+            ]}
+            onPress={() => {
+              setActiveTab(key);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
           >
-            <LinearGradient
-              colors={['#667eea', '#764ba2']}
-              style={styles.emptyCartButtonGradient}
-            >
-              <MaterialIcons name="restaurant" size={20} color="white" />
-              <Text style={styles.emptyCartButtonText}>Explorer les restaurants</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    </Animated.View>
-  );
-
-  const renderCheckoutSection = () => (
-    <Animated.View style={[styles.checkoutSection, checkoutAnimatedStyle]}>
-      <LinearGradient
-        colors={['rgba(255,255,255,0.95)', 'rgba(248,250,252,0.98)']}
-        style={styles.checkoutBackground}
-      >
-        <ScrollView 
-          style={styles.checkoutScroll}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          <View style={styles.checkoutHeader}>
-            <MaterialIcons name="receipt-long" size={24} color="#667eea" />
-            <Text style={styles.checkoutTitle}>Récapitulatif</Text>
-          </View>
-        
-          <Formik
-            initialValues={{ specialInstructions: '' }}
-            validationSchema={mvpSchema}
-            onSubmit={handleCheckout}
-          >
-            {({ handleChange, handleSubmit, values, errors, touched }) => (
-              <View style={styles.checkoutContent}>
-                {/* Quick Summary */}
-                <View style={styles.quickSummary}>
-                  <View style={styles.summaryItem}>
-                    <MaterialIcons name="shopping-bag" size={20} color="#667eea" />
-                    <Text style={styles.summaryText}>{totalItems} articles</Text>
-                  </View>
-                  <View style={styles.summaryItem}>
-                    <MaterialIcons name="access-time" size={20} color="#667eea" />
-                    <Text style={styles.summaryText}>25-35 min</Text>
-                  </View>
-                  <View style={styles.summaryItem}>
-                    <MaterialIcons name="store" size={20} color="#667eea" />
-                    <Text style={styles.summaryText}>À emporter</Text>
-                  </View>
-                </View>
-
-                {/* MVP Notice */}
-                <View style={styles.mvpSection}>
-                  <View style={styles.sectionHeader}>
-                    <MaterialIcons name="info" size={20} color="#667eea" />
-                    <Text style={styles.sectionTitle}>Mode MVP</Text>
-                  </View>
-                  <View style={styles.mvpNotice}>
-                    <Text style={styles.mvpNoticeText}>
-                      Paiement sur place uniquement • Pas de codes promo pour le moment
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Special Instructions */}
-                <View style={styles.instructionsSection}>
-                  <View style={styles.sectionHeader}>
-                    <MaterialIcons name="note-add" size={20} color="#667eea" />
-                    <Text style={styles.sectionTitle}>Instructions spéciales</Text>
-                  </View>
-                  <TextInput
-                    mode="outlined"
-                    placeholder="Allergies, préférences de cuisson..."
-                    value={values.specialInstructions}
-                    onChangeText={handleChange('specialInstructions')}
-                    multiline
-                    numberOfLines={3}
-                    style={styles.instructionsInput}
-                    outlineStyle={styles.instructionsInputOutline}
-                    error={touched.specialInstructions && !!errors.specialInstructions}
-                  />
-                  {touched.specialInstructions && errors.specialInstructions && (
-                    <Text style={styles.errorText}>{errors.specialInstructions}</Text>
-                  )}
-                </View>
-
-                {/* Price Breakdown Card */}
-                <View style={styles.priceCard}>
-                  <LinearGradient
-                    colors={['#f8fafc', '#ffffff']}
-                    style={styles.priceCardGradient}
-                  >
-                    <Text style={styles.priceCardTitle}>Détail de la commande</Text>
-                    
-                    <View style={styles.priceBreakdown}>
-                      <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Sous-total ({totalItems} articles)</Text>
-                        <Text style={styles.priceValue}>{totalPrice.toFixed(2)} €</Text>
-                      </View>
-                      
-                      <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Frais supplémentaires</Text>
-                        <Text style={styles.priceValue}>0.00 €</Text>
-                      </View>
-
-
-                      <View style={styles.totalDivider} />
-                      
-                      <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Total à payer sur place</Text>
-                        <Text style={styles.totalValue}>{finalTotal.toFixed(2)} €</Text>
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </View>
-
-                {/* Checkout Button */}
-                <TouchableOpacity
-                  style={[styles.checkoutButton, (isCheckingOut || items.length === 0) && styles.checkoutButtonDisabled]}
-                  onPress={handleSubmit}
-                  disabled={isCheckingOut || items.length === 0}
-                >
-                  <LinearGradient
-                    colors={isCheckingOut || items.length === 0 ? ['#9ca3af', '#9ca3af'] : ['#667eea', '#764ba2']}
-                    style={styles.checkoutButtonGradient}
-                  >
-                    {isCheckingOut ? (
-                      <View style={styles.checkoutButtonContent}>
-                        <Text style={styles.checkoutButtonText}>Traitement en cours...</Text>
-                      </View>
-                    ) : (
-                      <View style={styles.checkoutButtonContent}>
-                        <MaterialIcons name="shopping-bag" size={24} color="white" />
-                        <Text style={styles.checkoutButtonText}>Commander • {finalTotal.toFixed(2)} €</Text>
-                      </View>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-
-                {/* MVP Notice */}
-                <View style={styles.securityNotice}>
-                  <MaterialIcons name="info" size={16} color="#667eea" />
-                  <Text style={styles.securityText}>Paiement sur place uniquement</Text>
-                </View>
+            <Text style={[
+              styles.tabText,
+              activeTab === key && { color: currentTheme.colors.onPrimaryContainer }
+            ]}>
+              {title}
+            </Text>
+            {count > 0 && (
+              <View style={[styles.tabBadge, { backgroundColor: currentTheme.colors.primary }]}>
+                <Text style={[styles.tabBadgeText, { color: currentTheme.colors.onPrimary }]}>
+                  {count > 99 ? '99+' : count}
+                </Text>
               </View>
             )}
-          </Formik>
-        </ScrollView>
-      </LinearGradient>
-    </Animated.View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </Surface>
   );
 
-  if (items.length === 0) {
+  // Rendu du panier
+  const renderCart = () => {
+    if (!items.length) {
+      return (
+        <View style={styles.emptyState}>
+          <Avatar.Icon size={80} icon="cart-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
+          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
+            Panier vide
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Ajoutez des plats depuis un restaurant
+          </Text>
+          <Button
+            mode="contained"
+            onPress={() => router.push('/(tabs)/' as any)}
+            style={styles.emptyButton}
+            buttonColor={currentTheme.colors.primary}
+          >
+            Découvrir les restaurants
+          </Button>
+        </View>
+      );
+    }
+
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="light" />
-        {renderHeader()}
-        <Animated.View style={[styles.content, contentAnimatedStyle]}>
-          {renderTrendingSection()}
-          {renderEmptyCart()}
-        </Animated.View>
-      </SafeAreaView>
+      <Formik
+        initialValues={{
+          customerName: user?.name || '',
+          phoneNumber: user?.phone || '',
+          pickupTime: selectedPickupTime,
+          specialInstructions: '',
+        }}
+        validationSchema={orderSchema}
+        onSubmit={handleCreateOrder}
+      >
+        {({ handleChange, handleSubmit, values, errors, touched }) => (
+          <KeyboardAvoidingView 
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+          >
+            <ScrollView 
+              ref={scrollViewRef}
+              style={styles.cartContent} 
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentInsetAdjustmentBehavior="automatic"
+            >
+            {/* Articles du panier */}
+            <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+              <Card.Content>
+                <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                  Vos articles ({totalItems})
+                </Text>
+                {items.map((item) => (
+                  <View key={item.id} style={styles.cartItem}>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, { color: currentTheme.colors.onSurface }]}>
+                        {item.menuItem.name}
+                      </Text>
+                      <Text style={[styles.itemPrice, { color: currentTheme.colors.primary }]}>
+                        {item.totalPrice.toFixed(2)}€
+                      </Text>
+                    </View>
+                    <View style={styles.quantityControls}>
+                      <IconButton
+                        icon="minus"
+                        size={20}
+                        onPress={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        style={styles.quantityButton}
+                      />
+                      <Text style={[styles.quantity, { color: currentTheme.colors.onSurface }]}>
+                        {item.quantity}
+                      </Text>
+                      <IconButton
+                        icon="plus"
+                        size={20}
+                        onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        style={styles.quantityButton}
+                      />
+                      <IconButton
+                        icon="delete"
+                        size={20}
+                        onPress={() => handleRemoveItem(item.id)}
+                        iconColor={currentTheme.colors.error}
+                      />
+                    </View>
+                  </View>
+                ))}
+              </Card.Content>
+            </Card>
+
+            {/* Heure de récupération */}
+            <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+              <Card.Content>
+                <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                  ⏰ Heure de récupération
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.timeSlotsContainer}>
+                    {availableSlots.map((slot) => (
+                      <Chip
+                        key={slot.value}
+                        selected={selectedPickupTime === slot.value}
+                        onPress={() => setSelectedPickupTime(slot.value)}
+                        style={styles.timeSlot}
+                        selectedColor={currentTheme.colors.onPrimaryContainer}
+                        showSelectedOverlay={false}
+                      >
+                        {slot.label}
+                      </Chip>
+                    ))}
+                  </View>
+                </ScrollView>
+              </Card.Content>
+            </Card>
+
+            {/* Informations client */}
+            <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+              <Card.Content>
+                <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                  📞 Vos informations
+                </Text>
+                <TextInput
+                  label="Nom complet"
+                  value={values.customerName}
+                  onChangeText={handleChange('customerName')}
+                  onFocus={() => scrollToInput(250)}
+                  returnKeyType="next"
+                  returnKeyLabel="Suivant"
+                  style={styles.input}
+                  error={touched.customerName && !!errors.customerName}
+                />
+                <TextInput
+                  label="Numéro de téléphone"
+                  value={values.phoneNumber}
+                  onChangeText={handleChange('phoneNumber')}
+                  onFocus={() => scrollToInput(320)}
+                  keyboardType="phone-pad"
+                  returnKeyType="next"
+                  returnKeyLabel="Suivant"
+                  style={styles.input}
+                  error={touched.phoneNumber && !!errors.phoneNumber}
+                />
+                <TextInput
+                  label="Instructions spéciales (optionnel)"
+                  value={values.specialInstructions}
+                  onChangeText={handleChange('specialInstructions')}
+                  onFocus={() => scrollToInput(400)}
+                  multiline
+                  numberOfLines={3}
+                  returnKeyType="done"
+                  returnKeyLabel="Terminé"
+                  blurOnSubmit={true}
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                  style={styles.input}
+                />
+              </Card.Content>
+            </Card>
+
+            {/* Total et validation */}
+            <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+              <Card.Content>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, { color: currentTheme.colors.onSurface }]}>
+                    Total
+                  </Text>
+                  <Text style={[styles.totalPrice, { color: currentTheme.colors.primary }]}>
+                    {totalPrice.toFixed(2)}€
+                  </Text>
+                </View>
+                <Button
+                  mode="contained"
+                  onPress={() => handleSubmit()}
+                  loading={isLoading}
+                  disabled={isLoading || !selectedPickupTime}
+                  style={styles.checkoutButton}
+                  buttonColor={currentTheme.colors.primary}
+                  contentStyle={styles.checkoutButtonContent}
+                >
+                  Confirmer la commande - {selectedPickupTime}
+                </Button>
+              </Card.Content>
+            </Card>
+            
+            {/* Espace en bas */}
+            <View style={{ height: 50 }} />
+            </ScrollView>
+          </KeyboardAvoidingView>
+        )}
+      </Formik>
     );
-  }
+  };
+
+  // Rendu commandes en cours
+  const renderCurrentOrders = () => {
+    if (!currentOrder && orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status)).length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Avatar.Icon size={80} icon="clock-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
+          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
+            Aucune commande en cours
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Vos commandes actives apparaîtront ici
+          </Text>
+        </View>
+      );
+    }
+
+    const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
+
+    return (
+      <ScrollView style={styles.ordersContent}>
+        {activeOrders.map((order) => (
+          <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+            <Card.Content>
+              <View style={styles.orderHeader}>
+                <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
+                  {order.restaurant.name}
+                </Text>
+                <Chip 
+                  icon={order.status === 'ready' ? 'check' : 'clock'}
+                  style={{ backgroundColor: order.status === 'ready' ? currentTheme.colors.primary : currentTheme.colors.secondary }}
+                >
+                  {order.status === 'pending' ? 'En attente' : 
+                   order.status === 'preparing' ? 'En préparation' : 'Prête !'}
+                </Chip>
+              </View>
+              <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Commande #{order.id.substring(0, 8)} • {order.total.toFixed(2)}€
+              </Text>
+              <Button
+                mode="outlined"
+                onPress={() => router.push(`/order/${order.id}`)}
+                style={styles.orderButton}
+              >
+                Voir les détails
+              </Button>
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
+    );
+  };
+
+  // Rendu historique
+  const renderHistory = () => {
+    const completedOrders = orders.filter(o => ['completed', 'cancelled'].includes(o.status));
+
+    if (completedOrders.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Avatar.Icon size={80} icon="history" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
+          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
+            Pas d'historique
+          </Text>
+          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Vos commandes terminées s'afficheront ici
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView style={styles.ordersContent}>
+        {completedOrders.map((order) => (
+          <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+            <Card.Content>
+              <View style={styles.orderHeader}>
+                <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
+                  {order.restaurant.name}
+                </Text>
+                <Text style={[styles.orderDate, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  {new Date(order.orderTime).toLocaleDateString()}
+                </Text>
+              </View>
+              <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                {order.total.toFixed(2)}€ • {order.items.length} articles
+              </Text>
+              <View style={styles.historyActions}>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.push(`/order/${order.id}`)}
+                  style={styles.historyButton}
+                >
+                  Voir détails
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    // TODO: Ajouter reorder functionality
+                    Alert.alert('Recommander', 'Fonctionnalité bientôt disponible');
+                  }}
+                  style={styles.historyButton}
+                  buttonColor={currentTheme.colors.primary}
+                >
+                  Recommander
+                </Button>
+              </View>
+            </Card.Content>
+          </Card>
+        ))}
+      </ScrollView>
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+      <StatusBar style="dark" backgroundColor={currentTheme.colors.background} />
       
-      {renderHeader()}
-      
-      <Animated.View style={[styles.content, contentAnimatedStyle]}>
-        {activeTab === 'cart' ? (
-          items.length === 0 ? (
-            <>
-              {renderTrendingSection()}
-              {renderEmptyCart()}
-            </>
-          ) : (
-            <FlatList
-              data={items}
-              renderItem={renderCartItem}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.cartList}
-              ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-              ListHeaderComponent={renderTrendingSection}
-            />
-          )
-        ) : (
-          renderOrdersList()
-        )}
-      </Animated.View>
+        {/* Header */}
+        <Animated.View style={[styles.header, headerAnimatedStyle]}>
+          <Surface style={[styles.headerSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+            <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
+              Mes Commandes
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Panier, suivi et historique
+            </Text>
+          </Surface>
+        </Animated.View>
 
-      {activeTab === 'cart' && items.length > 0 && renderCheckoutSection()}
+        {/* Tabs */}
+        {renderTabs()}
+
+        {/* Content */}
+        <View style={styles.content}>
+          {activeTab === 'cart' && renderCart()}
+          {activeTab === 'current' && renderCurrentOrders()}
+          {activeTab === 'history' && renderHistory()}
+        </View>
     </SafeAreaView>
   );
 }
@@ -661,665 +544,190 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
   },
   header: {
-    height: 140,
-    zIndex: 1000,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  headerGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingTop: 20,
-  },
-  headerContent: {
-    paddingHorizontal: 20,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
+  headerSurface: {
+    padding: 16,
+    borderRadius: 12,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '800',
-    color: 'white',
-    marginBottom: 2,
+    fontWeight: '700',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
+    marginTop: 4,
   },
-  clearButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  tabsContainer: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  tabs: {
+    flexDirection: 'row',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tabBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 8,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tabBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   content: {
     flex: 1,
-    marginTop: -20,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    backgroundColor: '#f1f5f9',
-    paddingTop: 4,
+    paddingHorizontal: 16,
   },
-
-  // Trending Section (Liste Organisée Style)
-  trendingSection: {
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  trendingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    gap: 8,
-  },
-  trendingTitle: {
+  cartContent: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1f2937',
   },
-  trendingSubtitle: {
-    fontSize: 14,
-    color: '#6b7280',
+  ordersContent: {
+    flex: 1,
+  },
+  card: {
     marginBottom: 12,
-  },
-  popularTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  popularTag: {
-    backgroundColor: '#f3f4f6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     borderRadius: 12,
   },
-  popularTagText: {
-    fontSize: 13,
-    color: '#4b5563',
-    fontWeight: '500',
-  },
-
-  cartList: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 450,
-  },
-  itemSeparator: {
-    height: 16,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
   },
   cartItem: {
-    marginHorizontal: 4,
-  },
-  cartItemCard: {
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  cartItemGradient: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  cartItemContent: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 16,
-  },
-  imageContainer: {
-    position: 'relative',
-  },
-  cartItemImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 16,
-  },
-  quantityBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#667eea',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 24,
-    alignItems: 'center',
-  },
-  quantityBadgeText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  cartItemInfo: {
-    flex: 1,
     justifyContent: 'space-between',
-  },
-  cartItemHeader: {
-    flex: 1,
-  },
-  cartItemTitleContainer: {
-    flex: 1,
-  },
-  cartItemName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 6,
-    lineHeight: 20,
-  },
-  restaurantRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginBottom: 6,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  cartItemRestaurant: {
-    fontSize: 13,
-    color: '#9ca3af',
+  itemInfo: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 16,
     fontWeight: '500',
   },
-  instructionsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 4,
-    marginTop: 4,
-  },
-  specialInstructions: {
-    fontSize: 12,
-    color: '#6b7280',
-    fontStyle: 'italic',
-    flex: 1,
-    lineHeight: 16,
-  },
-  cartItemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 12,
-  },
-  priceContainer: {
-    flex: 1,
-  },
-  unitPrice: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginBottom: 2,
-  },
-  cartItemPrice: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#667eea',
-  },
-  itemActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 2,
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
   quantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    margin: 0,
   },
-  removeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fef2f2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Empty Cart
-  emptyCart: {
-    flex: 1,
-    margin: 20,
-  },
-  emptyCartGradient: {
-    flex: 1,
-    borderRadius: 24,
-    padding: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyCartContent: {
-    alignItems: 'center',
-    maxWidth: 300,
-  },
-  emptyCartIconContainer: {
-    marginBottom: 32,
-  },
-  emptyCartIconGradient: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyCartTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1f2937',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  emptyCartText: {
+  quantity: {
     fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  emptyTrendingSection: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 32,
-    alignSelf: 'stretch',
-  },
-  emptyTrendingTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyTrendingSubtitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  emptyCartButton: {
-    borderRadius: 28,
-    overflow: 'hidden',
-  },
-  emptyCartButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    gap: 8,
-  },
-  emptyCartButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: 'white',
-  },
-
-  // Checkout Section
-  checkoutSection: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: '65%',
-  },
-  checkoutBackground: {
-    flex: 1,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 8,
-  },
-  checkoutScroll: {
-    flex: 1,
-  },
-  checkoutHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 8,
-  },
-  checkoutTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1f2937',
-  },
-  checkoutContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  quickSummary: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginBottom: 24,
-  },
-  summaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  summaryText: {
-    fontSize: 14,
     fontWeight: '600',
-    color: '#4c51bf',
+    marginHorizontal: 8,
   },
-  mvpSection: {
-    marginBottom: 24,
-  },
-  mvpNotice: {
-    backgroundColor: '#f0f9ff',
-    padding: 16,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#667eea',
-  },
-  mvpNoticeText: {
-    fontSize: 14,
-    color: '#1e40af',
-    fontWeight: '500',
-    lineHeight: 20,
-  },
-  sectionHeader: {
+  timeSlotsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
+    paddingVertical: 8,
+  },
+  timeSlot: {
+    marginRight: 8,
+  },
+  input: {
     marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  instructionsSection: {
-    marginBottom: 24,
-  },
-  instructionsInput: {
-    backgroundColor: 'white',
-    fontSize: 14,
-  },
-  instructionsInputOutline: {
-    borderRadius: 16,
-    borderColor: '#e5e7eb',
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#ef4444',
-    marginTop: 6,
-    marginLeft: 4,
-  },
-  priceCard: {
-    borderRadius: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  priceCardGradient: {
-    padding: 20,
-    borderRadius: 20,
-  },
-  priceCardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  priceBreakdown: {
-    gap: 12,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  priceRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  priceLabel: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  priceValue: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '600',
-  },
-  discountLabel: {
-    color: '#10b981',
-  },
-  discountValue: {
-    color: '#10b981',
-  },
-  totalDivider: {
-    backgroundColor: '#e5e7eb',
-    height: 1,
-    marginVertical: 12,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 8,
+    marginBottom: 16,
   },
   totalLabel: {
     fontSize: 18,
-    color: '#1f2937',
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  totalValue: {
-    fontSize: 22,
-    color: '#667eea',
-    fontWeight: '800',
+  totalPrice: {
+    fontSize: 20,
+    fontWeight: '700',
   },
   checkoutButton: {
-    borderRadius: 20,
-    marginBottom: 20,
-    elevation: 4,
-    shadowColor: '#667eea',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  checkoutButtonDisabled: {
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  checkoutButtonGradient: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 20,
+    borderRadius: 12,
   },
   checkoutButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    height: 50,
   },
-  checkoutButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: 'white',
-  },
-  securityNotice: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-  },
-  securityText: {
-    fontSize: 13,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  
-  // Styles pour les onglets
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    gap: 8,
-  },
-  tab: {
+  emptyState: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    gap: 8,
+    alignItems: 'center',
+    paddingHorizontal: 32,
   },
-  activeTab: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  tabText: {
-    fontSize: 14,
+  emptyTitle: {
+    fontSize: 20,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.7)',
+    marginTop: 16,
+    textAlign: 'center',
   },
-  activeTabText: {
-    color: 'white',
+  emptySubtitle: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
   },
-  
-  // Styles pour les commandes
-  ordersContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 100,
-  },
-  orderItem: {
-    marginBottom: 12,
-  },
-  orderCard: {
-    borderRadius: 16,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+  emptyButton: {
+    marginTop: 24,
+    borderRadius: 12,
   },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  orderInfo: {
-    flex: 1,
-  },
-  orderNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  orderDate: {
-    fontSize: 13,
-    color: '#6b7280',
-  },
-  orderStatus: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  orderStatusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'white',
-  },
-  orderDetails: {
-    marginBottom: 12,
-  },
-  orderRestaurant: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 4,
-  },
-  orderItems: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  orderTotal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1f2937',
-  },
-  orderActionButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  orderActionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#667eea',
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-  },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#374151',
-    marginTop: 16,
     marginBottom: 8,
   },
-  emptyStateMessage: {
+  orderTitle: {
     fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
+    fontWeight: '600',
+    flex: 1,
+  },
+  orderSubtitle: {
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  orderDate: {
+    fontSize: 12,
+  },
+  orderButton: {
+    borderRadius: 8,
+  },
+  historyActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  historyButton: {
+    flex: 1,
+    borderRadius: 8,
   },
 });

@@ -7,6 +7,7 @@ import {
   Image,
   RefreshControl,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -59,13 +60,14 @@ const createCustomTheme = (currentTheme: any) => ({
 
 // Page d'accueil avec design home-design-5
 export default function HomeIndex() {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
-  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(mockRestaurants);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Utiliser le thème global
   const { currentTheme: globalTheme, setSelectedTheme: setGlobalTheme, selectedTheme, themeMetadata } = useAppTheme();
@@ -76,15 +78,39 @@ export default function HomeIndex() {
     await setGlobalTheme(themeKey as any);
   };
 
+  const renderLoadingState = () => (
+    <View style={[baseStyles.loadingContainer, { backgroundColor: globalTheme.colors.background }]}>
+      <ActivityIndicator size="large" color={globalTheme.colors.primary} />
+      <Text style={[baseStyles.loadingText, { color: globalTheme.colors.onSurfaceVariant }]}>
+        Chargement des restaurants...
+      </Text>
+    </View>
+  );
+
   const headerOpacity = useSharedValue(0);
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 800 });
+    loadRestaurants();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [selectedCategory, searchQuery, selectedFilters, restaurants]);
+
+  const loadRestaurants = async () => {
+    try {
+      setIsLoading(true);
+      // Simuler une requête API
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setRestaurants(mockRestaurants);
+      setFilteredRestaurants(mockRestaurants);
+    } catch (error) {
+      console.error('Erreur lors du chargement des restaurants:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const applyFilters = () => {
     let filtered = [...restaurants];
@@ -114,7 +140,7 @@ export default function HomeIndex() {
   const onRefresh = async () => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadRestaurants();
     setRefreshing(false);
   };
 
@@ -461,42 +487,48 @@ export default function HomeIndex() {
       <SafeAreaView style={[baseStyles.container, dynamicStyles.container]}>
         <StatusBar style="dark" backgroundColor={customTheme.colors.background} />
         
-        <ScrollView
-          style={baseStyles.scrollView}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={onRefresh}
-              colors={[customTheme.colors.primary]}
-              tintColor={customTheme.colors.primary}
-            />
-          }
-        >
-          {renderHeader()}
-          {renderSearch()}
-          {renderFilters()}
-          {renderCategories()}
-          
-          <View style={baseStyles.restaurantsSection}>
-            <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
-              Restaurants recommandés ({filteredRestaurants.length})
-            </Text>
+        {isLoading ? (
+          renderLoadingState()
+        ) : (
+          <>
+            <ScrollView
+              style={baseStyles.scrollView}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl 
+                  refreshing={refreshing} 
+                  onRefresh={onRefresh}
+                  colors={[customTheme.colors.primary]}
+                  tintColor={customTheme.colors.primary}
+                />
+              }
+            >
+              {renderHeader()}
+              {renderSearch()}
+              {renderFilters()}
+              {renderCategories()}
+              
+              <View style={baseStyles.restaurantsSection}>
+                <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
+                  Restaurants recommandés ({filteredRestaurants.length})
+                </Text>
+                
+                <View style={baseStyles.restaurantsList}>
+                  {filteredRestaurants.map(renderRestaurant)}
+                </View>
+              </View>
+            </ScrollView>
             
-            <View style={baseStyles.restaurantsList}>
-              {filteredRestaurants.map(renderRestaurant)}
-            </View>
-          </View>
-        </ScrollView>
-        
-        {renderFilterModal()}
-        
-        <FAB
-          icon="tune"
-          style={[baseStyles.fab, dynamicStyles.fab]}
-          onPress={() => setFilterVisible(true)}
-          color={customTheme.colors.onPrimary}
-        />
+            {renderFilterModal()}
+            
+            <FAB
+              icon="tune"
+              style={[baseStyles.fab, dynamicStyles.fab]}
+              onPress={() => setFilterVisible(true)}
+              color={customTheme.colors.onPrimary}
+            />
+          </>
+        )}
       </SafeAreaView>
     </PaperProvider>
   );
@@ -758,6 +790,17 @@ const baseStyles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    fontSize: 16,
+    marginTop: 16,
+    textAlign: 'center',
   },
 });
 
