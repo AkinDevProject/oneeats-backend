@@ -7,6 +7,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -54,6 +57,10 @@ public class MenuItem extends BaseEntity {
     
     @Column(name = "preparation_time_minutes")
     private Integer preparationTimeMinutes;
+    
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private List<MenuItemOption> options = new ArrayList<>();
     
     // Constructeur protégé pour JPA
     protected MenuItem() {}
@@ -117,6 +124,24 @@ public class MenuItem extends BaseEntity {
     public Boolean getIsVegan() { return isVegan; }
     public String getAllergens() { return allergens; }
     public Integer getPreparationTimeMinutes() { return preparationTimeMinutes; }
+    public List<MenuItemOption> getOptions() { return List.copyOf(options); }
+    
+    // Méthodes pour gérer les options
+    public void addOption(MenuItemOption option) {
+        Objects.requireNonNull(option, "L'option ne peut pas être null");
+        option.setMenuItem(this);
+        this.options.add(option);
+    }
+    
+    public void removeOption(MenuItemOption option) {
+        if (this.options.remove(option)) {
+            option.setMenuItem(null);
+        }
+    }
+    
+    public boolean hasOptions() {
+        return !options.isEmpty();
+    }
     
     // Setters pour propriétés modifiables
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

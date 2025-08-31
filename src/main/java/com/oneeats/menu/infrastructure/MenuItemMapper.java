@@ -2,8 +2,14 @@ package com.oneeats.menu.infrastructure;
 
 import com.oneeats.menu.api.CreateMenuItemRequest;
 import com.oneeats.menu.api.MenuItemDto;
+import com.oneeats.menu.api.MenuItemOptionDto;
+import com.oneeats.menu.api.MenuItemChoiceDto;
 import com.oneeats.menu.domain.MenuItem;
+import com.oneeats.menu.domain.MenuItemOption;
+import com.oneeats.menu.domain.MenuItemChoice;
+import com.oneeats.menu.domain.MenuItemOptionType;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre les entités MenuItem et les DTOs
@@ -32,6 +38,9 @@ public class MenuItemMapper {
             menuItem.getIsVegetarian(),
             menuItem.getIsVegan(),
             menuItem.getAllergens(),
+            menuItem.getOptions().stream()
+                .map(this::toOptionDto)
+                .collect(Collectors.toList()),
             menuItem.getCreatedAt(),
             menuItem.getUpdatedAt()
         );
@@ -94,5 +103,71 @@ public class MenuItemMapper {
                 request.allergens() != null ? request.allergens() : menuItem.getAllergens()
             );
         }
+    }
+    
+    /**
+     * Convertir une option d'entité vers DTO
+     */
+    public MenuItemOptionDto toOptionDto(MenuItemOption option) {
+        if (option == null) {
+            return null;
+        }
+        
+        return new MenuItemOptionDto(
+            option.getId(),
+            option.getMenuItem().getId(),
+            option.getName(),
+            option.getType().getValue(),
+            option.getIsRequired(),
+            option.getMaxChoices(),
+            option.getDisplayOrder(),
+            option.getChoices().stream()
+                .map(this::toChoiceDto)
+                .collect(Collectors.toList()),
+            option.getCreatedAt(),
+            option.getUpdatedAt()
+        );
+    }
+    
+    /**
+     * Convertir un choix d'entité vers DTO
+     */
+    public MenuItemChoiceDto toChoiceDto(MenuItemChoice choice) {
+        if (choice == null) {
+            return null;
+        }
+        
+        return new MenuItemChoiceDto(
+            choice.getId(),
+            choice.getMenuItemOption().getId(),
+            choice.getName(),
+            choice.getPrice(),
+            choice.getDisplayOrder(),
+            choice.getIsAvailable(),
+            choice.getCreatedAt(),
+            choice.getUpdatedAt()
+        );
+    }
+    
+    /**
+     * Convertir DTO vers entité option
+     */
+    public MenuItemOption toOptionEntity(MenuItemOptionDto dto, MenuItem menuItem) {
+        if (dto == null || menuItem == null) {
+            return null;
+        }
+        
+        MenuItemOptionType type = MenuItemOptionType.fromValue(dto.type());
+        MenuItemOption option = new MenuItemOption(menuItem, dto.name(), type);
+        option.updateInfo(dto.name(), type, dto.isRequired(), dto.maxChoices());
+        
+        if (dto.choices() != null) {
+            dto.choices().forEach(choiceDto -> {
+                MenuItemChoice choice = new MenuItemChoice(option, choiceDto.name(), choiceDto.price());
+                option.addChoice(choice);
+            });
+        }
+        
+        return option;
     }
 }

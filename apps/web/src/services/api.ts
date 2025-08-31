@@ -107,9 +107,10 @@ class ApiService {
         body: JSON.stringify(data),
       }),
     
-    toggleAvailability: (id: string): Promise<MenuItem> => 
+    toggleAvailability: (id: string, available: boolean): Promise<MenuItem> => 
       this.request(`/api/menu-items/${id}/availability`, {
         method: 'PUT',
+        body: JSON.stringify({ available }),
       }),
     
     delete: (id: string): Promise<void> => 

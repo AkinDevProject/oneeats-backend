@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,6 +45,8 @@ public record MenuItemDto(
     
     String allergens,
     
+    List<MenuItemOptionDto> options,
+    
     LocalDateTime createdAt,
     
     LocalDateTime updatedAt
@@ -53,6 +56,6 @@ public record MenuItemDto(
     public MenuItemDto(UUID restaurantId, String name, String description, 
                       BigDecimal price, String category) {
         this(null, restaurantId, name, description, price, category, 
-             null, true, null, false, false, null, null, null);
+             null, true, null, false, false, null, List.of(), null, null);
     }
 }

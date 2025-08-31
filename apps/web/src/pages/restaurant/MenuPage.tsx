@@ -13,11 +13,14 @@ import { MenuItem, MenuItemOption } from '../../types';
 import { useRestaurantData } from '../../hooks/useRestaurantData';
 import apiService from '../../services/api';
 
+const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Pizza Palace ID from backend
+
 const MenuPage: React.FC = () => {
   const { menuItems, loading, error, refetch } = useRestaurantData();
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedAvailability, setSelectedAvailability] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
@@ -29,28 +32,49 @@ const MenuPage: React.FC = () => {
     options: [] as MenuItemOption[]
   });
 
-  const categories = ['all', ...Array.from(new Set(menuItems.map(item => item.category)))];
+  // Get dynamic categories from actual menu items
+  const availableCategories = Array.from(new Set(menuItems.map(item => item.category))).sort();
+  const categories = ['all', ...availableCategories];
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesAvailability = selectedAvailability === 'all' || 
+                               (selectedAvailability === 'available' && item.available === true) ||
+                               (selectedAvailability === 'unavailable' && item.available === false);
+    
+    return matchesSearch && matchesCategory && matchesAvailability;
   });
 
   const stats = {
     total: menuItems.length,
     available: menuItems.filter(item => item.available).length,
     unavailable: menuItems.filter(item => !item.available).length,
-    categories: categories.length - 1
+    categories: availableCategories.length
   };
 
-  const tabs = [
-    { key: 'all', label: 'Toutes' },
-    { key: 'entrées', label: 'Entrées' },
-    { key: 'plats', label: 'Plats' },
-    { key: 'desserts', label: 'Desserts' },
-    { key: 'boissons', label: 'Boissons' }
+  // Dynamic tabs based on actual categories
+  const categoryTabs = [
+    { key: 'all', label: 'Toutes', count: filteredItems.length },
+    ...availableCategories.map(category => ({
+      key: category,
+      label: category.charAt(0).toUpperCase() + category.slice(1),
+      count: menuItems.filter(item => item.category === category && 
+        (selectedAvailability === 'all' || 
+         (selectedAvailability === 'available' && item.available) ||
+         (selectedAvailability === 'unavailable' && !item.available))).length
+    }))
+  ];
+
+  // Availability filter options
+  const availabilityTabs = [
+    { key: 'all', label: 'Tous', count: menuItems.filter(item => 
+      selectedCategory === 'all' || item.category === selectedCategory).length },
+    { key: 'available', label: 'Disponibles', count: menuItems.filter(item => 
+      item.available && (selectedCategory === 'all' || item.category === selectedCategory)).length },
+    { key: 'unavailable', label: 'Non disponibles', count: menuItems.filter(item => 
+      !item.available && (selectedCategory === 'all' || item.category === selectedCategory)).length }
   ];
 
   const handleOpenModal = (item?: MenuItem) => {
@@ -78,53 +102,78 @@ const MenuPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editingItem) {
-      setMenuItems(prev => prev.map(item =>
-        item.id === editingItem.id
-          ? {
-              ...item,
-              name: formData.name,
-              description: formData.description,
-              price: parseFloat(formData.price),
-              category: formData.category,
-              available: formData.available,
-              options: formData.options
-            }
-          : item
-      ));
-    } else {
-      const newItem: MenuItem = {
-        id: Date.now().toString(),
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        available: formData.available,
-        restaurantId: '1',
-        options: formData.options
-      };
-      setMenuItems(prev => [...prev, newItem]);
+    try {
+      if (editingItem) {
+        // Update existing item
+        const updateData = {
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          available: formData.available,
+          restaurantId: RESTAURANT_ID,
+          options: formData.options
+        };
+        await apiService.menuItems.update(editingItem.id, updateData);
+      } else {
+        // Create new item
+        const createData = {
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          available: formData.available,
+          restaurantId: RESTAURANT_ID,
+          options: formData.options
+        };
+        await apiService.menuItems.create(createData);
+      }
+
+      // Refresh menu items from backend
+      await refetch();
+      
+      setShowModal(false);
+      setEditingItem(null);
+    } catch (error) {
+      console.error('Error saving menu item:', error);
+      // You might want to show an error toast here
     }
-
-    setShowModal(false);
-    setEditingItem(null);
   };
 
-  const handleDelete = (id: string) => {
-    setMenuItems(prev => prev.filter(item => item.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      await apiService.menuItems.delete(id);
+      // Refresh menu items from backend
+      await refetch();
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+      // You might want to show an error toast here
+    }
   };
 
-  const toggleAvailability = (id: string) => {
-    setMenuItems(prev => prev.map(item =>
-      item.id === id ? { ...item, available: !item.available } : item
-    ));
+  const toggleAvailability = async (id: string) => {
+    try {
+      // Find the current item to get its availability status
+      const currentItem = menuItems.find(item => item.id === id);
+      if (!currentItem) return;
+      
+      // Toggle the availability
+      const newAvailability = !currentItem.available;
+      await apiService.menuItems.toggleAvailability(id, newAvailability);
+      
+      // Refresh menu items from backend
+      await refetch();
+    } catch (error) {
+      console.error('Error toggling menu item availability:', error);
+      // You might want to show an error toast here
+    }
   };
 
   const groupedItems = categories.slice(1).reduce((acc, category) => {
-    acc[category] = menuItems.filter(item => item.category === category);
+    acc[category] = filteredItems.filter(item => item.category === category);
     return acc;
   }, {} as Record<string, MenuItem[]>);
 
@@ -166,42 +215,51 @@ const MenuPage: React.FC = () => {
             />
           </div>
           
-          {/* Mobile Category Tabs - 2x2 Grid */}
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { key: 'all', label: 'Toutes', shortLabel: 'Toutes', count: stats.total },
-              { key: 'entrées', label: 'Entrées', shortLabel: 'Entrées', count: menuItems.filter(o => o.category === 'entrées').length },
-              { key: 'plats', label: 'Plats', shortLabel: 'Plats', count: menuItems.filter(o => o.category === 'plats').length },
-              { key: 'desserts', label: 'Desserts', shortLabel: 'Desserts', count: menuItems.filter(o => o.category === 'desserts').length },
-            ].map((tab) => {
+          {/* Mobile Availability Filter */}
+          <div className="mb-3">
+            <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+              {availabilityTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedAvailability(tab.key)}
+                  className={`flex-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                    selectedAvailability === tab.key
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Category Tabs - Dynamic Grid */}
+          <div className={`grid gap-2 ${categoryTabs.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+            {categoryTabs.slice(0, 6).map((tab) => {
               const getTabConfig = (key: string) => {
-                switch(key) {
-                  case 'all':
-                    return { 
-                      icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700',
-                      bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700',
-                      activeGradient: 'bg-gradient-to-r from-slate-500 to-slate-700'
-                    };
-                  case 'entrées':
-                    return { 
-                      icon: AlertCircle, emoji: '🥗', gradient: 'from-emerald-400 to-teal-600',
-                      bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800',
-                      activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600'
-                    };
-                  case 'plats':
-                    return { 
-                      icon: ChefHat, emoji: '🍖', gradient: 'from-orange-400 to-red-500',
-                      bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800',
-                      activeGradient: 'bg-gradient-to-r from-orange-400 to-red-500'
-                    };
-                  case 'desserts':
-                    return { 
-                      icon: Cake, emoji: '🍰', gradient: 'from-pink-400 to-purple-600',
-                      bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800',
-                      activeGradient: 'bg-gradient-to-r from-pink-400 to-purple-600'
-                    };
-                  default: return { icon: Clock, emoji: '🍽️', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600' };
+                if (key === 'all') {
+                  return { 
+                    icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700',
+                    bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700',
+                    activeGradient: 'bg-gradient-to-r from-slate-500 to-slate-700'
+                  };
                 }
+                
+                // Use generic icon for all categories
+                const colors = [
+                  { gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600' },
+                  { gradient: 'from-orange-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-r from-orange-400 to-red-500' },
+                  { gradient: 'from-pink-400 to-purple-600', bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800', activeGradient: 'bg-gradient-to-r from-pink-400 to-purple-600' },
+                  { gradient: 'from-blue-400 to-cyan-600', bgGradient: 'from-blue-50 to-cyan-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-r from-blue-400 to-cyan-600' },
+                  { gradient: 'from-purple-400 to-indigo-600', bgGradient: 'from-purple-50 to-indigo-50', textColor: 'text-purple-800', activeGradient: 'bg-gradient-to-r from-purple-400 to-indigo-600' },
+                  { gradient: 'from-yellow-400 to-orange-500', bgGradient: 'from-yellow-50 to-orange-50', textColor: 'text-yellow-800', activeGradient: 'bg-gradient-to-r from-yellow-400 to-orange-500' }
+                ];
+                
+                const categoryIndex = availableCategories.indexOf(key);
+                const colorConfig = colors[categoryIndex % colors.length];
+                
+                return { icon: ChefHat, emoji: '🍽️', ...colorConfig };
               };
               
               const config = getTabConfig(tab.key);
@@ -218,11 +276,10 @@ const MenuPage: React.FC = () => {
                       : `bg-gradient-to-r ${config.bgGradient} border border-gray-200 active:scale-95`
                   }`}
                 >
-                  <div className="flex items-center space-x-2">
-                    <IconComponent className={`h-4 w-4 ${isActive ? 'text-white' : config.textColor}`} />
+                  <div className="flex items-center justify-between">
                     <div className="flex-1 text-left">
                       <div className={`font-medium text-xs ${isActive ? 'text-white' : config.textColor}`}>
-                        {tab.shortLabel}
+                        {tab.label}
                       </div>
                     </div>
                     <div className={`px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center ${
@@ -269,22 +326,47 @@ const MenuPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Tablet Category Tabs */}
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { key: 'all', label: 'Toutes', count: stats.total },
-              { key: 'entrées', label: 'Entrées', count: menuItems.filter(o => o.category === 'entrées').length },
-              { key: 'plats', label: 'Plats', count: menuItems.filter(o => o.category === 'plats').length },
-              { key: 'desserts', label: 'Desserts', count: menuItems.filter(o => o.category === 'desserts').length },
-            ].map((tab) => {
+          {/* Tablet Availability Filter */}
+          <div className="mb-4">
+            <div className="flex space-x-2 bg-gray-100 rounded-lg p-1">
+              {availabilityTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedAvailability(tab.key)}
+                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    selectedAvailability === tab.key
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tablet Category Tabs - Dynamic */}
+          <div className={`grid gap-3 ${categoryTabs.length <= 4 ? 'grid-cols-4' : categoryTabs.length <= 6 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+            {categoryTabs.map((tab) => {
               const getTabConfig = (key: string) => {
-                switch(key) {
-                  case 'all': return { icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700', bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700', activeGradient: 'bg-gradient-to-r from-slate-500 to-slate-700' };
-                  case 'entrées': return { icon: AlertCircle, emoji: '🥗', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600' };
-                  case 'plats': return { icon: ChefHat, emoji: '🍖', gradient: 'from-orange-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-r from-orange-400 to-red-500' };
-                  case 'desserts': return { icon: Cake, emoji: '🍰', gradient: 'from-pink-400 to-purple-600', bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800', activeGradient: 'bg-gradient-to-r from-pink-400 to-purple-600' };
-                  default: return { icon: Clock, emoji: '🍽️', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600' };
+                if (key === 'all') {
+                  return { icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700', bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700', activeGradient: 'bg-gradient-to-r from-slate-500 to-slate-700' };
                 }
+                
+                // Use generic icon for all categories with rotating colors
+                const colors = [
+                  { gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600' },
+                  { gradient: 'from-orange-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-r from-orange-400 to-red-500' },
+                  { gradient: 'from-pink-400 to-purple-600', bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800', activeGradient: 'bg-gradient-to-r from-pink-400 to-purple-600' },
+                  { gradient: 'from-blue-400 to-cyan-600', bgGradient: 'from-blue-50 to-cyan-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-r from-blue-400 to-cyan-600' },
+                  { gradient: 'from-purple-400 to-indigo-600', bgGradient: 'from-purple-50 to-indigo-50', textColor: 'text-purple-800', activeGradient: 'bg-gradient-to-r from-purple-400 to-indigo-600' },
+                  { gradient: 'from-yellow-400 to-orange-500', bgGradient: 'from-yellow-50 to-orange-50', textColor: 'text-yellow-800', activeGradient: 'bg-gradient-to-r from-yellow-400 to-orange-500' }
+                ];
+                
+                const categoryIndex = availableCategories.indexOf(key);
+                const colorConfig = colors[categoryIndex % colors.length];
+                
+                return { icon: ChefHat, emoji: '🍽️', ...colorConfig };
               };
               
               const config = getTabConfig(tab.key);
@@ -350,21 +432,46 @@ const MenuPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-4 gap-4">
-            {[
-              { key: 'all', label: 'Toutes', count: stats.total },
-              { key: 'entrées', label: 'Entrées', count: menuItems.filter(o => o.category === 'entrées').length },
-              { key: 'plats', label: 'Plats', count: menuItems.filter(o => o.category === 'plats').length },
-              { key: 'desserts', label: 'Desserts', count: menuItems.filter(o => o.category === 'desserts').length },
-            ].map((tab) => {
+          {/* Desktop Availability Filter */}
+          <div className="mb-6">
+            <div className="flex space-x-3 bg-gray-100 rounded-xl p-2">
+              {availabilityTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setSelectedAvailability(tab.key)}
+                  className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    selectedAvailability === tab.key
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-blue-600'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className={`grid gap-4 ${categoryTabs.length <= 4 ? 'grid-cols-4' : categoryTabs.length <= 6 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+            {categoryTabs.map((tab) => {
               const getTabConfig = (key: string) => {
-                switch(key) {
-                  case 'all': return { icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700', bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700', activeGradient: 'bg-gradient-to-br from-slate-500 to-slate-700', shadowColor: 'shadow-slate-300', glowColor: 'shadow-slate-500/50' };
-                  case 'entrées': return { icon: AlertCircle, emoji: '🥗', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', activeGradient: 'bg-gradient-to-br from-emerald-400 to-teal-600', shadowColor: 'shadow-emerald-200', glowColor: 'shadow-emerald-500/50' };
-                  case 'plats': return { icon: ChefHat, emoji: '🍖', gradient: 'from-orange-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-br from-orange-400 to-red-500', shadowColor: 'shadow-orange-200', glowColor: 'shadow-orange-500/50' };
-                  case 'desserts': return { icon: Cake, emoji: '🍰', gradient: 'from-pink-400 to-purple-600', bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800', activeGradient: 'bg-gradient-to-br from-pink-400 to-purple-600', shadowColor: 'shadow-pink-200', glowColor: 'shadow-pink-500/50' };
-                  default: return { icon: Clock, emoji: '🍽️', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600', shadowColor: 'shadow-gray-200', glowColor: 'shadow-gray-500/50' };
+                if (key === 'all') {
+                  return { icon: Sparkles, emoji: '🍽️', gradient: 'from-slate-500 to-slate-700', bgGradient: 'from-slate-50 to-slate-100', textColor: 'text-slate-700', activeGradient: 'bg-gradient-to-br from-slate-500 to-slate-700', shadowColor: 'shadow-slate-300', glowColor: 'shadow-slate-500/50' };
                 }
+                
+                // Use generic icon for all categories with rotating colors
+                const colors = [
+                  { gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', activeGradient: 'bg-gradient-to-br from-emerald-400 to-teal-600', shadowColor: 'shadow-emerald-200', glowColor: 'shadow-emerald-500/50' },
+                  { gradient: 'from-orange-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-br from-orange-400 to-red-500', shadowColor: 'shadow-orange-200', glowColor: 'shadow-orange-500/50' },
+                  { gradient: 'from-pink-400 to-purple-600', bgGradient: 'from-pink-50 to-purple-50', textColor: 'text-pink-800', activeGradient: 'bg-gradient-to-br from-pink-400 to-purple-600', shadowColor: 'shadow-pink-200', glowColor: 'shadow-pink-500/50' },
+                  { gradient: 'from-blue-400 to-cyan-600', bgGradient: 'from-blue-50 to-cyan-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-br from-blue-400 to-cyan-600', shadowColor: 'shadow-blue-200', glowColor: 'shadow-blue-500/50' },
+                  { gradient: 'from-purple-400 to-indigo-600', bgGradient: 'from-purple-50 to-indigo-50', textColor: 'text-purple-800', activeGradient: 'bg-gradient-to-br from-purple-400 to-indigo-600', shadowColor: 'shadow-purple-200', glowColor: 'shadow-purple-500/50' },
+                  { gradient: 'from-yellow-400 to-orange-500', bgGradient: 'from-yellow-50 to-orange-50', textColor: 'text-yellow-800', activeGradient: 'bg-gradient-to-br from-yellow-400 to-orange-500', shadowColor: 'shadow-yellow-200', glowColor: 'shadow-yellow-500/50' }
+                ];
+                
+                const categoryIndex = availableCategories.indexOf(key);
+                const colorConfig = colors[categoryIndex % colors.length];
+                
+                return { icon: ChefHat, emoji: '🍽️', ...colorConfig };
               };
               
               const config = getTabConfig(tab.key);
@@ -430,7 +537,7 @@ const MenuPage: React.FC = () => {
         ) : selectedCategory === 'all' ? (
           // Show grouped by category - Full Responsive
           <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-            {Object.entries(groupedItems).map(([category, items]) => {
+            {Object.entries(groupedItems).filter(([category, items]) => items.length > 0).map(([category, items]) => {
               const config = (() => {
                 switch(category) {
                   case 'entrées': return { gradient: 'from-emerald-50 to-teal-50', textColor: 'text-emerald-800', iconGradient: 'from-emerald-400 to-teal-600', icon: AlertCircle };
