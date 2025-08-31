@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS menu_item_option (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     menu_item_id UUID NOT NULL REFERENCES menu_item(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    option_type VARCHAR(50) NOT NULL CHECK (option_type IN ('choice', 'remove', 'extra')),
+    option_type VARCHAR(50) NOT NULL CHECK (option_type IN ('CHOICE', 'REMOVE', 'EXTRA')),
     is_required BOOLEAN NOT NULL DEFAULT FALSE,
     max_choices INTEGER,
     display_order INTEGER DEFAULT 0,
@@ -72,9 +72,9 @@ INSERT INTO menu_item (id, restaurant_id, name, description, price, category, im
 
 -- Options pour Salade César (91111111-1111-1111-1111-111111111117)
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at) VALUES
-('a1111111-1111-1111-1111-111111111117', '91111111-1111-1111-1111-111111111117', 'Taille de salade', 'choice', true, 1, 1, NOW(), NOW()),
-('a2222222-2222-2222-2222-222222222227', '91111111-1111-1111-1111-111111111117', 'Protéines', 'choice', false, 1, 2, NOW(), NOW()),
-('a3333333-3333-3333-3333-333333333337', '91111111-1111-1111-1111-111111111117', 'Options à retirer', 'remove', false, null, 3, NOW(), NOW());
+('a1111111-1111-1111-1111-111111111117', '91111111-1111-1111-1111-111111111117', 'Taille de salade', 'CHOICE', true, 1, 1, NOW(), NOW()),
+('a2222222-2222-2222-2222-222222222227', '91111111-1111-1111-1111-111111111117', 'Protéines', 'CHOICE', false, 1, 2, NOW(), NOW()),
+('a3333333-3333-3333-3333-333333333337', '91111111-1111-1111-1111-111111111117', 'Options à retirer', 'REMOVE', false, null, 3, NOW(), NOW());
 
 -- Taille de salade
 INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_order, is_available, created_at, updated_at) VALUES
@@ -95,8 +95,8 @@ INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_orde
 
 -- Sample menu item options for Pizza Margherita
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at) VALUES
-('a1111111-1111-1111-1111-111111111111', '91111111-1111-1111-1111-111111111111', 'Choix de base', 'remove', false, null, 1, NOW(), NOW()),
-('a2222222-2222-2222-2222-222222222222', '91111111-1111-1111-1111-111111111111', 'Suppléments payants', 'extra', false, null, 2, NOW(), NOW());
+('a1111111-1111-1111-1111-111111111111', '91111111-1111-1111-1111-111111111111', 'Choix de base', 'REMOVE', false, null, 1, NOW(), NOW()),
+('a2222222-2222-2222-2222-222222222222', '91111111-1111-1111-1111-111111111111', 'Suppléments payants', 'EXTRA', false, null, 2, NOW(), NOW());
 
 -- Choices for "Choix de base" (remove ingredients)
 INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_order, is_available, created_at, updated_at) VALUES
@@ -111,9 +111,9 @@ INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_orde
 
 -- Sample options for Classic Burger
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at) VALUES
-('c1111111-1111-1111-1111-111111111111', '92222222-2222-2222-2222-222222222221', 'Cuisson du steak', 'choice', true, 1, 1, NOW(), NOW()),
-('c2222222-2222-2222-2222-222222222222', '92222222-2222-2222-2222-222222222221', 'Options gratuites', 'remove', false, null, 2, NOW(), NOW()),
-('c3333333-3333-3333-3333-333333333333', '92222222-2222-2222-2222-222222222221', 'Extras', 'extra', false, null, 3, NOW(), NOW());
+('c1111111-1111-1111-1111-111111111111', '92222222-2222-2222-2222-222222222221', 'Cuisson du steak', 'CHOICE', true, 1, 1, NOW(), NOW()),
+('c2222222-2222-2222-2222-222222222222', '92222222-2222-2222-2222-222222222221', 'Options gratuites', 'REMOVE', false, null, 2, NOW(), NOW()),
+('c3333333-3333-3333-3333-333333333333', '92222222-2222-2222-2222-222222222221', 'Extras', 'EXTRA', false, null, 3, NOW(), NOW());
 
 -- Cuisson choices
 INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_order, is_available, created_at, updated_at) VALUES
@@ -135,10 +135,10 @@ INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_orde
 
 -- Options pour Pizza Personnalisée (91111111-1111-1111-1111-111111111116)
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at) VALUES
-('e1111111-1111-1111-1111-111111111111', '91111111-1111-1111-1111-111111111116', 'Taille de la pizza', 'choice', true, 1, 1, NOW(), NOW()),
-('e2222222-2222-2222-2222-222222222222', '91111111-1111-1111-1111-111111111116', 'Garnitures viandes', 'choice', false, null, 2, NOW(), NOW()),
-('e3333333-3333-3333-3333-333333333333', '91111111-1111-1111-1111-111111111116', 'Garnitures légumes', 'choice', false, null, 3, NOW(), NOW()),
-('e4444444-4444-4444-4444-444444444444', '91111111-1111-1111-1111-111111111116', 'Fromages supplémentaires', 'extra', false, null, 4, NOW(), NOW());
+('e1111111-1111-1111-1111-111111111111', '91111111-1111-1111-1111-111111111116', 'Taille de la pizza', 'CHOICE', true, 1, 1, NOW(), NOW()),
+('e2222222-2222-2222-2222-222222222222', '91111111-1111-1111-1111-111111111116', 'Garnitures viandes', 'CHOICE', false, null, 2, NOW(), NOW()),
+('e3333333-3333-3333-3333-333333333333', '91111111-1111-1111-1111-111111111116', 'Garnitures légumes', 'CHOICE', false, null, 3, NOW(), NOW()),
+('e4444444-4444-4444-4444-444444444444', '91111111-1111-1111-1111-111111111116', 'Fromages supplémentaires', 'EXTRA', false, null, 4, NOW(), NOW());
 
 -- Choix pour taille de pizza
 INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_order, is_available, created_at, updated_at) VALUES
@@ -171,9 +171,9 @@ INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_orde
 
 -- Options pour Pasta Carbonara (91111111-1111-1111-1111-111111111118)
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at) VALUES
-('b3333333-3333-3333-3333-333333333337', '91111111-1111-1111-1111-111111111118', 'Type de pâtes', 'choice', true, 1, 1, NOW(), NOW()),
-('b4444444-4444-4444-4444-444444444447', '91111111-1111-1111-1111-111111111118', 'Suppléments', 'extra', false, null, 2, NOW(), NOW()),
-('b5555555-5555-5555-5555-555555555557', '91111111-1111-1111-1111-111111111118', 'Modifications', 'remove', false, null, 3, NOW(), NOW());
+('b3333333-3333-3333-3333-333333333337', '91111111-1111-1111-1111-111111111118', 'Type de pâtes', 'CHOICE', true, 1, 1, NOW(), NOW()),
+('b4444444-4444-4444-4444-444444444447', '91111111-1111-1111-1111-111111111118', 'Suppléments', 'EXTRA', false, null, 2, NOW(), NOW()),
+('b5555555-5555-5555-5555-555555555557', '91111111-1111-1111-1111-111111111118', 'Modifications', 'REMOVE', false, null, 3, NOW(), NOW());
 
 -- Types de pâtes
 INSERT INTO menu_item_choice (id, menu_item_option_id, name, price, display_order, is_available, created_at, updated_at) VALUES
