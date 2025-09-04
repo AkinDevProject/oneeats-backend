@@ -302,7 +302,7 @@ export default function MenuItemDetail() {
   };
 
   const renderOption = (option: MenuItemOption) => {
-    const isMultiple = option.type === 'extra' || (option.maxChoices && option.maxChoices > 1);
+    const isMultiple = option.type === 'extra' || option.type === 'remove' || (option.maxChoices && option.maxChoices > 1);
     const selectedChoices = selectedOptions[option.id] || [];
 
     return (
