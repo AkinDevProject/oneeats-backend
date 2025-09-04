@@ -127,10 +127,15 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
                     onChange={(e) => updateOption(option.id, 'type', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="choice">Choix unique/multiple</option>
-                    <option value="remove">Retirer des ingrédients</option>
-                    <option value="extra">Suppléments payants</option>
+                    <option value="choice">🔘 Choix unique/multiple</option>
+                    <option value="remove">➖ Retirer des ingrédients</option>
+                    <option value="extra">➕ Suppléments payants</option>
                   </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {option.type === 'remove' && 'Les clients pourront retirer plusieurs ingrédients (prix généralement 0€)'}
+                    {option.type === 'extra' && 'Les clients pourront ajouter plusieurs suppléments payants'}
+                    {option.type === 'choice' && 'Choix unique (radio) ou multiple (checkbox) selon le max'}
+                  </p>
                 </div>
               </div>
 
