@@ -33,7 +33,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useNotification } from '../../src/contexts/NotificationContext';
 import { useOrder } from '../../src/contexts/OrderContext';
-import { useAppTheme, ThemeSelector } from '../../src/contexts/ThemeContext';
+import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { mockRestaurants } from '../../src/data/mockData';
 
 // Types pour les sections
@@ -414,7 +414,9 @@ export default function ProfileMVP() {
               {themeMetadata[selectedTheme]?.emoji} {themeMetadata[selectedTheme]?.name}
             </Text>
           </View>
-          <ThemeSelector style={styles.themeSelector} />
+          <Text style={[styles.settingDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Changement de thème bientôt disponible
+          </Text>
         </Card.Content>
       </Card>
 
