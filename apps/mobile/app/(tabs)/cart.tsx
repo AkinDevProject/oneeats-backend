@@ -143,14 +143,14 @@ export default function CartMVP() {
       const restaurantId = items[0]?.menuItem.restaurantId;
       if (!restaurantId) throw new Error('Restaurant non trouvé');
 
-      const orderData = {
-        ...values,
+      // Passer les données client correctement structurées
+      const customerData = {
+        customerName: values.customerName,
+        customerPhone: values.phoneNumber,
         pickupTime: selectedPickupTime,
-        items: items,
-        total: totalPrice,
       };
-
-      const order = await createOrder(restaurantId, JSON.stringify(orderData));
+      
+      const order = await createOrder(restaurantId, values.specialInstructions || undefined, customerData);
       if (!order) throw new Error('Erreur création commande');
 
       addOrder(order);

@@ -68,6 +68,8 @@ export interface Order {
   total: number;
   orderTime: Date;
   pickupTime: Date;
+  customerName?: string;
+  customerPhone?: string;
   customerNotes?: string;
 }
 
@@ -334,9 +336,31 @@ export const cuisineCategories = [
 ];
 
 // Mock Orders
-export const generateMockOrder = (restaurantId: string, items: CartItem[]): Order => {
+export const generateMockOrder = (
+  restaurantId: string, 
+  items: CartItem[], 
+  customerData?: { 
+    customerName?: string; 
+    customerPhone?: string; 
+    pickupTime?: string;
+  }
+): Order => {
   const restaurant = mockRestaurants.find(r => r.id === restaurantId)!;
-  const total = items.reduce((sum, item) => sum + (item.menuItem.price * item.quantity), 0);
+  const total = items.reduce((sum, item) => sum + (item.totalPrice || item.menuItem.price * item.quantity), 0);
+  
+  // Parse pickup time or default to 30 minutes from now
+  let pickupTime: Date;
+  if (customerData?.pickupTime) {
+    const [hours, minutes] = customerData.pickupTime.split(':');
+    pickupTime = new Date();
+    pickupTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    // If pickup time is in the past, add a day
+    if (pickupTime < new Date()) {
+      pickupTime.setDate(pickupTime.getDate() + 1);
+    }
+  } else {
+    pickupTime = new Date(Date.now() + 30 * 60 * 1000);
+  }
   
   return {
     id: Math.random().toString(36).substring(7),
@@ -346,6 +370,8 @@ export const generateMockOrder = (restaurantId: string, items: CartItem[]): Orde
     status: 'pending',
     total,
     orderTime: new Date(),
-    pickupTime: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
+    pickupTime,
+    customerName: customerData?.customerName,
+    customerPhone: customerData?.customerPhone,
   };
 };

@@ -12,7 +12,7 @@ interface CartContextType {
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
-  createOrder: (restaurantId: string, customerNotes?: string) => Promise<Order | null>;
+  createOrder: (restaurantId: string, customerNotes?: string, customerData?: { customerName?: string; customerPhone?: string; pickupTime?: string; }) => Promise<Order | null>;
   getItemQuantity: (menuItemId: string) => number;
 }
 
@@ -181,11 +181,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setItems([]);
   };
 
-  const createOrder = async (restaurantId: string, customerNotes?: string): Promise<Order | null> => {
+  const createOrder = async (restaurantId: string, customerNotes?: string, customerData?: { customerName?: string; customerPhone?: string; pickupTime?: string; }): Promise<Order | null> => {
     if (items.length === 0) return null;
 
     try {
-      const order = generateMockOrder(restaurantId, items);
+      const order = generateMockOrder(restaurantId, items, customerData);
       if (customerNotes) {
         order.customerNotes = customerNotes;
       }

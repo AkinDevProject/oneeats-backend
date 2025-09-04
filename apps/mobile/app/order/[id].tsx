@@ -326,10 +326,24 @@ export default function OrderDetailScreen() {
             </Text>
           </View>
           
+          <View style={styles.pickupInfo}>
+            <MaterialIcons name="person" size={20} color={currentTheme.colors.primary} />
+            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
+              Client: {order.customerName || 'Utilisateur'}
+            </Text>
+          </View>
+
+          <View style={styles.pickupInfo}>
+            <MaterialIcons name="phone" size={20} color={currentTheme.colors.primary} />
+            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
+              Téléphone: {order.customerPhone || 'Non renseigné'}
+            </Text>
+          </View>
+
           {order.customerNotes && (
             <View style={styles.notesSection}>
               <Text style={[styles.notesLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Notes de commande:
+                Instructions spéciales:
               </Text>
               <Text style={[styles.notesText, { color: currentTheme.colors.onSurface }]}>
                 {order.customerNotes}
