@@ -30,8 +30,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     loadCart();
   }, [user]);
 
+  // Optimisation: debounce le save pour éviter trop d'écriture AsyncStorage
   useEffect(() => {
-    saveCart();
+    const timeoutId = setTimeout(() => {
+      saveCart();
+    }, 300); // Attendre 300ms avant de sauver
+
+    return () => clearTimeout(timeoutId);
   }, [items, user]);
 
   const getCartKey = () => {

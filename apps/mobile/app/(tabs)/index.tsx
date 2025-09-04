@@ -92,7 +92,10 @@ export default function HomeIndex() {
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 800 });
-    loadRestaurants();
+    // Optimisation: chargement synchrone des données mock (plus rapide)
+    setRestaurants(mockRestaurants);
+    setFilteredRestaurants(mockRestaurants);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -102,8 +105,7 @@ export default function HomeIndex() {
   const loadRestaurants = async () => {
     try {
       setIsLoading(true);
-      // Simuler une requête API
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      // Chargement immédiat des données mock (pas de délai artificiel)
       setRestaurants(mockRestaurants);
       setFilteredRestaurants(mockRestaurants);
     } catch (error) {
@@ -358,8 +360,9 @@ export default function HomeIndex() {
         >
           <View>
             <Card.Cover 
-              source={{ uri: restaurant.image }} 
+              source={{ uri: restaurant.image }}
               style={baseStyles.cardCover}
+              resizeMode="cover"
             />
             
             {!restaurant.isOpen && (

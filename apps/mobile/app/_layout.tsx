@@ -20,12 +20,15 @@ import { OrderProvider } from '../src/contexts/OrderContext';
 import { NotificationProvider } from '../src/contexts/NotificationContext';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/ThemeContext';
 
-// Create a client for React Query
+// Create a client for React Query - Optimisé pour de meilleures performances
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1, // Réduire les tentatives pour échouer plus vite
+      staleTime: 10 * 60 * 1000, // 10 minutes - données restent fraîches plus longtemps
+      cacheTime: 15 * 60 * 1000, // 15 minutes en cache
+      refetchOnWindowFocus: false, // Pas de refetch au focus de la fenêtre
+      refetchOnMount: false, // Pas de refetch au montage si données en cache
     },
   },
 });
