@@ -28,6 +28,7 @@ import {
   IconButton,
 } from 'react-native-paper';
 import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useNotification } from '../../src/contexts/NotificationContext';
@@ -113,10 +114,10 @@ export default function ProfileMVP() {
     <Surface style={styles.tabsContainer} elevation={1}>
       <View style={styles.tabs}>
         {[
-          { key: 'account' as ProfileSection, title: 'Compte', icon: 'person' },
-          { key: 'favorites' as ProfileSection, title: 'Favoris', icon: 'favorite' },
-          { key: 'settings' as ProfileSection, title: 'Réglages', icon: 'settings' },
-          { key: 'support' as ProfileSection, title: 'Aide', icon: 'help' },
+          { key: 'account' as ProfileSection, title: 'Compte', icon: 'account' },
+          { key: 'favorites' as ProfileSection, title: 'Favoris', icon: 'heart' },
+          { key: 'settings' as ProfileSection, title: 'Réglages', icon: 'cog' },
+          { key: 'support' as ProfileSection, title: 'Aide', icon: 'help-circle' },
         ].map(({ key, title, icon }) => (
           <TouchableOpacity
             key={key}
@@ -158,7 +159,7 @@ export default function ProfileMVP() {
         <View style={styles.section}>
           <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content style={styles.loginPrompt}>
-              <Avatar.Icon size={80} icon="person-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
+              <Avatar.Icon size={80} icon="account-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
               <Text style={[styles.promptTitle, { color: currentTheme.colors.onSurface }]}>
                 Connectez-vous
               </Text>
@@ -202,7 +203,7 @@ export default function ProfileMVP() {
                 </Badge>
               </View>
               <IconButton
-                icon="edit"
+                icon="pencil"
                 size={24}
                 onPress={() => Alert.alert('Modifier profil', 'Fonctionnalité bientôt disponible')}
               />
@@ -213,9 +214,12 @@ export default function ProfileMVP() {
         {/* Statistiques */}
         <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
           <Card.Content>
-            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-              📊 Mes statistiques
-            </Text>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="bar-chart" size={20} color={currentTheme.colors.primary} />
+              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                Mes statistiques
+              </Text>
+            </View>
             <View style={styles.statsGrid}>
               <View style={styles.statItem}>
                 <Text style={[styles.statValue, { color: currentTheme.colors.primary }]}>
@@ -245,22 +249,58 @@ export default function ProfileMVP() {
           </Card.Content>
         </Card>
 
-        {/* Actions rapides */}
+        {/* Menu principal */}
         <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
           <Card.Content>
-            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-              ⚡ Actions rapides
-            </Text>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="apps" size={20} color={currentTheme.colors.primary} />
+              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                Menu
+              </Text>
+            </View>
             <List.Item
               title="Mes commandes"
-              description="Voir toutes mes commandes"
+              description="Historique de toutes mes commandes"
               left={(props) => <List.Icon {...props} icon="receipt" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => router.push('/(tabs)/cart' as any)}
             />
             <List.Item
+              title="Favoris"
+              description="Mes restaurants préférés"
+              left={(props) => <List.Icon {...props} icon="heart" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => Alert.alert('Favoris', 'Fonctionnalité bientôt disponible')}
+            />
+            <List.Item
+              title="Réglages"
+              description="Préférences et configuration"
+              left={(props) => <List.Icon {...props} icon="cog" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => Alert.alert('Réglages', 'Fonctionnalité bientôt disponible')}
+            />
+            <List.Item
+              title="Aide & Support"
+              description="Besoin d'aide ?"
+              left={(props) => <List.Icon {...props} icon="help-circle" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => Alert.alert('Aide', 'Fonctionnalité bientôt disponible')}
+            />
+          </Card.Content>
+        </Card>
+
+        {/* Notifications */}
+        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+          <Card.Content>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="notifications" size={20} color={currentTheme.colors.primary} />
+              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+                Notifications
+              </Text>
+            </View>
+            <List.Item
               title="Notifications"
-              description={`${unreadCount} non lues`}
+              description={`${unreadCount} messages non lus`}
               left={(props) => <List.Icon {...props} icon="bell" />}
               right={() => unreadCount > 0 ? <Badge>{unreadCount}</Badge> : <List.Icon icon="chevron-right" />}
               onPress={() => setActiveSection('support')}
@@ -311,9 +351,12 @@ export default function ProfileMVP() {
         </Card>
       ) : (
         <>
-          <Text style={[styles.pageTitle, { color: currentTheme.colors.onSurface }]}>
-            ❤️ Mes restaurants favoris ({favoriteRestaurants.length})
-          </Text>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="favorite" size={24} color={currentTheme.colors.primary} />
+            <Text style={[styles.pageTitle, { color: currentTheme.colors.onSurface }]}>
+              Mes restaurants favoris ({favoriteRestaurants.length})
+            </Text>
+          </View>
           {favoriteRestaurants.map((restaurant) => (
             <Card key={restaurant.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
               <Card.Content>
@@ -323,10 +366,10 @@ export default function ProfileMVP() {
                       {restaurant.name}
                     </Text>
                     <Text style={[styles.restaurantCuisine, { color: currentTheme.colors.onSurfaceVariant }]}>
-                      {restaurant.cuisine} • ⭐ {restaurant.rating}
+                      {restaurant.cuisine} • ★ {restaurant.rating}
                     </Text>
                     <Text style={[styles.restaurantDetails, { color: currentTheme.colors.onSurfaceVariant }]}>
-                      🕐 {restaurant.deliveryTime} • 📍 {restaurant.distance}
+                      {restaurant.deliveryTime} • {restaurant.distance}
                     </Text>
                   </View>
                   <View style={styles.restaurantActions}>
@@ -606,17 +649,21 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 20,
     fontWeight: '700',
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    marginLeft: 8,
   },
   card: {
     marginBottom: 12,
     borderRadius: 12,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
+    marginLeft: 8,
   },
   userInfo: {
     flexDirection: 'row',
