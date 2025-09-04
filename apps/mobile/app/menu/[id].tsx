@@ -33,7 +33,7 @@ import {
   Dialog,
   Paragraph,
 } from 'react-native-paper';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
@@ -42,7 +42,7 @@ import { mockMenuItems, mockRestaurants, MenuItemOption, MenuItemChoice } from '
 const { width } = Dimensions.get('window');
 
 export default function MenuItemDetail() {
-  const { id } = useLocalSearchParams();
+  const { id, editItemId } = useLocalSearchParams();
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
   const [totalPrice, setTotalPrice] = useState(0);
@@ -50,8 +50,10 @@ export default function MenuItemDetail() {
   const [menuItem, setMenuItem] = useState<any>(null);
   const [restaurant, setRestaurant] = useState<any>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  const { addItem } = useCart();
+  const { addItem, items, updateQuantity, removeItem } = useCart();
   const { currentTheme } = useAppTheme();
 
   const headerOpacity = useSharedValue(0);
@@ -59,11 +61,39 @@ export default function MenuItemDetail() {
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 600 });
     loadMenuData();
-  }, []);
+    
+    // Vérifier si on est en mode édition
+    if (editItemId) {
+      const itemToEdit = items.find(item => item.id === editItemId);
+      if (itemToEdit) {
+        setIsEditMode(true);
+        setEditingItem(itemToEdit);
+        setQuantity(itemToEdit.quantity);
+        
+        // Restaurer les options sélectionnées
+        if (itemToEdit.options) {
+          const restoredOptions: Record<string, string[]> = {};
+          itemToEdit.options.forEach(option => {
+            restoredOptions[option.optionId] = option.choices.map(choice => choice.choiceId);
+          });
+          setSelectedOptions(restoredOptions);
+        }
+      }
+    }
+  }, [editItemId]);
 
   useEffect(() => {
     calculateTotalPrice();
   }, [quantity, selectedOptions, menuItem]);
+
+  // Set dynamic page title when menu item loads
+  useEffect(() => {
+    if (menuItem && restaurant) {
+      // This will set a professional title instead of "menu/[id]"
+      const title = `${menuItem.name} - ${restaurant.name}`;
+      // Note: In Expo Router, title is handled by Stack.Screen configuration
+    }
+  }, [menuItem, restaurant]);
 
   const loadMenuData = async () => {
     try {
@@ -170,7 +200,7 @@ export default function MenuItemDetail() {
   };
 
   const handleAddToCart = () => {
-    console.log('🛒 Bouton cliqué - Ajout au panier:', menuItem.name);
+    console.log('🛒 Bouton cliqué:', isEditMode ? 'Modification' : 'Ajout au panier', menuItem.name);
     
     // Valider les options requises
     if (menuItem.options) {
@@ -186,27 +216,88 @@ export default function MenuItemDetail() {
     }
 
     try {
-      // Version simplifiée pour test
-      console.log('✅ Tentative d\'ajout au panier...');
-      
-      // Juste ajouter l'item de base sans options complexes pour tester
-      addItem(menuItem, quantity);
-      
-      console.log('✅ Ajout réussi!');
-      
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
-      // Version simplifiée pour test sur web
-      console.log('📱 Ajout réussi, navigation automatique vers le restaurant');
-      
-      // Navigation directe vers le restaurant après 500ms pour laisser le temps à l'utilisateur de voir l'action
-      setTimeout(() => {
-        console.log('🔙 Navigation vers le restaurant (router.back())');
-        router.back();
-      }, 500);
+      if (isEditMode && editingItem) {
+        // Mode édition : supprimer l'ancien item et ajouter le nouveau
+        console.log('✏️ Modification de l\'item existant...');
+        removeItem(editingItem.id);
+        
+        // Créer les options formatées
+        const formattedOptions = Object.entries(selectedOptions).map(([optionId, choiceIds]) => {
+          const option = menuItem.options.find(opt => opt.id === optionId);
+          return {
+            optionId,
+            optionName: option?.name || '',
+            choices: choiceIds.map(choiceId => {
+              const choice = option?.choices.find(c => c.id === choiceId);
+              return {
+                choiceId,
+                choiceName: choice?.name || '',
+                price: choice?.price || 0
+              };
+            })
+          };
+        });
+        
+        // Ajouter le nouvel item avec les options mises à jour
+        const menuItemWithOptions = {
+          ...menuItem,
+          options: formattedOptions,
+          totalPrice: totalPrice,
+          quantity: quantity
+        };
+        
+        addItem(menuItemWithOptions);
+        console.log('✅ Modification réussie!');
+        
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        // Retourner au panier après modification
+        setTimeout(() => {
+          router.push('/(tabs)/cart');
+        }, 500);
+        
+      } else {
+        // Mode ajout normal
+        console.log('✅ Tentative d\'ajout au panier...');
+        
+        // Créer les options formatées si elles existent
+        const formattedOptions = Object.entries(selectedOptions).map(([optionId, choiceIds]) => {
+          const option = menuItem.options.find(opt => opt.id === optionId);
+          return {
+            optionId,
+            optionName: option?.name || '',
+            choices: choiceIds.map(choiceId => {
+              const choice = option?.choices.find(c => c.id === choiceId);
+              return {
+                choiceId,
+                choiceName: choice?.name || '',
+                price: choice?.price || 0
+              };
+            })
+          };
+        });
+        
+        const menuItemWithOptions = {
+          ...menuItem,
+          options: formattedOptions.length > 0 ? formattedOptions : undefined,
+          totalPrice: totalPrice,
+          quantity: quantity
+        };
+        
+        addItem(menuItemWithOptions);
+        
+        console.log('✅ Ajout réussi!');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        // Navigation vers le restaurant après ajout
+        setTimeout(() => {
+          console.log('🔙 Navigation vers le restaurant (router.back())');
+          router.back();
+        }, 500);
+      }
     } catch (error) {
-      console.error('❌ Erreur ajout panier:', error);
-      Alert.alert('Erreur', `Impossible d'ajouter au panier: ${error}`);
+      console.error('❌ Erreur:', error);
+      Alert.alert('Erreur', `Impossible de ${isEditMode ? 'modifier' : 'ajouter'} l'article: ${error}`);
     }
   };
 
@@ -283,21 +374,32 @@ export default function MenuItemDetail() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-      <StatusBar style="light" backgroundColor="transparent" translucent />
+    <>
+      <Stack.Screen 
+        options={{
+          title: menuItem && restaurant 
+            ? `${isEditMode ? 'Modifier • ' : ''}${menuItem.name}` 
+            : isEditMode 
+              ? 'Modifier le plat' 
+              : 'Détails du plat',
+          headerStyle: { backgroundColor: currentTheme.colors.surface },
+          headerTitleStyle: { 
+            color: currentTheme.colors.onSurface,
+            fontWeight: '600'
+          },
+          headerBackTitle: isEditMode ? 'Panier' : (restaurant?.name || 'Restaurant'),
+          headerTintColor: currentTheme.colors.onSurface,
+        }} 
+      />
+      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+        <StatusBar style="light" backgroundColor="transparent" translucent />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Image de l'article */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: menuItem.image }} style={styles.itemImage} />
           <View style={styles.imageOverlay}>
-            <IconButton
-              icon="arrow-left"
-              size={24}
-              iconColor="white"
-              style={[styles.backButton, { backgroundColor: 'rgba(0,0,0,0.3)' }]}
-              onPress={() => router.back()}
-            />
+            {/* Bouton retour supprimé - remplacé par la barre de navigation native */}
             {menuItem.popular && (
               <Surface style={[styles.popularBadge, { backgroundColor: currentTheme.colors.tertiary }]} elevation={2}>
                 <Text style={[styles.popularText, { color: currentTheme.colors.onTertiary }]}>
@@ -416,7 +518,12 @@ export default function MenuItemDetail() {
                   buttonColor={currentTheme.colors.primary}
                   contentStyle={styles.addToCartContent}
                 >
-                  {menuItem.available ? 'Ajouter au panier' : 'Non disponible'}
+                  {!menuItem.available 
+                    ? 'Non disponible' 
+                    : isEditMode 
+                      ? 'Mettre à jour' 
+                      : 'Ajouter au panier'
+                  }
                 </Button>
               </Card.Content>
             </Card>
@@ -455,6 +562,7 @@ export default function MenuItemDetail() {
         </Dialog>
       </Portal>
     </SafeAreaView>
+    </>
   );
 }
 

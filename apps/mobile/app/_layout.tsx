@@ -6,6 +6,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'react-native-reanimated';
+// Import global CSS for React Native Web fixes - including title fixes
+import '../assets/styles/global.css';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '../src/contexts/AuthContext';
@@ -39,10 +41,11 @@ function AppContent() {
                 <Stack>
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                   <Stack.Screen name="auth/index" options={{ headerShown: false }} />
-                  <Stack.Screen name="restaurant/[id]" options={{ headerShown: false }} />
-                  <Stack.Screen name="order/[id]" options={{ headerShown: false }} />
                   <Stack.Screen name="designs" options={{ headerShown: false }} />
                   <Stack.Screen name="+not-found" />
+                  {/* Pages de détail AVEC barre de navigation */}
+                  {/* restaurant/[id] et menu/[id] ont leur propre configuration Stack.Screen */}
+                  {/* order/[id] sera configuré individuellement si besoin */}
                 </Stack>
                 <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
               </ThemeProvider>

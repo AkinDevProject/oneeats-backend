@@ -20,7 +20,7 @@ import {
   Divider,
   ProgressBar,
 } from 'react-native-paper';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -193,12 +193,7 @@ export default function OrderDetailScreen() {
   const renderHeader = () => (
     <Surface style={[styles.header, { backgroundColor: currentTheme.colors.surface }]} elevation={2}>
       <View style={styles.headerContent}>
-        <IconButton
-          icon="arrow-left"
-          size={24}
-          iconColor={currentTheme.colors.onSurface}
-          onPress={() => router.back()}
-        />
+        {/* Bouton retour supprimé - remplacé par la barre native */}
         <View style={styles.headerInfo}>
           <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
             Commande #{order.id.substring(0, 8)}
@@ -393,10 +388,23 @@ export default function OrderDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-      <StatusBar style="auto" />
+    <>
+      <Stack.Screen 
+        options={{
+          title: order ? `Commande #${order.id.slice(-4)}` : 'Commande',
+          headerStyle: { backgroundColor: currentTheme.colors.surface },
+          headerTitleStyle: { 
+            color: currentTheme.colors.onSurface,
+            fontWeight: '600'
+          },
+          headerBackTitle: 'Mes commandes',
+          headerTintColor: currentTheme.colors.onSurface,
+        }} 
+      />
+      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+        <StatusBar style="auto" />
       
-      {renderHeader()}
+{/* renderHeader() supprimé - remplacé par la barre de navigation native */}
       
       <ScrollView
         style={styles.scrollView}
@@ -416,6 +424,7 @@ export default function OrderDetailScreen() {
         {renderActions()}
       </ScrollView>
     </SafeAreaView>
+    </>
   );
 }
 

@@ -21,7 +21,7 @@ import {
   Chip,
   FAB,
 } from 'react-native-paper';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -158,20 +158,7 @@ export default function RestaurantScreen() {
         </View>
       </View>
       
-      {/* Bouton retour amélioré */}
-      <View style={styles.backButtonContainer}>
-        <Surface style={[styles.backButton, { backgroundColor: currentTheme.colors.surface }]} elevation={3}>
-          <IconButton
-            icon="arrow-left"
-            size={24}
-            iconColor={currentTheme.colors.onSurface}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              router.back();
-            }}
-          />
-        </Surface>
-      </View>
+{/* Bouton retour supprimé - remplacé par la barre de navigation native */}
     </View>
   );
 
@@ -255,7 +242,8 @@ export default function RestaurantScreen() {
                   <View style={[styles.quantityControls, { backgroundColor: currentTheme.colors.surface }]}>
                     <TouchableOpacity
                       style={[styles.quantityButton, { backgroundColor: currentTheme.colors.errorContainer }]}
-                      onPress={() => {
+                      onPress={(e) => {
+                        e.stopPropagation();
                         const currentQuantity = getItemQuantity(item.id);
                         if (currentQuantity > 1) {
                           const cartItem = items.find(cartItem => cartItem.menuItem.id === item.id);
@@ -278,7 +266,15 @@ export default function RestaurantScreen() {
                     </Text>
                     <TouchableOpacity
                       style={[styles.quantityButton, { backgroundColor: currentTheme.colors.primary }]}
-                      onPress={() => handleAddToCart(item)}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        // Utiliser la même logique que handleItemPress
+                        if (item.options && item.options.length > 0) {
+                          router.push(`/menu/${item.id}` as any);
+                        } else {
+                          handleAddToCart(item);
+                        }
+                      }}
                     >
                       <MaterialIcons name="add" size={16} color={currentTheme.colors.onPrimary} />
                     </TouchableOpacity>
@@ -286,7 +282,15 @@ export default function RestaurantScreen() {
                 ) : (
                   <TouchableOpacity
                     style={[styles.addButton, { backgroundColor: currentTheme.colors.primary }]}
-                    onPress={() => handleAddToCart(item)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      // Utiliser la même logique que handleItemPress
+                      if (item.options && item.options.length > 0) {
+                        router.push(`/menu/${item.id}` as any);
+                      } else {
+                        handleAddToCart(item);
+                      }
+                    }}
                   >
                     <MaterialIcons name="add" size={20} color={currentTheme.colors.onPrimary} />
                   </TouchableOpacity>
@@ -300,8 +304,21 @@ export default function RestaurantScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-      <StatusBar style="light" />
+    <>
+      <Stack.Screen 
+        options={{
+          title: restaurant ? restaurant.name : 'Restaurant',
+          headerStyle: { backgroundColor: currentTheme.colors.surface },
+          headerTitleStyle: { 
+            color: currentTheme.colors.onSurface,
+            fontWeight: '600'
+          },
+          headerBackTitle: 'Restaurants',
+          headerTintColor: currentTheme.colors.onSurface,
+        }} 
+      />
+      <View style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+        <StatusBar style="light" />
       
       
       <ScrollView
@@ -345,6 +362,7 @@ export default function RestaurantScreen() {
         />
       )}
     </View>
+    </>
   );
 }
 
@@ -459,17 +477,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
   },
-  backButtonContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    zIndex: 10,
-  },
-  backButton: {
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // backButton styles supprimés - utilisation de la barre native
   menuHeader: {
     flexDirection: 'row',
     alignItems: 'center',

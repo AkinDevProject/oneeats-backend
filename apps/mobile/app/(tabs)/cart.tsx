@@ -38,6 +38,7 @@ import { useCart } from '../../src/contexts/CartContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { mockRestaurants } from '../../src/data/mockData';
 
 // Types pour les onglets MVP
 type MVPTabType = 'cart' | 'current' | 'history';
@@ -253,6 +254,36 @@ export default function CartMVP() {
               keyboardShouldPersistTaps="handled"
               contentInsetAdjustmentBehavior="automatic"
             >
+            {/* Bouton retour restaurant */}
+            {items.length > 0 && (
+              <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+                <Card.Content>
+                  <View style={styles.restaurantInfo}>
+                    <View style={styles.restaurantDetails}>
+                      <Text style={[styles.restaurantLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                        Commande chez
+                      </Text>
+                      <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>
+                        {mockRestaurants.find(r => r.id === items[0].menuItem.restaurantId)?.name || 'Restaurant'}
+                      </Text>
+                    </View>
+                    <Button
+                      mode="contained"
+                      onPress={() => {
+                        const restaurantId = items[0].menuItem.restaurantId;
+                        router.push(`/restaurant/${restaurantId}` as any);
+                      }}
+                      style={styles.continueShoppingButton}
+                      buttonColor={currentTheme.colors.primary}
+                      icon="plus"
+                    >
+                      Ajouter des plats
+                    </Button>
+                  </View>
+                </Card.Content>
+              </Card>
+            )}
+
             {/* Articles du panier */}
             <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
               <Card.Content>
@@ -265,6 +296,22 @@ export default function CartMVP() {
                       <Text style={[styles.itemName, { color: currentTheme.colors.onSurface }]}>
                         {item.menuItem.name}
                       </Text>
+                      {/* Affichage des options choisies */}
+                      {item.options && item.options.length > 0 && (
+                        <View style={styles.optionsContainer}>
+                          {item.options.map((option) => (
+                            <Text key={option.optionId} style={[styles.optionText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                              {option.optionName}: {option.choices.map(choice => choice.choiceName).join(', ')}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      {/* Instructions spéciales */}
+                      {item.specialInstructions && (
+                        <Text style={[styles.instructionsText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                          Note: {item.specialInstructions}
+                        </Text>
+                      )}
                       <Text style={[styles.itemPrice, { color: currentTheme.colors.primary }]}>
                         {item.totalPrice.toFixed(2)}€
                       </Text>
@@ -285,6 +332,15 @@ export default function CartMVP() {
                         onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
                         style={styles.quantityButton}
                       />
+                      {/* Bouton modifier pour les items avec options */}
+                      {item.menuItem.options && item.menuItem.options.length > 0 && (
+                        <IconButton
+                          icon="pencil"
+                          size={20}
+                          onPress={() => router.push(`/menu/${item.menuItem.id}?editItemId=${item.id}` as any)}
+                          iconColor={currentTheme.colors.primary}
+                        />
+                      )}
                       <IconButton
                         icon="delete"
                         size={20}
@@ -728,6 +784,44 @@ const styles = StyleSheet.create({
   },
   historyButton: {
     flex: 1,
+    borderRadius: 8,
+  },
+  // Nouveaux styles pour les options
+  optionsContainer: {
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  optionText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  instructionsText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  // Styles pour la section restaurant
+  restaurantInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  restaurantDetails: {
+    flex: 1,
+    marginRight: 16,
+  },
+  restaurantLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  restaurantName: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  continueShoppingButton: {
     borderRadius: 8,
   },
 });

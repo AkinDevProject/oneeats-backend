@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CartItem, MenuItem, Order, generateMockOrder, CartItemOption } from '../data/mockData';
 import { useAuth } from './AuthContext';
@@ -60,6 +61,41 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const addItem = (menuItem: MenuItem | (MenuItem & { options?: CartItemOption[], totalPrice?: number, quantity?: number }), quantity?: number, specialInstructions?: string) => {
     setItems(currentItems => {
+      // Vérifier si on peut ajouter cet article (même restaurant ou panier vide)
+      if (currentItems.length > 0) {
+        const currentRestaurantId = currentItems[0].menuItem.restaurantId;
+        if (menuItem.restaurantId !== currentRestaurantId) {
+          // Alert pour demander confirmation de changement de restaurant
+          Alert.alert(
+            'Changer de restaurant ?',
+            'Votre panier contient des articles d\'un autre restaurant. Voulez-vous vider le panier et commander chez ce restaurant ?',
+            [
+              {
+                text: 'Annuler',
+                style: 'cancel',
+                onPress: () => {
+                  // Ne rien faire, l'article ne sera pas ajouté
+                  return;
+                }
+              },
+              {
+                text: 'Changer',
+                style: 'destructive',
+                onPress: () => {
+                  // Vider le panier et ajouter le nouvel article
+                  setItems([]);
+                  // Utiliser setTimeout pour que le vidage soit effectif avant l'ajout
+                  setTimeout(() => {
+                    addItem(menuItem, quantity, specialInstructions);
+                  }, 100);
+                }
+              }
+            ]
+          );
+          return currentItems; // Retourner l'état actuel sans modification
+        }
+      }
+
       // Extract options and totalPrice from menuItem if they exist
       const itemOptions = 'options' in menuItem ? menuItem.options : undefined;
       const itemTotalPrice = 'totalPrice' in menuItem ? menuItem.totalPrice : undefined;
@@ -158,8 +194,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const getItemQuantity = (menuItemId: string) => {
-    const item = items.find(i => i.menuItem.id === menuItemId);
-    return item ? item.quantity : 0;
+    // Somme toutes les quantités pour ce menuItemId
+    return items
+      .filter(i => i.menuItem.id === menuItemId)
+      .reduce((total, item) => total + item.quantity, 0);
   };
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
