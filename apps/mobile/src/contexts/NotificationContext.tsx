@@ -40,10 +40,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
 
   useEffect(() => {
-    requestPermissions();
+    // Ne configurer les notifications que sur mobile
+    if (Platform.OS !== 'web') {
+      requestPermissions();
+    }
   }, []);
 
   const requestPermissions = async () => {
+    // Vérifier si on est sur web pour éviter les erreurs
+    if (Platform.OS === 'web') {
+      console.log('Notifications not supported on web');
+      return;
+    }
+
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
         name: 'default',

@@ -1,51 +1,13 @@
-/* OneEats Mobile App - CSS Fixes for React Native Web */
-/* Prevents auto-generated problematic classes */
+/* OneEats Mobile App - Minimal CSS fixes without interfering with RN Web */
 
-/* Force clean view styles */
-.css-view-175oi2r,
-.css-view-g5y9jx,
-.r-borderBottomWidth-qklmqi,
-.r-flex-13awgt0,
-.r-pointerEvents-105ug2t {
-  border-bottom: none !important;
-  flex: inherit !important;
-  pointer-events: auto !important;
+/* Basic reset only for body and html */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Fix problematic title/heading classes - MAIN FIX for menu/[id] */
-.css-text-146c3p1,
-.r-maxWidth-dnmrzs,
-.r-overflow-1udh08x,
-.r-textOverflow-1udbk01,
-.r-whiteSpace-3s2u2q,
-.r-wordWrap-1iln25a,
-.r-fontSize-1i10wst {
-  max-width: none !important;
-  overflow: visible !important;
-  text-overflow: inherit !important;
-  white-space: normal !important;
-  word-wrap: normal !important;
-  font-size: inherit !important;
-}
-
-/* Clean title styling for headings */
-h1, h2, h3, h4, h5, h6 {
-  color: #212121 !important;
-  font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-  font-weight: 600 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Specific fix for route-based titles */
+/* Hide the problematic auto-generated route title that shows "menu/[id]" */
 h1[aria-level="1"][role="heading"] {
-  display: none !important; /* Hide the problematic auto-generated title */
-}
-
-/* OneEats custom header styling */
-.oneeats-header-title {
-  color: #212121 !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  display: none !important;
 }

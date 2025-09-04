@@ -74,34 +74,34 @@ export default function RestaurantScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={currentTheme.colors.primary} />
-          <Text style={[styles.loadingText, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Chargement du restaurant...
-          </Text>
-        </View>
-      </SafeAreaView>
+      <View style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+            <Text style={[styles.loadingText, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Chargement du restaurant...
+            </Text>
+          </View>
+      </View>
     );
   }
 
   if (!restaurant) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-        <View style={styles.errorContainer}>
-          <MaterialIcons name="error-outline" size={60} color={currentTheme.colors.onSurfaceVariant} />
-          <Text style={[styles.errorText, { color: currentTheme.colors.onSurface }]}>
-            Restaurant non trouvé
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => router.back()}
-            buttonColor={currentTheme.colors.primary}
-          >
-            Retour
-          </Button>
-        </View>
-      </SafeAreaView>
+      <View style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+          <View style={styles.errorContainer}>
+            <MaterialIcons name="error-outline" size={60} color={currentTheme.colors.onSurfaceVariant} />
+            <Text style={[styles.errorText, { color: currentTheme.colors.onSurface }]}>
+              Restaurant non trouvé
+            </Text>
+            <Button
+              mode="contained"
+              onPress={() => router.back()}
+              buttonColor={currentTheme.colors.primary}
+            >
+              Retour
+            </Button>
+          </View>
+      </View>
     );
   }
 
@@ -442,9 +442,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: 'white',
     marginBottom: 8,
-    textShadowColor: 'rgba(0,0,0,0.7)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadow: '0px 1px 4px rgba(0,0,0,0.7)',
   },
   restaurantInfo: {
     flexDirection: 'row',

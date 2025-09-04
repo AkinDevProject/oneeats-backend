@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CartItem, MenuItem, Order, generateMockOrder, CartItemOption } from '../data/mockData';
+import { CartItem, MenuItem, Order, generateMockOrder, CartItemOption, mockMenuItems } from '../data/mockData';
 import { useAuth } from './AuthContext';
 
 interface CartContextType {
@@ -101,7 +101,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const itemTotalPrice = 'totalPrice' in menuItem ? menuItem.totalPrice : undefined;
       const itemQuantity = quantity || ('quantity' in menuItem ? menuItem.quantity : undefined) || 1;
       
-      // Create a clean MenuItem object
+      // Create a clean MenuItem object, ensuring original options are preserved
+      const originalMenuItem = mockMenuItems.find(item => item.id === menuItem.id);
       const cleanMenuItem: MenuItem = {
         id: menuItem.id,
         restaurantId: menuItem.restaurantId,
@@ -112,7 +113,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         category: menuItem.category,
         popular: menuItem.popular,
         available: menuItem.available,
-        options: menuItem.options,
+        options: originalMenuItem?.options || menuItem.options, // Preserve original options
       };
 
       // For items with options, each combination of options should be a separate cart item

@@ -8,6 +8,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'react-native-reanimated';
 // Import global CSS for React Native Web fixes - including title fixes
 import '../assets/styles/global.css';
+// Supprimer les warnings de développement sur Web
+if (typeof window !== 'undefined') {
+  require('../web/suppress-warnings.js');
+}
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '../src/contexts/AuthContext';
@@ -40,7 +44,7 @@ function AppContent() {
               <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <Stack>
                   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="auth/index" options={{ headerShown: false }} />
+                  <Stack.Screen name="auth/login" options={{ headerShown: false }} />
                   <Stack.Screen name="designs" options={{ headerShown: false }} />
                   <Stack.Screen name="+not-found" />
                   {/* Pages de détail AVEC barre de navigation */}
@@ -68,7 +72,14 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ 
+      flex: 1, 
+      width: '100%', 
+      height: '100%',
+      minHeight: '100vh',
+      WebkitBoxSizing: 'border-box',
+      boxSizing: 'border-box'
+    }}>
       <QueryClientProvider client={queryClient}>
         <AppThemeProvider>
           <AppContent />

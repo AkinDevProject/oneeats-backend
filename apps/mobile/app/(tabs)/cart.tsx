@@ -332,7 +332,7 @@ export default function CartMVP() {
                         onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
                         style={styles.quantityButton}
                       />
-                      {/* Bouton modifier pour les items avec options */}
+                      {/* Bouton modifier pour les items avec options disponibles */}
                       {item.menuItem.options && item.menuItem.options.length > 0 && (
                         <IconButton
                           icon="pencil"
