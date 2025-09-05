@@ -10,7 +10,10 @@
       "Bash(npm start)",
       "Bash(npx expo start:*)",
       "Bash(npm run web:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm test:*)",
+      "Bash(node:*)",
+      "Bash(npm run test:coverage:*)"
     ],
     "deny": [],
     "ask": []

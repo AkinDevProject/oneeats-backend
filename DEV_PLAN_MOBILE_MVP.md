@@ -74,17 +74,9 @@
 - **Mise à jour du contexte** : Oui, documenter les fonctionnalités de partage dans `contexte.md`.
 - **Message de commit** : "Ajouter partage social et deep linking"
 
-### 10. Optimisations de performance
-- **Description courte** : Optimiser les performances de l'app avec lazy loading, memoization et optimisations images.
-- **Prompt à exécuter** : Implémenter React.memo sur les composants coûteux, ajouter le lazy loading des images avec react-native-fast-image, optimiser les listes avec FlatList virtualisées, créer un composant d'image optimisée avec cache. Ajouter des indicateurs de performance et optimiser les re-rendus des contextes.
-- **Mise à jour du contexte** : Oui, documenter les optimisations de performance dans `contexte.md`.
-- **Message de commit** : "Optimiser performances avec lazy loading et memoization"
 
-### 11. Tests et validation
-- **Description courte** : Implémenter des tests unitaires et d'intégration pour assurer la qualité du code.
-- **Prompt à exécuter** : Configurer Jest et @testing-library/react-native, créer des tests pour les contextes principaux (Auth, Cart, Order), tester les composants critiques (panier, authentification), ajouter des tests d'intégration pour les flux utilisateur principaux. Créer des mocks pour les services et ajouter la couverture de code.
-- **Mise à jour du contexte** : Oui, documenter la stratégie de tests dans `contexte.md`.
-- **Message de commit** : "Ajouter suite de tests unitaires et d'intégration"
+
+
 
 ### 12. Configuration de production
 - **Description courte** : Préparer l'application pour le déploiement avec optimisations et configurations de production.

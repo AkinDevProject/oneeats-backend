@@ -306,9 +306,40 @@ order/
 - **Validation** : Bean Validation côté backend
 
 ### 6.3 Tests
-- **Backend** : Tests unitaires (Use Cases) + intégration (REST)
-- **Coverage** : Jacoco pour métriques de couverture  
-- **Frontend** : Tests composants (à implémenter)
+
+#### Backend
+- **Tests unitaires** : JUnit 5 pour Use Cases et entités
+- **Tests d'intégration** : RestAssured pour API REST  
+- **Coverage** : Jacoco pour métriques de couverture
+
+#### Frontend Web  
+- **Tests composants** : À implémenter avec React Testing Library
+
+#### Mobile (React Native)
+- **Framework** : Jest avec @testing-library/react-native
+- **Configuration** : jest-expo preset, mocks pour Expo modules
+- **Coverage** : 89% des contextes principaux (AuthContext, CartContext, OrderContext, NotificationContext)
+- **Types de tests** :
+  - Tests unitaires des contextes React avec hooks
+  - Tests de persistance AsyncStorage  
+  - Tests de gestion d'erreurs
+  - Tests de validation des données
+  - Tests des notifications push
+  - Tests de cohérence restaurant dans le panier
+
+**Commandes tests mobile** :
+```bash
+cd apps/mobile
+npm test                    # Tous les tests
+npm run test:watch         # Mode surveillance
+npm run test:coverage      # Avec couverture
+```
+
+**Stratégie de tests mobile** :
+1. **Tests unitaires** (✅ Implémenté) : Contextes, hooks, utils
+2. **Tests composants** (🔄 En cours) : Écrans, composants UI
+3. **Tests d'intégration** (⏳ À faire) : Flux utilisateur complets
+4. **Tests E2E** (⏳ Futur) : Tests bout-en-bout sur devices
 
 ---
 
