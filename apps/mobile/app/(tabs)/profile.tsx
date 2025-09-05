@@ -177,6 +177,15 @@ export default function ProfileMVP() {
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => navigateToSection('support')}
           />
+          {__DEV__ && (
+            <List.Item
+              title="🧪 Test Notifications"
+              description="Tester les notifications push"
+              left={(props) => <List.Icon {...props} icon="bell-ring" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => router.push('/test-notifications/' as any)}
+            />
+          )}
         </Card.Content>
       </Card>
     </ScrollView>

@@ -100,9 +100,25 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
 
   const updateOrderStatus = (orderId: string, status: Order['status']) => {
     setOrders(currentOrders =>
-      currentOrders.map(order =>
-        order.id === orderId ? { ...order, status } : order
-      )
+      currentOrders.map(order => {
+        if (order.id === orderId) {
+          const updatedOrder = { ...order, status };
+          
+          // Émettre un événement pour déclencher les notifications push
+          if (typeof window !== 'undefined') {
+            const event = new CustomEvent('orderStatusUpdated', {
+              detail: { orderId, status, restaurantName: order.restaurant.name }
+            });
+            window.dispatchEvent(event);
+          } else {
+            // Pour React Native - On peut utiliser console.log pour le moment
+            console.log('Order status updated:', { orderId, status, restaurantName: order.restaurant.name });
+          }
+          
+          return updatedOrder;
+        }
+        return order;
+      })
     );
   };
 

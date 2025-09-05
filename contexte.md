@@ -472,6 +472,29 @@ cd apps/mobile && npm start
   - Navigation fluide avec animations Reanimated
 - **Intégration** : Connecté aux contextes Auth et Theme existants, accessible depuis le profil utilisateur
 
+**✅ Système de Notifications Push Expo**
+- **Configuration Expo** : Ajout du plugin `expo-notifications` dans `app.json` avec icônes, canaux Android et permissions iOS
+- **Contexte PushNotificationContext** : Gestion complète des notifications push avec :
+  - 🔔 **Gestion des permissions** : Demande automatique et vérification des autorisations push
+  - 📱 **Token Expo Push** : Génération et stockage du token pour l'envoi de notifications
+  - 🎨 **Templates prédéfinis** : Templates pour commandes (confirmé, préparation, prêt, terminé, annulé), promotions, recommandations
+  - 📊 **Gestion avancée** : Persistance AsyncStorage, historique, marquage lecture, statistiques
+  - 🔧 **Configuration dynamique** : Respect des préférences utilisateur (son, vibration, types)
+- **Page de test `/test-notifications/`** : Interface complète pour tester toutes les notifications :
+  - Mode automatique avec envoi périodique
+  - Tests individuels par type de notification
+  - Simulation du flux complet de commande
+  - Tests avec vraies commandes existantes
+  - Statistiques et historique en temps réel
+- **Intégration OrderContext** : Émission d'événements lors des changements de statut pour déclencher automatiquement les notifications
+- **Canaux Android** : Configuration de canaux spécialisés (commandes haute priorité, promotions normales)
+- **Fonctionnalités avancées** :
+  - Navigation automatique vers les détails lors de l'interaction avec une notification
+  - Gestion des badges (compteur notifications non lues)
+  - Mode arrière-plan et réveil de l'app
+  - Templates avec variables dynamiques (nom restaurant, statut, etc.)
+  - Hooks utilitaires pour tests et développement
+
 ### 9.6 🎯 OBJECTIFS À LONG TERME
 - **Notifications temps réel** : WebSocket + push Expo intégrés
 - **Monitoring avancé** : Métriques détaillées Prometheus + dashboards

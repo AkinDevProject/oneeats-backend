@@ -18,6 +18,7 @@ import { AuthProvider } from '../src/contexts/AuthContext';
 import { CartProvider } from '../src/contexts/CartContext';
 import { OrderProvider } from '../src/contexts/OrderContext';
 import { NotificationProvider } from '../src/contexts/NotificationContext';
+import { PushNotificationProvider } from '../src/contexts/PushNotificationContext';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/ThemeContext';
 import { SettingsProvider } from '../src/contexts/SettingsContext';
 
@@ -43,8 +44,9 @@ function AppContent() {
     <PaperProvider theme={currentTheme} key={selectedTheme}>
       <SettingsProvider>
         <AuthProvider>
-          <NotificationProvider>
-            <CartProvider>
+          <PushNotificationProvider>
+            <NotificationProvider>
+              <CartProvider>
               <OrderProvider>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                   <Stack>
@@ -60,7 +62,8 @@ function AppContent() {
                 </ThemeProvider>
               </OrderProvider>
             </CartProvider>
-          </NotificationProvider>
+            </NotificationProvider>
+          </PushNotificationProvider>
         </AuthProvider>
       </SettingsProvider>
     </PaperProvider>

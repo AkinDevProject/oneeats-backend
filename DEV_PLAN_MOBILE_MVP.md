@@ -48,11 +48,7 @@
 - **Mise à jour du contexte** : Oui, documenter la fonctionnalité de géolocalisation dans `contexte.md`.
 - **Message de commit** : "Intégrer carte interactive et géolocalisation des restaurants"
 
-### 5. Système de notifications push
-- **Description courte** : Implémenter les notifications push Expo pour le suivi des commandes et les promotions.
-- **Prompt à exécuter** : Configurer Expo Notifications dans `app.json`, mettre à jour `src/contexts/NotificationContext.tsx` pour gérer les notifications push, créer des templates de notification pour les statuts de commande. Ajouter la logique de demande de permissions et la gestion des tokens push. Simuler les notifications pour les changements de statut de commande.
-- **Mise à jour du contexte** : Oui, documenter le système de notifications push dans `contexte.md`.
-- **Message de commit** : "Implémenter notifications push Expo pour suivi commandes"
+
 
 ### 6. Onboarding et guide utilisateur
 - **Description courte** : Créer un onboarding pour les nouveaux utilisateurs avec présentation des fonctionnalités.
