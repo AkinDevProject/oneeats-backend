@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Order } from '../data/mockData';
 import { useAuth } from './AuthContext';
@@ -23,14 +23,6 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-
-  useEffect(() => {
-    loadOrders();
-  }, [user]);
-
-  useEffect(() => {
-    saveOrders();
-  }, [orders, user]);
 
   // Auto-update order statuses (mock simulation)
   useEffect(() => {
@@ -61,11 +53,11 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const getOrdersKey = () => {
+  const getOrdersKey = useCallback(() => {
     return user ? `orders_${user.id}` : 'orders_guest';
-  };
+  }, [user]);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       setIsLoading(true);
       const ordersData = await AsyncStorage.getItem(getOrdersKey());
@@ -82,9 +74,9 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [getOrdersKey]);
 
-  const saveOrders = async () => {
+  const saveOrders = useCallback(async () => {
     try {
       if (user && !isLoading) {
         await AsyncStorage.setItem(getOrdersKey(), JSON.stringify(orders));
@@ -92,13 +84,22 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Error saving orders:', error);
     }
-  };
+  }, [user, isLoading, orders, getOrdersKey]);
 
-  const addOrder = (order: Order) => {
+  // useEffect hooks that depend on the functions above
+  useEffect(() => {
+    loadOrders();
+  }, [user, loadOrders]);
+
+  useEffect(() => {
+    saveOrders();
+  }, [orders, user, saveOrders]);
+
+  const addOrder = useCallback((order: Order) => {
     setOrders(currentOrders => [order, ...currentOrders]);
-  };
+  }, []);
 
-  const updateOrderStatus = (orderId: string, status: Order['status']) => {
+  const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
     setOrders(currentOrders =>
       currentOrders.map(order => {
         if (order.id === orderId) {
@@ -120,22 +121,24 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         return order;
       })
     );
-  };
+  }, []);
 
-  const getOrderById = (orderId: string): Order | undefined => {
+  const getOrderById = useCallback((orderId: string): Order | undefined => {
     return orders.find(order => order.id === orderId);
-  };
+  }, [orders]);
 
-  const clearOrders = () => {
+  const clearOrders = useCallback(() => {
     setOrders([]);
-  };
+  }, []);
 
   // Get current active order (most recent non-completed order)
-  const currentOrder = orders.find(order => 
-    ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
-  ) || null;
+  const currentOrder = useMemo(() => {
+    return orders.find(order => 
+      ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
+    ) || null;
+  }, [orders]);
 
-  const value: OrderContextType = {
+  const value = useMemo<OrderContextType>(() => ({
     orders,
     currentOrder,
     isLoading,
@@ -143,7 +146,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     updateOrderStatus,
     getOrderById,
     clearOrders,
-  };
+  }), [orders, currentOrder, isLoading, addOrder, updateOrderStatus, getOrderById, clearOrders]);
 
   return <OrderContext.Provider value={value}>{children}</OrderContext.Provider>;
 };

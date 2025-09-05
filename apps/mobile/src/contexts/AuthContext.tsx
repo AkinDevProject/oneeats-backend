@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, mockUser } from '../data/mockData';
 
@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUser();
   }, []);
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
       const userData = await AsyncStorage.getItem('user');
       if (userData) {
@@ -39,18 +39,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const saveUser = async (userData: User) => {
+  const saveUser = useCallback(async (userData: User) => {
     try {
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
       console.error('Error saving user:', error);
     }
-  };
+  }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       // Mock authentication - in real app, call your API
       if (email === mockUser.email && password === 'password123') {
@@ -62,9 +62,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Login error:', error);
       return false;
     }
-  };
+  }, [saveUser]);
 
-  const loginGuest = async (email: string): Promise<boolean> => {
+  const loginGuest = useCallback(async (email: string): Promise<boolean> => {
     try {
       const guestUser: User = {
         id: Math.random().toString(36).substring(7),
@@ -80,9 +80,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Guest login error:', error);
       return false;
     }
-  };
+  }, [saveUser]);
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       // Mock registration - in real app, call your API
       const newUser: User = {
@@ -99,18 +99,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Registration error:', error);
       return false;
     }
-  };
+  }, [saveUser]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await AsyncStorage.removeItem('user');
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
     }
-  };
+  }, []);
 
-  const updateProfile = async (updates: Partial<User>) => {
+  const updateProfile = useCallback(async (updates: Partial<User>) => {
     if (!user) return;
     
     try {
@@ -119,9 +119,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Profile update error:', error);
     }
-  };
+  }, [user, saveUser]);
 
-  const convertGuestToFullUser = async (name: string, password: string): Promise<boolean> => {
+  const convertGuestToFullUser = useCallback(async (name: string, password: string): Promise<boolean> => {
     if (!user || !user.isGuest) return false;
 
     try {
@@ -136,9 +136,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Guest conversion error:', error);
       return false;
     }
-  };
+  }, [user, saveUser]);
 
-  const value: AuthContextType = {
+  const value = useMemo<AuthContextType>(() => ({
     user,
     isLoading,
     isAuthenticated: !!user,
@@ -148,7 +148,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     updateProfile,
     convertGuestToFullUser,
-  };
+  }), [user, isLoading, login, loginGuest, register, logout, updateProfile, convertGuestToFullUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

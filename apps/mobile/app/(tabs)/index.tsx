@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -40,6 +40,9 @@ import {
 
 import { mockRestaurants, cuisineCategories, Restaurant } from '../../src/data/mockData';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import OptimizedImage from '../../src/components/OptimizedImage';
+import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
+import { useRenderTime, useOptimizedCallback } from '../../src/hooks/usePerformanceMonitor';
 
 const { width } = Dimensions.get('window');
 
@@ -59,8 +62,98 @@ const createCustomTheme = (currentTheme: any) => ({
   },
 });
 
+// Composant mémoïsé pour les restaurants
+const RestaurantCard = memo(({ restaurant, onPress, theme }: {
+  restaurant: Restaurant;
+  onPress: (restaurant: Restaurant) => void;
+  theme: any;
+}) => {
+  const handlePress = useCallback(() => onPress(restaurant), [restaurant, onPress]);
+  
+  return (
+    <Card style={[baseStyles.card, { backgroundColor: theme.colors.surface }]} elevation={2}>
+      <TouchableRipple onPress={handlePress} borderless>
+        <View>
+          <Image 
+            source={{ uri: restaurant.image }}
+            style={baseStyles.cardCover}
+            resizeMode="cover"
+          />
+          
+          {!restaurant.isOpen && (
+            <View style={baseStyles.closedOverlay}>
+              <Surface style={[baseStyles.closedSurface, { backgroundColor: theme.colors.errorContainer }]} elevation={2}>
+                <Text style={[baseStyles.closedText, { color: theme.colors.onErrorContainer }]}>Fermé</Text>
+              </Surface>
+            </View>
+          )}
+          
+          <View style={baseStyles.cardBadges}>
+            <Badge style={[baseStyles.ratingBadge, { backgroundColor: theme.colors.surface }]}>
+              <Text style={{ color: theme.colors.onSurface, fontSize: 12, fontWeight: '600' }}>
+                ⭐ {restaurant.rating}
+              </Text>
+            </Badge>
+            {restaurant.featured && (
+              <Badge style={[baseStyles.featuredBadge, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                <Text style={{ color: theme.colors.onTertiaryContainer, fontSize: 12, fontWeight: '600' }}>
+                  ⚡ Populaire
+                </Text>
+              </Badge>
+            )}
+          </View>
+          
+          <Card.Content style={baseStyles.cardContent}>
+            <Text style={[baseStyles.restaurantName, { color: theme.colors.onSurface }]} numberOfLines={1}>
+              {restaurant.name}
+            </Text>
+            <Text style={[baseStyles.restaurantCuisine, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+              {restaurant.cuisine}
+            </Text>
+            
+            <View style={baseStyles.restaurantDetails}>
+              <View style={baseStyles.detailItem}>
+                <Text style={baseStyles.detailIcon}>🕐</Text>
+                <Text style={[baseStyles.detailText, { color: theme.colors.onSurfaceVariant }]}>{restaurant.deliveryTime}</Text>
+              </View>
+              <View style={baseStyles.detailItem}>
+                <Text style={baseStyles.detailIcon}>📍</Text>
+                <Text style={[baseStyles.detailText, { color: theme.colors.onSurfaceVariant }]}>{restaurant.distance}</Text>
+              </View>
+            </View>
+          </Card.Content>
+          
+          <Card.Actions style={baseStyles.cardActions}>
+            <Chip 
+              icon="walk" 
+              compact 
+              style={baseStyles.pickupChip}
+              backgroundColor={theme.colors.secondaryContainer}
+              textStyle={{ color: theme.colors.onSecondaryContainer }}
+            >
+              À emporter
+            </Chip>
+            <Button
+              mode="contained"
+              onPress={handlePress}
+              style={baseStyles.viewButton}
+              buttonColor={theme.colors.primaryContainer}
+              textColor={theme.colors.onPrimaryContainer}
+            >
+              Voir le menu
+            </Button>
+          </Card.Actions>
+        </View>
+      </TouchableRipple>
+    </Card>
+  );
+});
+
+RestaurantCard.displayName = 'RestaurantCard';
+
 // Page d'accueil avec design home-design-5
-export default function HomeIndex() {
+function HomeIndex() {
+  useRenderTime('HomeIndex');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -72,12 +165,12 @@ export default function HomeIndex() {
   
   // Utiliser le thème global
   const { currentTheme: globalTheme, setSelectedTheme: setGlobalTheme, selectedTheme, themeMetadata } = useAppTheme();
-  const customTheme = createCustomTheme(globalTheme);
+  const customTheme = useMemo(() => createCustomTheme(globalTheme), [globalTheme]);
   
   // Synchroniser avec le thème global quand on change
-  const handleThemeChange = async (themeKey: string) => {
+  const handleThemeChange = useCallback(async (themeKey: string) => {
     await setGlobalTheme(themeKey as any);
-  };
+  }, [setGlobalTheme]);
 
   const renderLoadingState = () => (
     <View style={[baseStyles.loadingContainer, { backgroundColor: globalTheme.colors.background }]}>
@@ -98,11 +191,7 @@ export default function HomeIndex() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [selectedCategory, searchQuery, selectedFilters, restaurants]);
-
-  const loadRestaurants = async () => {
+  const loadRestaurants = useOptimizedCallback(async () => {
     try {
       setIsLoading(true);
       // Chargement immédiat des données mock (pas de délai artificiel)
@@ -113,9 +202,9 @@ export default function HomeIndex() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [], 'loadRestaurants');
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...restaurants];
     
     if (selectedCategory !== 'all') {
@@ -138,27 +227,32 @@ export default function HomeIndex() {
     }
     
     setFilteredRestaurants(filtered);
-  };
+  }, [restaurants, selectedCategory, searchQuery, selectedFilters]);
 
-  const onRefresh = async () => {
+  // useEffect that depends on applyFilters - placed after its definition
+  useEffect(() => {
+    applyFilters();
+  }, [selectedCategory, searchQuery, selectedFilters, restaurants, applyFilters]);
+
+  const onRefresh = useOptimizedCallback(async () => {
     setRefreshing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await loadRestaurants();
     setRefreshing(false);
-  };
+  }, [loadRestaurants], 'onRefresh');
 
-  const handleRestaurantPress = (restaurant: Restaurant) => {
+  const handleRestaurantPress = useOptimizedCallback((restaurant: Restaurant) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(`/restaurant/${restaurant.id}` as any);
-  };
+  }, [], 'handleRestaurantPress');
 
-  const toggleFilter = (filter: string) => {
+  const toggleFilter = useCallback((filter: string) => {
     setSelectedFilters(prev => 
       prev.includes(filter) 
         ? prev.filter(f => f !== filter)
         : [...prev, filter]
     );
-  };
+  }, []);
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
@@ -347,92 +441,19 @@ export default function HomeIndex() {
     </View>
   );
 
-  const renderRestaurant = (restaurant: Restaurant, index: number) => (
+  const renderRestaurant = useCallback((restaurant: Restaurant, index: number) => (
     <Animated.View 
       key={restaurant.id}
       entering={FadeIn.delay(index * 100).duration(600)}
       style={baseStyles.restaurantCard}
     >
-      <Card style={[baseStyles.card, { backgroundColor: customTheme.colors.surface }]} elevation={2}>
-        <TouchableRipple
-          onPress={() => handleRestaurantPress(restaurant)}
-          borderless
-        >
-          <View>
-            <Card.Cover 
-              source={{ uri: restaurant.image }}
-              style={baseStyles.cardCover}
-              resizeMode="cover"
-            />
-            
-            {!restaurant.isOpen && (
-              <View style={baseStyles.closedOverlay}>
-                <Surface style={[baseStyles.closedSurface, dynamicStyles.closedSurface]} elevation={2}>
-                  <Text style={[baseStyles.closedText, dynamicStyles.closedText]}>Fermé</Text>
-                </Surface>
-              </View>
-            )}
-            
-            <View style={baseStyles.cardBadges}>
-              <Badge style={[baseStyles.ratingBadge, { backgroundColor: customTheme.colors.surface }]}>
-                <Text style={{ color: customTheme.colors.onSurface, fontSize: 12, fontWeight: '600' }}>
-                  ⭐ {restaurant.rating}
-                </Text>
-              </Badge>
-              {restaurant.featured && (
-                <Badge style={[baseStyles.featuredBadge, { backgroundColor: customTheme.colors.tertiaryContainer }]}>
-                  <Text style={{ color: customTheme.colors.onTertiaryContainer, fontSize: 12, fontWeight: '600' }}>
-                    ⚡ Populaire
-                  </Text>
-                </Badge>
-              )}
-            </View>
-            
-            <Card.Content style={baseStyles.cardContent}>
-              <Text style={[baseStyles.restaurantName, dynamicStyles.restaurantName]} numberOfLines={1}>
-                {restaurant.name}
-              </Text>
-              <Text style={[baseStyles.restaurantCuisine, dynamicStyles.restaurantCuisine]} numberOfLines={1}>
-                {restaurant.cuisine}
-              </Text>
-              
-              <View style={baseStyles.restaurantDetails}>
-                <View style={baseStyles.detailItem}>
-                  <Text style={baseStyles.detailIcon}>🕐</Text>
-                  <Text style={[baseStyles.detailText, dynamicStyles.detailText]}>{restaurant.deliveryTime}</Text>
-                </View>
-                <View style={baseStyles.detailItem}>
-                  <Text style={baseStyles.detailIcon}>📍</Text>
-                  <Text style={[baseStyles.detailText, dynamicStyles.detailText]}>{restaurant.distance}</Text>
-                </View>
-              </View>
-            </Card.Content>
-            
-            <Card.Actions style={baseStyles.cardActions}>
-              <Chip 
-                icon="walk" 
-                compact 
-                style={baseStyles.pickupChip}
-                backgroundColor={customTheme.colors.secondaryContainer}
-                textStyle={{ color: customTheme.colors.onSecondaryContainer }}
-              >
-                À emporter
-              </Chip>
-              <Button
-                mode="contained"
-                onPress={() => handleRestaurantPress(restaurant)}
-                style={baseStyles.viewButton}
-                buttonColor={customTheme.colors.primaryContainer}
-                textColor={customTheme.colors.onPrimaryContainer}
-              >
-                Voir le menu
-              </Button>
-            </Card.Actions>
-          </View>
-        </TouchableRipple>
-      </Card>
+      <RestaurantCard
+        restaurant={restaurant}
+        onPress={handleRestaurantPress}
+        theme={customTheme}
+      />
     </Animated.View>
-  );
+  ), [handleRestaurantPress, customTheme]);
 
   const renderFilterModal = () => {
     if (!filterVisible) return null;
@@ -517,9 +538,13 @@ export default function HomeIndex() {
                   Restaurants recommandés ({filteredRestaurants.length})
                 </Text>
                 
-                <View style={baseStyles.restaurantsList}>
-                  {filteredRestaurants.map(renderRestaurant)}
-                </View>
+                <OptimizedFlatListMemo
+                  data={filteredRestaurants}
+                  renderItem={({ item, index }) => renderRestaurant(item, index)}
+                  estimatedItemSize={350}
+                  style={baseStyles.restaurantsList}
+                  contentContainerStyle={{ gap: 16 }}
+                />
               </View>
             </ScrollView>
             
@@ -877,3 +902,5 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
 });
+
+export default memo(HomeIndex);
