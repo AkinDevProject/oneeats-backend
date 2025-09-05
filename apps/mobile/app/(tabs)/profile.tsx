@@ -168,7 +168,7 @@ export default function ProfileMVP() {
             description="Préférences et configuration"
             left={(props) => <List.Icon {...props} icon="cog" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => navigateToSection('settings')}
+            onPress={() => router.push('/settings/' as any)}
           />
           <List.Item
             title="Aide & Support"

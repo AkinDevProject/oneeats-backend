@@ -19,6 +19,7 @@ import { CartProvider } from '../src/contexts/CartContext';
 import { OrderProvider } from '../src/contexts/OrderContext';
 import { NotificationProvider } from '../src/contexts/NotificationContext';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/ThemeContext';
+import { SettingsProvider } from '../src/contexts/SettingsContext';
 
 // Create a client for React Query - Optimisé pour de meilleures performances
 const queryClient = new QueryClient({
@@ -40,26 +41,28 @@ function AppContent() {
 
   return (
     <PaperProvider theme={currentTheme} key={selectedTheme}>
-      <AuthProvider>
-        <NotificationProvider>
-          <CartProvider>
-            <OrderProvider>
-              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <Stack>
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-                  <Stack.Screen name="designs" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" />
-                  {/* Pages de détail AVEC barre de navigation */}
-                  {/* restaurant/[id] et menu/[id] ont leur propre configuration Stack.Screen */}
-                  {/* order/[id] sera configuré individuellement si besoin */}
-                </Stack>
-                <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
-              </ThemeProvider>
-            </OrderProvider>
-          </CartProvider>
-        </NotificationProvider>
-      </AuthProvider>
+      <SettingsProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <CartProvider>
+              <OrderProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                  <Stack>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+                    <Stack.Screen name="designs" options={{ headerShown: false }} />
+                    <Stack.Screen name="+not-found" />
+                    {/* Pages de détail AVEC barre de navigation */}
+                    {/* restaurant/[id] et menu/[id] ont leur propre configuration Stack.Screen */}
+                    {/* order/[id] sera configuré individuellement si besoin */}
+                  </Stack>
+                  <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
+                </ThemeProvider>
+              </OrderProvider>
+            </CartProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </SettingsProvider>
     </PaperProvider>
   );
 }

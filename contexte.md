@@ -453,7 +453,26 @@ cd apps/mobile && npm start
 5. **Tests complets** : Coverage pour tous les domaines
 6. **Frontend integration** : Adapter apps web/mobile aux nouvelles APIs
 
-### 9.5 🎯 OBJECTIFS À LONG TERME
+### 9.5 📱 NOUVELLES FONCTIONNALITÉS MOBILE AJOUTÉES
+**✅ Paramètres Avancés Complets**
+- **Contexte SettingsContext** : Gestion complète des préférences utilisateur avec persistance AsyncStorage
+- **Page `/settings/index.tsx`** : Interface utilisateur complète avec sections :
+  - 🔔 **Notifications Push** : Gestion des notifications (commandes, promotions, recommandations, son, vibration)
+  - 🥗 **Préférences Alimentaires** : Végétarien, végétalien, sans gluten, sans lactose, sans noix, halal, casher
+  - 🔒 **Confidentialité** : Partage localisation, données d'usage, emails marketing, visibilité profil
+  - 👤 **Compte Utilisateur** : Changement mot de passe, modification email, suppression compte
+  - ⚙️ **Application** : Langue (FR/EN/ES/IT), devise (EUR/USD/GBP), unités distance, localisation auto, thème
+  - ℹ️ **À Propos** : Version app, CGU, politique confidentialité, support, évaluation
+- **Fonctionnalités Avancées** :
+  - Export/Import des paramètres utilisateur
+  - Réinitialisation aux valeurs par défaut
+  - Hooks utilitaires : `useActiveDietaryPreferences`, `useCheckDietaryCompatibility`
+  - Persistance automatique avec AsyncStorage
+  - Interface responsive avec Material Design 3
+  - Navigation fluide avec animations Reanimated
+- **Intégration** : Connecté aux contextes Auth et Theme existants, accessible depuis le profil utilisateur
+
+### 9.6 🎯 OBJECTIFS À LONG TERME
 - **Notifications temps réel** : WebSocket + push Expo intégrés
 - **Monitoring avancé** : Métriques détaillées Prometheus + dashboards
 - **Recherche avancée** : Recherche full-text restaurants + menus
