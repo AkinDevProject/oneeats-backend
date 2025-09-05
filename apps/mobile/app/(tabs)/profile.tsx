@@ -16,6 +16,9 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   FadeIn,
+  FadeInLeft,
+  SlideInRight,
+  withSpring,
 } from 'react-native-reanimated';
 import {
   Card,
@@ -40,7 +43,8 @@ import { mockRestaurants } from '../../src/data/mockData';
 type ProfileSection = 'account' | 'favorites' | 'settings' | 'support';
 
 export default function ProfileMVP() {
-  const [activeSection, setActiveSection] = useState<ProfileSection>('account');
+  const [activeSection, setActiveSection] = useState<ProfileSection | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [marketingEnabled, setMarketingEnabled] = useState(false);
@@ -109,54 +113,98 @@ export default function ProfileMVP() {
   // Favoris simulés
   const favoriteRestaurants = mockRestaurants.slice(0, stats.favoriteRestaurants || 3);
 
-  // Rendu des sections
-  const renderSectionTabs = () => (
-    <Surface style={styles.tabsContainer} elevation={1}>
-      <View style={styles.tabs}>
-        {[
-          { key: 'account' as ProfileSection, title: 'Compte', icon: 'account' },
-          { key: 'favorites' as ProfileSection, title: 'Favoris', icon: 'heart' },
-          { key: 'settings' as ProfileSection, title: 'Réglages', icon: 'cog' },
-          { key: 'support' as ProfileSection, title: 'Aide', icon: 'help-circle' },
-        ].map(({ key, title, icon }) => (
-          <TouchableOpacity
-            key={key}
-            style={[
-              styles.tab,
-              activeSection === key && { backgroundColor: currentTheme.colors.primaryContainer }
-            ]}
-            onPress={() => {
-              setActiveSection(key);
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          >
-            <Avatar.Icon
-              size={24}
-              icon={icon}
-              style={{
-                backgroundColor: activeSection === key ? currentTheme.colors.primary : currentTheme.colors.surfaceVariant,
-                marginBottom: 4,
-              }}
-            />
-            <Text style={[
-              styles.tabText,
-              {
-                color: activeSection === key ? currentTheme.colors.onPrimaryContainer : currentTheme.colors.onSurface
-              }
-            ]}>
-              {title}
+  // Fonction pour retourner au menu principal avec transition fluide
+  const goBackToMenu = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Transition fluide
+    setTimeout(() => {
+      setActiveSection(null);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  // Fonction pour naviguer vers une section avec animation
+  const navigateToSection = (section: ProfileSection) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Transition fluide
+    setTimeout(() => {
+      setActiveSection(section);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  // Menu principal (Menu 2)
+  const renderMainMenu = () => (
+    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+      {/* Menu principal */}
+      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <MaterialIcons name="apps" size={20} color={currentTheme.colors.primary} />
+            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+              Menu
             </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </Surface>
+          </View>
+          <List.Item
+            title="Compte"
+            description="Informations personnelles et statistiques"
+            left={(props) => <List.Icon {...props} icon="account" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigateToSection('account')}
+          />
+          <List.Item
+            title="Favoris"
+            description="Mes restaurants préférés"
+            left={(props) => <List.Icon {...props} icon="heart" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigateToSection('favorites')}
+          />
+          <List.Item
+            title="Réglages"
+            description="Préférences et configuration"
+            left={(props) => <List.Icon {...props} icon="cog" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigateToSection('settings')}
+          />
+          <List.Item
+            title="Aide & Support"
+            description="Besoin d'aide ?"
+            left={(props) => <List.Icon {...props} icon="help-circle" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigateToSection('support')}
+          />
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
+
 
   // Section Compte
   const renderAccountSection = () => {
     if (!isAuthenticated) {
       return (
         <View style={styles.section}>
+          {/* Bouton retour amélioré */}
+          <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+            <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
+              <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+                <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
+              </View>
+              <View style={styles.backButtonContent}>
+                <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
+                  Retour au menu
+                </Text>
+                <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  Connexion utilisateur
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </Surface>
+          
           <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content style={styles.loginPrompt}>
               <Avatar.Icon size={80} icon="account-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
@@ -182,6 +230,22 @@ export default function ProfileMVP() {
 
     return (
       <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+        {/* Bouton retour amélioré */}
+        <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+          <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
+            <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+              <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
+            </View>
+            <View style={styles.backButtonContent}>
+              <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
+                Retour au menu
+              </Text>
+              <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Profil principal
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </Surface>
         {/* Info utilisateur */}
         <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
           <Card.Content>
@@ -249,45 +313,6 @@ export default function ProfileMVP() {
           </Card.Content>
         </Card>
 
-        {/* Menu principal */}
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content>
-            <View style={styles.sectionHeader}>
-              <MaterialIcons name="apps" size={20} color={currentTheme.colors.primary} />
-              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-                Menu
-              </Text>
-            </View>
-            <List.Item
-              title="Mes commandes"
-              description="Historique de toutes mes commandes"
-              left={(props) => <List.Icon {...props} icon="receipt" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => router.push('/(tabs)/cart' as any)}
-            />
-            <List.Item
-              title="Favoris"
-              description="Mes restaurants préférés"
-              left={(props) => <List.Icon {...props} icon="heart" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => Alert.alert('Favoris', 'Fonctionnalité bientôt disponible')}
-            />
-            <List.Item
-              title="Réglages"
-              description="Préférences et configuration"
-              left={(props) => <List.Icon {...props} icon="cog" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => Alert.alert('Réglages', 'Fonctionnalité bientôt disponible')}
-            />
-            <List.Item
-              title="Aide & Support"
-              description="Besoin d'aide ?"
-              left={(props) => <List.Icon {...props} icon="help-circle" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => Alert.alert('Aide', 'Fonctionnalité bientôt disponible')}
-            />
-          </Card.Content>
-        </Card>
 
         {/* Notifications */}
         <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
@@ -329,6 +354,22 @@ export default function ProfileMVP() {
   // Section Favoris
   const renderFavoritesSection = () => (
     <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+      {/* Bouton retour amélioré */}
+      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
+          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
+          </View>
+          <View style={styles.backButtonContent}>
+            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
+              Retour au menu
+            </Text>
+            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Mes favoris
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Surface>
       {favoriteRestaurants.length === 0 ? (
         <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
           <Card.Content style={styles.emptyState}>
@@ -400,6 +441,22 @@ export default function ProfileMVP() {
   // Section Paramètres
   const renderSettingsSection = () => (
     <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+      {/* Bouton retour amélioré */}
+      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
+          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
+          </View>
+          <View style={styles.backButtonContent}>
+            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
+              Retour au menu
+            </Text>
+            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Réglages
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Surface>
       {/* Thème */}
       <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
         <Card.Content>
@@ -492,6 +549,22 @@ export default function ProfileMVP() {
   // Section Support
   const renderSupportSection = () => (
     <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+      {/* Bouton retour amélioré */}
+      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
+          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
+          </View>
+          <View style={styles.backButtonContent}>
+            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
+              Retour au menu
+            </Text>
+            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Aide & Support
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Surface>
       {/* Notifications */}
       <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
         <Card.Content>
@@ -575,27 +648,82 @@ export default function ProfileMVP() {
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
       <StatusBar style="dark" backgroundColor={currentTheme.colors.background} />
       
-      {/* Header */}
+      {/* Header dynamique avec breadcrumb */}
       <Animated.View style={[styles.header, headerAnimatedStyle]}>
         <Surface style={[styles.headerSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+          {/* Breadcrumb Navigation */}
+          <View style={styles.breadcrumbContainer}>
+            <TouchableOpacity 
+              style={[styles.breadcrumbItem, activeSection === null && styles.breadcrumbActive]}
+              onPress={activeSection ? goBackToMenu : undefined}
+              disabled={isTransitioning}
+            >
+              <MaterialIcons name="home" size={16} color={currentTheme.colors.primary} />
+              <Text style={[styles.breadcrumbText, { color: activeSection === null ? currentTheme.colors.primary : currentTheme.colors.onSurfaceVariant }]}>
+                Accueil
+              </Text>
+            </TouchableOpacity>
+            
+            {activeSection && (
+              <>
+                <MaterialIcons name="chevron-right" size={16} color={currentTheme.colors.onSurfaceVariant} />
+                <View style={[styles.breadcrumbItem, styles.breadcrumbActive]}>
+                  <Text style={[styles.breadcrumbText, { color: currentTheme.colors.primary }]}>
+                    {activeSection === 'account' ? 'Compte' :
+                     activeSection === 'favorites' ? 'Favoris' :
+                     activeSection === 'settings' ? 'Réglages' : 
+                     activeSection === 'support' ? 'Support' : ''}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+          
           <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
-            Mon Compte
+            {activeSection === null ? 'Mon Compte' : 
+             activeSection === 'account' ? 'Mon Compte' :
+             activeSection === 'favorites' ? 'Mes Favoris' :
+             activeSection === 'settings' ? 'Réglages' : 
+             activeSection === 'support' ? 'Aide & Support' : 'Mon Compte'}
           </Text>
           <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Profil, favoris et paramètres
+            {activeSection === null ? 'Profil, favoris et paramètres' :
+             activeSection === 'account' ? 'Informations personnelles et statistiques' :
+             activeSection === 'favorites' ? 'Vos restaurants préférés' :
+             activeSection === 'settings' ? 'Préférences et configuration' :
+             activeSection === 'support' ? 'Aide, FAQ et support client' : 'Profil, favoris et paramètres'}
           </Text>
         </Surface>
       </Animated.View>
 
-      {/* Tabs */}
-      {renderSectionTabs()}
 
-      {/* Content */}
+      {/* Content avec animations */}
       <View style={styles.content}>
-        {activeSection === 'account' && renderAccountSection()}
-        {activeSection === 'favorites' && renderFavoritesSection()}
-        {activeSection === 'settings' && renderSettingsSection()}
-        {activeSection === 'support' && renderSupportSection()}
+        {activeSection === null && (
+          <Animated.View entering={FadeIn.duration(400).springify()}>
+            {renderMainMenu()}
+          </Animated.View>
+        )}
+        {activeSection === 'account' && (
+          <Animated.View entering={FadeInLeft.duration(400).springify()}>
+            {renderAccountSection()}
+          </Animated.View>
+        )}
+        {activeSection === 'favorites' && (
+          <Animated.View entering={SlideInRight.duration(400).springify()}>
+            {renderFavoritesSection()}
+          </Animated.View>
+        )}
+        {activeSection === 'settings' && (
+          <Animated.View entering={FadeInLeft.duration(400).springify()}>
+            {renderSettingsSection()}
+          </Animated.View>
+        )}
+        {activeSection === 'support' && (
+          <Animated.View entering={SlideInRight.duration(400).springify()}>
+            {renderSupportSection()}
+          </Animated.View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -620,26 +748,6 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 14,
     marginTop: 4,
-  },
-  tabsContainer: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  tabs: {
-    flexDirection: 'row',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabText: {
-    fontSize: 11,
-    fontWeight: '600',
   },
   content: {
     flex: 1,
@@ -812,5 +920,72 @@ const styles = StyleSheet.create({
   notificationMessage: {
     fontSize: 12,
     marginTop: 2,
+  },
+  backButtonSurface: {
+    borderRadius: 12,
+    marginBottom: 16,
+    marginHorizontal: 4,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  backButtonIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  backButtonContent: {
+    flex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  backButtonSubtext: {
+    fontSize: 12,
+    opacity: 0.8,
+  },
+  backButtonPressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.8,
+  },
+  // Styles pour de meilleures interactions
+  menuItemActive: {
+    backgroundColor: 'rgba(0, 204, 188, 0.08)',
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  menuItemDisabled: {
+    opacity: 0.6,
+  },
+  // Breadcrumb styles
+  breadcrumbContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  breadcrumbItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginHorizontal: 2,
+  },
+  breadcrumbActive: {
+    backgroundColor: 'rgba(0, 204, 188, 0.1)',
+  },
+  breadcrumbText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
   },
 });

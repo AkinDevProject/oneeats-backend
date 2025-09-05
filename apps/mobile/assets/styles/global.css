@@ -11,3 +11,78 @@ body, html {
 h1[aria-level="1"][role="heading"] {
   display: none !important;
 }
+
+/* Import custom categories styles */
+@import url('./categories.css');
+
+/* Correction de l'espacement des catégories - Version compacte */
+/* Container principal des catégories avec espacement optimisé */
+.css-view-g5y9jx.r-flexDirection-18u37iz.r-gap-1ssbvtb {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  padding-bottom: 8px !important; /* Réduit de 16px à 8px */
+  margin-bottom: 4px !important; /* Réduit de 8px à 4px */
+}
+
+.css-view-g5y9jx.r-flexDirection-18u37iz.r-gap-1ssbvtb::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Cartes de catégories avec espacement compact */
+[data-testid="surface"] {
+  transition: all 0.2s ease !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin-bottom: 4px !important; /* Réduit de 8px à 4px */
+  box-sizing: border-box !important;
+}
+
+[data-testid="surface"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Bouton de catégorie actif avec la couleur turquoise */
+[data-testid="surface"][style*="background-color: rgb(0, 204, 188)"] {
+  box-shadow: 0 4px 8px rgba(0, 204, 188, 0.3) !important;
+  border: 2px solid #00ccbc !important;
+}
+
+/* Contenu interne des cartes avec padding compact */
+.css-view-g5y9jx.r-touchAction-1otgn73.r-padding-nsbfu8 {
+  padding: 10px 8px 12px 8px !important; /* Réduit de 12px-16px à 10px-12px */
+}
+
+/* Texte des catégories */
+.css-text-146c3p1.r-fontSize-1enofrn.r-fontWeight-1kfrs79 {
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  max-width: 70px !important;
+  margin-top: 2px !important; /* Réduit de 4px à 2px */
+}
+
+/* Emoji des catégories */
+.css-text-146c3p1.r-fontSize-1x35g6 {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+  transition: transform 0.2s ease !important;
+  margin-bottom: 4px !important; /* Réduit de 6px à 4px */
+}
+
+/* Icône material actif */
+.css-view-g5y9jx[style*="background-color: rgb(0, 204, 188)"] .css-text-146c3p1[style*="material-community"] {
+  box-shadow: 0 2px 4px rgba(0, 204, 188, 0.3) !important;
+  transform: scale(1.1) !important;
+}
+
+/* Animation au survol des emojis */
+[data-testid="surface"]:hover .css-text-146c3p1.r-fontSize-1x35g6 {
+  transform: scale(1.1) !important;
+}
+
+/* Container parent avec marge réduite */
+.css-view-g5y9jx.r-flexDirection-18u37iz.r-gap-1ssbvtb[style*="margin-bottom: 12px"] {
+  margin-bottom: 16px !important; /* Réduit de 20px à 16px */
+}
