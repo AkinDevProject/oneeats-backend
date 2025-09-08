@@ -338,43 +338,41 @@ IMPORTANT : L'app fonctionne déjà sans auth, ajoute auth comme couche sécurit
 
 ---
 
-### **ONEE-009** 🔧 **TECHNIQUE**
-**Titre** : Tests automatisés complets  
-**Story Points** : 8  
-**Priorité** : P2 - Qualité MVP  
+### **ONEE-007** 🔧 **TECHNIQUE**
+**Titre** : Tests automatisés critiques  
+**Story Points** : 5  
+**Priorité** : P1 - Qualité MVP  
 
-**Description** : Couverture test complète pour assurer qualité et non-régression.
+**Description** : Tests essentiels pour assurer MVP stable (pas couverture complète, juste critical path).
 
 **Prompt Claude Code** :
 ```
-Implémente la stratégie de tests complète OneEats :
+Implémente les tests critiques OneEats MVP :
 
-1. Tests unitaires backend :
-   - Services métier (OrderService, RestaurantService, etc.)
-   - Mappers et validators
-   - Couverture >80% domaines critiques
+1. Tests backend essentiels :
+   - OrderService : création/validation commandes
+   - AuthService : login/register/JWT validation
+   - Tests intégration endpoints critiques (/api/orders, /api/auth)
 
-2. Tests intégration :
-   - Endpoints REST avec RestAssured
-   - Tests base de données avec @Transactional
-   - Tests sécurité (auth, autorisations)
+2. Tests E2E scenarios MVP :
+   - Flux complet : mobile commande → backend → dashboard restaurant
+   - Tests authentification et autorisations
+   - Tests changements statuts commandes
 
-3. Tests frontend :
-   - Composants React avec Testing Library
-   - Tests integration API calls
-   - Tests mobile avec Detox (basique)
+3. Setup CI basique :
+   - GitHub Actions pour tests backend sur PR
+   - Tests bloquants sur branches main
+   - Pas de tests frontend pour l'instant (manuel)
 
-4. Tests E2E :
-   - Scenarios critiques (commande complète)
-   - Tests cross-platform (web + mobile)
-   - CI/CD integration GitHub Actions
-
-Configure pipeline CI qui bloque merge si tests échouent.
+FOCUS : Stabilité MVP, pas couverture complète. Tests complets en post-MVP.
 ```
 
 ---
 
-### **ONEE-008** 🔧 **TECHNIQUE**
+## 🚀 **SPRINT 4 - DÉPLOIEMENT (Semaine 4)**
+*Préparation production et finitions*
+
+### **ONEE-008** 🚀 **DÉPLOIEMENT**
 **Titre** : Configuration environnements (dev/staging/prod)  
 **Story Points** : 5  
 **Priorité** : P2 - Déploiement MVP  
