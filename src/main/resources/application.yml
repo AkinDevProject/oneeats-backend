@@ -6,12 +6,15 @@ quarkus:
   # Serveur HTTP
   http:
     port: 8080
+    host: 0.0.0.0  # Écouter sur toutes les interfaces pour permettre les connexions mobiles
     cors:
       ~: true
       origins: 
         - http://localhost:3000
         - http://localhost:5173
         - http://localhost:8081
+        - http://192.168.1.36:8080  # IP réseau pour appareils physiques
+        - http://10.0.2.2:8080      # Android émulateur
       methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
       headers: accept,authorization,content-type,x-requested-with
       access-control-max-age: 86400

@@ -38,7 +38,8 @@ import {
   MD3LightTheme,
 } from 'react-native-paper';
 
-import { mockRestaurants, cuisineCategories, Restaurant } from '../../src/data/mockData';
+import { cuisineCategories, Restaurant } from '../../src/data/mockData';
+import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import OptimizedImage from '../../src/components/OptimizedImage';
 import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
@@ -154,14 +155,16 @@ RestaurantCard.displayName = 'RestaurantCard';
 // Page d'accueil avec design home-design-5
 function HomeIndex() {
   useRenderTime('HomeIndex');
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  
+  // Utiliser le hook pour charger les restaurants depuis l'API
+  const { restaurants, loading: isLoading, error: apiError, refetch } = useRestaurants();
+  
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   
   // Utiliser le thème global
   const { currentTheme: globalTheme, setSelectedTheme: setGlobalTheme, selectedTheme, themeMetadata } = useAppTheme();
@@ -178,6 +181,11 @@ function HomeIndex() {
       <Text style={[baseStyles.loadingText, { color: globalTheme.colors.onSurfaceVariant }]}>
         Chargement des restaurants...
       </Text>
+      {apiError && (
+        <Text style={[baseStyles.errorText, { color: globalTheme.colors.error }]}>
+          Erreur: {apiError}
+        </Text>
+      )}
     </View>
   );
 
@@ -185,24 +193,25 @@ function HomeIndex() {
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 800 });
-    // Optimisation: chargement synchrone des données mock (plus rapide)
-    setRestaurants(mockRestaurants);
-    setFilteredRestaurants(mockRestaurants);
-    setIsLoading(false);
   }, []);
+
+  // Mettre à jour les restaurants filtrés quand les données changent
+  useEffect(() => {
+    if (restaurants.length > 0) {
+      setFilteredRestaurants(restaurants);
+    }
+  }, [restaurants]);
 
   const loadRestaurants = useOptimizedCallback(async () => {
     try {
-      setIsLoading(true);
-      // Chargement immédiat des données mock (pas de délai artificiel)
-      setRestaurants(mockRestaurants);
-      setFilteredRestaurants(mockRestaurants);
+      setRefreshing(true);
+      await refetch();
     } catch (error) {
       console.error('Erreur lors du chargement des restaurants:', error);
     } finally {
-      setIsLoading(false);
+      setRefreshing(false);
     }
-  }, [], 'loadRestaurants');
+  }, [refetch], 'loadRestaurants');
 
   const applyFilters = useCallback(() => {
     let filtered = [...restaurants];
@@ -830,6 +839,12 @@ const baseStyles = StyleSheet.create({
     fontSize: 16,
     marginTop: 16,
     textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

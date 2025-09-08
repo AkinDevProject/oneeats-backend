@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Download, Calendar, BarChart3, RefreshCcw, Eye, EyeOff, TrendingUp } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { mockDashboardStats } from '../../data/mockData';
+import { useDashboard } from '../../hooks/data/useDashboard';
+import { useRestaurants } from '../../hooks/data/useRestaurants';
 
 const StatsPage: React.FC = () => {
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
-  const stats = mockDashboardStats;
+  const { stats: dashboardStats, loading: dashboardLoading, error: dashboardError } = useDashboard();
+  const { restaurants, loading: restaurantsLoading } = useRestaurants();
+  
+  // Utiliser les vraies données si disponibles, sinon fallback sur mock
+  const stats = dashboardStats || mockDashboardStats;
+  const loading = dashboardLoading || restaurantsLoading;
 
-  const restaurantData = [
-    { name: 'Chez Luigi', value: 35, color: '#3B82F6' },
-    { name: 'Sakura Sushi', value: 25, color: '#10B981' },
-    { name: 'Burger Street', value: 20, color: '#F59E0B' },
+  // Construire les données des restaurants depuis l'API
+  const restaurantData = restaurants.length > 0 ? [
+    { name: restaurants.find(r => r.cuisineType === 'PIZZA')?.name || 'Pizza Palace', value: 35, color: '#3B82F6' },
+    { name: restaurants.find(r => r.cuisineType === 'JAPONAIS')?.name || 'Sushi Express', value: 25, color: '#10B981' },
+    { name: restaurants.find(r => r.cuisineType === 'AMERICAIN')?.name || 'Burger House', value: 20, color: '#F59E0B' },
+    { name: 'Autres', value: 20, color: '#8B5CF6' }
+  ] : [
+    { name: 'Pizza Palace', value: 35, color: '#3B82F6' },
+    { name: 'Sushi Express', value: 25, color: '#10B981' },
+    { name: 'Burger House', value: 20, color: '#F59E0B' },
     { name: 'Autres', value: 20, color: '#8B5CF6' }
   ];
 
@@ -32,6 +45,18 @@ const StatsPage: React.FC = () => {
     link.download = 'statistiques.csv';
     link.click();
   };
+
+  // Affichage pendant le chargement
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des statistiques...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

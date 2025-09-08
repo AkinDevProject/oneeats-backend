@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Camera, Clock, MapPin, Phone, Mail, Settings, Save, Upload, Store, Palette, Bell,
   Power
@@ -7,11 +7,55 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
-import { mockRestaurants } from '../../data/mockData';
+import apiService from '../../services/api';
 
 const RestaurantSettingsPage: React.FC = () => {
-  const [restaurant, setRestaurant] = useState(mockRestaurants[0]);
-  const [isOpen, setIsOpen] = useState(restaurant.isOpen);
+  // ID du restaurant Pizza Palace
+  const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
+  
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Fonction pour charger les données du restaurant
+  const loadRestaurantData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const apiData = await apiService.restaurants.getById(RESTAURANT_ID);
+      
+      // Mapper les données de l'API vers le format attendu par la page
+      const mappedData = {
+        ...apiData,
+        category: apiData.cuisineType, // Mapping cuisineType -> category
+        schedule: { // Créer un schedule par défaut car absent de l'API
+          monday: { open: '09:00', close: '18:00' },
+          tuesday: { open: '09:00', close: '18:00' },
+          wednesday: { open: '09:00', close: '18:00' },
+          thursday: { open: '09:00', close: '18:00' },
+          friday: { open: '09:00', close: '18:00' },
+          saturday: { open: '10:00', close: '17:00' },
+          sunday: null // Fermé le dimanche
+        }
+      };
+      
+      setRestaurant(mappedData);
+      setIsOpen(apiData.isOpen);
+      
+    } catch (err) {
+      console.error('Error loading restaurant data:', err);
+      setError(err instanceof Error ? err.message : 'Erreur de chargement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Charger les données au montage
+  useEffect(() => {
+    loadRestaurantData();
+  }, []);
 
   const handleSave = () => {
     // Save restaurant settings
@@ -34,6 +78,42 @@ const RestaurantSettingsPage: React.FC = () => {
     saturday: 'Samedi',
     sunday: 'Dimanche'
   };
+
+  // Afficher un état de chargement
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des paramètres du restaurant...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Afficher l'erreur si nécessaire
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={loadRestaurantData}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Ne pas afficher la page si les données ne sont pas encore chargées
+  if (!restaurant) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-50">

@@ -2,36 +2,42 @@ import React, { useState, useEffect } from 'react';
 import {
   MapPin, Phone, Mail, Clock, Star, Edit3, Save, X,
   Camera, Upload, Eye, EyeOff, Building2, Users,
-  Calendar, Award, TrendingUp, Settings, Globe
+  Calendar, Award, TrendingUp, Settings, Globe, CheckCircle
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import ImageWithFallback from '../../components/ui/ImageWithFallback';
+import apiService from '../../services/api';
 
 const RestaurantProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // ID du restaurant Pizza Palace (le premier de la DB)
+  const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 
   const [profileData, setProfileData] = useState({
-    name: 'Chez Luigi',
-    description: 'Restaurant italien authentique proposant des spécialités traditionnelles dans une ambiance chaleureuse et familiale.',
-    address: '123 Rue de la Paix, 75001 Paris',
-    phone: '+33 1 42 36 15 78',
-    email: 'contact@chezluigi.fr',
-    website: 'www.chezluigi.fr',
+    name: '',
+    description: '',
+    address: '',
+    phone: '',
+    email: '',
+    website: '',
     logo: '/placeholder-restaurant.jpg',
     coverImage: '/placeholder-cover.jpg',
-    category: 'Italien',
+    category: '',
     priceRange: '€€',
-    rating: 4.8,
-    reviewsCount: 127,
+    rating: 0,
+    reviewsCount: 0,
     isOpen: true,
-    openingSince: '1985',
-    specialties: ['Pizza', 'Pasta', 'Risotto', 'Desserts italiens'],
+    openingSince: '2020',
+    specialties: [],
     schedule: {
       monday: { open: '11:00', close: '23:00', closed: false },
       tuesday: { open: '11:00', close: '23:00', closed: false },
@@ -42,14 +48,73 @@ const RestaurantProfilePage: React.FC = () => {
       sunday: { open: '', close: '', closed: true }
     },
     socialMedia: {
-      facebook: '@chezluigi',
-      instagram: '@chezluigi_paris',
+      facebook: '',
+      instagram: '',
       twitter: ''
     },
-    features: ['Terrasse', 'Wifi gratuit', 'Parking', 'Accessible PMR', 'Animaux acceptés']
+    features: ['Wifi gratuit', 'Accessible PMR']
   });
 
   const [tempData, setTempData] = useState({ ...profileData });
+
+  // Fonction pour charger les données du restaurant depuis l'API
+  const loadRestaurantData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const restaurant = await apiService.restaurants.getById(RESTAURANT_ID);
+      
+      const mappedData = {
+        name: restaurant.name,
+        description: restaurant.description,
+        address: restaurant.address,
+        phone: restaurant.phone,
+        email: restaurant.email,
+        website: restaurant.website || '',
+        logo: restaurant.imageUrl || '/placeholder-restaurant.jpg',
+        coverImage: restaurant.imageUrl || '/placeholder-cover.jpg',
+        category: restaurant.cuisineType,
+        priceRange: '€€',
+        rating: restaurant.rating,
+        reviewsCount: 127, // Mock data - sera ajouté à l'API plus tard
+        isOpen: restaurant.isOpen,
+        openingSince: '2020',
+        specialties: restaurant.cuisineType === 'PIZZA' ? ['Pizza', 'Pâtes', 'Desserts italiens'] : 
+                     restaurant.cuisineType === 'AMERICAIN' ? ['Burgers', 'Frites', 'Milkshakes'] :
+                     restaurant.cuisineType === 'JAPONAIS' ? ['Sushis', 'Sashimis', 'Makis'] : [],
+        schedule: {
+          monday: { open: '11:00', close: '23:00', closed: false },
+          tuesday: { open: '11:00', close: '23:00', closed: false },
+          wednesday: { open: '11:00', close: '23:00', closed: false },
+          thursday: { open: '11:00', close: '23:00', closed: false },
+          friday: { open: '11:00', close: '23:00', closed: false },
+          saturday: { open: '11:00', close: '23:00', closed: false },
+          sunday: { open: '', close: '', closed: true }
+        },
+        socialMedia: {
+          facebook: '',
+          instagram: '',
+          twitter: ''
+        },
+        features: ['Wifi gratuit', 'Accessible PMR']
+      };
+      
+      setProfileData(mappedData);
+      setTempData(mappedData);
+      
+    } catch (err) {
+      console.error('Error loading restaurant data:', err);
+      setError(err instanceof Error ? err.message : 'Erreur de chargement');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Charger les données au montage du composant
+  useEffect(() => {
+    loadRestaurantData();
+  }, []);
 
   const days = [
     { key: 'monday', label: 'Lundi' },
@@ -95,6 +160,37 @@ const RestaurantProfilePage: React.FC = () => {
   const toggleRestaurantStatus = () => {
     setTempData(prev => ({ ...prev, isOpen: !prev.isOpen }));
   };
+
+  // Afficher un état de chargement
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des données du restaurant...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Afficher l'erreur si nécessaire
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={loadRestaurantData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">

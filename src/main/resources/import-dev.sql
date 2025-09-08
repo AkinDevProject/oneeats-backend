@@ -51,7 +51,8 @@ INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_ty
 INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, is_active) VALUES
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), true),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), true),
-('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), true);
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), true),
+('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), true);
 
 -- Menu items pour Pizza Palace
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at) VALUES
@@ -217,7 +218,10 @@ INSERT INTO orders (id, order_number, user_id, restaurant_id, status, total_amou
 ('31313131-3131-3131-3131-313131313131', 'CMD-013', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', 'RECUPEREE', 27.00, 'Parfait!', NOW() - INTERVAL '45 minutes', NOW() - INTERVAL '20 minutes', NOW() - INTERVAL '25 minutes'),
 ('34343434-3434-3434-3434-343434343434', 'CMD-014', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'RECUPEREE', 20.50, '', NOW() - INTERVAL '50 minutes', NOW() - INTERVAL '25 minutes', NOW() - INTERVAL '30 minutes'),
 ('34343434-3434-3434-3434-343434343435', 'CMD-015', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'RECUPEREE', 15.50, 'Très bon!', NOW() - INTERVAL '40 minutes', NOW() - INTERVAL '15 minutes', NOW() - INTERVAL '20 minutes'),
-('34343434-3434-3434-3434-343434343436', 'CMD-016', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', 'RECUPEREE', 32.00, 'Service rapide', NOW() - INTERVAL '55 minutes', NOW() - INTERVAL '30 minutes', NOW() - INTERVAL '35 minutes');
+('34343434-3434-3434-3434-343434343436', 'CMD-016', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', 'RECUPEREE', 32.00, 'Service rapide', NOW() - INTERVAL '55 minutes', NOW() - INTERVAL '30 minutes', NOW() - INTERVAL '35 minutes'),
+-- Commandes utilisateur mobile
+('12340101-0101-0101-0101-010101010101', 'CMD-017', '12345678-1234-1234-1234-123456789012', '11111111-1111-1111-1111-111111111111', 'EN_ATTENTE', 19.50, 'Commande depuis mobile', NOW() - INTERVAL '2 minutes', NOW(), NOW() + INTERVAL '20 minutes'),
+('12340202-0202-0202-0202-020202020202', 'CMD-018', '12345678-1234-1234-1234-123456789012', '22222222-2222-2222-2222-222222222222', 'EN_PREPARATION', 16.50, 'Test app mobile', NOW() - INTERVAL '10 minutes', NOW() - INTERVAL '5 minutes', NOW() + INTERVAL '10 minutes');
 
 -- Order Items pour toutes les commandes
 INSERT INTO order_items (id, order_id, menu_item_id, menu_item_name, unit_price, quantity, special_notes, created_at, updated_at) VALUES
@@ -278,4 +282,11 @@ INSERT INTO order_items (id, order_id, menu_item_id, menu_item_name, unit_price,
 
 ('34343434-0000-0000-0000-000000000021', '34343434-3434-3434-3434-343434343436', '92222222-2222-2222-2222-222222222222', 'Cheese Burger', 12.50, 2, '', NOW(), NOW()),
 ('34343434-0000-0000-0000-000000000022', '34343434-3434-3434-3434-343434343436', '92222222-2222-2222-2222-222222222223', 'Frites', 4.50, 1, '', NOW(), NOW()),
-('34343434-0000-0000-0000-000000000023', '34343434-3434-3434-3434-343434343436', '92222222-2222-2222-2222-222222222221', 'Classic Burger', 11.00, 1, '', NOW(), NOW());
+('34343434-0000-0000-0000-000000000023', '34343434-3434-3434-3434-343434343436', '92222222-2222-2222-2222-222222222221', 'Classic Burger', 11.00, 1, '', NOW(), NOW()),
+
+-- Items pour commandes utilisateur mobile
+('12340001-0001-0001-0001-000000000001', '12340101-0101-0101-0101-010101010101', '91111111-1111-1111-1111-111111111111', 'Pizza Margherita', 12.50, 1, 'Commande mobile', NOW(), NOW()),
+('12340001-0001-0001-0001-000000000002', '12340101-0101-0101-0101-010101010101', '91111111-1111-1111-1111-111111111114', 'Coca-Cola', 3.50, 2, '', NOW(), NOW()),
+
+('12340002-0002-0002-0002-000000000001', '12340202-0202-0202-0202-020202020202', '92222222-2222-2222-2222-222222222221', 'Classic Burger', 11.00, 1, 'Test mobile', NOW(), NOW()),
+('12340002-0002-0002-0002-000000000002', '12340202-0202-0202-0202-020202020202', '92222222-2222-2222-2222-222222222223', 'Frites', 5.50, 1, '', NOW(), NOW());

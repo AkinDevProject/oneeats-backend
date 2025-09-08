@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, mockUser } from '../data/mockData';
+import { ENV } from '../config/env';
 
 interface AuthContextType {
   user: User | null;
@@ -30,6 +31,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUser = useCallback(async () => {
     try {
+      // Si auth désactivé, créer un user par défaut pour les tests
+      if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+        const defaultUser: User = {
+          id: ENV.MOCK_USER_ID,
+          name: 'Test User Mobile',
+          email: 'test@oneeats-mobile.com',
+          phone: '+33 6 12 34 56 78',
+          favoriteRestaurants: [],
+          orders: [],
+          isGuest: false,
+        };
+        setUser(defaultUser);
+        await AsyncStorage.setItem('user', JSON.stringify(defaultUser));
+        setIsLoading(false);
+        return;
+      }
+
+      // Mode auth normal
       const userData = await AsyncStorage.getItem('user');
       if (userData) {
         setUser(JSON.parse(userData));
@@ -52,6 +71,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
+      // Si auth désactivé, login automatique réussi
+      if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simule délai réseau
+        return true; // Login toujours réussi en mode test
+      }
+      
       // Mock authentication - in real app, call your API
       if (email === mockUser.email && password === 'password123') {
         await saveUser({ ...mockUser, isGuest: false });

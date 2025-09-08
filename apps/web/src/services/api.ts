@@ -211,6 +211,12 @@ class ApiService {
     getPlatformStats: (): Promise<Record<string, unknown>> => 
       this.request('/api/analytics/platform'),
   };
+
+  // Admin API for dashboard stats
+  admin = {
+    getDashboardStats: (): Promise<Record<string, unknown>> => 
+      this.request('/api/admin/dashboard/stats'),
+  };
 }
 
 // Create and export a singleton instance
