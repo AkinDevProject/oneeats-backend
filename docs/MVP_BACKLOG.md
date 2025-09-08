@@ -20,51 +20,10 @@ Plateforme fonctionnelle permettant aux clients de commander via mobile et aux r
 
 ---
 
-## 🔥 **SPRINT 1 - CRITIQUE (Semaine 1)**
-*Tâches bloquantes pour un MVP fonctionnel*
+## 🔥 **SPRINT 1 - INTÉGRATION (Semaine 1)**
+*Connexion frontend/backend pour MVP démontrable rapidement*
 
-### **ONEE-001** 🚨 **CRITIQUE**
-**Titre** : Implémenter l'authentification JWT complète  
-**Story Points** : 8  
-**Priorité** : P0 - Bloquant MVP  
-
-**Description** : Actuellement l'authentification est désactivée. Implémenter JWT + endpoints auth pour permettre login/register des utilisateurs.
-
-**Acceptance Criteria** :
-- [ ] Endpoints `/api/auth/login`, `/api/auth/register`, `/api/auth/logout` fonctionnels
-- [ ] Génération et validation JWT tokens
-- [ ] Middleware de vérification sur endpoints protégés
-- [ ] Tests d'intégration auth
-
-**Prompt Claude Code** :
-```
-Implémente l'authentification JWT complète pour OneEats :
-
-1. Crée un domaine `auth` avec :
-   - AuthResource avec endpoints login/register/logout/profile
-   - AuthService pour logique métier (vérification credentials, génération JWT)
-   - JWTService pour création/validation tokens
-   
-2. Configure la sécurité :
-   - Middleware JWT pour vérifier tokens sur endpoints protégés
-   - Gestion des rôles USER/RESTAURANT_OWNER/ADMIN
-   - Configuration CORS mise à jour
-
-3. Sécurise les endpoints existants :
-   - Ajoute @RolesAllowed sur tous les endpoints selon règles métier
-   - Vérifie ownership (user ne peut voir que ses commandes, etc.)
-
-4. Tests :
-   - Tests unitaires AuthService
-   - Tests d'intégration endpoints auth
-   - Tests sécurité (tentatives accès non autorisé)
-
-Utilise les patterns existants (Order, User) et assure-toi que l'auth s'intègre bien avec le frontend.
-```
-
----
-
-### **ONEE-002** 🚨 **CRITIQUE** 
+### **ONEE-002** 🚀 **INTÉGRATION**
 **Titre** : Connecter frontend web aux vraies APIs  
 **Story Points** : 5  
 **Priorité** : P0 - Bloquant MVP  
@@ -75,33 +34,35 @@ Utilise les patterns existants (Order, User) et assure-toi que l'auth s'intègre
 - [ ] Remplacer tous les mock data par vrais appels API
 - [ ] Gestion d'erreurs réseau appropriée  
 - [ ] Loading states pendant requêtes
-- [ ] Authentification intégrée dans les appels
+- [ ] ✨ **Mode sans auth** : Fonctionne sans authentification pour tests rapides
 
 **Prompt Claude Code** :
 ```
-Connecte le frontend web OneEats aux vraies APIs backend :
+Connecte le frontend web OneEats aux vraies APIs backend (SANS AUTHENTIFICATION pour l'instant) :
 
 1. Analyse le dashboard restaurant dans apps/web/ et identifie tous les mock data
 
 2. Remplace par vrais appels API :
    - Services API pour restaurants, menus, commandes
-   - Intégration authentification (JWT tokens dans headers)
+   - Configuration axios ou fetch pour localhost:8080
    - Gestion états loading/error/success
 
 3. Configuration environnement :
-   - Variables d'environnement pour URL API
-   - Configuration axios ou fetch avec intercepteurs auth
+   - Variables d'environnement pour URL API (.env.local)
+   - Service API centralisé dans services/api.js
+   - Pas d'auth headers pour l'instant (à ajouter plus tard)
 
-4. Tests intégration :
-   - Teste toutes les fonctionnalités avec vrai backend
-   - Vérifie gestion erreurs (réseau, auth, validation)
+4. Tests fonctionnalités :
+   - Teste TOUS les écrans avec vrai backend
+   - Vérifie CRUD complet (restaurants, menus, commandes)
+   - Gestion erreurs réseau et validation
 
-Assure-toi que toutes les fonctionnalités dashboard fonctionnent avec les vraies APIs.
+FOCUS : MVP fonctionnel rapidement. Auth sera ajoutée en Sprint 3.
 ```
 
 ---
 
-### **ONEE-003** 🚨 **CRITIQUE**
+### **ONEE-003** 🚀 **INTÉGRATION**
 **Titre** : Connecter app mobile aux vraies APIs  
 **Story Points** : 5  
 **Priorité** : P0 - Bloquant MVP  
@@ -109,41 +70,82 @@ Assure-toi que toutes les fonctionnalités dashboard fonctionnent avec les vraie
 **Description** : L'app mobile utilise des données mockées. Connecter aux vraies APIs pour permettre vraies commandes.
 
 **Acceptance Criteria** :
-- [ ] Contexts (Auth, Order, Restaurant) utilisent vraies APIs
-- [ ] Authentification mobile fonctionnelle
+- [ ] Contexts (Order, Restaurant) utilisent vraies APIs
 - [ ] Passage de commandes réel jusqu'en base
 - [ ] Synchronisation états avec backend
+- [ ] ✨ **Mode sans auth** : AuthContext simplifié sans vraie auth
 
 **Prompt Claude Code** :
 ```
-Connecte l'application mobile OneEats aux vraies APIs backend :
+Connecte l'application mobile OneEats aux vraies APIs backend (SANS AUTHENTIFICATION pour l'instant) :
 
 1. Configure l'intégration API :
-   - URL backend adaptée mobile (10.0.2.2 pour Android emulator)
-   - Service API centralisé avec gestion auth
-   - AsyncStorage pour persistence tokens JWT
+   - URL backend adaptée mobile (10.0.2.2 pour Android, localhost pour iOS)
+   - Service API centralisé dans services/api.ts
+   - AuthContext simplifié (mock user ID fixe pour tests)
 
 2. Mise à jour des Contexts :
-   - AuthContext : login/register via API
-   - OrderContext : CRUD commandes réelles
+   - OrderContext : CRUD commandes réelles avec API
    - RestaurantContext : données restaurants depuis API
+   - AuthContext : user fictif fixe (id: "test-user-123")
 
-3. Gestion réseau mobile :
-   - Offline support basique avec AsyncStorage
-   - Retry automatique sur erreurs réseau
-   - Loading states et error handling
+3. Configuration sans auth :
+   - Pas de JWT tokens pour l'instant
+   - User ID fixe dans les appels API
+   - AsyncStorage pour persistence basique (panier, etc.)
 
 4. Tests sur émulateurs :
-   - Teste flux complet commande client
-   - Vérifie synchronisation avec dashboard restaurant
+   - Teste flux complet commande client → backend → dashboard restaurant
+   - Vérifie synchronisation temps réel données
 
-Focus sur les user journeys critiques : inscription, recherche restaurants, commande, suivi.
+FOCUS : Démo complète client mobile + dashboard restaurant qui fonctionne !
 ```
 
 ---
 
-## ⚡ **SPRINT 2 - IMPORTANT (Semaine 2)**
-*Fonctionnalités importantes pour expérience utilisateur*
+### **ONEE-006** 🚀 **INTÉGRATION**
+**Titre** : Gestion statuts commandes avancée  
+**Story Points** : 3  
+**Priorité** : P0 - Critical MVP  
+
+**Description** : Améliorer la machine à états des commandes avec plus de granularité et règles métier pour démo réaliste.
+
+**Acceptance Criteria** :
+- [ ] Statuts enrichis avec temps estimés
+- [ ] Transitions logiques validées
+- [ ] Interface utilisateur mise à jour
+- [ ] Synchronisation temps réel mobile ↔ web
+
+**Prompt Claude Code** :
+```
+Améliore la gestion des statuts de commandes OneEats pour démo MVP :
+
+1. Enrichir OrderStatus enum :
+   - EN_ATTENTE → EN_ATTENTE_CONFIRMATION  
+   - Ajouter CONFIRMEE, EN_PREPARATION, PRETE_RETRAIT, RETIREE, ANNULEE
+   - Temps estimé par statut (5min confirmation, 15-30min préparation, etc.)
+
+2. State machine avec règles métier :
+   - Transitions autorisées selon statut actuel
+   - Calcul temps estimés selon items commandés
+   - Validation côté backend et frontend
+
+3. Intégration frontend :
+   - Timeline visuelle progression sur mobile
+   - Actions restaurant (confirmer, marquer prêt) sur web
+   - Mise à jour automatique statuts côtés
+
+4. Notifications simples :
+   - Console.log sur changement statut (pour tests)
+   - Base pour notifications futures Sprint 2
+
+Priorise UX démo : client mobile voit progression, restaurant web gère commandes.
+```
+
+---
+
+## ⚡ **SPRINT 2 - FONCTIONNALITÉS (Semaine 2)**
+*Fonctionnalités importantes pour expérience utilisateur complète*
 
 ### **ONEE-004** ⚡ **IMPORTANT**
 **Titre** : Implémenter upload d'images restaurants/menus  
@@ -254,10 +256,89 @@ Assure-toi que les transitions respectent la logique métier réelle.
 
 ---
 
-## 🔧 **SPRINT 3 - TECHNIQUE (Semaine 3)**
-*Améliorations techniques et performance*
+### **ONEE-010** ⚡ **FONCTIONNALITÉ**
+**Titre** : Recherche et filtrage avancés  
+**Story Points** : 5  
+**Priorité** : P1 - UX MVP  
 
-### **ONEE-007** 🔧 **TECHNIQUE**
+**Description** : Améliorer recherche restaurants avec filtres avancés (cuisine, prix, distance, note) pour UX complète.
+
+**Prompt Claude Code** :
+```
+Implémente la recherche avancée OneEats :
+
+1. Backend search :
+   - Endpoint GET /api/restaurants/search avec query params
+   - Filtres : cuisine, prix min/max, distance, note min, ouvert/fermé
+   - Full-text search sur nom/description (PostgreSQL)
+   - Tri par pertinence, distance, note
+
+2. Géolocalisation basique :
+   - Calcul distance avec coordonnées GPS
+   - Filtrage par rayon (1km, 5km, 10km)
+   - Mock coordonnées pour restaurants test
+
+3. Frontend web :
+   - Interface filtres avec facettes
+   - Autocomplete recherche textuelle
+   - Sauvegarde préférences utilisateur
+
+4. Mobile :
+   - Recherche avec géolocalisation automatique
+   - Filtres mobile-friendly (bottom sheet)
+   - Historique recherches
+
+Focus sur fonctionnalités démo impressionnantes pour clients.
+```
+
+---
+
+## 🔐 **SPRINT 3 - SÉCURITÉ (Semaine 3)**
+*Authentification et sécurisation avant production*
+
+### **ONEE-001** 🔐 **SÉCURITÉ**
+**Titre** : Implémenter l'authentification JWT complète  
+**Story Points** : 8  
+**Priorité** : P1 - Sécurité MVP  
+
+**Description** : Ajouter authentification JWT en surcouche sur l'application fonctionnelle existante.
+
+**Acceptance Criteria** :
+- [ ] Endpoints `/api/auth/login`, `/api/auth/register`, `/api/auth/logout` fonctionnels
+- [ ] Génération et validation JWT tokens
+- [ ] Middleware de vérification sur endpoints protégés
+- [ ] Migration frontend/mobile vers auth réelle
+
+**Prompt Claude Code** :
+```
+Implémente l'authentification JWT sur OneEats EXISTANT :
+
+1. Crée domaine auth :
+   - AuthResource avec endpoints login/register/logout/profile
+   - AuthService pour logique métier (vérification credentials, génération JWT)
+   - JWTService pour création/validation tokens avec rôles
+
+2. Sécurise APIs existantes :
+   - Ajoute @RolesAllowed sur endpoints selon règles métier
+   - Vérifie ownership (user ses commandes, restaurant ses menus)
+   - Configuration CORS mise à jour
+
+3. Migration frontend web :
+   - Ajoute écran login/register
+   - Intègre JWT tokens dans service API existant
+   - Gestion déconnexion automatique (token expiré)
+
+4. Migration mobile :
+   - Remplace AuthContext mock par vraie authentification
+   - AsyncStorage pour JWT tokens
+   - Gestion refresh token
+
+IMPORTANT : L'app fonctionne déjà sans auth, ajoute auth comme couche sécurité.
+```
+
+---
+
+### **ONEE-009** 🔧 **TECHNIQUE**
 **Titre** : Tests automatisés complets  
 **Story Points** : 8  
 **Priorité** : P2 - Qualité MVP  
