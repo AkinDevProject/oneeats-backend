@@ -1,29 +1,57 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Search, Download, Ban, Eye, Users, UserPlus, Shield, User, Activity, Calendar, Mail, TrendingUp, BarChart3, RefreshCcw, EyeOff, Filter } from 'lucide-react';
+import { Search, Download, Ban, Eye, Users, UserPlus, Shield, User as UserIcon, Activity, Calendar, Mail, TrendingUp, BarChart3, RefreshCcw, EyeOff, Filter } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '../../components/ui/Table';
-import { mockUsers } from '../../data/mockData';
+import { useUsers } from '../../hooks/data/useUsers';
+import { User } from '../../types';
 
 const UsersPage: React.FC = () => {
+  const { users, loading, error, updateUserStatus } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState(mockUsers);
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="text-center py-16">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="mt-4 text-gray-600">Chargement des utilisateurs...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Card className="text-center py-16 border-danger-200 bg-danger-50">
+          <Users className="h-16 w-16 text-danger-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-danger-900 mb-2">Erreur de chargement</h3>
+          <p className="text-danger-700">{error}</p>
+        </Card>
+      </div>
+    );
+  }
 
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleStatus = (userId: string) => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-        : user
-    ));
+  const handleToggleStatus = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+    try {
+      await updateUserStatus(userId, newStatus);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+    }
   };
 
   const handleExportCSV = () => {
@@ -144,7 +172,7 @@ const UsersPage: React.FC = () => {
                   <p className="text-green-200 text-xs mt-1">Partenaires actifs</p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                  <User className="h-6 w-6" />
+                  <UserIcon className="h-6 w-6" />
                 </div>
               </div>
             </div>
@@ -263,7 +291,7 @@ const UsersPage: React.FC = () => {
                     }`}>
                       {user.role === 'admin' ? 
                         <Shield className="h-6 w-6 text-secondary-600" /> :
-                        <User className="h-6 w-6 text-primary-600" />
+                        <UserIcon className="h-6 w-6 text-primary-600" />
                       }
                     </div>
                     <div>

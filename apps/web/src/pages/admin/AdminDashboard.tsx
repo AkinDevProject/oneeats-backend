@@ -8,9 +8,14 @@ import {
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
-import { mockDashboardStats, mockRestaurants, mockOrders } from '../../data/mockData';
+import { useDashboard } from '../../hooks/data/useDashboard';
+import { useRestaurants } from '../../hooks/data/useRestaurants';
+import { useOrders } from '../../hooks/data/useOrders';
 
 const AdminDashboard: React.FC = () => {
+  const { stats, loading: statsLoading, error: statsError } = useDashboard();
+  const { restaurants, loading: restaurantsLoading } = useRestaurants();
+  const { orders, loading: ordersLoading } = useOrders();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isRealTime, setIsRealTime] = useState(true);
   const [showAnalytics, setShowAnalytics] = useState(true);
@@ -25,15 +30,43 @@ const AdminDashboard: React.FC = () => {
     }
   }, [isRealTime]);
   
-  const stats = mockDashboardStats;
-  const inactiveRestaurants = mockRestaurants.filter(r => !r.isOpen);
-  const pendingOrders = mockOrders.filter(o => o.status === 'pending');
-  const activeOrders = mockOrders.filter(o => ['accepted', 'preparing'].includes(o.status));
-  const todayOrders = mockOrders.filter(o => {
+  const inactiveRestaurants = restaurants.filter(r => !r.isOpen);
+  const pendingOrders = orders.filter(o => o.status === 'en_attente');
+  const activeOrders = orders.filter(o => ['en_preparation', 'prete'].includes(o.status));
+  const todayOrders = orders.filter(o => {
     const today = new Date();
     const orderDate = new Date(o.createdAt);
     return orderDate.toDateString() === today.toDateString();
   });
+
+  const loading = statsLoading || restaurantsLoading || ordersLoading;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-4"></div>
+          <p className="text-gray-600">Chargement du tableau de bord...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (statsError) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <Card className="p-8 text-center border-danger-200 bg-danger-50">
+          <AlertCircle className="h-16 w-16 text-danger-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-danger-900 mb-2">Erreur de chargement</h3>
+          <p className="text-danger-700">{statsError}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
 
   // Analytics Data
   const analytics = {
@@ -147,7 +180,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex items-center text-green-100 text-sm">
               <CheckCircle2 className="h-4 w-4 mr-1" />
-              <span>{mockRestaurants.length - inactiveRestaurants.length} en ligne</span>
+              <span>{restaurants.length - inactiveRestaurants.length} en ligne</span>
             </div>
           </Card>
 

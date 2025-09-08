@@ -8,11 +8,11 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '../../components/ui/Table';
-import { mockRestaurants } from '../../data/mockData';
+import { useRestaurants } from '../../hooks/data/useRestaurants';
 import { Restaurant } from '../../types';
 
 const RestaurantsPage: React.FC = () => {
-  const [restaurants, setRestaurants] = useState(mockRestaurants);
+  const { restaurants, loading, error, updateRestaurantStatus, deleteRestaurant } = useRestaurants();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'blocked'>('all');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
@@ -32,22 +32,19 @@ const RestaurantsPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!selectedRestaurant || !modalAction) return;
 
-    setRestaurants(prev => prev.map(r => {
-      if (r.id === selectedRestaurant.id) {
-        if (modalAction === 'approve') {
-          return { ...r, status: 'approved' as const };
-        } else if (modalAction === 'block') {
-          return { ...r, status: 'blocked' as const };
-        }
+    try {
+      if (modalAction === 'approve') {
+        await updateRestaurantStatus(selectedRestaurant.id, 'approved');
+      } else if (modalAction === 'block') {
+        await updateRestaurantStatus(selectedRestaurant.id, 'blocked');
+      } else if (modalAction === 'delete') {
+        await deleteRestaurant(selectedRestaurant.id);
       }
-      return r;
-    }));
-
-    if (modalAction === 'delete') {
-      setRestaurants(prev => prev.filter(r => r.id !== selectedRestaurant.id));
+    } catch (error) {
+      console.error('Erreur lors de l\'action:', error);
     }
 
     setShowModal(false);
@@ -87,6 +84,29 @@ const RestaurantsPage: React.FC = () => {
     blocked: restaurants.filter(r => r.status === 'blocked').length,
     active: restaurants.filter(r => r.isOpen).length
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="text-center py-16">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="mt-4 text-gray-600">Chargement des restaurants...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Card className="text-center py-16 border-danger-200 bg-danger-50">
+          <AlertCircle className="h-16 w-16 text-danger-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-danger-900 mb-2">Erreur de chargement</h3>
+          <p className="text-danger-700">{error}</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

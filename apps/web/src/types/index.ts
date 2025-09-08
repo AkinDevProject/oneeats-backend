@@ -6,6 +6,7 @@ export interface User {
   createdAt: Date;
   ordersCount?: number;
   status?: 'active' | 'inactive';
+  restaurantId?: string; // Pour les users de type restaurant
 }
 
 export interface Restaurant {

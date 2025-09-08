@@ -1,6 +1,12 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User } from '../types';
 
+// Environment configuration for auth
+const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
+const MOCK_AUTH = import.meta.env.VITE_MOCK_AUTH === 'true';
+const DEFAULT_USER_ID = import.meta.env.VITE_DEFAULT_USER_ID || '11111111-1111-1111-1111-111111111111';
+const DEFAULT_RESTAURANT_ID = import.meta.env.VITE_DEFAULT_RESTAURANT_ID || '11111111-1111-1111-1111-111111111111';
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
@@ -23,7 +29,24 @@ export const useAuthProvider = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('delishgo-user');
+    // Si auth désactivé, créer un user par défaut pour les tests
+    if (!AUTH_ENABLED || MOCK_AUTH) {
+      const defaultUser: User = {
+        id: DEFAULT_USER_ID,
+        email: 'test@oneeats.com',
+        name: 'Test User - Restaurant Owner',
+        role: 'restaurant',
+        createdAt: new Date(),
+        restaurantId: DEFAULT_RESTAURANT_ID
+      };
+      setUser(defaultUser);
+      localStorage.setItem('oneeats-user', JSON.stringify(defaultUser));
+      setIsLoading(false);
+      return;
+    }
+
+    // Mode auth normal
+    const savedUser = localStorage.getItem('oneeats-user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -33,33 +56,41 @@ export const useAuthProvider = () => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // Mock authentication
+    // Si auth désactivé, login automatique réussi
+    if (!AUTH_ENABLED || MOCK_AUTH) {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simule délai réseau
+      setIsLoading(false);
+      return true; // Login toujours réussi en mode test
+    }
+    
+    // Mode auth réel (sera implémenté en Sprint 3)
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    if (email === 'admin@delishgo.com' && password === 'admin123') {
+    if (email === 'admin@oneeats.com' && password === 'admin123') {
       const adminUser: User = {
         id: 'admin-1',
-        email: 'admin@delishgo.com',
-        name: 'Administrateur',
+        email: 'admin@oneeats.com',
+        name: 'Administrateur OneEats',
         role: 'admin',
         createdAt: new Date()
       };
       setUser(adminUser);
-      localStorage.setItem('delishgo-user', JSON.stringify(adminUser));
+      localStorage.setItem('oneeats-user', JSON.stringify(adminUser));
       setIsLoading(false);
       return true;
     }
     
-    if (email === 'luigi@restaurant.com' && password === 'resto123') {
+    if (email === 'restaurant@oneeats.com' && password === 'resto123') {
       const restaurantUser: User = {
-        id: 'resto-1',
-        email: 'luigi@restaurant.com',
-        name: 'Luigi Restaurant',
+        id: DEFAULT_USER_ID,
+        email: 'restaurant@oneeats.com',
+        name: 'Pizza Palace',
         role: 'restaurant',
-        createdAt: new Date()
+        createdAt: new Date(),
+        restaurantId: DEFAULT_RESTAURANT_ID
       };
       setUser(restaurantUser);
-      localStorage.setItem('delishgo-user', JSON.stringify(restaurantUser));
+      localStorage.setItem('oneeats-user', JSON.stringify(restaurantUser));
       setIsLoading(false);
       return true;
     }
@@ -70,7 +101,7 @@ export const useAuthProvider = () => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('delishgo-user');
+    localStorage.removeItem('oneeats-user');
   };
 
   return {

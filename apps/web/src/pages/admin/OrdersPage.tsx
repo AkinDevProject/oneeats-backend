@@ -7,14 +7,38 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '../../components/ui/Table';
-import { mockOrders } from '../../data/mockData';
+import { useOrders } from '../../hooks/data/useOrders';
 import { Order } from '../../types';
 
 const OrdersPage: React.FC = () => {
+  const { orders, loading, error } = useOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | Order['status']>('all');
 
-  const filteredOrders = mockOrders.filter(order => {
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="text-center py-16">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="mt-4 text-gray-600">Chargement des commandes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Card className="text-center py-16 border-danger-200 bg-danger-50">
+          <AlertTriangle className="h-16 w-16 text-danger-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-danger-900 mb-2">Erreur de chargement</h3>
+          <p className="text-danger-700">{error}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.restaurantName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -24,17 +48,15 @@ const OrdersPage: React.FC = () => {
 
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
-      case 'pending':
+      case 'en_attente':
         return <Badge variant="warning">En attente</Badge>;
-      case 'accepted':
-        return <Badge variant="success">Acceptée</Badge>;
-      case 'preparing':
+      case 'en_preparation':
         return <Badge variant="default">En préparation</Badge>;
-      case 'ready':
+      case 'prete':
         return <Badge variant="success">Prête</Badge>;
-      case 'delivered':
-        return <Badge variant="success">Livrée</Badge>;
-      case 'cancelled':
+      case 'recuperee':
+        return <Badge variant="success">Récupérée</Badge>;
+      case 'annulee':
         return <Badge variant="danger">Annulée</Badge>;
       default:
         return <Badge>Inconnu</Badge>;
@@ -42,13 +64,13 @@ const OrdersPage: React.FC = () => {
   };
 
   const stats = {
-    total: mockOrders.length,
-    pending: mockOrders.filter(o => o.status === 'pending').length,
-    processing: mockOrders.filter(o => ['accepted', 'preparing'].includes(o.status)).length,
-    ready: mockOrders.filter(o => o.status === 'ready').length,
-    completed: mockOrders.filter(o => ['delivered'].includes(o.status)).length,
-    cancelled: mockOrders.filter(o => o.status === 'cancelled').length,
-    revenue: mockOrders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + o.total, 0)
+    total: orders.length,
+    pending: orders.filter(o => o.status === 'en_attente').length,
+    processing: orders.filter(o => ['en_preparation'].includes(o.status)).length,
+    ready: orders.filter(o => o.status === 'prete').length,
+    completed: orders.filter(o => ['recuperee'].includes(o.status)).length,
+    cancelled: orders.filter(o => o.status === 'annulee').length,
+    revenue: orders.filter(o => o.status === 'recuperee').reduce((sum, o) => sum + o.total, 0)
   };
 
   return (
@@ -131,10 +153,10 @@ const OrdersPage: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               {[
                 { key: 'all', label: 'Toutes', count: stats.total, color: 'primary' },
-                { key: 'pending', label: 'En attente', count: stats.pending, color: 'warning' },
-                { key: 'accepted', label: 'Acceptées', count: stats.processing, color: 'info' },
-                { key: 'ready', label: 'Prêtes', count: stats.ready, color: 'success' },
-                { key: 'delivered', label: 'Terminées', count: stats.completed, color: 'success' }
+                { key: 'en_attente', label: 'En attente', count: stats.pending, color: 'warning' },
+                { key: 'en_preparation', label: 'En préparation', count: stats.processing, color: 'info' },
+                { key: 'prete', label: 'Prêtes', count: stats.ready, color: 'success' },
+                { key: 'recuperee', label: 'Terminées', count: stats.completed, color: 'success' }
               ].map(({ key, label, count, color }) => (
                 <Button
                   key={key}
@@ -201,9 +223,9 @@ const OrdersPage: React.FC = () => {
                 key={order.id} 
                 hover
                 className={`transition-all duration-300 ${
-                  order.status === 'pending' ? 'border-warning-200 bg-gradient-to-r from-warning-50 to-warning-100' :
-                  order.status === 'cancelled' ? 'border-danger-200 bg-gradient-to-r from-danger-50 to-danger-100' :
-                  order.status === 'ready' ? 'border-success-200 bg-gradient-to-r from-success-50 to-success-100' :
+                  order.status === 'en_attente' ? 'border-warning-200 bg-gradient-to-r from-warning-50 to-warning-100' :
+                  order.status === 'annulee' ? 'border-danger-200 bg-gradient-to-r from-danger-50 to-danger-100' :
+                  order.status === 'prete' ? 'border-success-200 bg-gradient-to-r from-success-50 to-success-100' :
                   'border-gray-200'
                 } animate-fade-in`}
                 style={{ animationDelay: `${index * 50}ms` }}
