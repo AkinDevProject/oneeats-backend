@@ -587,12 +587,18 @@ Assure-toi que le système encourage reviews constructives.
 
 ## 📈 **MÉTRIQUES SPRINT & VÉLOCITÉ**
 
-### **Estimation Vélocité**
-- **Sprint 1** : 18 story points (critique)
-- **Sprint 2** : 16 story points (important)  
-- **Sprint 3** : 18 story points (technique)
-- **Sprint 4** : 13 story points (UX)
-- **Total MVP** : 65 story points (~4 semaines)
+### **Estimation Vélocité - NOUVELLE APPROCHE**
+- **Sprint 1 - INTÉGRATION** : 13 story points (connexion frontend/backend)
+- **Sprint 2 - FONCTIONNALITÉS** : 16 story points (upload, notifications, recherche)  
+- **Sprint 3 - SÉCURITÉ** : 18 story points (auth JWT + tests critiques)
+- **Sprint 4 - DÉPLOIEMENT** : 13 story points (config environnements + finitions)
+- **Total MVP** : 60 story points (~4 semaines)
+
+### **🎯 Avantages Nouvel Ordre**
+- **Semaine 1** : MVP démontrable sans auth (présentation client possible)
+- **Semaine 2** : MVP complet fonctionnellement (UX riche)
+- **Semaine 3** : MVP sécurisé (prêt production)
+- **Semaine 4** : MVP déployable (production ready)
 
 ### **Définition de "Done"**
 - [ ] Code développé et testé
