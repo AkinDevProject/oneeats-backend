@@ -1,87 +1,124 @@
-# oneeats-backend
+# OneEats - Plateforme de Commande Alimentaire
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+OneEats est une plateforme de commande de plats à récupérer sur place, construite avec une architecture monolithique modulaire moderne.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## 🚀 Démarrage Rapide
 
-## Running the application in dev mode
+```bash
+# 1. Démarrer la base de données
+docker-compose -f docker-compose.dev.yml up -d
 
-You can run your application in dev mode that enables live coding using:
-
-```shell script
+# 2. Lancer le backend (inclut le frontend web via Quinoa)
 ./mvnw quarkus:dev
+
+# 3. Lancer l'app mobile (optionnel)
+cd apps/mobile && npm start
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+**URLs importantes :**
+- Frontend Web : http://localhost:5173
+- API Backend : http://localhost:8080/api
+- Documentation API : http://localhost:8080/q/swagger-ui
 
-## Packaging and running the application
+## 🏗️ Architecture
 
-The application can be packaged using:
+**Monorepo** avec architecture **hexagonale/clean** et **Domain-Driven Design** :
 
-```shell script
-./mvnw package
+```
+oneeats-backend/
+├── src/main/java/com/oneeats/    # Backend Java Quarkus
+├── apps/web/                     # Frontend React restaurant
+├── apps/mobile/                  # App React Native client
+└── docs/                         # Documentation projet
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## 📚 Documentation
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+- **[Architecture Guide](docs/ARCHITECTURE_GUIDE.md)** - Guide architectural complet
+- **[Getting Started](docs/GETTING_STARTED.md)** - Configuration et démarrage rapide
+- **[API Reference](docs/API_REFERENCE.md)** - Documentation APIs complète
+- **[Mobile Roadmap](docs/MOBILE_ROADMAP.md)** - Roadmap et plan mobile
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Guide déploiement production
+- **[Security Guide](docs/SECURITY_GUIDE.md)** - Guide sécurité complet
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Guide dépannage et résolution problèmes
+- **[MVP Backlog](docs/MVP_BACKLOG.md)** - 🎯 **Roadmap complète avec tâches prioritaires MVP**
+- **[Mobile Documentation](docs/mobile/)** - Guides techniques mobile
+- **[Business Documents](docs/business/)** - Spécifications et cahiers des charges
 
-If you want to build an _über-jar_, execute the following command:
+## 🎯 MVP Fonctionnalités
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+### Pour les Clients (Mobile)
+- 📱 Recherche restaurants par proximité/cuisine
+- 🛒 Ajout articles au panier
+- 📋 Passage commandes avec suivi temps réel
+- ⭐ Système de favoris
+
+### Pour les Restaurants (Web)
+- 🏪 Gestion profil restaurant
+- 🍽️ Création/modification menus
+- 📦 Traitement commandes
+- 📊 Statistiques et analytics
+
+### Pour les Admins (Web)
+- 👥 Gestion restaurants
+- 📋 Supervision commandes
+- 📈 Tableau de bord global
+
+## 🛠️ Stack Technique
+
+### Backend
+- **Quarkus 3.24.2** + Java 21
+- **PostgreSQL** + Hibernate ORM
+- **Architecture hexagonale** + DDD
+- **Event-driven** avec CDI Events
+
+### Frontend Web
+- **React 18** + TypeScript + Vite
+- **Tailwind CSS** + Recharts
+- **React Router DOM**
+
+### Mobile
+- **React Native** + Expo 53
+- **Expo Router** + React Query
+- **React Native Paper**
+- **Push notifications** intégrées
+
+## 📦 Domaines Implémentés
+
+- ✅ **Order** - Gestion commandes complète
+- ✅ **User** - Utilisateurs et authentification
+- ✅ **Restaurant** - Gestion restaurants
+- ✅ **Menu** - Items et catégories
+- ✅ **Admin** - Administration
+- ✅ **Notification** - Push notifications
+
+## 🔧 Commandes Utiles
+
+```bash
+# Backend
+./mvnw quarkus:dev              # Mode développement
+./mvnw test                     # Tests
+./mvnw clean package           # Build production
+
+# Frontend web
+cd apps/web && npm run dev     # Développement
+cd apps/web && npm run build   # Production
+
+# Mobile
+cd apps/mobile && npm start    # Expo dev server
+cd apps/mobile && npm run android  # Android
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## 📊 État MVP
 
-## Creating a native executable
+- 🏗️ **Architecture** : ✅ Complète
+- 🔌 **APIs Backend** : ✅ Toutes les APIs nécessaires
+- 💾 **Base données** : ✅ Schéma complet + données test
+- 🎨 **Frontend Web** : ✅ Dashboard restaurant fonctionnel
+- 📱 **App Mobile** : ✅ Fonctionnalités client complètes
+- 🔐 **Authentification** : 🔨 À finaliser
+- 📊 **Analytics** : 🔨 Stats de base implémentées
 
-You can create a native executable using:
+## 📝 Licence
 
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/oneeats-backend-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Validate object properties (field, getter) and method parameters for your beans (REST, CDI, Jakarta Persistence)
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Jacoco - Code Coverage ([guide](https://quarkus.io/guides/tests-with-coverage)): Jacoco test coverage support
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- RESTEasy Classic ([guide](https://quarkus.io/guides/resteasy)): REST endpoint framework implementing Jakarta REST and more
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+Projet privé - OneEats 2024

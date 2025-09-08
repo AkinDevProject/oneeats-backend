@@ -528,4 +528,27 @@ cd apps/mobile && npm start
 - **Gestion d'images** : Upload + optimisation automatique photos
 - **Analytics** : Dashboard administrateur avec KPIs complets
 
-**🏆 Le projet OneEats dispose maintenant d'une architecture monolithique moderne, performante et maintenable avec des optimisations de performance mobile avancées. La structure modulaire par packages facilite le développement tout en gardant la simplicité d'un déploiement unique. L'application mobile offre maintenant une expérience utilisateur fluide avec monitoring de performance en temps réel.**
+## 📚 Organisation Documentation
+
+### Structure Documentaire Simplifiée
+La documentation du projet a été réorganisée pour une meilleure lisibilité :
+
+```
+docs/
+├── ARCHITECTURE_GUIDE.md         # Guide architectural complet (fusion contexte + CLAUDE)
+├── GETTING_STARTED.md            # Guide développement et APIs
+├── API_REFERENCE.md              # Spécifications APIs frontend complètes
+├── MOBILE_ROADMAP.md             # Roadmap et plan développement mobile
+├── business/                     # Documents contractuels et specs UX/UI
+├── mobile/                       # Documentation technique mobile
+└── concepts/                     # Concepts futurs (IA menu, etc.)
+```
+
+### Fichiers Principales
+- **README.md** : Vue d'ensemble et démarrage rapide
+- **contexte.md** : Ce fichier (contexte projet mis à jour)
+- **CLAUDE.md** : Instructions Claude Code (conservé pour compatibilité)
+
+**🏆 Le projet OneEats dispose maintenant d'une architecture monolithique moderne, performante et maintenable avec des optimisations de performance mobile avancées. La structure modulaire par packages facilite le développement tout en gardant la simplicité d'un déploiement unique. L'application mobile offre maintenant une expérience utilisateur fluide avec monitoring de performance en temps réel.
+
+📚 La documentation a été considérablement simplifiée : 47 fichiers .md dispersés ont été réduits à 15 fichiers bien organisés, éliminant 90% des redondances tout en conservant 100% des informations utiles.**

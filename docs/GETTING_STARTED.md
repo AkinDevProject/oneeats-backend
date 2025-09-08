@@ -1,18 +1,52 @@
-# OneEats Backend - Intégration Frontend
+# OneEats - Guide de Développement et Démarrage
 
-## 🎯 Résumé des développements
+Guide complet pour configurer et démarrer l'environnement de développement OneEats.
 
-Le backend OneEats a été complètement implémenté pour supporter le dashboard restaurant web. Toutes les APIs nécessaires ont été créées avec une architecture DDD + Event-Driven cohérente.
+---
 
-## ✅ Ce qui a été implémenté
+## 🚀 Démarrage Rapide
 
-### 1. Architecture DDD + PanacheRepository
+### 1. Prérequis
+```bash
+# Vérifier Java 21+
+java -version
+
+# Démarrer PostgreSQL
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+### 2. Lancer l'Application
+```bash
+cd oneeats-backend
+
+# Mode développement avec hot reload
+./mvnw quarkus:dev        # Linux/Mac
+mvnw.cmd quarkus:dev      # Windows
+```
+
+### 3. Vérifications
+```bash
+# Health check
+curl http://localhost:8080/q/health
+
+# Liste des restaurants
+curl http://localhost:8080/api/restaurants
+
+# Menu de Pizza Palace
+curl http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111
+```
+
+---
+
+## 🏗️ Architecture et Intégration Backend
+
+### Architecture DDD + PanacheRepository
 - ✅ **BaseRepository** : Classe abstraite commune avec méthodes CRUD
 - ✅ **Restaurant Domain** : Entité JPA complète avec logique métier 
 - ✅ **MenuItem Domain** : Entité JPA avec options diététiques et gestion disponibilité
 - ✅ **Repositories** : PanacheRepository pour Restaurant et MenuItem avec requêtes métier
 
-### 2. API REST complète pour le frontend
+### API REST Complète pour Frontend
 
 #### Restaurant API (`/api/restaurants`)
 - ✅ `GET /api/restaurants` - Liste avec filtres (cuisine, statut, pagination)
@@ -41,74 +75,16 @@ Le backend OneEats a été complètement implémenté pour supporter le dashboar
 - ✅ `GET /api/menu-items/restaurant/{id}/vegetarian` - Items végétariens
 - ✅ `GET /api/menu-items/restaurant/{id}/vegan` - Items végétaliens
 
-#### Order API (déjà existante, améliorée)
+#### Order API (existante, améliorée)
 - ✅ `GET /api/orders/restaurant/{id}/stats/today` - Stats détaillées aujourd'hui
 - ✅ `GET /api/orders/restaurant/{id}/pending` - Commandes en attente
 - ✅ Toutes les autres APIs orders existantes
 
-### 3. DTOs et Validation
-- ✅ **RestaurantDto** : DTO complet avec validation Bean Validation
-- ✅ **CreateRestaurantRequest** : DTO création avec contraintes
-- ✅ **UpdateRestaurantRequest** : DTO mise à jour
-- ✅ **MenuItemDto** : DTO complet avec infos diététiques
-- ✅ **CreateMenuItemRequest** : DTO création menu item
-- ✅ **Mappers** : Conversion bidirectionnelle Entity ↔ DTO
-
-### 4. Données de test complètes
-- ✅ **4 restaurants** : Pizza Palace, Burger King Local, Sushi Zen, Café Français
-- ✅ **16 items de menu** : 4 items par restaurant avec catégories
-- ✅ **3 commandes d'exemple** avec différents statuts
-- ✅ **3 utilisateurs** : 2 clients + 1 admin
-- ✅ **Images Unsplash** : URLs d'images réelles pour les items
-
-### 5. Configuration
-- ✅ **CORS configuré** : Origins localhost:3000, :5173, :8081
-- ✅ **Base de données** : PostgreSQL avec données de dev
-- ✅ **OpenAPI** : Documentation API automatique
-- ✅ **Health checks** : Monitoring Quarkus
-- ✅ **Logs** : Configuration complète avec niveaux
-
-## 🚀 Démarrage rapide
-
-### Prérequis
-```bash
-# Java 21
-java -version
-
-# PostgreSQL running on localhost:5432
-# Database: oneeats_dev
-# User: oneeats_user / Password: oneeats_password
-```
-
-### Lancer le backend
-```bash
-cd oneeats-backend
-
-# Démarrer PostgreSQL d'abord
-docker-compose -f docker-compose.dev.yml up -d
-
-# Lancer l'application (dev mode avec hot reload)
-./mvnw quarkus:dev
-
-# Ou sur Windows
-mvnw.cmd quarkus:dev
-```
-
-### URLs importantes
-- **API Backend** : http://localhost:8080
-- **API Documentation** : http://localhost:8080/q/swagger-ui  
-- **Health Check** : http://localhost:8080/q/health
-- **Métriques** : http://localhost:8080/q/metrics
+---
 
 ## 🔗 Intégration Frontend
 
-### Authentification temporaire
-❌ **Pas d'authentification** pour le moment (comme demandé)
-- Toutes les APIs sont ouvertes
-- Pas de JWT token requis
-- À implémenter plus tard
-
-### APIs prêtes pour le dashboard
+### APIs Prêtes pour le Dashboard
 Le frontend peut maintenant appeler directement :
 
 1. **Liste restaurants** : `GET http://localhost:8080/api/restaurants`
@@ -116,22 +92,37 @@ Le frontend peut maintenant appeler directement :
 3. **Stats restaurant** : `GET http://localhost:8080/api/orders/restaurant/{id}/stats/today`
 4. **Commandes en attente** : `GET http://localhost:8080/api/orders/restaurant/{id}/pending`
 
-### Exemple d'appel API (JavaScript)
+### Exemple d'Appel API (JavaScript)
 ```javascript
-// Récupérer tous les restaurants
-const restaurants = await fetch('http://localhost:8080/api/restaurants')
+// Dans votre dashboard restaurant
+const restaurantId = '11111111-1111-1111-1111-111111111111'; // Pizza Palace
+
+// Récupérer les infos du restaurant
+const restaurant = await fetch(`http://localhost:8080/api/restaurants/${restaurantId}`)
   .then(res => res.json());
 
-// Récupérer le menu d'un restaurant  
-const menuItems = await fetch('http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111')
+// Récupérer le menu
+const menuItems = await fetch(`http://localhost:8080/api/menu-items/restaurant/${restaurantId}`)
   .then(res => res.json());
 
-// Stats du jour pour un restaurant
-const stats = await fetch('http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-111111111111/stats/today')
+// Récupérer les stats
+const stats = await fetch(`http://localhost:8080/api/orders/restaurant/${restaurantId}/stats/today`)
   .then(res => res.json());
+
+console.log('Restaurant:', restaurant);
+console.log('Menu:', menuItems);
+console.log('Stats:', stats);
 ```
 
-## 📊 Données de test disponibles
+### Authentification Temporaire
+❌ **Pas d'authentification** pour le moment (comme demandé)
+- Toutes les APIs sont ouvertes
+- Pas de JWT token requis
+- À implémenter plus tard
+
+---
+
+## 📊 Données de Test Disponibles
 
 ### Restaurants
 1. **Pizza Palace** (ID: `11111111-1111-1111-1111-111111111111`)
@@ -150,9 +141,41 @@ const stats = await fetch('http://localhost:8080/api/orders/restaurant/11111111-
    - 4 items : Coq au Vin, Ratatouille, Tarte Tatin, Vin Rouge
    - **Fermé**, Actif, Note: 4.3
 
-## 🛠 Debugging et Tests
+### Données de Test Complètes
+- ✅ **4 restaurants** complets avec menus
+- ✅ **16 items de menu** avec images Unsplash
+- ✅ **3 commandes d'exemple** avec différents statuts
+- ✅ **3 utilisateurs** : 2 clients + 1 admin
+- ✅ **CORS configuré** pour localhost:3000, :5173, :8081
 
-### Vérifier les données
+---
+
+## 🛠️ Configuration et Services
+
+### URLs Importantes
+- **Backend API** : http://localhost:8080
+- **API Documentation** : http://localhost:8080/q/swagger-ui  
+- **Health Check** : http://localhost:8080/q/health
+- **Métriques** : http://localhost:8080/q/metrics
+- **PgAdmin** : http://localhost:5050 (admin@admin.com / admin)
+
+### Base de Données
+- **Développement** : PostgreSQL via Docker (port 5432)
+- **Connexion** : `oneeats_dev` / `oneeats_user` / `oneeats_password`
+- **Schema** : Génération automatique avec Hibernate (drop-and-create en dev)
+- **Données test** : `import-dev.sql` chargé automatiquement
+
+### Configuration
+- ✅ **CORS configuré** : Origins localhost:3000, :5173, :8081
+- ✅ **OpenAPI** : Documentation API automatique
+- ✅ **Health checks** : Monitoring Quarkus
+- ✅ **Logs** : Configuration complète avec niveaux
+
+---
+
+## 🔧 Debugging et Dépannage
+
+### Vérifier les Données
 ```bash
 # Se connecter à PostgreSQL
 psql -h localhost -U oneeats_user -d oneeats_dev
@@ -176,14 +199,66 @@ curl http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111
 curl http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-111111111111/stats/today
 ```
 
-## ⚠️ Limitations actuelles
+### Résolution de Problèmes
+
+1. **Port 8080 occupé** :
+   ```bash
+   ./mvnw quarkus:dev -Dquarkus.http.port=8081
+   ```
+
+2. **Base de données** :
+   ```bash
+   docker-compose -f docker-compose.dev.yml down
+   docker-compose -f docker-compose.dev.yml up -d
+   ```
+
+3. **Clean build** :
+   ```bash
+   ./mvnw clean compile quarkus:dev
+   ```
+
+4. **Erreurs de compilation** :
+   - Vérifier Java 21+
+   - Nettoyer `.m2/repository`
+   - Relancer avec `./mvnw clean quarkus:dev`
+
+---
+
+## 📝 DTOs et Validation
+
+### DTOs Disponibles
+- ✅ **RestaurantDto** : DTO complet avec validation Bean Validation
+- ✅ **CreateRestaurantRequest** : DTO création avec contraintes
+- ✅ **UpdateRestaurantRequest** : DTO mise à jour
+- ✅ **MenuItemDto** : DTO complet avec infos diététiques
+- ✅ **CreateMenuItemRequest** : DTO création menu item
+- ✅ **Mappers** : Conversion bidirectionnelle Entity ↔ DTO
+
+### Architecture Hexagonale
+```
+[domaine]/
+├── api/                          # DTOs et contrats
+├── domain/                       # Entités et services métier
+│   └── events/                   # Événements du domaine
+└── infrastructure/               # Implémentations techniques
+    ├── [Domaine]Repository.java  # Persistence
+    ├── [Domaine]Resource.java    # API REST
+    ├── [Domaine]Mapper.java      # Mapping
+    └── [Domaine]EventHandler.java # Gestion événements
+```
+
+---
+
+## ⚠️ Limitations Actuelles
 
 1. **Pas d'authentification** (sera ajoutée plus tard)
 2. **Stats mockées** (revenus calculés avec prix moyen fictif)  
 3. **Pas d'upload d'images** (URLs statiques Unsplash)
 4. **Users API manquante** (peut être ajoutée si nécessaire)
 
-## 🎯 Prochaines étapes
+---
+
+## 🎯 Prochaines Étapes
 
 1. **Tester l'intégration** avec le frontend web
 2. **Ajouter l'authentification** JWT + Keycloak
