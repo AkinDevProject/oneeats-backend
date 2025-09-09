@@ -4,12 +4,13 @@
   "description": "Tests automatisés end-to-end pour OneEats",
   "scripts": {
     "test": "playwright test",
+    "test:web": "playwright test phase1-dashboard phase2-api phase3-orders dashboard-ui integration-complete",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
     "install": "playwright install",
-    "setup": "npm install && playwright install"
+    "setup": "npm install && playwright install chromium"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
