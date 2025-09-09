@@ -1,14 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { ApiHelper } from '../helpers/api-helper';
 
 test.describe('Phase 3 : Tests Commandes API (Backend)', () => {
-  let api: ApiHelper;
   const PIZZA_PALACE_ID = '11111111-1111-1111-1111-111111111111';
   const TEST_USER_ID = '12345678-1234-1234-1234-123456789012';
-
-  test.beforeAll(async ({ request }) => {
-    api = new ApiHelper(request);
-  });
 
   test('Test 3.1 : Test API commandes complète', async () => {
     console.log('🔗 Test 3.1 : Test API commandes complète');

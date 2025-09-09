@@ -126,14 +126,18 @@ quarkus:
             - method: PUT
               scopes: ['order:write']
   
-  # Frontend intégration (Quinoa) - Désactivé temporairement
-  # quinoa:
-  #   package-manager-install: false
-  #   package-manager: npm
-  #   build-dir: dist
-  #   dev-server:
-  #     port: 5173
-  #     host: localhost
+  # Frontend intégration (Quinoa) - Production
+  quinoa:
+    enabled: false  # Désactivé par défaut, activé en dev/prod
+    package-manager: npm
+    package-manager-install: false
+    build-dir: dist
+    ui-dir: apps/web
+    
+    # SPA routing pour production
+    spa-routing: true
+    spa-routing-path: "/"
+    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*"
     
 # Configuration métier OneEats
 oneeats:

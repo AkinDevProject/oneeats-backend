@@ -1,14 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { ApiHelper } from '../helpers/api-helper';
 
 test.describe('Integration Complète : Flow OneEats End-to-End', () => {
-  let api: ApiHelper;
   const PIZZA_PALACE_ID = '11111111-1111-1111-1111-111111111111';
   const TEST_USER_ID = '12345678-1234-1234-1234-123456789012';
-
-  test.beforeAll(async ({ request }) => {
-    api = new ApiHelper(request);
-  });
 
   test('Flow complet : Dashboard → API → Mobile → BDD', async ({ page }) => {
     console.log('🎯 Test Flow Complet OneEats');

@@ -8,6 +8,7 @@ interface CardProps {
   variant?: 'default' | 'elevated' | 'outlined' | 'glass';
   hover?: boolean;
   onClick?: () => void;
+  'data-testid'?: string;
 }
 
 export const Card: React.FC<CardProps> = ({ 
@@ -16,7 +17,8 @@ export const Card: React.FC<CardProps> = ({
   padding = 'md',
   variant = 'default',
   hover = false,
-  onClick
+  onClick,
+  'data-testid': dataTestId
 }) => {
   const paddingClasses = {
     none: '',
@@ -43,6 +45,7 @@ export const Card: React.FC<CardProps> = ({
         className
       )}
       onClick={onClick}
+      data-testid={dataTestId}
     >
       {children}
     </div>

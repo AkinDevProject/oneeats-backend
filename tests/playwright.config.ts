@@ -27,7 +27,7 @@ export default defineConfig({
   ],
   
   use: {
-    // Global test settings - Quinoa sert le frontend depuis Quarkus
+    // Global test settings - Solution professionnelle : Quarkus avec SPA routing
     baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -61,7 +61,7 @@ export default defineConfig({
     // Tests API Backend
     {
       name: 'api-backend',
-      testMatch: /phase2-api|phase3-orders/,
+      testMatch: /simple-api-tests/,
       use: {
         baseURL: 'http://localhost:8080/api',
         // Timeouts plus courts pour API

@@ -683,6 +683,7 @@ const MenuItemCard: React.FC<{
           ? 'opacity-75 border-gray-300 bg-gray-50'
           : 'border-gray-200 hover:border-primary-200'
       }`}
+      data-testid="menu-item-card"
     >
       <div className="space-y-4">
         {/* Image placeholder - Responsive */}

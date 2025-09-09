@@ -1,0 +1,40 @@
+# Profil spécialisé pour développement frontend
+# Usage: ./mvnw quarkus:dev -Dquarkus.profile=web
+
+quarkus:
+  quinoa:
+    # Configuration Quinoa activée pour développement web
+    enabled: true
+    ui-dir: apps/web
+    
+    # Dev server configuration
+    dev-server:
+      port: 5173
+      host: localhost  
+      check-timeout: 2000
+      auto-start: true
+      managed: true
+      
+    # SPA routing optimal
+    spa-routing: true
+    spa-routing-path: "/"
+    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/favicon.ico"
+    
+    # Package manager
+    package-manager: npm
+    package-manager-install: true
+    package-manager-install-dir: apps/web
+    
+    # Build settings
+    build-dir: dist
+    dev-script: "dev"
+    build-script: "build"
+    
+    # Force SPA mode
+    force-spa-routing: true
+
+  # Logs spécialisés pour développement web
+  log:
+    category:
+      "io.quarkiverse.quinoa": DEBUG
+      "com.oneeats": INFO

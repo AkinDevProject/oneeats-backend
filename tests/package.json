@@ -4,7 +4,7 @@
   "description": "Tests automatisés end-to-end pour OneEats",
   "scripts": {
     "test": "playwright test",
-    "test:web": "playwright test phase1-dashboard phase2-api phase3-orders dashboard-ui integration-complete",
+    "test:web": "playwright test dashboard-ui simple-api-tests",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",

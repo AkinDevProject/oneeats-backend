@@ -64,11 +64,14 @@ export const useRestaurantData = () => {
 
       // Fetch menu items
       const menuData = await apiService.menuItems.getByRestaurant(RESTAURANT_ID);
+      console.log('Raw menu data from API:', menuData);
+      
       // Transform backend data to frontend format
       const transformedMenuItems = menuData.map((item: any) => ({
         ...item,
         available: item.isAvailable // Map backend isAvailable to frontend available
       }));
+      console.log('Transformed menu items:', transformedMenuItems);
       setMenuItems(transformedMenuItems);
 
       // Fetch all orders for the restaurant (not just pending)

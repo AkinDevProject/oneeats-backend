@@ -1,62 +1,29 @@
-<testsuites id="" name="" tests="21" failures="15" skipped="0" errors="0" time="50.009232000000004">
-<testsuite name="dashboard-ui.spec.ts" timestamp="2025-09-09T18:49:07.466Z" hostname="web-dashboard" tests="6" failures="1" skipped="0" time="15.016" errors="0">
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.1 : Accès et navigation dashboard" classname="dashboard-ui.spec.ts" time="0.827">
+<testsuites id="" name="" tests="11" failures="1" skipped="0" errors="0" time="32.514992">
+<testsuite name="dashboard-ui.spec.ts" timestamp="2025-09-09T19:31:16.533Z" hostname="web-dashboard" tests="6" failures="1" skipped="0" time="26.667" errors="0">
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.1 : Accès et navigation dashboard" classname="dashboard-ui.spec.ts" time="3.715">
 <system-out>
 <![CDATA[🌐 Test UI.1 : Accès et navigation dashboard
 ✅ Test UI.1 : Dashboard accessible et chargé
 ]]>
 </system-out>
 </testcase>
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.2 : Affichage des plats existants" classname="dashboard-ui.spec.ts" time="2.854">
-<failure message="dashboard-ui.spec.ts:27:7 Test UI.2 : Affichage des plats existants" type="FAILURE">
-<![CDATA[  [web-dashboard] › dashboard-ui.spec.ts:27:7 › Dashboard Restaurant - Interface UI › Test UI.2 : Affichage des plats existants 
-
-    Error: expect(received).toBeGreaterThan(expected)
-
-    Expected: > 0
-    Received:   0
-
-      39 |     
-      40 |     // On s'attend à voir au moins quelques éléments
-    > 41 |     expect(count).toBeGreaterThan(0);
-         |                   ^
-      42 |     
-      43 |     console.log('✅ Test UI.2 : Plats affichés dans l\'interface');
-      44 |   });
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\dashboard-ui.spec.ts:41:19
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\error-context.md
-]]>
-</failure>
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.2 : Affichage des plats existants" classname="dashboard-ui.spec.ts" time="1.747">
 <system-out>
 <![CDATA[🍽️ Test UI.2 : Affichage des plats existants
-📊 0 éléments trouvés dans l'interface
-
-[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\video.webm]]
-
-[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-791e4-fichage-des-plats-existants-web-dashboard\error-context.md]]
+📊 8 éléments trouvés dans l'interface
+✅ Test UI.2 : Plats affichés dans l'interface
 ]]>
 </system-out>
 </testcase>
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.3 : Interaction basique avec l&apos;interface" classname="dashboard-ui.spec.ts" time="3.838">
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.3 : Interaction basique avec l&apos;interface" classname="dashboard-ui.spec.ts" time="4.924">
 <system-out>
 <![CDATA[🖱️ Test UI.3 : Interaction basique
-🔘 50 éléments interactifs trouvés
+🔘 64 éléments interactifs trouvés
 ✅ Test UI.3 : Interface interactive et responsive
 ]]>
 </system-out>
 </testcase>
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.4 : Vérification responsive et layout" classname="dashboard-ui.spec.ts" time="2.3">
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.4 : Vérification responsive et layout" classname="dashboard-ui.spec.ts" time="3.499">
 <system-out>
 <![CDATA[📱 Test UI.4 : Responsive et layout
 ✅ Layout OK sur 1920x1080
@@ -66,497 +33,105 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.5 : Performance et temps de chargement" classname="dashboard-ui.spec.ts" time="1.797">
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.5 : Performance et temps de chargement" classname="dashboard-ui.spec.ts" time="4.698">
+<failure message="dashboard-ui.spec.ts:97:7 Test UI.5 : Performance et temps de chargement" type="FAILURE">
+<![CDATA[  [web-dashboard] › dashboard-ui.spec.ts:97:7 › Dashboard Restaurant - Interface UI › Test UI.5 : Performance et temps de chargement 
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 2
+    Received:    4
+
+      133 |     
+      134 |     // Tolérer quelques erreurs non critiques mais pas trop
+    > 135 |     expect(criticalErrors.length).toBeLessThanOrEqual(2);
+          |                                   ^
+      136 |     
+      137 |     console.log('✅ Test UI.5 : Performance dashboard validée');
+      138 |   });
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\dashboard-ui.spec.ts:135:35
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\error-context.md
+]]>
+</failure>
 <system-out>
 <![CDATA[⚡ Test UI.5 : Performance dashboard
-⏱️ Temps de chargement: 529ms
-🐛 1 erreurs JS critiques détectées
+⏱️ Temps de chargement: 853ms
+🐛 4 erreurs JS critiques détectées
 Erreurs: [
-  [32m'Failed to load resource: the server responded with a status of 404 (Not Found)'[39m
+  [32m"Access to font at 'https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2' from origin 'http://localhost:5173' has been blocked by CORS policy: Request header field content-type is not allowed by Access-Control-Allow-Headers in preflight response."[39m,
+  [32m'Failed to load resource: net::ERR_FAILED'[39m,
+  [32m"Access to font at 'https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2' from origin 'http://localhost:5173' has been blocked by CORS policy: Request header field content-type is not allowed by Access-Control-Allow-Headers in preflight response."[39m,
+  [32m'Failed to load resource: net::ERR_FAILED'[39m
 ]
-✅ Test UI.5 : Performance dashboard validée
+
+[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\test-failed-1.png]]
+
+[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\video.webm]]
+
+[[ATTACHMENT|..\test-results\dashboard-ui-Dashboard-Res-99506-ance-et-temps-de-chargement-web-dashboard\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Dashboard Restaurant - Interface UI › Test UI.6 : Navigation entre pages" classname="dashboard-ui.spec.ts" time="3.4">
+<testcase name="Dashboard Restaurant - Interface UI › Test UI.6 : Navigation entre pages" classname="dashboard-ui.spec.ts" time="8.084">
 <system-out>
 <![CDATA[🧭 Test UI.6 : Navigation dashboard
-ℹ️ Page non implémentée: /restaurant/orders
-ℹ️ Page non implémentée: /restaurant/analytics
-ℹ️ Page non implémentée: /restaurant/settings
+✅ Page accessible: /restaurant/orders
+✅ Page accessible: /restaurant/analytics
+✅ Page accessible: /restaurant/settings
 ℹ️ Page non implémentée: /restaurant
 ✅ Test UI.6 : Navigation testée
 ]]>
 </system-out>
 </testcase>
 </testsuite>
-<testsuite name="phase1-dashboard.spec.ts" timestamp="2025-09-09T18:49:07.466Z" hostname="web-dashboard" tests="4" failures="3" skipped="0" time="22.998" errors="0">
-<testcase name="Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.1 : Création d&apos;un menu complet" classname="phase1-dashboard.spec.ts" time="10.484">
-<failure message="phase1-dashboard.spec.ts:6:7 Test 1.1 : Création d&apos;un menu complet" type="FAILURE">
-<![CDATA[  [web-dashboard] › phase1-dashboard.spec.ts:6:7 › Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.1 : Création d'un menu complet 
-
-    Error: expect(page).toHaveTitle(expected) failed
-
-    Expected pattern: /OneEats/
-    Received string:  "404 - Resource Not Found"
-    Timeout: 10000ms
-
-    Call log:
-      - Expect "toHaveTitle" with timeout 10000ms
-        13 × unexpected value "404 - Resource Not Found"
-
-
-       9 |     // Navigation vers le dashboard menu
-      10 |     await page.goto('/restaurant/menu');
-    > 11 |     await expect(page).toHaveTitle(/OneEats/);
-         |                        ^
-      12 |     
-      13 |     // Attendre que la page soit chargée
-      14 |     await page.waitForLoadState('networkidle');
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:11:24
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\error-context.md
-]]>
-</failure>
+<testsuite name="simple-api-tests.spec.ts" timestamp="2025-09-09T19:31:16.533Z" hostname="api-backend" tests="5" failures="0" skipped="0" time="0.086" errors="0">
+<testcase name="Tests API OneEats - Simplifiés › API Restaurants - GET /restaurants" classname="simple-api-tests.spec.ts" time="0.032">
 <system-out>
-<![CDATA[🍕 Test 1.1 : Création d'un menu complet
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\video.webm]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-4e681--Création-d-un-menu-complet-web-dashboard\error-context.md]]
+<![CDATA[🏪 Test API Restaurants
+API Response: 200 OK
+Restaurants received: [33m0[39m []
+ℹ️ API Restaurants fonctionne mais sans données (DB vide)
+✅ API Restaurants validée
 ]]>
 </system-out>
 </testcase>
-<testcase name="Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.2 : Gestion de la disponibilité" classname="phase1-dashboard.spec.ts" time="11.009">
-<failure message="phase1-dashboard.spec.ts:42:7 Test 1.2 : Gestion de la disponibilité" type="FAILURE">
-<![CDATA[  [web-dashboard] › phase1-dashboard.spec.ts:42:7 › Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.2 : Gestion de la disponibilité 
-
-    Error: expect(locator).toBeVisible() failed
-
-    Locator:  locator('[data-testid="menu-item-card"]').first()
-    Expected: visible
-    Received: <element(s) not found>
-    Timeout:  10000ms
-
-    Call log:
-      - Expect "toBeVisible" with timeout 10000ms
-      - waiting for locator('[data-testid="menu-item-card"]').first()
-
-
-      48 |     // Trouver un plat disponible
-      49 |     const menuItem = page.locator('[data-testid="menu-item-card"]').first();
-    > 50 |     await expect(menuItem).toBeVisible();
-         |                            ^
-      51 |     
-      52 |     // Récupérer le nom du plat pour le suivi
-      53 |     const itemName = await menuItem.locator('[data-testid="item-name"]').textContent();
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:50:28
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\error-context.md
-]]>
-</failure>
+<testcase name="Tests API OneEats - Simplifiés › API Restaurant détails - GET /restaurants/{id}" classname="simple-api-tests.spec.ts" time="0.007">
 <system-out>
-<![CDATA[👁️ Test 1.2 : Gestion de la disponibilité
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\video.webm]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-94247-Gestion-de-la-disponibilité-web-dashboard\error-context.md]]
+<![CDATA[🔍 Test API Restaurant détails
+ℹ️ Restaurant non trouvé (normal si DB vide)
+✅ Test API Restaurant détails validé
 ]]>
 </system-out>
 </testcase>
-<testcase name="Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.3 : Filtres et recherche" classname="phase1-dashboard.spec.ts" time="0.78">
+<testcase name="Tests API OneEats - Simplifiés › API Menu Items - GET /menu-items/restaurant/{id}" classname="simple-api-tests.spec.ts" time="0.008">
 <system-out>
-<![CDATA[🔍 Test 1.3 : Filtres et recherche
-✅ Test 1.3 : Filtres et recherche validés
+<![CDATA[🍽️ Test API Menu Items
+ℹ️ Menu items non trouvés (normal si DB vide)
+✅ Test API Menu Items validé
 ]]>
 </system-out>
 </testcase>
-<testcase name="Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.4 : Validation données synchronisées" classname="phase1-dashboard.spec.ts" time="0.725">
-<failure message="phase1-dashboard.spec.ts:119:7 Test 1.4 : Validation données synchronisées" type="FAILURE">
-<![CDATA[  [web-dashboard] › phase1-dashboard.spec.ts:119:7 › Phase 1 : Gestion des Menus - Dashboard Restaurant › Test 1.4 : Validation données synchronisées 
-
-    ReferenceError: db is not defined
-
-      127 |     
-      128 |     // Récupérer les données de la BDD
-    > 129 |     const dbMenuItems = await db.getMenuItems(process.env.TEST_RESTAURANT_ID!);
-          |                         ^
-      130 |     const availableDbItems = dbMenuItems.filter(item => item.is_available);
-      131 |     
-      132 |     console.log(`🌐 Interface: ${uiMenuItems} plats`);
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:129:25
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\error-context.md
-]]>
-</failure>
+<testcase name="Tests API OneEats - Simplifiés › API Performance" classname="simple-api-tests.spec.ts" time="0.006">
 <system-out>
-<![CDATA[🔄 Test 1.4 : Validation synchronisation BDD
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\video.webm]]
-
-[[ATTACHMENT|..\test-results\phase1-dashboard-Phase-1-G-3ecfd-ation-données-synchronisées-web-dashboard\error-context.md]]
+<![CDATA[⚡ Test Performance API
+⚡ API response time: 3ms
 ]]>
 </system-out>
 </testcase>
-</testsuite>
-<testsuite name="phase2-api.spec.ts" timestamp="2025-09-09T18:49:07.466Z" hostname="api-backend" tests="5" failures="5" skipped="0" time="0.067" errors="0">
-<testcase name="Phase 2 : Tests API Backend › Test 2.1 : API Restaurants - GET /restaurants" classname="phase2-api.spec.ts" time="0.003">
-<failure message="phase2-api.spec.ts:12:7 Test 2.1 : API Restaurants - GET /restaurants" type="FAILURE">
-<![CDATA[  [api-backend] › phase2-api.spec.ts:12:7 › Phase 2 : Tests API Backend › Test 2.1 : API Restaurants - GET /restaurants 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:8
-
-       6 |   // Restaurants
-       7 |   async getAllRestaurants() {
-    >  8 |     const response = await this.request.get('/restaurants');
-         |                                         ^
-       9 |     return await response.json();
-      10 |   }
-      11 |
-        at ApiHelper.getAllRestaurants (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:8:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase2-api.spec.ts:15:35
-]]>
-</failure>
+<testcase name="Tests API OneEats - Simplifiés › API Commande simple" classname="simple-api-tests.spec.ts" time="0.033">
 <system-out>
-<![CDATA[🏪 Test 2.1 : API Restaurants
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 2 : Tests API Backend › Test 2.2 : API Restaurant détails - GET /restaurants/{id}" classname="phase2-api.spec.ts" time="0.004">
-<failure message="phase2-api.spec.ts:31:7 Test 2.2 : API Restaurant détails - GET /restaurants/{id}" type="FAILURE">
-<![CDATA[  [api-backend] › phase2-api.spec.ts:31:7 › Phase 2 : Tests API Backend › Test 2.2 : API Restaurant détails - GET /restaurants/{id} 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:13
-
-      11 |
-      12 |   async getRestaurant(id: string) {
-    > 13 |     const response = await this.request.get(`/restaurants/${id}`);
-         |                                         ^
-      14 |     return await response.json();
-      15 |   }
-      16 |
-        at ApiHelper.getRestaurant (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:13:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase2-api.spec.ts:34:34
-]]>
-</failure>
-<system-out>
-<![CDATA[🔍 Test 2.2 : API Restaurant détails
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 2 : Tests API Backend › Test 2.3 : API Menu Items - GET /menu-items/restaurant/{id}" classname="phase2-api.spec.ts" time="0.003">
-<failure message="phase2-api.spec.ts:46:7 Test 2.3 : API Menu Items - GET /menu-items/restaurant/{id}" type="FAILURE">
-<![CDATA[  [api-backend] › phase2-api.spec.ts:46:7 › Phase 2 : Tests API Backend › Test 2.3 : API Menu Items - GET /menu-items/restaurant/{id} 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase2-api.spec.ts:49:33
-]]>
-</failure>
-<system-out>
-<![CDATA[🍽️ Test 2.3 : API Menu Items
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 2 : Tests API Backend › Test 2.4 : Cohérence API-BDD" classname="phase2-api.spec.ts" time="0.004">
-<failure message="phase2-api.spec.ts:98:7 Test 2.4 : Cohérence API-BDD" type="FAILURE">
-<![CDATA[  [api-backend] › phase2-api.spec.ts:98:7 › Phase 2 : Tests API Backend › Test 2.4 : Cohérence API-BDD 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase2-api.spec.ts:102:36
-]]>
-</failure>
-<system-out>
-<![CDATA[🔄 Test 2.4 : Cohérence API-BDD
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 2 : Tests API Backend › Test 2.5 : Performance API" classname="phase2-api.spec.ts" time="0.053">
-<failure message="phase2-api.spec.ts:126:7 Test 2.5 : Performance API" type="FAILURE">
-<![CDATA[  [api-backend] › phase2-api.spec.ts:126:7 › Phase 2 : Tests API Backend › Test 2.5 : Performance API 
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: true
-    Received: false
-
-      142 |     const menuTime = Date.now() - menuStartTime;
-      143 |     
-    > 144 |     expect(menuResponse.ok()).toBe(true);
-          |                               ^
-      145 |     expect(menuTime).toBeLessThan(1500); // Moins de 1.5 secondes
-      146 |     console.log(`🍽️ GET /menu-items: ${menuTime}ms`);
-      147 |     
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase2-api.spec.ts:144:31
-]]>
-</failure>
-<system-out>
-<![CDATA[⚡ Test 2.5 : Performance API
-🏪 GET /restaurants: 43ms
-]]>
-</system-out>
-</testcase>
-</testsuite>
-<testsuite name="phase3-orders.spec.ts" timestamp="2025-09-09T18:49:07.466Z" hostname="api-backend" tests="4" failures="4" skipped="0" time="0.013" errors="0">
-<testcase name="Phase 3 : Tests Commandes API (Backend) › Test 3.1 : Test API commandes complète" classname="phase3-orders.spec.ts" time="0.003">
-<failure message="phase3-orders.spec.ts:13:7 Test 3.1 : Test API commandes complète" type="FAILURE">
-<![CDATA[  [api-backend] › phase3-orders.spec.ts:13:7 › Phase 3 : Tests Commandes API (Backend) › Test 3.1 : Test API commandes complète 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase3-orders.spec.ts:17:33
-]]>
-</failure>
-<system-out>
-<![CDATA[🔗 Test 3.1 : Test API commandes complète
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 3 : Tests Commandes API (Backend) › Test 3.2 : Simulation cycle de vie complet d&apos;une commande" classname="phase3-orders.spec.ts" time="0.004">
-<failure message="phase3-orders.spec.ts:86:7 Test 3.2 : Simulation cycle de vie complet d&apos;une commande" type="FAILURE">
-<![CDATA[  [api-backend] › phase3-orders.spec.ts:86:7 › Phase 3 : Tests Commandes API (Backend) › Test 3.2 : Simulation cycle de vie complet d'une commande 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase3-orders.spec.ts:90:33
-]]>
-</failure>
-<system-out>
-<![CDATA[🔄 Test 3.2 : Cycle de vie complet d'une commande
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 3 : Tests Commandes API (Backend) › Test 3.3 : Validation données commande en BDD" classname="phase3-orders.spec.ts" time="0.003">
-<failure message="phase3-orders.spec.ts:140:7 Test 3.3 : Validation données commande en BDD" type="FAILURE">
-<![CDATA[  [api-backend] › phase3-orders.spec.ts:140:7 › Phase 3 : Tests Commandes API (Backend) › Test 3.3 : Validation données commande en BDD 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase3-orders.spec.ts:144:33
-]]>
-</failure>
-<system-out>
-<![CDATA[🗄️ Test 3.3 : Validation données commande en BDD
-]]>
-</system-out>
-</testcase>
-<testcase name="Phase 3 : Tests Commandes API (Backend) › Test 3.4 : Test charge et performance commandes" classname="phase3-orders.spec.ts" time="0.003">
-<failure message="phase3-orders.spec.ts:217:7 Test 3.4 : Test charge et performance commandes" type="FAILURE">
-<![CDATA[  [api-backend] › phase3-orders.spec.ts:217:7 › Phase 3 : Tests Commandes API (Backend) › Test 3.4 : Test charge et performance commandes 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase3-orders.spec.ts:220:33
-]]>
-</failure>
-<system-out>
-<![CDATA[⚡ Test 3.4 : Performance commandes
-]]>
-</system-out>
-</testcase>
-</testsuite>
-<testsuite name="integration-complete.spec.ts" timestamp="2025-09-09T18:49:07.466Z" hostname="integration" tests="2" failures="2" skipped="0" time="1.091" errors="0">
-<testcase name="Integration Complète : Flow OneEats End-to-End › Flow complet : Dashboard → API → Mobile → BDD" classname="integration-complete.spec.ts" time="0.796">
-<failure message="integration-complete.spec.ts:13:7 Flow complet : Dashboard → API → Mobile → BDD" type="FAILURE">
-<![CDATA[  [integration] › integration-complete.spec.ts:13:7 › Integration Complète : Flow OneEats End-to-End › Flow complet : Dashboard → API → Mobile → BDD 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:18
-
-      16 |
-      17 |   async getRestaurantMenuItems(restaurantId: string) {
-    > 18 |     const response = await this.request.get(`/menu-items/restaurant/${restaurantId}`);
-         |                                         ^
-      19 |     return await response.json();
-      20 |   }
-      21 |
-        at ApiHelper.getRestaurantMenuItems (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:18:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\integration-complete.spec.ts:29:36
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🎯 Test Flow Complet OneEats
-📊 PHASE 1: Dashboard Restaurant
-🌐 Dashboard: 0 plats affichés
-🔗 PHASE 2: API Backend
-
-[[ATTACHMENT|..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\video.webm]]
-
-[[ATTACHMENT|..\test-results\integration-complete-Integ-b879b-hboard-→-API-→-Mobile-→-BDD-integration\error-context.md]]
-]]>
-</system-out>
-</testcase>
-<testcase name="Integration Complète : Flow OneEats End-to-End › Test de régression : Fonctionnalités critiques" classname="integration-complete.spec.ts" time="0.295">
-<failure message="integration-complete.spec.ts:115:7 Test de régression : Fonctionnalités critiques" type="FAILURE">
-<![CDATA[  [integration] › integration-complete.spec.ts:115:7 › Integration Complète : Flow OneEats End-to-End › Test de régression : Fonctionnalités critiques 
-
-    Error: apiRequestContext.get: Fixture { request } from beforeAll cannot be reused in a test.
-      - Recommended fix: use a separate { request } in the test.
-      - Alternatively, manually create APIRequestContext in beforeAll and dispose it in afterAll.
-    See https://playwright.dev/docs/api-testing#sending-api-requests-from-ui-tests for more details.
-
-       at ..\helpers\api-helper.ts:8
-
-       6 |   // Restaurants
-       7 |   async getAllRestaurants() {
-    >  8 |     const response = await this.request.get('/restaurants');
-         |                                         ^
-       9 |     return await response.json();
-      10 |   }
-      11 |
-        at ApiHelper.getAllRestaurants (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\helpers\api-helper.ts:8:41)
-        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\integration-complete.spec.ts:119:35
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\test-results\integration-complete-Integ-17111-n-Fonctionnalités-critiques-integration\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\test-results\integration-complete-Integ-17111-n-Fonctionnalités-critiques-integration\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-]]>
-</failure>
-<system-out>
-<![CDATA[🔍 Test de Régression OneEats
-
-[[ATTACHMENT|..\test-results\integration-complete-Integ-17111-n-Fonctionnalités-critiques-integration\test-failed-1.png]]
-
-[[ATTACHMENT|..\test-results\integration-complete-Integ-17111-n-Fonctionnalités-critiques-integration\video.webm]]
+<![CDATA[📝 Test API Commande
+ℹ️ Commande échouée (erreur serveur)
+✅ Test API Commande validé
 ]]>
 </system-out>
 </testcase>

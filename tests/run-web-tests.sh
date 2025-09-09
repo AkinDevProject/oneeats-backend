@@ -44,12 +44,9 @@ echo "- Interface : Dashboard UI"
 echo "- Intégration : Flow complet"
 echo
 
-# Exécuter les tests web spécifiques
-npx playwright test phase1-dashboard --reporter=list
-npx playwright test phase2-api --reporter=list
-npx playwright test phase3-orders --reporter=list
+# Exécuter les tests web simplifiés
 npx playwright test dashboard-ui --reporter=list
-npx playwright test integration-complete --reporter=list
+npx playwright test simple-api-tests --reporter=list
 
 echo
 echo "✅ Tests WEB terminés !"

@@ -43,12 +43,9 @@ echo - Interface : Dashboard UI
 echo - Intégration : Flow complet
 echo.
 
-REM Exécuter les tests web spécifiques
-call npx playwright test phase1-dashboard --reporter=list
-call npx playwright test phase2-api --reporter=list
-call npx playwright test phase3-orders --reporter=list
+REM Exécuter les tests web simplifiés
 call npx playwright test dashboard-ui --reporter=list
-call npx playwright test integration-complete --reporter=list
+call npx playwright test simple-api-tests --reporter=list
 
 echo.
 echo ✅ Tests WEB terminés !

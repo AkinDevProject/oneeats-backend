@@ -47,17 +47,32 @@ quarkus:
   #   node-version: 20.10.0
 
   quinoa:
+    # Configuration professionnelle Quinoa + Vite
     enabled: true
     ui-dir: apps/web
-    dev-script: "npm run dev"
-    dev-port: 5173
-    dev-server-auto-start: true
-    dev-server-timeout: 60
+    
+    # Configuration dev server
+    dev-server:
+      port: 5173
+      host: localhost
+      check-timeout: 1000
+      auto-start: true
+      
+    # SPA routing pour React Router
     spa-routing: true
     spa-routing-path: "/"
-    spa-routing-ignored-paths: "/api/*,/q/*,/metrics,/health"
-    dev-server-proxy:
-      "/api": "http://localhost:8080"
+    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/favicon.ico"
+    
+    # Build configuration  
+    build-dir: dist
+    
+    # Package manager
+    package-manager: npm
+    package-manager-install: true
+    
+    # Scripts
+    dev-script: "dev"
+    build-script: "build"
 
   keycloak:
     policy-enforcer:

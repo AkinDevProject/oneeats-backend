@@ -27,11 +27,11 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
   test('Test UI.2 : Affichage des plats existants', async ({ page }) => {
     console.log('🍽️ Test UI.2 : Affichage des plats existants');
     
-    // Attendre que les données soient chargées
-    await page.waitForTimeout(2000);
+    // Attendre que les menu items se chargent depuis l'API
+    await page.waitForSelector('[data-testid="menu-item-card"]', { timeout: 10000 });
     
-    // Chercher les plats affichés (adaptez les sélecteurs)
-    const menuItems = page.locator('[class*="menu"], [class*="item"], [class*="card"], [data-testid*="menu"]');
+    // Chercher les plats affichés avec le sélecteur correct
+    const menuItems = page.locator('[data-testid="menu-item-card"]');
     
     // Vérifier qu'on a des éléments (au moins quelques plats)
     const count = await menuItems.count();
