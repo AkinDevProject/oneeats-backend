@@ -24,7 +24,9 @@
       "Bash(npx playwright test:*)",
       "Bash(npm run test:report:*)",
       "Bash(npx playwright:*)",
-      "Bash(start http://localhost:5173/restaurant/menu)"
+      "Bash(start http://localhost:5173/restaurant/menu)",
+      "Bash(dir:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

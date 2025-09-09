@@ -55,7 +55,7 @@ quarkus:
     dev-server:
       port: 5173
       host: localhost
-      check-timeout: 1000
+      check-timeout: 30000
       auto-start: true
       
     # SPA routing pour React Router
