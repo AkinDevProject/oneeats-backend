@@ -22,7 +22,9 @@
       "Bash(cmd:*)",
       "Bash(npm run test:web:*)",
       "Bash(npx playwright test:*)",
-      "Bash(npm run test:report:*)"
+      "Bash(npm run test:report:*)",
+      "Bash(npx playwright:*)",
+      "Bash(start http://localhost:5173/restaurant/menu)"
     ],
     "deny": [],
     "ask": []
