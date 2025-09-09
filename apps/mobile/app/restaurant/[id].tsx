@@ -31,7 +31,8 @@ import Animated, {
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { mockRestaurants, mockMenuItems, MenuItem, Restaurant } from '../../src/data/mockData';
+import { MenuItem, Restaurant } from '../../src/data/mockData';
+import apiService from '../../src/services/api';
 
 const { width } = Dimensions.get('window');
 const HEADER_HEIGHT = 280;
@@ -55,17 +56,53 @@ export default function RestaurantScreen() {
     
     try {
       setIsLoading(true);
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('🔄 Loading restaurant data for ID:', id);
       
-      const foundRestaurant = mockRestaurants.find(r => r.id === id);
-      if (foundRestaurant) {
-        setRestaurant(foundRestaurant);
-        const menu = mockMenuItems.filter(item => item.restaurantId === id);
-        setMenuItems(menu);
-      }
+      // Récupérer les détails du restaurant depuis l'API
+      const restaurantData = await apiService.restaurants.getById(id);
+      console.log('🏪 Restaurant data:', restaurantData);
+      
+      // Mapper les données restaurant au format attendu
+      const mappedRestaurant: Restaurant = {
+        id: restaurantData.id,
+        name: restaurantData.name,
+        image: restaurantData.imageUrl || 'https://via.placeholder.com/400x300',
+        cuisine: restaurantData.cuisineType || 'Restaurant',
+        rating: restaurantData.rating || 4.5,
+        deliveryTime: '20-30 min',
+        deliveryFee: 2.99,
+        distance: '1.2 km',
+        featured: false,
+        isOpen: restaurantData.isOpen,
+        description: restaurantData.description || 'Délicieux restaurant',
+      };
+      
+      setRestaurant(mappedRestaurant);
+      
+      // Récupérer les items du menu depuis l'API
+      const menuData = await apiService.restaurants.getMenuItems(id);
+      console.log('🍽️ Menu data:', menuData);
+      
+      // Mapper les données menu au format attendu
+      const mappedMenu: MenuItem[] = menuData.map((item: any) => ({
+        id: item.id,
+        restaurantId: item.restaurantId,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        image: item.imageUrl || 'https://via.placeholder.com/300x300',
+        category: item.category,
+        popular: item.isPopular || false,
+        available: item.available,
+        options: item.options || [], // Les options seront mappées plus tard si nécessaire
+      }));
+      
+      console.log('✅ Mapped menu:', mappedMenu);
+      setMenuItems(mappedMenu);
+      
     } catch (error) {
-      console.error('Erreur lors du chargement du restaurant:', error);
+      console.error('❌ Erreur lors du chargement du restaurant:', error);
+      // En cas d'erreur, on peut afficher un message ou garder les states vides
     } finally {
       setIsLoading(false);
     }

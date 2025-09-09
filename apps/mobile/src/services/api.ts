@@ -82,7 +82,7 @@ class ApiService {
     getById: (id: string) => this.request<any>(`/restaurants/${id}`),
     
     getMenuItems: (restaurantId: string) => 
-      this.request<any[]>(`/restaurants/${restaurantId}/menu-items`),
+      this.request<any[]>(`/menu-items/restaurant/${restaurantId}`),
   };
 
   // Orders

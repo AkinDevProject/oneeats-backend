@@ -10,6 +10,8 @@ import com.oneeats.restaurant.internal.application.ValidateRestaurantUseCase;
 import com.oneeats.restaurant.internal.application.GetRestaurantUseCase;
 import com.oneeats.restaurant.internal.application.GetAllRestaurantsUseCase;
 import com.oneeats.user.internal.entity.User;
+import com.oneeats.menu.infrastructure.MenuItemRepository;
+import com.oneeats.menu.domain.MenuItem;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -32,6 +34,8 @@ public class RestaurantResource {
     GetRestaurantUseCase getRestaurantUseCase;
     @Inject
     GetAllRestaurantsUseCase getAllRestaurantsUseCase;
+    @Inject
+    MenuItemRepository menuItemRepository;
 
     @POST
     public Response createRestaurant(CreateRestaurantCommand command) {
@@ -82,5 +86,11 @@ public class RestaurantResource {
     @GET
     public List<RestaurantDto> getAllRestaurants() {
         return getAllRestaurantsUseCase.handle();
+    }
+
+    @GET
+    @Path("/{id}/menu-items")
+    public List<MenuItem> getRestaurantMenuItems(@PathParam("id") UUID restaurantId) {
+        return menuItemRepository.findByRestaurantId(restaurantId);
     }
 }

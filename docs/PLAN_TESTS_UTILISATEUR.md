@@ -104,17 +104,18 @@ Ce document guide les testeurs pour valider le fonctionnement complet de l'écos
 #### **Test 2.1 : Navigation et Découverte**
 **Étapes** :
 1. 📱 Ouvrir l'application mobile OneEats
-2. 🔍 Vérifier que le restaurant "Pizza Palace" est affiché
-3. 👆 Appuyer sur le restaurant pour accéder aux détails
-4. 📋 Vérifier que le menu complet créé au Test 1.1 est affiché
-5. 🏷️ Tester les filtres par catégorie (entrées, plats, desserts)
+2. 🔍 Vérifier que le restaurant "Pizza Palace" est affiché dans la liste
+3. 👆 Appuyer sur "Pizza Palace" pour accéder aux détails
+4. 📋 Vérifier que le menu est chargé depuis l'API backend
+5. 🏷️ Tester les filtres par catégorie (Pizza, Dessert, Salade, Pâtes, Boisson)
 
 **Vérifications** :
-- ✅ Le restaurant est visible sur la page d'accueil
-- ✅ Les 9 plats créés sont visibles dans l'app
-- ✅ Les prix correspondent exactement
+- ✅ Pizza Palace est visible sur la page d'accueil (chargé depuis l'API)
+- ✅ Les 8 plats existants en BDD sont visibles dans l'app
+- ✅ Les prix correspondent exactement à ceux du dashboard
 - ✅ Les plats non disponibles sont correctement masqués
-- ✅ Les catégories s'affichent dynamiquement
+- ✅ Les catégories s'affichent dynamiquement selon les plats en BDD
+- ✅ Aucune donnée mockée n'est utilisée (tout vient de l'API)
 
 #### **Test 2.2 : Processus de Commande Complet**
 **Étapes** :
