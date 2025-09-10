@@ -46,13 +46,24 @@ export default defineConfig({
   },
 
   projects: [
-    // Tests Web Dashboard - Chrome
+    // Tests Web Dashboard - Chrome  
     {
-      name: 'web-dashboard',
+      name: 'restaurant-dashboard',
+      testMatch: /restaurant\//,
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Paramètres spécifiques pour les tests restaurant
+        actionTimeout: 15000,
+        navigationTimeout: 30000,
+      },
+    },
+    
+    // Tests Legacy (à migrer)
+    {
+      name: 'legacy-tests',
       testMatch: /phase1-dashboard|dashboard-ui/,
       use: { 
         ...devices['Desktop Chrome'],
-        // Paramètres spécifiques pour les tests UI
         actionTimeout: 15000,
         navigationTimeout: 30000,
       },

@@ -46,3 +46,41 @@ nb-configuration.xml
 
 # Windows reserved filename issue
 nul
+
+# E2E Tests artifacts (Playwright)
+tests/test-results/
+tests/reports/
+tests/playwright-report/
+tests/test-artifacts/
+tests/.last-run.json
+test-results/
+reports/
+playwright-report/
+.last-run.json
+
+# Playwright specific artifacts
+*.png
+*.webm
+*.zip
+trace.zip
+*.trace.zip
+test-results*.json
+auth-state.json
+
+# Playwright coverage and debug files
+coverage/
+.nyc_output/
+.playwright/
+playwright/.cache/
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build artifacts
+apps/web/dist/
+apps/web/build/
+apps/mobile/dist/
+apps/mobile/.expo/
