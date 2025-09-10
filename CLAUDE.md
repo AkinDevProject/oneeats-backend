@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📋 Context File Reference
+
+**IMPORTANT**: Always read the `CONTEXT.md` file at the start of each session. This file contains:
+- Complete project overview and architecture details
+- Specific development setup constraints (IntelliJ + Quinoa)
+- Available/unavailable commands for this environment
+- Domain structure and implementation status
+- All technical specifications and workflows
+
+This context file is essential for understanding the OneEats project architecture and development environment.
+
 ## Project Overview
 
 OneEats is a food delivery platform built with a monorepo architecture containing:

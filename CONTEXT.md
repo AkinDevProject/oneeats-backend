@@ -12,6 +12,34 @@ Les objectifs principaux sont :
 
 ---
 
+## 🏗️ Architecture de Développement Spécifique
+
+### **Setup Backend + Frontend**
+- **Backend** : Quarkus Java lancé depuis **IntelliJ IDEA** (pas de JDK terminal)
+- **Frontend Dashboard** : React intégré via **Quinoa** dans Quarkus 
+- **URL unique** : `http://localhost:8080` (backend + dashboard)
+- **Mobile App** : React Native/Expo séparée sur `apps/mobile/`
+
+### **Services**
+- **API Backend** : `http://localhost:8080/api`
+- **Dashboard Restaurant** : `http://localhost:8080/restaurant`
+- **Base de données** : PostgreSQL Docker `localhost:5432`
+- **App mobile** : `http://192.168.1.36:8080/api` (IP réseau local)
+
+### **Outils de développement**
+- **IDE Principal** : IntelliJ IDEA (avec Quarkus + Quinoa)
+- **Terminal** : Pas de JDK disponible
+- **Docker** : PostgreSQL + PgAdmin
+- **Mobile** : Expo CLI
+
+### **⚠️ Contraintes importantes pour Claude Code**
+- **Pas de `./mvnw`** en ligne de commande (IntelliJ seulement)
+- **Pas de `npm run dev`** pour le dashboard (géré par Quinoa)
+- **URL unique** `:8080` pour backend + dashboard
+- **Tests E2E** adaptés à cette architecture unique
+
+---
+
 ## 2. Côté métier
 
 ### 2.1 Acteurs principaux
@@ -315,25 +343,43 @@ order/
 ## 7. Workflow de développement
 
 ### 7.1 Setup projet (architecture monolithique)
+
+#### **⚠️ Setup spécifique à cet environnement**
 ```bash
-# Démarrage base de données
+# ✅ Démarrage base de données
 docker-compose -f docker-compose.dev.yml up -d
 
-# Backend monolithique (avec frontend web intégré via Quinoa)
-./mvnw quarkus:dev                    # Linux/Mac  
-mvnw.cmd quarkus:dev                  # Windows
-
-# Mobile (séparément)
+# ✅ Mobile (séparément) 
 cd apps/mobile && npm start
 
-# Build complet du projet
-./mvnw clean install
+# ✅ Tests E2E
+cd tests && npm test
 
-# Tests
-./mvnw test
+# ❌ Backend (IntelliJ SEULEMENT - pas de terminal)
+# ./mvnw quarkus:dev                  # NON DISPONIBLE
 
-# Package pour production
-./mvnw clean package -Dnative        # Build natif (optionnel)
+# ❌ Dashboard (intégré via Quinoa - pas séparé)
+# cd apps/web && npm run dev          # NON NÉCESSAIRE
+```
+
+#### **Workflow de développement adapté**
+1. **Base de données** : `docker-compose -f docker-compose.dev.yml up -d`
+2. **Backend + Dashboard** : Lancer Quarkus dev depuis IntelliJ IDEA
+3. **Mobile** : `cd apps/mobile && npm start` (si nécessaire)
+4. **Tests** : `cd tests && npm test`
+5. **Vérification** : `http://localhost:8080/restaurant/menu`
+
+#### **URLs de test unifiées**
+```bash
+# Dashboard Restaurant (Quinoa intégré)
+http://localhost:8080/restaurant/menu
+
+# API Backend 
+http://localhost:8080/api/restaurants
+http://localhost:8080/api/menu-items/restaurant/{id}
+
+# App Mobile (réseau local)
+http://192.168.1.36:8080/api
 ```
 
 ### 7.2 Développement de nouveaux domaines
@@ -354,18 +400,28 @@ cd apps/mobile && npm start
 - **Validation** : Bean Validation sur DTOs + logique métier dans entités
 
 ### 7.4 Commandes utiles de développement
+
+#### **⚠️ Commandes adaptées à cet environnement**
 ```bash
-# Hot reload automatique (Quarkus Dev Mode)
-./mvnw quarkus:dev
+# ✅ Base de données
+docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose.dev.yml down -v
 
-# Tests avec watch mode
-./mvnw test -Dquarkus.test.continuous-testing=enabled
+# ✅ Tests E2E
+cd tests && npm test
+cd tests && npm run test:headed
 
-# Génération de rapports de couverture
-./mvnw test jacoco:report
+# ✅ Mobile
+cd apps/mobile && npm start
+cd apps/mobile && npm run android
 
-# Profil spécifique
-./mvnw quarkus:dev -Dquarkus.profile=dev
+# ❌ Backend (IntelliJ uniquement)
+# ./mvnw quarkus:dev                           # NON DISPONIBLE
+# ./mvnw test -Dquarkus.test.continuous-testing=enabled
+# ./mvnw test jacoco:report
+
+# 📝 Note: Hot reload Quarkus géré automatiquement par IntelliJ
+# 📝 Note: Dashboard React hot reload géré par Quinoa
 ```
 
 ---

@@ -35,17 +35,6 @@ quarkus:
 
 
 
-  # Quinoa désactivé temporairement pour les tests backend
-  # quinoa:
-  #   ui-dir: apps/web
-  #   dev-server:
-  #     port: 5173
-  #     host: localhost
-  #     check-timeout: 1000
-  #   package-manager-install: false
-  #   package-manager-install-dir: ../../apps/web
-  #   node-version: 20.10.0
-
   quinoa:
     # Configuration professionnelle Quinoa + Vite
     enabled: true
