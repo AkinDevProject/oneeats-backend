@@ -3,8 +3,8 @@ package com.oneeats.menu.infrastructure.persistence.entity;
 import com.oneeats.menu.domain.model.MenuItemOptionType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -35,21 +35,25 @@ public class MenuItemOptionEntity {
     @Column(name = "is_required", nullable = false)
     private Boolean isRequired = false;
     
-    @Column(name = "max_choices", nullable = false)
-    private Integer maxChoices = 1;
+    @Column(name = "max_choices")
+    private Integer maxChoices;
     
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder = 0;
     
     @OneToMany(mappedBy = "option", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
-    private List<MenuItemChoiceEntity> choices = new ArrayList<>();
+    private Set<MenuItemChoiceEntity> choices = new LinkedHashSet<>();
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    @Version
+    @Column(name = "version")
+    private Integer version;
     
     // Constructeurs
     public MenuItemOptionEntity() {}
@@ -106,12 +110,15 @@ public class MenuItemOptionEntity {
     public Integer getDisplayOrder() { return displayOrder; }
     public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }
     
-    public List<MenuItemChoiceEntity> getChoices() { return choices; }
-    public void setChoices(List<MenuItemChoiceEntity> choices) { this.choices = choices; }
+    public Set<MenuItemChoiceEntity> getChoices() { return choices; }
+    public void setChoices(Set<MenuItemChoiceEntity> choices) { this.choices = choices; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Integer getVersion() { return version; }
+    public void setVersion(Integer version) { this.version = version; }
 }

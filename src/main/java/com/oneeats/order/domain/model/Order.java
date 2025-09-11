@@ -195,4 +195,41 @@ public class Order extends BaseEntity {
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
+    
+    // Méthodes métier
+    
+    /**
+     * Mettre à jour le statut de la commande avec validation métier
+     */
+    public void updateStatus(OrderStatus newStatus) {
+        OrderStatus oldStatus = this.status;
+        
+        // Validation des transitions de statut
+        if (!isValidStatusTransition(oldStatus, newStatus)) {
+            throw new IllegalStateException(
+                "Invalid status transition from " + oldStatus + " to " + newStatus);
+        }
+        
+        this.status = newStatus;
+        
+        // Publier un événement de changement de statut
+        addDomainEvent(new OrderStatusChangedEvent(this.getId(), oldStatus, newStatus));
+        
+        // Actions spécifiques selon le nouveau statut
+        if (newStatus == OrderStatus.COMPLETED) {
+            this.actualPickupTime = LocalDateTime.now();
+        }
+    }
+    
+    /**
+     * Vérifier si la transition de statut est valide
+     */
+    private boolean isValidStatusTransition(OrderStatus from, OrderStatus to) {
+        if (from == null || to == null) {
+            return false;
+        }
+        
+        // Utiliser la logique de validation définie dans l'enum OrderStatus
+        return from.canTransitionTo(to);
+    }
 }

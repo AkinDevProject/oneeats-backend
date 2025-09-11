@@ -8,6 +8,7 @@ import com.oneeats.order.infrastructure.mapper.OrderInfrastructureMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class JpaOrderRepository implements IOrderRepository {
     }
 
     @Override
+    @Transactional
     public List<Order> findByRestaurantId(UUID restaurantId) {
         return OrderEntity.<OrderEntity>find("restaurantId", restaurantId).stream()
                 .map(mapper::toDomain)
@@ -63,10 +65,25 @@ public class JpaOrderRepository implements IOrderRepository {
     }
 
     @Override
+    @Transactional
     public Order save(Order order) {
-        OrderEntity entity = mapper.toEntity(order);
-        entity.persistAndFlush();
-        return mapper.toDomain(entity);
+        if (order.getId() == null) {
+            // Nouvelle entité
+            OrderEntity entity = mapper.toEntity(order);
+            entity.persist();
+            return mapper.toDomain(entity);
+        } else {
+            // Entité existante - la charger et la modifier
+            OrderEntity existingEntity = OrderEntity.findById(order.getId());
+            if (existingEntity != null) {
+                // Mettre à jour directement les champs nécessaires
+                existingEntity.setStatus(order.getStatus());
+                existingEntity.setUpdatedAt(order.getUpdatedAt());
+                return mapper.toDomain(existingEntity);
+            } else {
+                throw new RuntimeException("Order not found: " + order.getId());
+            }
+        }
     }
 
     @Override

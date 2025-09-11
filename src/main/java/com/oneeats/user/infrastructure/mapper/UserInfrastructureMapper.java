@@ -29,6 +29,9 @@ public class UserInfrastructureMapper {
             user.getEmail().getValue(),
             user.getHashedPassword(),
             user.getStatus(),
+            null, // phone - sera ajouté plus tard
+            null, // address - sera ajouté plus tard
+            true, // isActive par défaut
             user.getCreatedAt(),
             user.getUpdatedAt()
         );

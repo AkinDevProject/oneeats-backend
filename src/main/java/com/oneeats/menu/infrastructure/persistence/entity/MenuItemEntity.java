@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -58,13 +60,17 @@ public class MenuItemEntity {
     
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
-    private List<MenuItemOptionEntity> options = new ArrayList<>();
+    private Set<MenuItemOptionEntity> options = new LinkedHashSet<>();
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    @Version
+    @Column(name = "version")
+    private Integer version;
     
     // Constructeurs
     public MenuItemEntity() {}
@@ -131,14 +137,23 @@ public class MenuItemEntity {
     public String getAllergens() { return allergens; }
     public void setAllergens(String allergens) { this.allergens = allergens; }
     
-    public List<MenuItemOptionEntity> getOptions() { return options; }
-    public void setOptions(List<MenuItemOptionEntity> options) { this.options = options; }
+    public Set<MenuItemOptionEntity> getOptions() { return options; }
+    public void setOptions(Set<MenuItemOptionEntity> options) { this.options = options; }
+    
+    // Méthode de compatibilité temporaire pour éviter NoSuchMethodError
+    @Deprecated
+    public java.util.List<MenuItemOptionEntity> getOptionsAsList() { 
+        return new java.util.ArrayList<>(options); 
+    }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Integer getVersion() { return version; }
+    public void setVersion(Integer version) { this.version = version; }
     
     @Override
     public String toString() {

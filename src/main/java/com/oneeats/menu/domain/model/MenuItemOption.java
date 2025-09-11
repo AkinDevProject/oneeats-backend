@@ -127,8 +127,9 @@ public class MenuItemOption extends BaseEntity {
     }
     
     private int validateMaxChoices(int maxChoices) {
-        if (maxChoices < 1) {
-            throw new ValidationException("Max choices must be at least 1");
+        // 0 ou -1 signifie illimité (pour les types MODIFICATION ou EXTRA)
+        if (maxChoices < 0) {
+            return 0; // Normaliser -1 vers 0 pour "illimité"
         }
         if (maxChoices > 50) {
             throw new ValidationException("Max choices cannot exceed 50");

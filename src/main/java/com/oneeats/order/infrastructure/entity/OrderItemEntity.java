@@ -19,6 +19,10 @@ public class OrderItemEntity extends PanacheEntityBase {
     
     @Column(name = "updated_at")  
     private LocalDateTime updatedAt;
+    
+    @Version
+    @Column(name = "version")
+    private Integer version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -124,5 +128,13 @@ public class OrderItemEntity extends PanacheEntityBase {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Integer getVersion() {
+        return version;
+    }
+    
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

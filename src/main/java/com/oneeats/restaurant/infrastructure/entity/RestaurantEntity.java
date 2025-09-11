@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "restaurants")
+@Table(name = "restaurant")
 public class RestaurantEntity extends PanacheEntityBase {
 
     @Id
@@ -19,6 +19,10 @@ public class RestaurantEntity extends PanacheEntityBase {
     
     @Column(name = "updated_at")  
     private LocalDateTime updatedAt;
+    
+    @Version
+    @Column(name = "version")
+    private Integer version;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -44,15 +48,17 @@ public class RestaurantEntity extends PanacheEntityBase {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private RestaurantStatus status;
+    @Column(name = "is_open", nullable = false)
+    private Boolean isOpen = true;
+    
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     public RestaurantEntity() {}
 
     public RestaurantEntity(UUID id, String name, String description, String address, String phone,
                            String email, String cuisineType, Double rating, String imageUrl,
-                           RestaurantStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                           Boolean isOpen, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -64,7 +70,8 @@ public class RestaurantEntity extends PanacheEntityBase {
         this.cuisineType = cuisineType;
         this.rating = rating;
         this.imageUrl = imageUrl;
-        this.status = status;
+        this.isOpen = isOpen;
+        this.isActive = isActive;
     }
 
     public String getName() {
@@ -131,12 +138,20 @@ public class RestaurantEntity extends PanacheEntityBase {
         this.imageUrl = imageUrl;
     }
 
-    public RestaurantStatus getStatus() {
-        return status;
+    public Boolean getIsOpen() {
+        return isOpen;
     }
 
-    public void setStatus(RestaurantStatus status) {
-        this.status = status;
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+    
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
     
     public UUID getId() {
@@ -161,5 +176,13 @@ public class RestaurantEntity extends PanacheEntityBase {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Integer getVersion() {
+        return version;
+    }
+    
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

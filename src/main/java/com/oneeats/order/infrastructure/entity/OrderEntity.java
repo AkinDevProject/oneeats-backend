@@ -22,6 +22,10 @@ public class OrderEntity extends PanacheEntityBase {
     
     @Column(name = "updated_at")  
     private LocalDateTime updatedAt;
+    
+    @Version
+    @Column(name = "version")
+    private Integer version;
 
     @Column(name = "order_number", nullable = false, unique = true)
     private String orderNumber;
@@ -164,5 +168,13 @@ public class OrderEntity extends PanacheEntityBase {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Integer getVersion() {
+        return version;
+    }
+    
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

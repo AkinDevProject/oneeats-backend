@@ -10,7 +10,7 @@ quarkus:
   # Base de données développement
   datasource:
     jdbc:
-      url: jdbc:postgresql://localhost:5432/oneeats_dev
+      url: jdbc:postgresql://localhost:5432/oneeats_dev2
     username: oneeats_user
     password: oneeats_password
 
@@ -32,6 +32,10 @@ quarkus:
       "io.quarkus.hibernate.orm": DEBUG
       "jakarta.transaction": DEBUG
 
+  # Désactiver l'authentification OIDC en développement
+  oidc:
+    tenant-enabled: false
+
 
 
 
@@ -39,26 +43,26 @@ quarkus:
     # Configuration professionnelle Quinoa + Vite
     enabled: true
     ui-dir: apps/web
-    
+
     # Configuration dev server
     dev-server:
       port: 5173
       host: localhost
       check-timeout: 30000
       auto-start: true
-      
+
     # SPA routing pour React Router
     spa-routing: true
     spa-routing-path: "/"
     spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/favicon.ico"
-    
-    # Build configuration  
+
+    # Build configuration
     build-dir: dist
-    
+
     # Package manager
     package-manager: npm
     package-manager-install: true
-    
+
     # Scripts
     dev-script: "dev"
     build-script: "build"

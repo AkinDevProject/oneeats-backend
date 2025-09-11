@@ -41,6 +41,10 @@ public class MenuItemChoiceEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
     
+    @Version
+    @Column(name = "version")
+    private Integer version;
+    
     // Constructeurs
     public MenuItemChoiceEntity() {}
     
@@ -96,4 +100,7 @@ public class MenuItemChoiceEntity {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public Integer getVersion() { return version; }
+    public void setVersion(Integer version) { this.version = version; }
 }

@@ -45,9 +45,9 @@ public class MenuItemPersistenceMapper {
             LocalDateTime.now()
         );
         
-        // Conversion des options si présentes
-        if (entity.getOptions() != null) {
-            entity.getOptions().forEach(optionEntity -> {
+        // Conversion des options si présentes (utilisation temporaire de getOptionsAsList pour compatibilité)
+        if (entity.getOptions() != null && !entity.getOptions().isEmpty()) {
+            entity.getOptionsAsList().forEach(optionEntity -> {
                 MenuItemOption option = toOptionDomain(optionEntity);
                 menuItem.addOption(option);
             });
@@ -113,7 +113,7 @@ public class MenuItemPersistenceMapper {
             entity.getDescription(),
             entity.getType(),
             entity.getIsRequired(),
-            entity.getMaxChoices(),
+            entity.getMaxChoices() != null ? entity.getMaxChoices() : 0,
             entity.getDisplayOrder()
         );
         
