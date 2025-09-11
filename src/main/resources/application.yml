@@ -80,6 +80,11 @@ quarkus:
       - url: http://localhost:8080
         description: Serveur de développement
   
+  # DevUI Configuration (fix startup issue)
+  dev-ui:
+    cors:
+      enabled: true
+  
   # Sécurité OIDC/Keycloak
   oidc:
     auth-server-url: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
