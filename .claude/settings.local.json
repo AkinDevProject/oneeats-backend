@@ -26,7 +26,19 @@
       "Bash(npx playwright:*)",
       "Bash(start http://localhost:5173/restaurant/menu)",
       "Bash(dir:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(./mvnw test -Dtest=AllEndpointsIntegrationTestSuite)",
+      "Bash(export:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(java:*)",
+      "Read(//c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2025.1.2/jbr/bin//**)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2025.1.2/jbr/bin/java.exe\" -version)",
+      "Bash(./mvnw:*)",
+      "Bash(netstat:*)",
+      "Bash(timeout:*)",
+      "Bash(docker-compose:*)",
+      "Bash(update-imports.bat)",
+      "Bash(\"C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2025.1.2\\jbr\\bin\\javac.exe\" -cp \"C:\\Users\\akin_\\.m2\\repository\\*\" src/main/java/com/oneeats/shared/domain/event/DomainEventPublisher.java)"
     ],
     "deny": [],
     "ask": []

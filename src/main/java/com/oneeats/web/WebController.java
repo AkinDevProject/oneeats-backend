@@ -26,6 +26,15 @@ public class WebController {
     int vitePort;
     
     /**
+     * Route racine
+     */
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getIndex() {
+        return "OneEats Backend is running";
+    }
+    
+    /**
      * Route de test pour vérifier le contrôleur
      */
     @GET
