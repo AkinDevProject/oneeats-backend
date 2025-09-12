@@ -58,8 +58,34 @@ public class JpaRestaurantRepository implements IRestaurantRepository {
 
     @Override
     public Restaurant save(Restaurant restaurant) {
-        RestaurantEntity entity = mapper.toEntity(restaurant);
-        entity.persistAndFlush();
+        // Vérifier si l'entité existe déjà
+        Optional<RestaurantEntity> existingEntity = RestaurantEntity.findByIdOptional(restaurant.getId());
+        
+        RestaurantEntity entity;
+        if (existingEntity.isPresent()) {
+            // Mettre à jour l'entité existante
+            entity = existingEntity.get();
+            // Mapper les champs du domaine vers l'entité existante
+            entity.setName(restaurant.getName());
+            entity.setDescription(restaurant.getDescription());
+            entity.setAddress(restaurant.getAddress());
+            entity.setPhone(restaurant.getPhone());
+            entity.setEmail(restaurant.getEmail().getValue());
+            entity.setCuisineType(restaurant.getCuisineType());
+            entity.setRating(restaurant.getRating());
+            entity.setImageUrl(restaurant.getImageUrl());
+            // Mapper le statut vers les boolean flags
+            boolean isOpen = restaurant.getStatus() == RestaurantStatus.OPEN;
+            boolean isActive = restaurant.getStatus() == RestaurantStatus.ACTIVE || restaurant.getStatus() == RestaurantStatus.OPEN;
+            entity.setIsOpen(isOpen);
+            entity.setIsActive(isActive);
+            entity.flush();
+        } else {
+            // Créer une nouvelle entité
+            entity = mapper.toEntity(restaurant);
+            entity.persistAndFlush();
+        }
+        
         return mapper.toDomain(entity);
     }
 

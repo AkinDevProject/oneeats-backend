@@ -2,6 +2,8 @@ package com.oneeats.restaurant.infrastructure.web;
 
 import com.oneeats.restaurant.application.command.CreateRestaurantCommand;
 import com.oneeats.restaurant.application.command.CreateRestaurantCommandHandler;
+import com.oneeats.restaurant.application.command.UpdateRestaurantCommand;
+import com.oneeats.restaurant.application.command.UpdateRestaurantCommandHandler;
 import com.oneeats.restaurant.application.dto.RestaurantDTO;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQuery;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQueryHandler;
@@ -23,6 +25,9 @@ public class RestaurantController {
 
     @Inject
     CreateRestaurantCommandHandler createRestaurantCommandHandler;
+
+    @Inject
+    UpdateRestaurantCommandHandler updateRestaurantCommandHandler;
 
     @Inject
     GetRestaurantQueryHandler getRestaurantQueryHandler;
@@ -47,5 +52,22 @@ public class RestaurantController {
     public Response getAllRestaurants() {
         List<RestaurantDTO> restaurants = getAllRestaurantsQueryHandler.handle(new GetAllRestaurantsQuery());
         return Response.ok(restaurants).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateRestaurant(@PathParam("id") UUID id, UpdateRestaurantCommand command) {
+        UpdateRestaurantCommand commandWithId = new UpdateRestaurantCommand(
+            id,
+            command.name(),
+            command.description(),
+            command.address(),
+            command.phone(),
+            command.email(),
+            command.cuisineType(),
+            command.isOpen()
+        );
+        RestaurantDTO restaurant = updateRestaurantCommandHandler.handle(commandWithId);
+        return Response.ok(restaurant).build();
     }
 }

@@ -17,6 +17,8 @@ const RestaurantSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Fonction pour charger les données du restaurant
   const loadRestaurantData = async () => {
@@ -57,9 +59,51 @@ const RestaurantSettingsPage: React.FC = () => {
     loadRestaurantData();
   }, []);
 
-  const handleSave = () => {
-    // Save restaurant settings
-    console.log('Saving restaurant settings:', restaurant);
+  const handleSave = async () => {
+    if (!restaurant) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+      
+      // Préparer les données à envoyer (mapper les champs UI vers l'API)
+      const updateData = {
+        name: restaurant.name,
+        email: restaurant.email,
+        phone: restaurant.phone,
+        address: restaurant.address,
+        cuisineType: restaurant.category, // Mapper category -> cuisineType
+        isOpen: isOpen
+        // Note: les horaires ne sont pas encore supportées par l'API backend
+      };
+
+      console.log('Saving restaurant settings:', updateData);
+      
+      // Envoyer les données au backend
+      const updatedRestaurant = await apiService.restaurants.update(RESTAURANT_ID, updateData);
+      
+      console.log('Restaurant updated successfully:', updatedRestaurant);
+      
+      // Mettre à jour l'état local avec les données retournées
+      const mappedData = {
+        ...updatedRestaurant,
+        category: updatedRestaurant.cuisineType,
+        schedule: restaurant.schedule // Garder les horaires locaux
+      };
+      
+      setRestaurant(mappedData);
+      setIsOpen(updatedRestaurant.isOpen);
+      
+      // Afficher le message de succès
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+      
+    } catch (err) {
+      console.error('Error saving restaurant settings:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
   };
 
 
@@ -499,6 +543,24 @@ const RestaurantSettingsPage: React.FC = () => {
           </div>
         </Card>
 
+        {/* Success/Error Messages */}
+        {(saveSuccess || error) && (
+          <div className="fixed top-4 right-4 z-50 max-w-sm">
+            {saveSuccess && (
+              <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
+                <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
+                <span className="font-medium">Modifications enregistrées avec succès !</span>
+              </div>
+            )}
+            {error && (
+              <div className="bg-red-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2">
+                <div className="w-2 h-2 bg-red-200 rounded-full"></div>
+                <span className="font-medium">{error}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Fixed Action Bar - Always Accessible */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:relative lg:shadow-none lg:border-t-0 lg:bg-transparent lg:pt-6">
           <div className="px-4 py-3 lg:px-0 lg:py-0">
@@ -509,6 +571,8 @@ const RestaurantSettingsPage: React.FC = () => {
                   variant="outline"
                   size="lg"
                   className="w-full lg:w-auto order-2 sm:order-1"
+                  onClick={loadRestaurantData}
+                  disabled={saving}
                 >
                   <span className="sm:hidden">Annuler</span>
                   <span className="hidden sm:inline">Annuler les modifications</span>
@@ -518,11 +582,12 @@ const RestaurantSettingsPage: React.FC = () => {
                   onClick={handleSave}
                   variant="primary"
                   size="lg"
-                  icon={<Save className="h-5 w-5" />}
+                  icon={saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Save className="h-5 w-5" />}
                   className="w-full lg:w-auto order-1 sm:order-2 shadow-lg lg:shadow-none"
+                  disabled={saving}
                 >
-                  <span className="sm:hidden">Enregistrer</span>
-                  <span className="hidden sm:inline">Enregistrer les modifications</span>
+                  <span className="sm:hidden">{saving ? 'Enregistrement...' : 'Enregistrer'}</span>
+                  <span className="hidden sm:inline">{saving ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}</span>
                 </Button>
               </div>
             </div>
