@@ -5,6 +5,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +54,9 @@ public class RestaurantEntity extends PanacheEntityBase {
     
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<OpeningHoursEntity> openingHours;
 
     public RestaurantEntity() {}
 
@@ -184,5 +188,16 @@ public class RestaurantEntity extends PanacheEntityBase {
     
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    public List<OpeningHoursEntity> getOpeningHours() {
+        return openingHours;
+    }
+
+    public void setOpeningHours(List<OpeningHoursEntity> openingHours) {
+        this.openingHours = openingHours;
+        if (openingHours != null) {
+            openingHours.forEach(hours -> hours.setRestaurant(this));
+        }
     }
 }

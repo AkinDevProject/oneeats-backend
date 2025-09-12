@@ -19,6 +19,7 @@ public class RestaurantApplicationMapper {
             restaurant.getRating(),
             restaurant.getImageUrl(),
             restaurant.getStatus(),
+            restaurant.canAcceptOrders(),
             restaurant.getCreatedAt(),
             restaurant.getUpdatedAt()
         );

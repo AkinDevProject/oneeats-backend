@@ -16,6 +16,8 @@ public record RestaurantDTO(
     Double rating,
     String imageUrl,
     RestaurantStatus status,
+    boolean isOpen,
+    ScheduleDTO schedule,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}

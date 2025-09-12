@@ -2,14 +2,17 @@ quarkus:
   application:
     name: OneEats Backend
     version: 1.0.0-SNAPSHOT
-  
+
+  telemetry:
+    enabled: false
+
   # Serveur HTTP
   http:
     port: 8080
     host: 0.0.0.0  # Écouter sur toutes les interfaces pour permettre les connexions mobiles
     cors:
       ~: true
-      origins: 
+      origins:
         - http://localhost:3000
         - http://localhost:5173
         - http://localhost:8081
@@ -18,7 +21,7 @@ quarkus:
       methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
       headers: accept,authorization,content-type,x-requested-with
       access-control-max-age: 86400
-  
+
   # Base de données
   datasource:
     db-kind: postgresql
@@ -28,7 +31,7 @@ quarkus:
       url: ${DB_URL:jdbc:postgresql://localhost:5432/oneeats_dev}
       max-size: 20
       min-size: 2
-  
+
   hibernate-orm:
     database:
       generation: update
@@ -36,11 +39,11 @@ quarkus:
       sql: false
     metrics:
       enabled: true
-  
+
   # Configuration Panache
   hibernate-orm-panache:
     enable-implicit-dirty-checking: true
-  
+
   # Sérialisation Jackson
   jackson:
     serialization-inclusion: non_null
@@ -49,7 +52,7 @@ quarkus:
       write-durations-as-timestamps: false
     deserialization:
       fail-on-unknown-properties: false
-  
+
   # Logs
   log:
     level: INFO
@@ -59,18 +62,18 @@ quarkus:
     console:
       enable: true
       format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
-  
+
   # Santé et métriques
   smallrye-health:
     ui:
       enable: true
-  
+
   micrometer:
     export:
       prometheus:
         enabled: true
         path: /metrics
-  
+
   # Documentation OpenAPI
   smallrye-openapi:
     info-title: OneEats API
@@ -79,12 +82,12 @@ quarkus:
     servers:
       - url: http://localhost:8080
         description: Serveur de développement
-  
+
   # DevUI Configuration (fix startup issue)
   dev-ui:
     cors:
       enabled: true
-  
+
   # Sécurité OIDC/Keycloak
   oidc:
     auth-server-url: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
@@ -96,7 +99,7 @@ quarkus:
     token:
       issuer: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
       audience: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
-    
+
   # Autorisation basée sur les rôles
   keycloak:
     policy-enforcer:
@@ -130,7 +133,7 @@ quarkus:
               scopes: ['order:create']
             - method: PUT
               scopes: ['order:write']
-  
+
   # Frontend intégration (Quinoa) - Production
   quinoa:
     enabled: false  # Désactivé par défaut, activé en dev/prod
@@ -138,12 +141,12 @@ quarkus:
     package-manager-install: false
     build-dir: dist
     ui-dir: apps/web
-    
+
     # SPA routing pour production
     spa-routing: true
     spa-routing-path: "/"
     spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*"
-    
+
 # Configuration métier OneEats
 oneeats:
   business:
@@ -159,7 +162,7 @@ oneeats:
       enabled: true
       email-enabled: false  # Désactivé en dev
       sms-enabled: false    # Désactivé en dev
-  
+
   # Limites et sécurité
   api:
     rate-limit:

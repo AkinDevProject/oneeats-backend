@@ -19,6 +19,10 @@ const RestaurantSettingsPage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   // Fonction pour charger les données du restaurant
   const loadRestaurantData = async () => {
@@ -54,6 +58,45 @@ const RestaurantSettingsPage: React.FC = () => {
     }
   };
 
+  // Fonction pour valider l'URL d'image
+  const isValidImageUrl = (url: string): boolean => {
+    if (!url || url.trim() === '') return false;
+    
+    try {
+      // Si c'est une URL relative, c'est valide
+      if (url.startsWith('/')) return true;
+      
+      // Si c'est une URL complète, valider
+      new URL(url);
+      return true;
+    } catch {
+      // URL invalide
+      console.warn('Invalid image URL detected:', url);
+      return false;
+    }
+  };
+
+  // Fonction pour construire l'URL complète de l'image
+  const getImageUrl = (imageUrl: string): string => {
+    if (!imageUrl) return '';
+    
+    // Nettoyer l'URL des espaces
+    const cleanUrl = imageUrl.trim();
+    
+    // Si c'est une URL externe (http/https), utiliser le proxy
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      return `http://localhost:8080/api/proxy/image?url=${encodeURIComponent(cleanUrl)}`;
+    }
+    
+    // Si c'est une URL relative, ajouter le serveur local
+    if (cleanUrl.startsWith('/')) {
+      return `http://localhost:8080${cleanUrl}`;
+    }
+    
+    // Par défaut, traiter comme une URL relative
+    return `http://localhost:8080/${cleanUrl}`;
+  };
+
   // Charger les données au montage
   useEffect(() => {
     loadRestaurantData();
@@ -73,8 +116,16 @@ const RestaurantSettingsPage: React.FC = () => {
         phone: restaurant.phone,
         address: restaurant.address,
         cuisineType: restaurant.category, // Mapper category -> cuisineType
-        isOpen: isOpen
-        // Note: les horaires ne sont pas encore supportées par l'API backend
+        isOpen: isOpen,
+        schedule: {
+          monday: restaurant.schedule.monday,
+          tuesday: restaurant.schedule.tuesday,
+          wednesday: restaurant.schedule.wednesday,
+          thursday: restaurant.schedule.thursday,
+          friday: restaurant.schedule.friday,
+          saturday: restaurant.schedule.saturday,
+          sunday: restaurant.schedule.sunday
+        }
       };
 
       console.log('Saving restaurant settings:', updateData);
@@ -107,9 +158,123 @@ const RestaurantSettingsPage: React.FC = () => {
   };
 
 
-  const handleToggleOpen = () => {
-    setIsOpen(!isOpen);
-    setRestaurant(prev => ({ ...prev, isOpen: !isOpen }));
+  const handleToggleOpen = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      
+      const newOpenStatus = !isOpen;
+      console.log('Toggling restaurant status:', newOpenStatus);
+      
+      // Appel direct à l'API pour changer le statut
+      const updatedRestaurant = await apiService.restaurants.toggleStatus(RESTAURANT_ID, newOpenStatus);
+      
+      console.log('Restaurant status updated:', updatedRestaurant);
+      
+      // Mettre à jour l'état local avec les données retournées
+      const mappedData = {
+        ...updatedRestaurant,
+        category: updatedRestaurant.cuisineType,
+        schedule: restaurant ? restaurant.schedule : {} // Garder les horaires locaux
+      };
+      
+      setRestaurant(mappedData);
+      setIsOpen(updatedRestaurant.isOpen);
+      
+    } catch (err) {
+      console.error('Error toggling restaurant status:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du changement de statut');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Seuls les fichiers JPG, PNG et WebP sont autorisés');
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setError('La taille du fichier ne peut pas dépasser 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError(null);
+      
+      console.log('Uploading restaurant image:', file.name);
+      
+      // Upload image
+      const updatedRestaurant = await apiService.restaurants.uploadImage(RESTAURANT_ID, file);
+      
+      console.log('Image uploaded successfully:', updatedRestaurant);
+      
+      // Update local state
+      const mappedData = {
+        ...updatedRestaurant,
+        category: updatedRestaurant.cuisineType,
+        schedule: restaurant ? restaurant.schedule : {}
+      };
+      
+      setRestaurant(mappedData);
+      
+      // Show success message
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+      
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload de l\'image');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  const handleImageDelete = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer l\'image de profil ?')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError(null);
+      
+      console.log('Deleting restaurant image');
+      
+      // Delete image
+      const updatedRestaurant = await apiService.restaurants.deleteImage(RESTAURANT_ID);
+      
+      console.log('Image deleted successfully:', updatedRestaurant);
+      
+      // Update local state
+      const mappedData = {
+        ...updatedRestaurant,
+        category: updatedRestaurant.cuisineType,
+        schedule: restaurant ? restaurant.schedule : {}
+      };
+      
+      setRestaurant(mappedData);
+      
+      // Show success message
+      setDeleteSuccess(true);
+      setTimeout(() => setDeleteSuccess(false), 3000);
+      
+    } catch (err) {
+      console.error('Error deleting image:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression de l\'image');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -175,7 +340,8 @@ const RestaurantSettingsPage: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleToggleOpen}
-                className={`group relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 overflow-hidden ${
+                disabled={saving}
+                className={`group relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed ${
                   isOpen 
                     ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105' 
                     : 'bg-gradient-to-r from-red-400 to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
@@ -220,7 +386,8 @@ const RestaurantSettingsPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <button
                 onClick={handleToggleOpen}
-                className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 overflow-hidden border-2 ${
+                disabled={saving}
+                className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 overflow-hidden border-2 disabled:opacity-60 disabled:cursor-not-allowed ${
                   isOpen 
                     ? 'bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white border-green-400 shadow-lg shadow-green-500/40 hover:shadow-green-500/60 hover:scale-105' 
                     : 'bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white border-red-400 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105'
@@ -276,7 +443,8 @@ const RestaurantSettingsPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleToggleOpen}
-                className={`group relative px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden border-2 ${
+                disabled={saving}
+                className={`group relative px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden border-2 disabled:opacity-60 disabled:cursor-not-allowed ${
                   isOpen 
                     ? 'bg-gradient-to-br from-green-400 via-green-500 to-green-600 text-white border-green-300 shadow-xl shadow-green-500/50 hover:shadow-green-500/70 hover:scale-105' 
                     : 'bg-gradient-to-br from-red-400 via-red-500 to-red-600 text-white border-red-300 shadow-xl shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105'
@@ -376,34 +544,118 @@ const RestaurantSettingsPage: React.FC = () => {
             </div>
           </div>
           <div className="p-3 sm:p-4 lg:p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center space-y-4 sm:space-y-6 lg:space-y-0 lg:space-x-8">
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                <div className="relative group mx-auto sm:mx-0">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 border-2 border-purple-200 group-hover:border-purple-300 transition-all duration-200">
-                    <Camera className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-purple-500" />
+            <div className="flex flex-col lg:flex-row lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+              {/* Image Preview */}
+              <div className="flex-shrink-0">
+                <div className="relative group mx-auto lg:mx-0 w-32 h-32 lg:w-40 lg:h-40">
+                  <div className="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center border-2 border-purple-200 overflow-hidden shadow-lg">
+                    {restaurant?.imageUrl ? (
+                      <img 
+                        src={getImageUrl(restaurant.imageUrl)}
+                        alt="Restaurant logo" 
+                        className="w-full h-full object-cover"
+                        onLoad={(e) => {
+                          console.log('Image loaded successfully:', restaurant.imageUrl);
+                          // Hide fallback if visible
+                          const fallbackDiv = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
+                          if (fallbackDiv) {
+                            fallbackDiv.style.display = 'none';
+                          }
+                        }}
+                        onError={(e) => {
+                          console.error('Failed to load image:', restaurant.imageUrl);
+                          // Show fallback on error
+                          e.currentTarget.style.display = 'none';
+                          const fallbackDiv = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
+                          if (fallbackDiv) {
+                            fallbackDiv.style.display = 'flex';
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Camera className="h-12 w-12 lg:h-16 lg:w-16 text-purple-500" />
+                    )}
+                    <div className="image-fallback hidden items-center justify-center w-full h-full absolute inset-0 bg-gradient-to-br from-purple-100 to-blue-100">
+                      <Camera className="h-12 w-12 lg:h-16 lg:w-16 text-purple-500" />
+                    </div>
                   </div>
-                  <div className="absolute inset-0 rounded-lg sm:rounded-xl bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
-                    <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  
+                  {/* Loading Overlay */}
+                  {(uploading || deleting) && (
+                    <div className="absolute inset-0 rounded-xl bg-black bg-opacity-50 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-3 text-center sm:text-left">
-                  <div>
-                    <h4 className="font-medium text-sm sm:text-base text-gray-900">Logo de votre restaurant</h4>
-                    <p className="text-xs sm:text-sm text-gray-600">Ajoutez une image qui représente votre établissement</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      icon={<Upload className="h-3 w-3 sm:h-4 sm:w-4" />}
-                      size="sm"
-                      className="shadow-sm text-xs sm:text-sm w-full sm:w-auto"
-                    >
-                      Télécharger une image
-                    </Button>
-                    <p className="text-xs text-gray-500">
-                      JPG, PNG, WebP • Max: 5MB
+                
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploading || deleting}
+                />
+              </div>
+              {/* Controls */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h4 className="font-medium text-base text-gray-900 mb-1">Logo de votre restaurant</h4>
+                  <p className="text-sm text-gray-600">Ajoutez une image qui représente votre établissement</p>
+                </div>
+                
+                {/* Current Image Info */}
+                {restaurant?.imageUrl && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 text-sm">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-blue-800 font-medium">Image actuelle chargée</span>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1 break-all">
+                      {restaurant.imageUrl.length > 50 ? `${restaurant.imageUrl.substring(0, 50)}...` : restaurant.imageUrl}
                     </p>
                   </div>
+                )}
+                
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      icon={uploading ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      size="sm"
+                      className="flex-1 shadow-sm"
+                      onClick={() => document.getElementById('image-upload')?.click()}
+                      disabled={uploading || deleting}
+                    >
+                      {uploading ? 'Upload en cours...' : (restaurant?.imageUrl ? 'Changer l\'image' : 'Télécharger une image')}
+                    </Button>
+                    
+                    {restaurant?.imageUrl && (
+                      <Button
+                        variant="outline"
+                        icon={deleting ? (
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <span className="text-red-500">✕</span>
+                        )}
+                        size="sm"
+                        className="flex-1 sm:flex-none border-red-300 text-red-600 hover:bg-red-50 shadow-sm"
+                        onClick={handleImageDelete}
+                        disabled={uploading || deleting}
+                      >
+                        {deleting ? 'Suppression...' : 'Supprimer'}
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    Formats acceptés : JPG, PNG, WebP • Taille max : 5MB
+                  </p>
                 </div>
               </div>
             </div>
@@ -544,12 +796,24 @@ const RestaurantSettingsPage: React.FC = () => {
         </Card>
 
         {/* Success/Error Messages */}
-        {(saveSuccess || error) && (
-          <div className="fixed top-4 right-4 z-50 max-w-sm">
+        {(saveSuccess || uploadSuccess || deleteSuccess || error) && (
+          <div className="fixed top-4 right-4 z-50 max-w-sm space-y-2">
             {saveSuccess && (
               <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
                 <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
                 <span className="font-medium">Modifications enregistrées avec succès !</span>
+              </div>
+            )}
+            {uploadSuccess && (
+              <div className="bg-blue-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
+                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse"></div>
+                <span className="font-medium">Image uploadée avec succès !</span>
+              </div>
+            )}
+            {deleteSuccess && (
+              <div className="bg-orange-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
+                <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
+                <span className="font-medium">Image supprimée avec succès !</span>
               </div>
             )}
             {error && (

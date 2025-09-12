@@ -19,6 +19,7 @@ public class Restaurant extends BaseEntity {
     private Double rating;
     private String imageUrl;
     private RestaurantStatus status;
+    private WeeklySchedule schedule;
 
     protected Restaurant() {}
 
@@ -33,6 +34,7 @@ public class Restaurant extends BaseEntity {
         this.cuisineType = cuisineType;
         this.rating = 0.0;
         this.status = status;
+        this.schedule = new WeeklySchedule();
     }
 
     public static Restaurant create(String name, String description, String address, 
@@ -63,6 +65,11 @@ public class Restaurant extends BaseEntity {
         this.address = address;
         this.phone = phone;
         this.email = new Email(email);
+        this.markAsModified();
+    }
+
+    public void updateSchedule(WeeklySchedule schedule) {
+        this.schedule = schedule;
         this.markAsModified();
     }
 
@@ -126,6 +133,7 @@ public class Restaurant extends BaseEntity {
     public Double getRating() { return rating; }
     public String getImageUrl() { return imageUrl; }
     public RestaurantStatus getStatus() { return status; }
+    public WeeklySchedule getSchedule() { return schedule; }
 
     public void setImageUrl(String imageUrl) { 
         this.imageUrl = imageUrl; 

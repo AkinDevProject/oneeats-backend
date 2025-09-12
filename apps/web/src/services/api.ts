@@ -12,9 +12,12 @@ class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    // Don't set Content-Type for FormData
+    const isFormData = options.body instanceof FormData;
+    
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...options.headers,
       },
       ...options,
@@ -72,6 +75,31 @@ class ApiService {
     updateStatus: (id: string, status: string): Promise<Restaurant> => 
       this.request(`/api/restaurants/${id}/status?status=${status}`, {
         method: 'PUT',
+      }),
+    
+    toggleStatus: (id: string, isOpen: boolean): Promise<Restaurant> => 
+      this.request(`/api/restaurants/${id}/toggle-status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isOpen }),
+      }),
+
+    uploadImage: (id: string, file: File): Promise<Restaurant> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', file.name);
+
+      return this.request(`/api/restaurants/${id}/image`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          // Don't set Content-Type for FormData, let browser handle it
+        },
+      });
+    },
+
+    deleteImage: (id: string): Promise<Restaurant> => 
+      this.request(`/api/restaurants/${id}/image`, {
+        method: 'DELETE',
       }),
   };
 
