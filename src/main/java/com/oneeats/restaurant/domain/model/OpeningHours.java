@@ -28,6 +28,13 @@ public class OpeningHours {
         }
     }
 
+    public static OpeningHours of(LocalTime openTime, LocalTime closeTime) {
+        if (openTime == null || closeTime == null) {
+            return null;
+        }
+        return new OpeningHours(openTime, closeTime);
+    }
+
     public boolean isOpen() {
         return openTime != null && closeTime != null;
     }

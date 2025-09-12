@@ -25,6 +25,17 @@ VALUES ('10101010-1010-1010-1010-101010101010', CURRENT_TIMESTAMP, CURRENT_TIMES
 INSERT INTO order_items (id, created_at, updated_at, order_id, menu_item_id, menu_item_name, unit_price, quantity, special_notes) 
 VALUES ('60606060-6060-6060-6060-606060606060', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '10101010-1010-1010-1010-101010101010', '33333333-3333-3333-3333-333333333333', 'Margherita', 12.50, 1, 'Bien cuite');
 
+-- Horaires d'ouverture pour Pizza Palace
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) 
+VALUES 
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'MONDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'TUESDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'WEDNESDAY', null, null),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'THURSDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'FRIDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'SATURDAY', '10:00', '17:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'SUNDAY', null, null);
+
 -- Notification de test
 INSERT INTO notifications (id, created_at, updated_at, destinataire, titre, message, type, lu, date_creation) 
 VALUES ('70707070-7070-7070-7070-707070707070', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '22222222-2222-2222-2222-222222222222', 'Commande confirmée', 'Votre commande a été confirmée', 'ORDER_CONFIRMATION', false, CURRENT_TIMESTAMP);

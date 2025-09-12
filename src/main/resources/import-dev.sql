@@ -7,6 +7,36 @@ INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_ty
 ('22222222-2222-2222-2222-222222222222', 'Burger House', 'Burgers artisanaux et frites maison', '456 Avenue des Burgers', '0198765432', 'info@burgerhouse.fr', 'AMERICAIN', 4.2, 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd', true, true, NOW(), NOW(), 0),
 ('33333333-3333-3333-3333-333333333333', 'Sushi Express', 'Sushis frais préparés quotidiennement', '789 Boulevard Tokyo', '0156789012', 'commande@sushiexpress.fr', 'JAPONAIS', 4.7, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351', true, true, NOW(), NOW(), 0);
 
+-- Horaires d'ouverture pour Pizza Palace
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES 
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'MONDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'TUESDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'WEDNESDAY', null, null),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'THURSDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'FRIDAY', '09:00', '18:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'SATURDAY', '10:00', '17:00'),
+    (gen_random_uuid(), '11111111-1111-1111-1111-111111111111', 'SUNDAY', null, null);
+
+-- Horaires d'ouverture pour Burger House
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES 
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'MONDAY', '11:00', '22:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'TUESDAY', '11:00', '22:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'WEDNESDAY', '11:00', '22:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'THURSDAY', '11:00', '22:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'FRIDAY', '11:00', '23:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'SATURDAY', '11:00', '23:00'),
+    (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'SUNDAY', '12:00', '21:00');
+
+-- Horaires d'ouverture pour Sushi Express
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES 
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'MONDAY', null, null),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'TUESDAY', '18:00', '23:00'),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'WEDNESDAY', '18:00', '23:00'),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'THURSDAY', '18:00', '23:00'),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'FRIDAY', '18:00', '00:00'),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'SATURDAY', '18:00', '00:00'),
+    (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'SUNDAY', '18:00', '22:00');
+
 -- Utilisateurs (table 'user_account')
 INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, status, is_active, version) VALUES
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), 'ACTIVE', true, 0),

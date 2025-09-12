@@ -14,9 +14,11 @@ const RestaurantSettingsPage: React.FC = () => {
   const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
   
   const [restaurant, setRestaurant] = useState(null);
+  const [originalRestaurant, setOriginalRestaurant] = useState(null); // Données d'origine pour annuler
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [originalIsOpen, setOriginalIsOpen] = useState(false); // État d'origine pour annuler
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -36,7 +38,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const mappedData = {
         ...apiData,
         category: apiData.cuisineType, // Mapping cuisineType -> category
-        schedule: { // Créer un schedule par défaut car absent de l'API
+        schedule: apiData.schedule || { // Utiliser les données de l'API, sinon valeurs par défaut
           monday: { open: '09:00', close: '18:00' },
           tuesday: { open: '09:00', close: '18:00' },
           wednesday: { open: '09:00', close: '18:00' },
@@ -135,11 +137,11 @@ const RestaurantSettingsPage: React.FC = () => {
       
       console.log('Restaurant updated successfully:', updatedRestaurant);
       
-      // Mettre à jour l'état local avec les données retournées
+      // Mettre à jour l'état local avec les données retournées du serveur
       const mappedData = {
         ...updatedRestaurant,
         category: updatedRestaurant.cuisineType,
-        schedule: restaurant.schedule // Garder les horaires locaux
+        schedule: updatedRestaurant.schedule // Utiliser les horaires mis à jour du serveur
       };
       
       setRestaurant(mappedData);
@@ -175,7 +177,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const mappedData = {
         ...updatedRestaurant,
         category: updatedRestaurant.cuisineType,
-        schedule: restaurant ? restaurant.schedule : {} // Garder les horaires locaux
+        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
       };
       
       setRestaurant(mappedData);
@@ -221,7 +223,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const mappedData = {
         ...updatedRestaurant,
         category: updatedRestaurant.cuisineType,
-        schedule: restaurant ? restaurant.schedule : {}
+        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
       };
       
       setRestaurant(mappedData);
@@ -260,7 +262,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const mappedData = {
         ...updatedRestaurant,
         category: updatedRestaurant.cuisineType,
-        schedule: restaurant ? restaurant.schedule : {}
+        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
       };
       
       setRestaurant(mappedData);

@@ -5,6 +5,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -194,10 +195,18 @@ public class RestaurantEntity extends PanacheEntityBase {
         return openingHours;
     }
 
-    public void setOpeningHours(List<OpeningHoursEntity> openingHours) {
-        this.openingHours = openingHours;
-        if (openingHours != null) {
-            openingHours.forEach(hours -> hours.setRestaurant(this));
+    public void setOpeningHours(List<OpeningHoursEntity> newOpeningHours) {
+        if (this.openingHours == null) {
+            this.openingHours = new ArrayList<>();
+        }
+        
+        // Supprimer tous les anciens horaires (orphanRemoval = true se chargera de la suppression en DB)
+        this.openingHours.clear();
+        
+        // Ajouter les nouveaux horaires
+        if (newOpeningHours != null) {
+            this.openingHours.addAll(newOpeningHours);
+            newOpeningHours.forEach(hours -> hours.setRestaurant(this));
         }
     }
 }

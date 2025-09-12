@@ -62,35 +62,21 @@ public class UpdateRestaurantCommandHandler {
             
             ScheduleDTO schedule = command.schedule();
             
-            // Mapper chaque jour
-            if (schedule.monday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.MONDAY, 
-                    OpeningHours.of(schedule.monday().open(), schedule.monday().close()));
-            }
-            if (schedule.tuesday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.TUESDAY, 
-                    OpeningHours.of(schedule.tuesday().open(), schedule.tuesday().close()));
-            }
-            if (schedule.wednesday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.WEDNESDAY, 
-                    OpeningHours.of(schedule.wednesday().open(), schedule.wednesday().close()));
-            }
-            if (schedule.thursday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.THURSDAY, 
-                    OpeningHours.of(schedule.thursday().open(), schedule.thursday().close()));
-            }
-            if (schedule.friday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.FRIDAY, 
-                    OpeningHours.of(schedule.friday().open(), schedule.friday().close()));
-            }
-            if (schedule.saturday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.SATURDAY, 
-                    OpeningHours.of(schedule.saturday().open(), schedule.saturday().close()));
-            }
-            if (schedule.sunday() != null) {
-                weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.SUNDAY, 
-                    OpeningHours.of(schedule.sunday().open(), schedule.sunday().close()));
-            }
+            // Mapper chaque jour - IMPORTANT: gérer TOUS les jours, même les null
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.MONDAY, 
+                schedule.monday() != null ? OpeningHours.of(schedule.monday().open(), schedule.monday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.TUESDAY, 
+                schedule.tuesday() != null ? OpeningHours.of(schedule.tuesday().open(), schedule.tuesday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.WEDNESDAY, 
+                schedule.wednesday() != null ? OpeningHours.of(schedule.wednesday().open(), schedule.wednesday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.THURSDAY, 
+                schedule.thursday() != null ? OpeningHours.of(schedule.thursday().open(), schedule.thursday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.FRIDAY, 
+                schedule.friday() != null ? OpeningHours.of(schedule.friday().open(), schedule.friday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.SATURDAY, 
+                schedule.saturday() != null ? OpeningHours.of(schedule.saturday().open(), schedule.saturday().close()) : null);
+            weeklySchedule.setDaySchedule(WeeklySchedule.DayOfWeek.SUNDAY, 
+                schedule.sunday() != null ? OpeningHours.of(schedule.sunday().open(), schedule.sunday().close()) : null);
             
             restaurant.updateSchedule(weeklySchedule);
         }
