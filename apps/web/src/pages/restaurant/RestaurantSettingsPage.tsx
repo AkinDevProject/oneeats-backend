@@ -50,7 +50,9 @@ const RestaurantSettingsPage: React.FC = () => {
       };
       
       setRestaurant(mappedData);
+      setOriginalRestaurant(mappedData); // Sauvegarder les données d'origine
       setIsOpen(apiData.isOpen);
+      setOriginalIsOpen(apiData.isOpen); // Sauvegarder l'état d'origine
       
     } catch (err) {
       console.error('Error loading restaurant data:', err);
@@ -99,6 +101,45 @@ const RestaurantSettingsPage: React.FC = () => {
     return `http://localhost:8080/${cleanUrl}`;
   };
 
+  // Fonction pour vérifier s'il y a des modifications
+  const hasChanges = () => {
+    if (!restaurant || !originalRestaurant) return false;
+    
+    // Vérifier si le statut ouvert/fermé a changé
+    if (isOpen !== originalIsOpen) return true;
+    
+    // Vérifier les champs de base
+    if (restaurant.name !== originalRestaurant.name ||
+        restaurant.email !== originalRestaurant.email ||
+        restaurant.phone !== originalRestaurant.phone ||
+        restaurant.address !== originalRestaurant.address ||
+        restaurant.category !== originalRestaurant.category) {
+      return true;
+    }
+    
+    // Vérifier les horaires
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    for (const day of days) {
+      const current = restaurant.schedule[day];
+      const original = originalRestaurant.schedule[day];
+      
+      // Comparer les horaires (null vs null, ou open/close times)
+      if (JSON.stringify(current) !== JSON.stringify(original)) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
+  // Fonction pour annuler les modifications (sans rechargement)
+  const handleCancel = () => {
+    if (originalRestaurant && hasChanges()) {
+      setRestaurant(originalRestaurant);
+      setIsOpen(originalIsOpen);
+    }
+  };
+
   // Charger les données au montage
   useEffect(() => {
     loadRestaurantData();
@@ -145,7 +186,9 @@ const RestaurantSettingsPage: React.FC = () => {
       };
       
       setRestaurant(mappedData);
+      setOriginalRestaurant(mappedData); // Mettre à jour les données d'origine après sauvegarde
       setIsOpen(updatedRestaurant.isOpen);
+      setOriginalIsOpen(updatedRestaurant.isOpen); // Mettre à jour l'état d'origine
       
       // Afficher le message de succès
       setSaveSuccess(true);
@@ -837,11 +880,15 @@ const RestaurantSettingsPage: React.FC = () => {
                   variant="outline"
                   size="lg"
                   className="w-full lg:w-auto order-2 sm:order-1"
-                  onClick={loadRestaurantData}
-                  disabled={saving}
+                  onClick={handleCancel}
+                  disabled={saving || !hasChanges()}
                 >
-                  <span className="sm:hidden">Annuler</span>
-                  <span className="hidden sm:inline">Annuler les modifications</span>
+                  <span className="sm:hidden">
+                    {hasChanges() ? 'Annuler' : 'Aucune modification'}
+                  </span>
+                  <span className="hidden sm:inline">
+                    {hasChanges() ? 'Annuler les modifications' : 'Aucune modification'}
+                  </span>
                 </Button>
                 
                 <Button
@@ -850,10 +897,14 @@ const RestaurantSettingsPage: React.FC = () => {
                   size="lg"
                   icon={saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Save className="h-5 w-5" />}
                   className="w-full lg:w-auto order-1 sm:order-2 shadow-lg lg:shadow-none"
-                  disabled={saving}
+                  disabled={saving || !hasChanges()}
                 >
-                  <span className="sm:hidden">{saving ? 'Enregistrement...' : 'Enregistrer'}</span>
-                  <span className="hidden sm:inline">{saving ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}</span>
+                  <span className="sm:hidden">
+                    {saving ? 'Enregistrement...' : hasChanges() ? 'Enregistrer' : 'Aucune modification'}
+                  </span>
+                  <span className="hidden sm:inline">
+                    {saving ? 'Enregistrement en cours...' : hasChanges() ? 'Enregistrer les modifications' : 'Aucune modification'}
+                  </span>
                 </Button>
               </div>
             </div>
