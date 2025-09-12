@@ -170,8 +170,6 @@ class ApiService {
         body: JSON.stringify(data),
       }),
     
-    getTodayStats: (restaurantId: string): Promise<any> => 
-      this.request(`/api/orders/restaurant/${restaurantId}/stats/today`),
   };
 
   // Users API (for admin)

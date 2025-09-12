@@ -18,18 +18,19 @@ import OrderDetailModal from './components/OrderDetailModal';
 
 const OrdersManagementPage: React.FC = () => {
   const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
-  const [filter, setFilter] = useState<'en_attente' | 'en_preparation' | 'prete' | 'recuperee' | 'annulee'>('en_attente');
+  const [filter, setFilter] = useState<'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED'>('PENDING');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newOrderSound, setNewOrderSound] = useState(false);
 
   const tabs = [
-    { key: 'en_attente', label: 'En attente' },
-    { key: 'en_preparation', label: 'En cours' },
-    { key: 'prete', label: 'Prêtes' },
-    { key: 'recuperee', label: 'Récupérées' },
-    { key: 'annulee', label: 'Annulées' },
+    { key: 'PENDING', label: 'En attente' },
+    { key: 'CONFIRMED', label: 'Confirmées' },
+    { key: 'PREPARING', label: 'En cours' },
+    { key: 'READY', label: 'Prêtes' },
+    { key: 'COMPLETED', label: 'Récupérées' },
+    { key: 'CANCELLED', label: 'Annulées' },
   ];
 
   // Note: Real-time updates and sound controls are now managed in the sidebar
@@ -42,22 +43,25 @@ const OrdersManagementPage: React.FC = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const handleOrderAction = async (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee') => {
+  const handleOrderAction = async (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee' | 'reactivate') => {
     try {
       console.log('Handling order action:', { orderId, action });
       let status: string;
       switch (action) {
         case 'accept':
-          status = 'EN_PREPARATION';
+          status = 'PREPARING';
           break;
         case 'cancel':
-          status = 'ANNULEE';
+          status = 'CANCELLED';
           break;
         case 'prete':
-          status = 'PRETE';
+          status = 'READY';
           break;
         case 'recuperee':
-          status = 'RECUPEREE';
+          status = 'COMPLETED';
+          break;
+        case 'reactivate':
+          status = 'PENDING';
           break;
         default:
           console.warn('Unknown action:', action);
@@ -76,7 +80,7 @@ const OrdersManagementPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleModalAction = (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee') => {
+  const handleModalAction = (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee' | 'reactivate') => {
     handleOrderAction(orderId, action);
     if (selectedOrder && selectedOrder.id === orderId) {
       const updatedOrder = orders.find(o => o.id === orderId);
@@ -90,7 +94,7 @@ const OrdersManagementPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const getStatusConfig = (status: string) => {
       switch (status) {
-        case 'en_attente':
+        case 'PENDING':
           return {
             gradient: 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500',
             textColor: 'text-white',
@@ -99,7 +103,16 @@ const OrdersManagementPage: React.FC = () => {
             shadow: 'shadow-orange-300',
             glow: 'shadow-orange-500/50'
           };
-        case 'en_preparation':
+        case 'CONFIRMED':
+          return {
+            gradient: 'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-600',
+            textColor: 'text-white',
+            icon: '✅',
+            label: 'Confirmée',
+            shadow: 'shadow-green-300',
+            glow: 'shadow-green-500/50'
+          };
+        case 'PREPARING':
           return {
             gradient: 'bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600',
             textColor: 'text-white',
@@ -108,7 +121,7 @@ const OrdersManagementPage: React.FC = () => {
             shadow: 'shadow-blue-300',
             glow: 'shadow-blue-500/50'
           };
-        case 'prete':
+        case 'READY':
           return {
             gradient: 'bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600',
             textColor: 'text-white',
@@ -117,16 +130,16 @@ const OrdersManagementPage: React.FC = () => {
             shadow: 'shadow-green-300',
             glow: 'shadow-green-500/50'
           };
-        case 'completed':
+        case 'COMPLETED':
           return {
             gradient: 'bg-gradient-to-r from-slate-400 via-gray-500 to-slate-600',
             textColor: 'text-white',
             icon: '✅',
-            label: 'Livrée',
+            label: 'Récupérée',
             shadow: 'shadow-gray-300',
             glow: 'shadow-gray-500/50'
           };
-        case 'annulee':
+        case 'CANCELLED':
           return {
             gradient: 'bg-gradient-to-r from-red-400 via-rose-500 to-pink-600',
             textColor: 'text-white',
@@ -159,7 +172,7 @@ const OrdersManagementPage: React.FC = () => {
 
   const getOrderActions = (order: Order) => {
     switch (order.status) {
-      case 'en_attente':
+      case 'PENDING':
         return (
           <div className="flex space-x-2">
             <Button 
@@ -184,7 +197,7 @@ const OrdersManagementPage: React.FC = () => {
             </Button>
           </div>
         );
-      case 'en_preparation':
+      case 'PREPARING':
         return (
           <Button 
             size="sm" 
@@ -243,39 +256,46 @@ const OrdersManagementPage: React.FC = () => {
           {/* Mobile Status Tabs - 3x2 Grid */}
           <div className="grid grid-cols-3 gap-2">
             {[
-              { key: 'en_attente', label: 'En attente', shortLabel: 'Attente', count: orders.filter(o => o.status === 'en_attente').length },
-              { key: 'en_preparation', label: 'En cours', shortLabel: 'Cours', count: orders.filter(o => o.status === 'en_preparation').length },
-              { key: 'prete', label: 'Prêtes', shortLabel: 'Prêtes', count: orders.filter(o => o.status === 'prete').length },
-              { key: 'recuperee', label: 'Récupérées', shortLabel: 'Récup', count: orders.filter(o => o.status === 'recuperee').length },
-              { key: 'annulee', label: 'Annulées', shortLabel: 'Annul', count: orders.filter(o => o.status === 'annulee').length },
+              { key: 'PENDING', label: 'En attente', shortLabel: 'Attente', count: orders.filter(o => o.status === 'PENDING').length },
+              { key: 'CONFIRMED', label: 'Confirmées', shortLabel: 'Conf', count: orders.filter(o => o.status === 'CONFIRMED').length },
+              { key: 'PREPARING', label: 'En cours', shortLabel: 'Cours', count: orders.filter(o => o.status === 'PREPARING').length },
+              { key: 'READY', label: 'Prêtes', shortLabel: 'Prêtes', count: orders.filter(o => o.status === 'READY').length },
+              { key: 'COMPLETED', label: 'Récupérées', shortLabel: 'Récup', count: orders.filter(o => o.status === 'COMPLETED').length },
+              { key: 'CANCELLED', label: 'Annulées', shortLabel: 'Annul', count: orders.filter(o => o.status === 'CANCELLED').length },
             ].map((tab) => {
               const getTabConfig = (key: string) => {
                 switch(key) {
-                  case 'en_attente':
+                  case 'PENDING':
                     return { 
                       icon: AlertCircle, emoji: '⚠️', gradient: 'from-amber-400 to-red-500',
                       bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800',
                       activeGradient: 'bg-gradient-to-r from-amber-400 to-red-500'
                     };
-                  case 'en_preparation':
+                  case 'CONFIRMED':
+                    return { 
+                      icon: CheckCircle, emoji: '✅', gradient: 'from-green-400 to-blue-500',
+                      bgGradient: 'from-green-50 to-blue-50', textColor: 'text-green-800',
+                      activeGradient: 'bg-gradient-to-r from-green-400 to-blue-500'
+                    };
+                  case 'PREPARING':
                     return { 
                       icon: Flame, emoji: '🔥', gradient: 'from-blue-400 to-purple-600',
                       bgGradient: 'from-blue-50 to-purple-50', textColor: 'text-blue-800',
                       activeGradient: 'bg-gradient-to-r from-blue-400 to-purple-600'
                     };
-                  case 'prete':
+                  case 'READY':
                     return { 
                       icon: Zap, emoji: '⚡', gradient: 'from-emerald-400 to-teal-600',
                       bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-green-800',
                       activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600'
                     };
-                  case 'recuperee':
+                  case 'COMPLETED':
                     return { 
                       icon: CheckCircle, emoji: '✅', gradient: 'from-gray-400 to-gray-600',
                       bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700',
                       activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600'
                     };
-                  case 'annulee':
+                  case 'CANCELLED':
                     return { 
                       icon: X, emoji: '❌', gradient: 'from-red-400 to-red-600',
                       bgGradient: 'from-red-50 to-red-100', textColor: 'text-red-700',
@@ -313,7 +333,7 @@ const OrdersManagementPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {tab.key === 'en_attente' && tab.count > 0 && (
+                  {tab.key === 'PENDING' && tab.count > 0 && (
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-bounce" />
                   )}
                 </button>
@@ -347,19 +367,19 @@ const OrdersManagementPage: React.FC = () => {
           {/* Tablet Status Tabs */}
           <div className="grid grid-cols-5 gap-3">
             {[
-              { key: 'en_attente', label: 'En attente', count: orders.filter(o => o.status === 'en_attente').length },
-              { key: 'en_preparation', label: 'En cours', count: orders.filter(o => o.status === 'en_preparation').length },
-              { key: 'prete', label: 'Prêtes', count: orders.filter(o => o.status === 'prete').length },
-              { key: 'recuperee', label: 'Récupérées', count: orders.filter(o => o.status === 'recuperee').length },
-              { key: 'annulee', label: 'Annulées', count: orders.filter(o => o.status === 'annulee').length },
+              { key: 'PENDING', label: 'En attente', count: orders.filter(o => o.status === 'PENDING').length },
+              { key: 'PREPARING', label: 'En cours', count: orders.filter(o => o.status === 'PREPARING').length },
+              { key: 'READY', label: 'Prêtes', count: orders.filter(o => o.status === 'READY').length },
+              { key: 'COMPLETED', label: 'Récupérées', count: orders.filter(o => o.status === 'COMPLETED').length },
+              { key: 'CANCELLED', label: 'Annulées', count: orders.filter(o => o.status === 'CANCELLED').length },
             ].map((tab) => {
               const getTabConfig = (key: string) => {
                 switch(key) {
-                  case 'en_attente': return { icon: AlertCircle, emoji: '⚠️', gradient: 'from-amber-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-r from-amber-400 to-red-500' };
-                  case 'en_preparation': return { icon: Flame, emoji: '🔥', gradient: 'from-blue-400 to-purple-600', bgGradient: 'from-blue-50 to-purple-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-r from-blue-400 to-purple-600' };
-                  case 'prete': return { icon: Zap, emoji: '⚡', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-green-800', activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600' };
-                  case 'recuperee': return { icon: CheckCircle, emoji: '✅', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600' };
-                  case 'annulee': return { icon: X, emoji: '❌', gradient: 'from-red-400 to-red-600', bgGradient: 'from-red-50 to-red-100', textColor: 'text-red-700', activeGradient: 'bg-gradient-to-r from-red-400 to-red-600' };
+                  case 'PENDING': return { icon: AlertCircle, emoji: '⚠️', gradient: 'from-amber-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-r from-amber-400 to-red-500' };
+                  case 'PREPARING': return { icon: Flame, emoji: '🔥', gradient: 'from-blue-400 to-purple-600', bgGradient: 'from-blue-50 to-purple-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-r from-blue-400 to-purple-600' };
+                  case 'READY': return { icon: Zap, emoji: '⚡', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-green-800', activeGradient: 'bg-gradient-to-r from-emerald-400 to-teal-600' };
+                  case 'COMPLETED': return { icon: CheckCircle, emoji: '✅', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600' };
+                  case 'CANCELLED': return { icon: X, emoji: '❌', gradient: 'from-red-400 to-red-600', bgGradient: 'from-red-50 to-red-100', textColor: 'text-red-700', activeGradient: 'bg-gradient-to-r from-red-400 to-red-600' };
                   default: return { icon: Clock, emoji: '📋', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-r from-gray-400 to-gray-600' };
                 }
               };
@@ -392,7 +412,7 @@ const OrdersManagementPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {tab.key === 'en_attente' && tab.count > 0 && (
+                  {tab.key === 'PENDING' && tab.count > 0 && (
                     <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-bounce">
                       <div className="w-2 h-2 bg-white rounded-full absolute top-1 left-1" />
                     </div>
@@ -426,19 +446,19 @@ const OrdersManagementPage: React.FC = () => {
           
           <div className="grid grid-cols-5 gap-4">
             {[
-              { key: 'en_attente', label: 'En attente', count: orders.filter(o => o.status === 'en_attente').length },
-              { key: 'en_preparation', label: 'En cours', count: orders.filter(o => o.status === 'en_preparation').length },
-              { key: 'prete', label: 'Prêtes', count: orders.filter(o => o.status === 'prete').length },
-              { key: 'recuperee', label: 'Récupérées', count: orders.filter(o => o.status === 'recuperee').length },
-              { key: 'annulee', label: 'Annulées', count: orders.filter(o => o.status === 'annulee').length },
+              { key: 'PENDING', label: 'En attente', count: orders.filter(o => o.status === 'PENDING').length },
+              { key: 'PREPARING', label: 'En cours', count: orders.filter(o => o.status === 'PREPARING').length },
+              { key: 'READY', label: 'Prêtes', count: orders.filter(o => o.status === 'READY').length },
+              { key: 'COMPLETED', label: 'Récupérées', count: orders.filter(o => o.status === 'COMPLETED').length },
+              { key: 'CANCELLED', label: 'Annulées', count: orders.filter(o => o.status === 'CANCELLED').length },
             ].map((tab) => {
               const getTabConfig = (key: string) => {
                 switch(key) {
-                  case 'en_attente': return { icon: AlertCircle, emoji: '⚠️', gradient: 'from-amber-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-br from-amber-400 to-red-500', shadowColor: 'shadow-orange-200', glowColor: 'shadow-orange-500/50' };
-                  case 'en_preparation': return { icon: Flame, emoji: '🔥', gradient: 'from-blue-400 to-purple-600', bgGradient: 'from-blue-50 to-purple-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-br from-blue-400 to-purple-600', shadowColor: 'shadow-blue-200', glowColor: 'shadow-blue-500/50' };
-                  case 'prete': return { icon: Zap, emoji: '⚡', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-green-800', activeGradient: 'bg-gradient-to-br from-emerald-400 to-teal-600', shadowColor: 'shadow-green-200', glowColor: 'shadow-green-500/50' };
-                  case 'recuperee': return { icon: CheckCircle, emoji: '✅', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600', shadowColor: 'shadow-gray-200', glowColor: 'shadow-gray-500/50' };
-                  case 'annulee': return { icon: X, emoji: '❌', gradient: 'from-red-400 to-red-600', bgGradient: 'from-red-50 to-red-100', textColor: 'text-red-700', activeGradient: 'bg-gradient-to-br from-red-400 to-red-600', shadowColor: 'shadow-red-200', glowColor: 'shadow-red-500/50' };
+                  case 'PENDING': return { icon: AlertCircle, emoji: '⚠️', gradient: 'from-amber-400 to-red-500', bgGradient: 'from-orange-50 to-red-50', textColor: 'text-orange-800', activeGradient: 'bg-gradient-to-br from-amber-400 to-red-500', shadowColor: 'shadow-orange-200', glowColor: 'shadow-orange-500/50' };
+                  case 'PREPARING': return { icon: Flame, emoji: '🔥', gradient: 'from-blue-400 to-purple-600', bgGradient: 'from-blue-50 to-purple-50', textColor: 'text-blue-800', activeGradient: 'bg-gradient-to-br from-blue-400 to-purple-600', shadowColor: 'shadow-blue-200', glowColor: 'shadow-blue-500/50' };
+                  case 'READY': return { icon: Zap, emoji: '⚡', gradient: 'from-emerald-400 to-teal-600', bgGradient: 'from-emerald-50 to-teal-50', textColor: 'text-green-800', activeGradient: 'bg-gradient-to-br from-emerald-400 to-teal-600', shadowColor: 'shadow-green-200', glowColor: 'shadow-green-500/50' };
+                  case 'COMPLETED': return { icon: CheckCircle, emoji: '✅', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600', shadowColor: 'shadow-gray-200', glowColor: 'shadow-gray-500/50' };
+                  case 'CANCELLED': return { icon: X, emoji: '❌', gradient: 'from-red-400 to-red-600', bgGradient: 'from-red-50 to-red-100', textColor: 'text-red-700', activeGradient: 'bg-gradient-to-br from-red-400 to-red-600', shadowColor: 'shadow-red-200', glowColor: 'shadow-red-500/50' };
                   default: return { icon: Clock, emoji: '📋', gradient: 'from-gray-400 to-gray-600', bgGradient: 'from-gray-50 to-gray-100', textColor: 'text-gray-700', activeGradient: 'bg-gradient-to-br from-gray-400 to-gray-600', shadowColor: 'shadow-gray-200', glowColor: 'shadow-gray-500/50' };
                 }
               };
@@ -477,7 +497,7 @@ const OrdersManagementPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {tab.key === 'en_attente' && tab.count > 0 && (
+                  {tab.key === 'PENDING' && tab.count > 0 && (
                     <div className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-bounce shadow-lg">
                       <div className="w-2.5 h-2.5 bg-white rounded-full absolute top-1 left-1 animate-pulse" />
                     </div>
@@ -522,7 +542,7 @@ const OrdersManagementPage: React.FC = () => {
             {filteredOrders.map((order) => {
                   const getStatusConfig = (status: string) => {
                     switch (status) {
-                      case 'en_attente':
+                      case 'PENDING':
                         return { 
                           color: 'bg-orange-500', 
                           label: 'En attente',
@@ -531,7 +551,16 @@ const OrdersManagementPage: React.FC = () => {
                           icon: AlertCircle,
                           dot: 'bg-orange-400'
                         };
-                      case 'en_preparation':
+                      case 'CONFIRMED':
+                        return { 
+                          color: 'bg-emerald-500', 
+                          label: 'Confirmée',
+                          textColor: 'text-emerald-600',
+                          bgColor: 'bg-emerald-50',
+                          icon: CheckCircle,
+                          dot: 'bg-emerald-400'
+                        };
+                      case 'PREPARING':
                         return { 
                           color: 'bg-blue-500', 
                           label: 'En préparation',
@@ -540,7 +569,7 @@ const OrdersManagementPage: React.FC = () => {
                           icon: ChefHat,
                           dot: 'bg-blue-400'
                         };
-                      case 'prete':
+                      case 'READY':
                         return { 
                           color: 'bg-green-500', 
                           label: 'Prête',
@@ -548,6 +577,24 @@ const OrdersManagementPage: React.FC = () => {
                           bgColor: 'bg-green-50',
                           icon: CheckCircle,
                           dot: 'bg-green-400'
+                        };
+                      case 'COMPLETED':
+                        return { 
+                          color: 'bg-gray-500', 
+                          label: 'Récupérée',
+                          textColor: 'text-gray-600',
+                          bgColor: 'bg-gray-50',
+                          icon: CheckCircle,
+                          dot: 'bg-gray-400'
+                        };
+                      case 'CANCELLED':
+                        return { 
+                          color: 'bg-red-500', 
+                          label: 'Annulée',
+                          textColor: 'text-red-600',
+                          bgColor: 'bg-red-50',
+                          icon: X,
+                          dot: 'bg-red-400'
                         };
                       default:
                         return { 
@@ -563,18 +610,20 @@ const OrdersManagementPage: React.FC = () => {
 
                   const getNextStatus = (currentStatus: string) => {
                     switch (currentStatus) {
-                      case 'en_attente': return 'en_preparation';
-                      case 'en_preparation': return 'prete';
-                      case 'prete': return 'recuperee';
+                      case 'PENDING': return 'PREPARING';
+                      case 'CONFIRMED': return 'PREPARING';
+                      case 'PREPARING': return 'READY';
+                      case 'READY': return 'COMPLETED';
                       default: return currentStatus;
                     }
                   };
 
                   const getActionLabel = (status: string) => {
                     switch (status) {
-                      case 'en_attente': return 'Accepter';
-                      case 'en_preparation': return 'Prêt';
-                      case 'prete': return 'Récupérée';
+                      case 'PENDING': return 'Accepter';
+                      case 'CONFIRMED': return 'Commencer';
+                      case 'PREPARING': return 'Prêt';
+                      case 'READY': return 'Récupérée';
                       default: return 'Action';
                     }
                   };
@@ -595,7 +644,7 @@ const OrdersManagementPage: React.FC = () => {
                               <div className="flex items-center space-x-2">
                                 <span className="font-bold text-gray-900">{order.orderNumber || `#${order.id.substring(0, 8)}...`}</span>
                                 <Badge 
-                                  variant={order.status === 'en_attente' ? 'warning' : (order.status === 'en_preparation') ? 'primary' : 'success'}
+                                  variant={order.status === 'PENDING' ? 'warning' : (order.status === 'PREPARING') ? 'primary' : 'success'}
                                   size="sm"
                                 >
                                   {config.label}
@@ -668,17 +717,17 @@ const OrdersManagementPage: React.FC = () => {
                           </div>
                           
                           <div className="flex items-center space-x-2">
-                            {(order.status !== 'recuperee') && (
+                            {(order.status !== 'COMPLETED') && (
                               <>
-                                {order.status !== 'annulee' ? (
+                                {order.status !== 'CANCELLED' ? (
                                   <Button
-                                    onClick={() => handleOrderAction(order.id, order.status === 'en_attente' ? 'accept' : order.status === 'en_preparation' ? 'prete' : order.status === 'prete' ? 'recuperee' : 'accept')}
-                                    variant={order.status === 'en_attente' ? 'primary' : (order.status === 'en_preparation') ? 'success' : 'outline'}
+                                    onClick={() => handleOrderAction(order.id, order.status === 'PENDING' ? 'accept' : order.status === 'PREPARING' ? 'prete' : order.status === 'READY' ? 'recuperee' : 'accept')}
+                                    variant={order.status === 'PENDING' ? 'primary' : (order.status === 'PREPARING') ? 'success' : 'outline'}
                                     size="sm"
                                     className="min-w-[80px]"
                                     icon={
-                                      order.status === 'en_attente' ? <ChefHat className="h-4 w-4" /> :
-                                      (order.status === 'en_preparation') ? <CheckCircle className="h-4 w-4" /> :
+                                      order.status === 'PENDING' ? <ChefHat className="h-4 w-4" /> :
+                                      (order.status === 'PREPARING') ? <CheckCircle className="h-4 w-4" /> :
                                       <CheckCircle className="h-4 w-4" />
                                     }
                                   >
@@ -686,7 +735,7 @@ const OrdersManagementPage: React.FC = () => {
                                   </Button>
                                 ) : (
                                   <Button
-                                    onClick={() => handleOrderAction(order.id, 'accept')}
+                                    onClick={() => handleOrderAction(order.id, 'reactivate')}
                                     variant="success"
                                     size="sm"
                                     className="min-w-[80px]"

@@ -61,7 +61,7 @@ export interface Order {
   clientEmail: string;
   items: OrderItem[];
   total: number;
-  status: 'en_attente' | 'en_preparation' | 'prete' | 'recuperee' | 'annulee';
+  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
   createdAt: Date;
   estimatedTime?: number;
 }

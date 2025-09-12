@@ -7,18 +7,20 @@ const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Pizza Palace ID
 // Helper function to convert backend order status to frontend status
 const mapOrderStatus = (backendStatus: string): Order['status'] => {
   switch (backendStatus) {
-    case 'EN_ATTENTE':
-      return 'en_attente';
-    case 'EN_PREPARATION':
-      return 'en_preparation';
-    case 'PRETE':
-      return 'prete';
-    case 'RECUPEREE':
-      return 'recuperee';
-    case 'ANNULEE':
-      return 'annulee';
+    case 'PENDING':
+      return 'PENDING';
+    case 'CONFIRMED':
+      return 'PENDING';
+    case 'PREPARING':
+      return 'PREPARING';
+    case 'READY':
+      return 'READY';
+    case 'COMPLETED':
+      return 'COMPLETED';
+    case 'CANCELLED':
+      return 'CANCELLED';
     default:
-      return 'en_attente';
+      return 'PENDING';
   }
 };
 
@@ -79,9 +81,7 @@ export const useRestaurantData = () => {
       const transformedOrders = ordersData.map(transformBackendOrder);
       setOrders(transformedOrders);
 
-      // Fetch stats
-      const statsData = await apiService.orders.getTodayStats(RESTAURANT_ID);
-      setStats(statsData);
+      // Stats removed - endpoint doesn't exist
 
     } catch (err) {
       console.error('Error fetching restaurant data:', err);

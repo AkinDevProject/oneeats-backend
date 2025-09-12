@@ -38,12 +38,12 @@ public enum OrderStatus {
      */
     public Set<OrderStatus> getAllowedTransitions() {
         return switch (this) {
-            case PENDING -> Set.of(CONFIRMED, CANCELLED);
+            case PENDING -> Set.of(CONFIRMED, PREPARING, CANCELLED);
             case CONFIRMED -> Set.of(PREPARING, CANCELLED);
             case PREPARING -> Set.of(READY, CANCELLED);
             case READY -> Set.of(COMPLETED, CANCELLED);
             case COMPLETED -> Set.of();
-            case CANCELLED -> Set.of();
+            case CANCELLED -> Set.of(PENDING);
         };
     }
     

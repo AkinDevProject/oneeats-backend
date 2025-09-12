@@ -15,7 +15,7 @@ interface OrderDetailModalProps {
   order: Order | null;
   isOpen: boolean;
   onClose: () => void;
-  onAction: (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee') => void;
+  onAction: (orderId: string, action: 'accept' | 'cancel' | 'prete' | 'recuperee' | 'reactivate') => void;
 }
 
 const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
@@ -37,15 +37,17 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'en_attente':
+      case 'PENDING':
         return <Badge variant="warning" className="bg-orange-100 text-orange-800 text-lg px-3 py-1">⏳ En attente</Badge>;
-      case 'en_preparation':
+      case 'CONFIRMED':
+        return <Badge variant="success" className="bg-emerald-100 text-emerald-800 text-lg px-3 py-1">✅ Confirmée</Badge>;
+      case 'PREPARING':
         return <Badge variant="primary" className="bg-yellow-100 text-yellow-800 text-lg px-3 py-1">👨‍🍳 En préparation</Badge>;
-      case 'prete':
+      case 'READY':
         return <Badge variant="success" className="bg-green-100 text-green-800 text-lg px-3 py-1">✅ Prête</Badge>;
-      case 'recuperee':
+      case 'COMPLETED':
         return <Badge variant="success" className="bg-gray-100 text-gray-800 text-lg px-3 py-1">✅ Récupérée</Badge>;
-      case 'annulee':
+      case 'CANCELLED':
         return <Badge variant="danger" className="bg-red-100 text-red-800 text-lg px-3 py-1">❌ Annulée</Badge>;
       default:
         return <Badge variant="default" className="text-lg px-3 py-1">{status}</Badge>;
@@ -69,13 +71,13 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const elapsed = getElapsedTime();
 
   const getActionButtons = () => {
-    const handleAction = (action: 'accept' | 'cancel' | 'prete' | 'recuperee') => {
+    const handleAction = (action: 'accept' | 'cancel' | 'prete' | 'recuperee' | 'reactivate') => {
       onAction(order.id, action);
       onClose();
     };
 
     switch (order.status) {
-      case 'en_attente':
+      case 'PENDING':
         return (
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button 
@@ -98,7 +100,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </Button>
           </div>
         );
-      case 'en_preparation':
+      case 'PREPARING':
         return (
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button 
@@ -121,7 +123,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </Button>
           </div>
         );
-      case 'prete':
+      case 'READY':
         return (
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button 
@@ -144,14 +146,14 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             </Button>
           </div>
         );
-      case 'annulee':
+      case 'CANCELLED':
         return (
           <Button 
             size="lg" 
             variant="primary"
             className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
             icon={<CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />}
-            onClick={() => handleAction('accept')}
+            onClick={() => handleAction('reactivate')}
           >
             <span className="text-sm sm:text-base">Réactiver la commande</span>
           </Button>
@@ -307,7 +309,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   Commande reçue - {format(new Date(order.createdAt), 'HH:mm', { locale: fr })}
                 </span>
               </div>
-              {(order.status === 'en_preparation' || order.status === 'prete' || order.status === 'recuperee') && (
+              {(order.status === 'PREPARING' || order.status === 'READY' || order.status === 'COMPLETED') && (
                 <div className="flex items-center space-x-3 text-xs sm:text-sm">
                   <div className="w-2 h-2 bg-yellow-600 rounded-full flex-shrink-0"></div>
                   <span className="text-gray-600">Préparation en cours</span>
