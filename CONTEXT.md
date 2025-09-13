@@ -334,9 +334,83 @@ order/
 - **Validation** : Bean Validation côté backend
 
 ### 6.3 Tests
-- **Backend** : Tests unitaires (Use Cases) + intégration (REST)
-- **Coverage** : Jacoco pour métriques de couverture  
-- **Frontend** : Tests composants (à implémenter)
+#### Structure Séparée : Tests Unitaires vs Tests d'Intégration
+
+**📂 Architecture des Tests**
+```
+src/test/java/com/oneeats/
+├── unit/                           # ✅ TESTS UNITAIRES (Rapides, Isolés)
+│   └── [domain]/domain/            # Tests entités métier pures
+│   └── [domain]/application/       # Tests use cases avec mocks
+│   └── [domain]/infrastructure/mapper/  # Tests mappers purs
+└── integration/                    # ✅ TESTS D'INTÉGRATION (Composants réels)
+    └── [domain]/repository/        # Tests Repository + Database
+    └── [domain]/web/              # Tests API REST End-to-End
+```
+
+**⚡ Tests Unitaires** (`src/test/java/com/oneeats/unit/`)
+- **Objectif** : Tester UNE SEULE CLASSE de façon ISOLÉE
+- **Vitesse** : Très rapide (<1ms), aucune dépendance externe
+- **Annotations** : `@ExtendWith(MockitoExtension.class)`, `@Mock`
+- **Exemples** :
+  - `unit/restaurant/domain/RestaurantTest.java` - Logique métier pure
+  - `unit/restaurant/application/UpdateRestaurantCommandHandlerTest.java` - Use case mocké
+- **Pattern** : Aucune DB, aucun Spring context, mocks seulement
+
+**🔄 Tests d'Intégration** (`src/test/java/com/oneeats/integration/`)
+- **Objectif** : Tester PLUSIEURS COUCHES qui INTERAGISSENT VRAIMENT
+- **Vitesse** : Plus lent (100ms-1s), composants réels
+- **Annotations** : `@QuarkusTest`, `@Transactional`, `@Inject`
+- **Exemples** :
+  - `integration/restaurant/repository/RestaurantRepositoryIntegrationTest.java` - Repository + PostgreSQL
+  - `integration/restaurant/web/RestaurantControllerIntegrationTest.java` - HTTP + DB + Use Cases
+- **Pattern** : Vraie DB, vraies transactions, vrais appels HTTP
+
+**🎯 Différences Clés**
+
+| Aspect | Tests Unitaires | Tests d'Intégration |
+|--------|----------------|---------------------|
+| **Vitesse** | ⚡ Très rapide (<1ms) | 🐌 Plus lent (100ms-1s) |
+| **Isolation** | 🎯 Une classe | 🔄 Plusieurs couches |
+| **Dépendances** | 🚫 Mocks seulement | ✅ Vraies dépendances |
+| **Base données** | 🚫 Jamais | ✅ PostgreSQL réel |
+| **Objectif** | Logique métier | Intégration composants |
+
+**Conventions Communes**
+```java
+@DisplayName("Clear description of component tested")
+class ComponentTest {
+    @Nested
+    @DisplayName("Logical group of tests")
+    class LogicalGroup {
+        @Test
+        @DisplayName("Should do X when Y condition")
+        void shouldDoXWhenYCondition() {
+            // Given - Arrange
+            // When - Act  
+            // Then - Assert
+        }
+    }
+}
+```
+
+**Commandes de Test**
+```bash
+# Tests unitaires seulement (rapide, développement)
+./mvnw test -Dtest="com.oneeats.unit.**"
+
+# Tests intégration seulement (complet, validation)  
+./mvnw test -Dtest="com.oneeats.integration.**"
+
+# Tous les tests
+./mvnw test
+```
+
+**Coverage et Métriques**
+- **Tests Unitaires** : >90% Domain Logic, <10s exécution
+- **Tests Intégration** : >80% Data Layer, >70% API Endpoints
+- **Jacoco** : Couverture séparée par type de test
+- **SonarQube** : Qualité code et détection problèmes
 
 ---
 

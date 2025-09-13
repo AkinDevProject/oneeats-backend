@@ -1,0 +1,683 @@
+package com.oneeats.integration.order.web;
+
+import com.oneeats.order.domain.model.OrderStatus;
+import com.oneeats.shared.domain.vo.Money;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+
+import jakarta.transaction.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+/**
+ * ✅ TESTS INTÉGRATION ORDER CONTROLLER - Real HTTP + Database
+ * - Annotation @QuarkusTest pour le contexte complet
+ * - Base de données réelle (PostgreSQL de test)
+ * - Appels HTTP réels via RestAssured
+ * - Tests end-to-end complets
+ */
+@QuarkusTest
+@DisplayName("Order Controller Integration Tests - Real HTTP + Database")
+class OrderControllerIntegrationTest {
+    
+    private UUID testUserId;
+    private UUID testRestaurantId;
+    private UUID testMenuItemId;
+    
+    @BeforeEach
+    @Transactional
+    void setUp() {
+        testUserId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        testRestaurantId = UUID.fromString("550e8400-e29b-41d4-a716-446655440002");
+        testMenuItemId = UUID.fromString("550e8400-e29b-41d4-a716-446655440003");
+    }
+    
+    @Nested
+    @DisplayName("Order Creation")
+    class OrderCreation {
+        
+        @Test
+        @DisplayName("Should create order via POST API")
+        void shouldCreateOrderViaPostApi() {
+            // Given
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "25.50",
+                    "currency", "EUR"
+                ),
+                "specialInstructions", "Please make it spicy",
+                "items", List.of(
+                    Map.of(
+                        "menuItemId", testMenuItemId.toString(),
+                        "menuItemName", "Margherita Pizza",
+                        "unitPrice", Map.of(
+                            "amount", "12.50",
+                            "currency", "EUR"
+                        ),
+                        "quantity", 2,
+                        "specialNotes", "Extra cheese"
+                    )
+                )
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("orderNumber", notNullValue())
+                .body("userId", equalTo(testUserId.toString()))
+                .body("restaurantId", equalTo(testRestaurantId.toString()))
+                .body("status", equalTo("PENDING"))
+                .body("totalAmount.amount", equalTo("25.50"))
+                .body("totalAmount.currency", equalTo("EUR"))
+                .body("specialInstructions", equalTo("Please make it spicy"))
+                .body("items", hasSize(1))
+                .body("items[0].menuItemName", equalTo("Margherita Pizza"))
+                .body("items[0].quantity", equalTo(2))
+                .body("createdAt", notNullValue());
+        }
+        
+        @Test
+        @DisplayName("Should create order without special instructions")
+        void shouldCreateOrderWithoutSpecialInstructions() {
+            // Given
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "15.00",
+                    "currency", "EUR"
+                ),
+                "items", List.of(
+                    Map.of(
+                        "menuItemId", testMenuItemId.toString(),
+                        "menuItemName", "Simple Pizza",
+                        "unitPrice", Map.of(
+                            "amount", "15.00",
+                            "currency", "EUR"
+                        ),
+                        "quantity", 1
+                    )
+                )
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(201)
+                .body("specialInstructions", anyOf(nullValue(), equalTo("")));
+        }
+        
+        @Test
+        @DisplayName("Should reject order with missing required fields")
+        void shouldRejectOrderWithMissingRequiredFields() {
+            // Given - Missing userId
+            Map<String, Object> invalidOrderData = Map.of(
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "20.00",
+                    "currency", "EUR"
+                )
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(invalidOrderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(400);
+        }
+        
+        @Test
+        @DisplayName("Should reject order with invalid data")
+        void shouldRejectOrderWithInvalidData() {
+            // Given - Invalid UUID format
+            Map<String, Object> invalidOrderData = Map.of(
+                "userId", "invalid-uuid",
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "20.00",
+                    "currency", "EUR"
+                )
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(invalidOrderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(400);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Order Retrieval")
+    class OrderRetrieval {
+        
+        @Test
+        @DisplayName("Should get order by ID via GET API")
+        void shouldGetOrderByIdViaGetApi() {
+            // Given - Create an order first
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "18.50",
+                    "currency", "EUR"
+                ),
+                "specialInstructions", "Test order for retrieval"
+            );
+            
+            String orderId = given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When & Then - Retrieve the created order
+            given()
+            .when()
+                .get("/api/orders/{id}", orderId)
+            .then()
+                .statusCode(200)
+                .body("id", equalTo(orderId))
+                .body("userId", equalTo(testUserId.toString()))
+                .body("restaurantId", equalTo(testRestaurantId.toString()))
+                .body("status", equalTo("PENDING"))
+                .body("totalAmount.amount", equalTo("18.50"))
+                .body("specialInstructions", equalTo("Test order for retrieval"));
+        }
+        
+        @Test
+        @DisplayName("Should return 404 for non-existent order")
+        void shouldReturn404ForNonExistentOrder() {
+            // Given
+            UUID nonExistentId = UUID.randomUUID();
+            
+            // When & Then
+            given()
+            .when()
+                .get("/api/orders/{id}", nonExistentId)
+            .then()
+                .statusCode(404);
+        }
+        
+        @Test
+        @DisplayName("Should get orders by restaurant ID")
+        void shouldGetOrdersByRestaurantId() {
+            // Given - Create multiple orders for the same restaurant
+            Map<String, Object> orderData1 = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of("amount", "20.00", "currency", "EUR")
+            );
+            Map<String, Object> orderData2 = Map.of(
+                "userId", UUID.randomUUID().toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of("amount", "15.00", "currency", "EUR")
+            );
+            
+            // Create the orders
+            given().contentType(ContentType.JSON).body(orderData1).post("/api/orders");
+            given().contentType(ContentType.JSON).body(orderData2).post("/api/orders");
+            
+            // When & Then - Get orders by restaurant
+            given()
+                .queryParam("restaurantId", testRestaurantId.toString())
+            .when()
+                .get("/api/orders")
+            .then()
+                .statusCode(200)
+                .body("size()", greaterThanOrEqualTo(2))
+                .body("[0].restaurantId", equalTo(testRestaurantId.toString()))
+                .body("[1].restaurantId", equalTo(testRestaurantId.toString()));
+        }
+        
+        @Test
+        @DisplayName("Should reject request without restaurant ID parameter")
+        void shouldRejectRequestWithoutRestaurantIdParameter() {
+            // When & Then
+            given()
+            .when()
+                .get("/api/orders")
+            .then()
+                .statusCode(400)
+                .body(containsString("restaurantId parameter is required"));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Order Status Updates")
+    class OrderStatusUpdates {
+        
+        private String createTestOrder() {
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of(
+                    "amount", "22.00",
+                    "currency", "EUR"
+                )
+            );
+            
+            return given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+        }
+        
+        @Test
+        @DisplayName("Should update order status via PUT API")
+        void shouldUpdateOrderStatusViaPutApi() {
+            // Given
+            String orderId = createTestOrder();
+            Map<String, String> statusUpdate = Map.of("newStatus", "CONFIRMED");
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(statusUpdate)
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("id", equalTo(orderId))
+                .body("status", equalTo("CONFIRMED"));
+        }
+        
+        @Test
+        @DisplayName("Should update through multiple status transitions")
+        void shouldUpdateThroughMultipleStatusTransitions() {
+            // Given
+            String orderId = createTestOrder();
+            
+            // When & Then - PENDING → CONFIRMED
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CONFIRMED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("CONFIRMED"));
+            
+            // CONFIRMED → PREPARING
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "PREPARING"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("PREPARING"));
+            
+            // PREPARING → READY
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "READY"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("READY"))
+                .body("estimatedPickupTime", notNullValue());
+            
+            // READY → COMPLETED
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "COMPLETED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("COMPLETED"))
+                .body("actualPickupTime", notNullValue());
+        }
+        
+        @Test
+        @DisplayName("Should cancel order from PENDING status")
+        void shouldCancelOrderFromPendingStatus() {
+            // Given
+            String orderId = createTestOrder();
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CANCELLED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("CANCELLED"));
+        }
+        
+        @Test
+        @DisplayName("Should reject invalid status transitions")
+        void shouldRejectInvalidStatusTransitions() {
+            // Given
+            String orderId = createTestOrder();
+            
+            // When & Then - Try invalid transition PENDING → COMPLETED
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "COMPLETED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(anyOf(equalTo(400), equalTo(422))); // Business rule violation
+        }
+        
+        @Test
+        @DisplayName("Should reject status update for non-existent order")
+        void shouldRejectStatusUpdateForNonExistentOrder() {
+            // Given
+            UUID nonExistentId = UUID.randomUUID();
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CONFIRMED"))
+            .when()
+                .put("/api/orders/{id}/status", nonExistentId)
+            .then()
+                .statusCode(404);
+        }
+        
+        @Test
+        @DisplayName("Should reject status update with invalid status")
+        void shouldRejectStatusUpdateWithInvalidStatus() {
+            // Given
+            String orderId = createTestOrder();
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "INVALID_STATUS"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(400);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Order Filtering and Queries")
+    class OrderFilteringAndQueries {
+        
+        @Test
+        @DisplayName("Should filter orders by restaurant correctly")
+        void shouldFilterOrdersByRestaurantCorrectly() {
+            // Given - Create orders for different restaurants
+            UUID restaurant1 = UUID.randomUUID();
+            UUID restaurant2 = UUID.randomUUID();
+            
+            Map<String, Object> order1 = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", restaurant1.toString(),
+                "totalAmount", Map.of("amount", "20.00", "currency", "EUR")
+            );
+            Map<String, Object> order2 = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", restaurant2.toString(),
+                "totalAmount", Map.of("amount", "25.00", "currency", "EUR")
+            );
+            
+            given().contentType(ContentType.JSON).body(order1).post("/api/orders");
+            given().contentType(ContentType.JSON).body(order2).post("/api/orders");
+            
+            // When & Then - Filter by restaurant1
+            given()
+                .queryParam("restaurantId", restaurant1.toString())
+            .when()
+                .get("/api/orders")
+            .then()
+                .statusCode(200)
+                .body("findAll { it.restaurantId == '" + restaurant1 + "' }.size()", 
+                      greaterThanOrEqualTo(1))
+                .body("findAll { it.restaurantId == '" + restaurant2 + "' }.size()", 
+                      equalTo(0));
+        }
+        
+        @Test
+        @DisplayName("Should return empty list for restaurant with no orders")
+        void shouldReturnEmptyListForRestaurantWithNoOrders() {
+            // Given
+            UUID restaurantWithNoOrders = UUID.randomUUID();
+            
+            // When & Then
+            given()
+                .queryParam("restaurantId", restaurantWithNoOrders.toString())
+            .when()
+                .get("/api/orders")
+            .then()
+                .statusCode(200)
+                .body("size()", equalTo(0));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Data Validation and Error Handling")
+    class DataValidationAndErrorHandling {
+        
+        @Test
+        @DisplayName("Should validate required fields in order creation")
+        void shouldValidateRequiredFieldsInOrderCreation() {
+            // Given - Order missing restaurantId
+            Map<String, Object> invalidOrder = Map.of(
+                "userId", testUserId.toString(),
+                "totalAmount", Map.of("amount", "20.00", "currency", "EUR")
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(invalidOrder)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(400);
+        }
+        
+        @Test
+        @DisplayName("Should validate money amounts")
+        void shouldValidateMoneyAmounts() {
+            // Given - Order with negative amount
+            Map<String, Object> invalidOrder = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of("amount", "-10.00", "currency", "EUR")
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(invalidOrder)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(anyOf(equalTo(400), equalTo(422)));
+        }
+        
+        @Test
+        @DisplayName("Should handle malformed JSON")
+        void shouldHandleMalformedJson() {
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body("{ invalid json }")
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(400);
+        }
+        
+        @Test
+        @DisplayName("Should validate UUID format in path parameters")
+        void shouldValidateUuidFormatInPathParameters() {
+            // When & Then
+            given()
+            .when()
+                .get("/api/orders/{id}", "invalid-uuid-format")
+            .then()
+                .statusCode(anyOf(equalTo(400), equalTo(404)));
+        }
+    }
+    
+    @Nested
+    @DisplayName("End-to-End Order Workflows")
+    class EndToEndOrderWorkflows {
+        
+        @Test
+        @DisplayName("Should complete full order lifecycle")
+        void shouldCompleteFullOrderLifecycle() {
+            // Given - Create order
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of("amount", "30.00", "currency", "EUR"),
+                "specialInstructions", "End-to-end test order"
+            );
+            
+            String orderId = given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+            .when()
+                .post("/api/orders")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When & Then - Complete lifecycle
+            // 1. Confirm order
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CONFIRMED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("CONFIRMED"));
+            
+            // 2. Start preparation
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "PREPARING"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200);
+            
+            // 3. Mark ready
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "READY"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("READY"))
+                .body("estimatedPickupTime", notNullValue());
+            
+            // 4. Complete order
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "COMPLETED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("COMPLETED"))
+                .body("actualPickupTime", notNullValue());
+            
+            // 5. Verify final state
+            given()
+            .when()
+                .get("/api/orders/{id}", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("COMPLETED"))
+                .body("actualPickupTime", notNullValue())
+                .body("estimatedPickupTime", notNullValue());
+        }
+        
+        @Test
+        @DisplayName("Should handle order cancellation workflow")
+        void shouldHandleOrderCancellationWorkflow() {
+            // Given - Create and confirm order
+            Map<String, Object> orderData = Map.of(
+                "userId", testUserId.toString(),
+                "restaurantId", testRestaurantId.toString(),
+                "totalAmount", Map.of("amount", "25.00", "currency", "EUR")
+            );
+            
+            String orderId = given()
+                .contentType(ContentType.JSON)
+                .body(orderData)
+                .post("/api/orders")
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CONFIRMED"))
+                .put("/api/orders/{id}/status", orderId);
+            
+            // When & Then - Cancel order
+            given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("newStatus", "CANCELLED"))
+            .when()
+                .put("/api/orders/{id}/status", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("CANCELLED"));
+            
+            // Verify cancellation persisted
+            given()
+            .when()
+                .get("/api/orders/{id}", orderId)
+            .then()
+                .statusCode(200)
+                .body("status", equalTo("CANCELLED"));
+        }
+    }
+}

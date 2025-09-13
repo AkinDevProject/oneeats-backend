@@ -1,0 +1,436 @@
+package com.oneeats.integration.restaurant.web;
+
+import com.oneeats.restaurant.application.command.CreateRestaurantCommand;
+import com.oneeats.restaurant.application.command.UpdateRestaurantCommand;
+import com.oneeats.restaurant.application.command.ToggleRestaurantStatusCommand;
+import com.oneeats.restaurant.application.dto.ScheduleDTO;
+import com.oneeats.restaurant.application.dto.ScheduleDTO.DayScheduleDTO;
+
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.transaction.Transactional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+
+import io.restassured.http.ContentType;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+/**
+ * ✅ TESTS D'INTÉGRATION API REST
+ * - Utilise @QuarkusTest (serveur HTTP complet)
+ * - Vraies requêtes HTTP via RestAssured
+ * - Vraie base de données PostgreSQL
+ * - Teste le flux complet : HTTP → Controller → UseCase → Repository → DB
+ */
+@QuarkusTest
+@DisplayName("Restaurant Controller Integration Tests - End-to-End API")
+class RestaurantControllerIntegrationTest {
+    
+    @Nested
+    @DisplayName("Restaurant Creation API")
+    class RestaurantCreationApi {
+        
+        @Test
+        @Transactional
+        @DisplayName("Should create restaurant via POST /api/restaurants")
+        void shouldCreateRestaurantViaPostApi() {
+            // Given
+            CreateRestaurantCommand command = new CreateRestaurantCommand(
+                "API Test Restaurant",
+                "Restaurant created via API test",
+                "456 API Street",
+                "0987654321",
+                "api@testrestaurant.fr",
+                "API_CUISINE"
+            );
+            
+            // When & Then - HTTP POST request
+            given()
+                .contentType(ContentType.JSON)
+                .body(command)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201)
+                .contentType(ContentType.JSON)
+                .body("name", equalTo("API Test Restaurant"))
+                .body("description", equalTo("Restaurant created via API test"))
+                .body("address", equalTo("456 API Street"))
+                .body("phone", equalTo("0987654321"))
+                .body("email", equalTo("api@testrestaurant.fr"))
+                .body("cuisineType", equalTo("API_CUISINE"))
+                .body("status", equalTo("PENDING"))
+                .body("id", notNullValue())
+                .body("rating", equalTo(0.0f))
+                .body("createdAt", notNullValue());
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should reject invalid restaurant creation")
+        void shouldRejectInvalidRestaurantCreation() {
+            // Given - Invalid command (empty name)
+            CreateRestaurantCommand invalidCommand = new CreateRestaurantCommand(
+                "", // Invalid: empty name
+                "Description",
+                "Address",
+                "Phone",
+                "invalid-email", // Invalid email format
+                "CUISINE"
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(invalidCommand)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(400); // Bad Request
+        }
+    }
+    
+    @Nested
+    @DisplayName("Restaurant Retrieval API")
+    class RestaurantRetrievalApi {
+        
+        @Test
+        @Transactional
+        @DisplayName("Should get restaurant by ID via GET /api/restaurants/{id}")
+        void shouldGetRestaurantByIdViaGetApi() {
+            // Given - Create restaurant first via API
+            CreateRestaurantCommand createCommand = new CreateRestaurantCommand(
+                "Retrievable Restaurant",
+                "Test description",
+                "123 Test Street",
+                "0123456789",
+                "retrievable@test.fr",
+                "TEST_CUISINE"
+            );
+            
+            String restaurantId = given()
+                .contentType(ContentType.JSON)
+                .body(createCommand)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When & Then - HTTP GET request
+            given()
+            .when()
+                .get("/api/restaurants/{id}", restaurantId)
+            .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("id", equalTo(restaurantId))
+                .body("name", equalTo("Retrievable Restaurant"))
+                .body("description", equalTo("Test description"))
+                .body("cuisineType", equalTo("TEST_CUISINE"));
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should return 404 for non-existent restaurant")
+        void shouldReturn404ForNonExistentRestaurant() {
+            // Given
+            UUID nonExistentId = UUID.randomUUID();
+            
+            // When & Then
+            given()
+            .when()
+                .get("/api/restaurants/{id}", nonExistentId)
+            .then()
+                .statusCode(404);
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should get all restaurants via GET /api/restaurants")
+        void shouldGetAllRestaurantsViaGetApi() {
+            // Given - Create multiple restaurants
+            CreateRestaurantCommand restaurant1 = new CreateRestaurantCommand(
+                "Restaurant One", "Description One", "Address One", 
+                "Phone One", "one@test.fr", "CUISINE_ONE"
+            );
+            CreateRestaurantCommand restaurant2 = new CreateRestaurantCommand(
+                "Restaurant Two", "Description Two", "Address Two",
+                "Phone Two", "two@test.fr", "CUISINE_TWO"
+            );
+            
+            given().contentType(ContentType.JSON).body(restaurant1).post("/api/restaurants");
+            given().contentType(ContentType.JSON).body(restaurant2).post("/api/restaurants");
+            
+            // When & Then - HTTP GET all
+            given()
+            .when()
+                .get("/api/restaurants")
+            .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("size()", greaterThanOrEqualTo(2))
+                .body("find { it.name == 'Restaurant One' }", notNullValue())
+                .body("find { it.name == 'Restaurant Two' }", notNullValue());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Restaurant Update API")
+    class RestaurantUpdateApi {
+        
+        @Test
+        @Transactional
+        @DisplayName("Should update restaurant via PUT /api/restaurants/{id}")
+        void shouldUpdateRestaurantViaPutApi() {
+            // Given - Create restaurant first
+            CreateRestaurantCommand createCommand = new CreateRestaurantCommand(
+                "Original Restaurant",
+                "Original description",
+                "Original address",
+                "0123456789",
+                "original@test.fr",
+                "ORIGINAL_CUISINE"
+            );
+            
+            String restaurantId = given()
+                .contentType(ContentType.JSON)
+                .body(createCommand)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When - Update via HTTP PUT
+            UpdateRestaurantCommand updateCommand = new UpdateRestaurantCommand(
+                UUID.fromString(restaurantId),
+                "Updated Restaurant",
+                "Updated description", 
+                "Updated address",
+                "0987654321",
+                "updated@test.fr",
+                "UPDATED_CUISINE",
+                null,
+                null
+            );
+            
+            // Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(updateCommand)
+            .when()
+                .put("/api/restaurants/{id}", restaurantId)
+            .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("id", equalTo(restaurantId))
+                .body("name", equalTo("Updated Restaurant"))
+                .body("description", equalTo("Updated description"))
+                .body("address", equalTo("Updated address"))
+                .body("phone", equalTo("0987654321"))
+                .body("email", equalTo("updated@test.fr"))
+                .body("cuisineType", equalTo("UPDATED_CUISINE"))
+                .body("updatedAt", notNullValue());
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should update restaurant schedule via API")
+        void shouldUpdateRestaurantScheduleViaApi() {
+            // Given - Create restaurant first
+            CreateRestaurantCommand createCommand = new CreateRestaurantCommand(
+                "Schedule Test Restaurant", "Test description", "123 Test Street",
+                "0123456789", "schedule@test.fr", "TEST_CUISINE"
+            );
+            
+            String restaurantId = given()
+                .contentType(ContentType.JSON)
+                .body(createCommand)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When - Update with schedule
+            ScheduleDTO schedule = new ScheduleDTO(
+                new DayScheduleDTO("09:00", "18:00"), // Monday
+                new DayScheduleDTO("10:00", "19:00"), // Tuesday
+                null, // Wednesday - closed
+                new DayScheduleDTO("09:30", "17:30"), // Thursday
+                null, null, null // Friday, Saturday, Sunday - closed
+            );
+            
+            UpdateRestaurantCommand updateCommand = new UpdateRestaurantCommand(
+                UUID.fromString(restaurantId),
+                null, null, null, null, null, null, null,
+                schedule
+            );
+            
+            // Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(updateCommand)
+            .when()
+                .put("/api/restaurants/{id}", restaurantId)
+            .then()
+                .statusCode(200)
+                .body("schedule.monday.open", equalTo("09:00"))
+                .body("schedule.monday.close", equalTo("18:00"))
+                .body("schedule.tuesday.open", equalTo("10:00"))
+                .body("schedule.tuesday.close", equalTo("19:00"))
+                .body("schedule.wednesday", nullValue())
+                .body("schedule.thursday.open", equalTo("09:30"))
+                .body("schedule.thursday.close", equalTo("17:30"));
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should return 404 when updating non-existent restaurant")
+        void shouldReturn404WhenUpdatingNonExistentRestaurant() {
+            // Given
+            UUID nonExistentId = UUID.randomUUID();
+            UpdateRestaurantCommand command = new UpdateRestaurantCommand(
+                nonExistentId, "Name", null, null, null, null, null, null, null
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(command)
+            .when()
+                .put("/api/restaurants/{id}", nonExistentId)
+            .then()
+                .statusCode(404);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Restaurant Status Management API")
+    class RestaurantStatusManagementApi {
+        
+        @Test
+        @Transactional
+        @DisplayName("Should toggle restaurant status via PATCH /api/restaurants/{id}/toggle-status")
+        void shouldToggleRestaurantStatusViaPatchApi() {
+            // Given - Create restaurant
+            CreateRestaurantCommand createCommand = new CreateRestaurantCommand(
+                "Status Test Restaurant", "Test description", "123 Test Street",
+                "0123456789", "status@test.fr", "TEST_CUISINE"
+            );
+            
+            String restaurantId = given()
+                .contentType(ContentType.JSON)
+                .body(createCommand)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+            
+            // When - Toggle to open via HTTP PATCH
+            ToggleRestaurantStatusCommand toggleCommand = new ToggleRestaurantStatusCommand(
+                UUID.fromString(restaurantId),
+                true
+            );
+            
+            // Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(toggleCommand)
+            .when()
+                .patch("/api/restaurants/{id}/toggle-status", restaurantId)
+            .then()
+                .statusCode(200)
+                .body("isOpen", equalTo(true));
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should return 404 when toggling status of non-existent restaurant")
+        void shouldReturn404WhenTogglingStatusOfNonExistentRestaurant() {
+            // Given
+            UUID nonExistentId = UUID.randomUUID();
+            ToggleRestaurantStatusCommand command = new ToggleRestaurantStatusCommand(
+                nonExistentId, true
+            );
+            
+            // When & Then
+            given()
+                .contentType(ContentType.JSON)
+                .body(command)
+            .when()
+                .patch("/api/restaurants/{id}/toggle-status", nonExistentId)
+            .then()
+                .statusCode(404);
+        }
+    }
+    
+    @Nested
+    @DisplayName("API Content Type and Error Handling")
+    class ApiContentTypeAndErrorHandling {
+        
+        @Test
+        @Transactional
+        @DisplayName("Should return JSON content type")
+        void shouldReturnJsonContentType() {
+            given()
+            .when()
+                .get("/api/restaurants")
+            .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON);
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should handle malformed UUID in path")
+        void shouldHandleMalformedUuidInPath() {
+            given()
+            .when()
+                .get("/api/restaurants/{id}", "not-a-uuid")
+            .then()
+                .statusCode(400); // Bad Request for malformed UUID
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should validate JSON content type for POST")
+        void shouldValidateJsonContentTypeForPost() {
+            CreateRestaurantCommand command = new CreateRestaurantCommand(
+                "JSON Test", "Description", "Address", "Phone", "email@test.fr", "CUISINE"
+            );
+            
+            given()
+                .contentType(ContentType.JSON) // Correct content type
+                .body(command)
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(201);
+        }
+        
+        @Test
+        @Transactional
+        @DisplayName("Should reject non-JSON content type for POST")
+        void shouldRejectNonJsonContentTypeForPost() {
+            given()
+                .contentType("text/plain") // Wrong content type
+                .body("some text")
+            .when()
+                .post("/api/restaurants")
+            .then()
+                .statusCode(415); // Unsupported Media Type
+        }
+    }
+}
