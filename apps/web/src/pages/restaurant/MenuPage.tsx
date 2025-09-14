@@ -169,9 +169,9 @@ const MenuPage: React.FC = () => {
 
       // Show success toast and keep modal open
       if (editingItem) {
-        toast.success('Plat modifié avec succès !', 'Modification sauvegardée');
+        toast.success(`"${formData.name}" modifié avec succès !`, 'Modification sauvegardée');
       } else {
-        toast.success('Nouveau plat ajouté avec succès !', 'Plat créé');
+        toast.success(`"${formData.name}" ajouté avec succès !`, 'Nouveau plat créé');
         // Only close modal for new items
         setShowModal(false);
         setEditingItem(null);
@@ -184,10 +184,14 @@ const MenuPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
+      // Find the item name before deleting
+      const itemToDelete = menuItems.find(item => item.id === id);
+      const itemName = itemToDelete?.name || 'Plat';
+
       await apiService.menuItems.delete(id);
       // Refresh menu items from backend
       await refetch();
-      toast.success('Plat supprimé avec succès', 'Suppression effectuée');
+      toast.success(`"${itemName}" supprimé avec succès`, 'Suppression effectuée');
     } catch (error) {
       console.error('Error deleting menu item:', error);
       toast.error('Erreur lors de la suppression du plat', 'Erreur de suppression');
@@ -208,7 +212,7 @@ const MenuPage: React.FC = () => {
       await refetch();
 
       toast.success(
-        `Plat ${newAvailability ? 'rendu disponible' : 'masqué'} avec succès`,
+        `"${currentItem.name}" ${newAvailability ? 'rendu disponible' : 'masqué'} avec succès`,
         'Disponibilité mise à jour'
       );
     } catch (error) {

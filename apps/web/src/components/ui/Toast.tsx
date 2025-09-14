@@ -58,7 +58,7 @@ export const Toast: React.FC<ToastProps> = ({
 
   return (
     <div className={clsx(
-      'fixed top-4 right-4 max-w-sm w-full p-4 rounded-lg border shadow-medium z-[9999] animate-slide-in',
+      'max-w-sm w-full p-4 rounded-lg border shadow-medium animate-slide-in',
       variants[type]
     )}>
       <div className="flex items-start space-x-3">
@@ -111,7 +111,7 @@ export const useToast = (): ToastManager & { toasts: React.ReactNode } => {
   const info = (message: string, title?: string) => show({ type: 'info', message, title });
 
   const toastElements = (
-    <div className="fixed top-4 right-4 z-[9999] space-y-2">
+    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] space-y-2">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
