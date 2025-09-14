@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, mockUser } from '../data/mockData';
 import { ENV } from '../config/env';
+import apiService from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -31,21 +32,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUser = useCallback(async () => {
     try {
-      // Si auth désactivé, créer un user par défaut pour les tests
+      // Si auth désactivé, récupérer l'utilisateur fixe depuis l'API
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
-        const defaultUser: User = {
-          id: ENV.MOCK_USER_ID,
-          name: 'Test User Mobile',
-          email: 'test@oneeats-mobile.com',
-          phone: '+33 6 12 34 56 78',
-          favoriteRestaurants: [],
-          orders: [],
-          isGuest: false,
-        };
-        setUser(defaultUser);
-        await AsyncStorage.setItem('user', JSON.stringify(defaultUser));
-        setIsLoading(false);
-        return;
+        console.log('🔄 Loading fixed user from API:', ENV.MOCK_USER_ID);
+
+        try {
+          // Essayer de récupérer l'utilisateur depuis l'API
+          const apiUser = await apiService.users.getById(ENV.MOCK_USER_ID);
+          console.log('✅ User loaded from API:', apiUser);
+
+          // Convertir les données API au format mobile
+          const mobileUser: User = {
+            id: apiUser.id,
+            name: `${apiUser.firstName} ${apiUser.lastName}`,
+            email: apiUser.email,
+            phone: apiUser.phone || '',
+            favoriteRestaurants: [],
+            orders: [],
+            isGuest: false,
+          };
+
+          setUser(mobileUser);
+          await AsyncStorage.setItem('user', JSON.stringify(mobileUser));
+          setIsLoading(false);
+          return;
+        } catch (apiError) {
+          console.warn('⚠️ Could not load user from API, using fallback:', apiError);
+
+          // Fallback vers un user par défaut si API échoue
+          const defaultUser: User = {
+            id: ENV.MOCK_USER_ID,
+            name: 'Utilisateur Mobile',
+            email: 'mobile@oneeats.com',
+            phone: '+33 6 45 67 89 01',
+            favoriteRestaurants: [],
+            orders: [],
+            isGuest: false,
+          };
+          setUser(defaultUser);
+          await AsyncStorage.setItem('user', JSON.stringify(defaultUser));
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Mode auth normal

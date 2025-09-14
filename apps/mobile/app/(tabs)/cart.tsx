@@ -153,11 +153,12 @@ export default function CartMVP() {
       const order = await createOrder(restaurantId, values.specialInstructions || undefined, customerData);
       if (!order) throw new Error('Erreur création commande');
 
-      addOrder(order);
-      
-      // Navigation directe vers la page de suivi de commande
-      console.log('✅ Commande créée avec succès, navigation vers order/', order.id);
-      router.push(`/order/${order.id}`);
+      // addOrder créé la commande via l'API et retourne la commande avec l'ID réel
+      const createdOrder = await addOrder(order);
+
+      // Navigation directe vers la page de suivi de commande avec l'ID réel
+      console.log('✅ Commande créée avec succès, navigation vers order/', createdOrder.id);
+      router.push(`/order/${createdOrder.id}`);
       
     } catch (error) {
       console.error('Erreur commande:', error);

@@ -96,8 +96,11 @@ class ApiService {
         body: JSON.stringify(orderData),
       }),
     
-    getByUserId: (userId: string = MOCK_USER_ID) => 
-      this.request<any[]>(`/orders?userId=${userId}`),
+    getByUserId: (userId?: string) => {
+      const finalUserId = userId || MOCK_USER_ID;
+      console.log('🔍 getByUserId called with:', { userId, finalUserId, MOCK_USER_ID });
+      return this.request<any[]>(`/orders?userId=${finalUserId}`);
+    },
     
     getById: (id: string) => 
       this.request<any>(`/orders/${id}`),
@@ -117,6 +120,11 @@ class ApiService {
     
     getByRestaurant: (restaurantId: string) => 
       this.request<any[]>(`/menu-items/restaurant/${restaurantId}`),
+  };
+
+  // Users
+  users = {
+    getById: (id: string) => this.request<any>(`/users/${id}`),
   };
 
   // Health check

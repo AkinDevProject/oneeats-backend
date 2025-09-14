@@ -9,6 +9,8 @@ import com.oneeats.order.application.query.GetOrderQuery;
 import com.oneeats.order.application.query.GetOrderQueryHandler;
 import com.oneeats.order.application.query.GetOrdersByRestaurantQuery;
 import com.oneeats.order.application.query.GetOrdersByRestaurantQueryHandler;
+import com.oneeats.order.application.query.GetOrdersByUserQuery;
+import com.oneeats.order.application.query.GetOrdersByUserQueryHandler;
 import com.oneeats.order.domain.model.OrderStatus;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -32,7 +34,10 @@ public class OrderController {
 
     @Inject
     GetOrdersByRestaurantQueryHandler getOrdersByRestaurantQueryHandler;
-    
+
+    @Inject
+    GetOrdersByUserQueryHandler getOrdersByUserQueryHandler;
+
     @Inject
     UpdateOrderStatusCommandHandler updateOrderStatusCommandHandler;
 
@@ -50,15 +55,28 @@ public class OrderController {
     }
 
     @GET
-    public Response getOrdersByRestaurant(@QueryParam("restaurantId") UUID restaurantId) {
-        if (restaurantId == null) {
+    public Response getOrders(@QueryParam("restaurantId") UUID restaurantId, @QueryParam("userId") UUID userId) {
+        if (restaurantId != null && userId != null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity("restaurantId parameter is required")
+                .entity("Cannot specify both restaurantId and userId parameters")
                 .build();
         }
-        
-        List<OrderDTO> orders = getOrdersByRestaurantQueryHandler.handle(
-            new GetOrdersByRestaurantQuery(restaurantId));
+
+        if (restaurantId == null && userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Either restaurantId or userId parameter is required")
+                .build();
+        }
+
+        List<OrderDTO> orders;
+        if (restaurantId != null) {
+            orders = getOrdersByRestaurantQueryHandler.handle(
+                new GetOrdersByRestaurantQuery(restaurantId));
+        } else {
+            orders = getOrdersByUserQueryHandler.handle(
+                new GetOrdersByUserQuery(userId));
+        }
+
         return Response.ok(orders).build();
     }
 

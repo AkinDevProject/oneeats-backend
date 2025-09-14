@@ -32,7 +32,7 @@ interface OrderContextType {
   currentOrder: Order | null;
   isLoading: boolean;
   error: string | null;
-  addOrder: (order: Order) => Promise<void>;
+  addOrder: (order: Order) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
   getOrderById: (orderId: string) => Order | undefined;
   clearOrders: () => void;
@@ -92,7 +92,9 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       if (user) {
         // Charger depuis l'API
         console.log('🔄 Loading orders for user:', user.id);
-        const apiOrders = await apiService.orders.getByUserId(user.id);
+        const userId = user.id || ENV.MOCK_USER_ID;
+        console.log('🎯 Using userId for orders request:', userId);
+        const apiOrders = await apiService.orders.getByUserId(userId);
         console.log('🎯 API returned orders:', apiOrders);
         
         // Créer une map des restaurants pour éviter de multiples requêtes
@@ -104,6 +106,18 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
           pickupTime: new Date(order.estimatedPickupTime || order.pickupTime),
           total: order.totalAmount || order.total,
           status: mapApiStatusToMobileStatus(order.status),
+          // Adapter les items de l'API au format mobile
+          items: order.items?.map((item: any) => ({
+            ...item,
+            menuItem: {
+              id: item.menuItemId,
+              name: item.menuItemName,
+              price: item.unitPrice,
+              restaurantId: order.restaurantId,
+            },
+            totalPrice: item.subtotal || item.totalPrice,
+            specialInstructions: item.specialNotes || item.specialInstructions,
+          })) || [],
           // Créer un objet restaurant minimal pour la compatibilité
           restaurant: {
             id: order.restaurantId,
@@ -182,29 +196,63 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     try {
       setError(null);
       
-      // Créer la commande via l'API
+      // Créer la commande via l'API - Format attendu par CreateOrderCommand
       const createdOrder = await apiService.orders.create({
+        userId: user?.id || ENV.MOCK_USER_ID,
         restaurantId: order.restaurantId,
-        items: order.items,
-        total: order.total,
-        pickupTime: order.pickupTime,
-        customerName: order.customerName,
-        customerPhone: order.customerPhone,
-        customerNotes: order.customerNotes,
+        totalAmount: order.total,
+        specialInstructions: order.customerNotes,
+        items: order.items.map(item => ({
+          menuItemId: item.menuItem.id,
+          menuItemName: item.menuItem.name,
+          unitPrice: item.menuItem.price,
+          quantity: item.quantity,
+          specialNotes: item.specialInstructions
+        }))
       });
       
       // Ajouter la commande créée à la liste locale
       const processedOrder = {
         ...createdOrder,
         orderTime: new Date(createdOrder.createdAt || createdOrder.orderTime),
-        pickupTime: new Date(createdOrder.pickupTime),
+        pickupTime: new Date(createdOrder.estimatedPickupTime || createdOrder.pickupTime),
+        status: mapApiStatusToMobileStatus(createdOrder.status),
+        // Adapter les items de l'API au format mobile
+        items: createdOrder.items?.map((item: any) => ({
+          ...item,
+          menuItem: {
+            id: item.menuItemId,
+            name: item.menuItemName,
+            price: item.unitPrice,
+            restaurantId: createdOrder.restaurantId,
+          },
+          totalPrice: item.subtotal || item.totalPrice,
+          specialInstructions: item.specialNotes || item.specialInstructions,
+        })) || [],
+        // Créer un objet restaurant minimal pour la compatibilité
+        restaurant: {
+          id: createdOrder.restaurantId,
+          name: getRestaurantName(createdOrder.restaurantId),
+          image: 'https://via.placeholder.com/400x300',
+          cuisine: 'Restaurant',
+          rating: 4.5,
+          deliveryTime: '20-30 min',
+          deliveryFee: 2.99,
+          distance: '1.2 km',
+          featured: false,
+          isOpen: true,
+          description: 'Restaurant',
+        }
       };
-      
+
+      console.log('✅ Adding new order to list:', processedOrder.id);
       setOrders(currentOrders => [processedOrder, ...currentOrders]);
+
+      return processedOrder;
     } catch (error) {
       console.error('Error creating order:', error);
       setError('Erreur lors de la création de la commande');
-      
+
       // Fallback - ajouter localement seulement
       setOrders(currentOrders => [order, ...currentOrders]);
       throw error;
@@ -236,7 +284,30 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   }, []);
 
   const getOrderById = useCallback((orderId: string): Order | undefined => {
-    return orders.find(order => order.id === orderId);
+    const order = orders.find(order => order.id === orderId);
+    if (!order) return undefined;
+
+    // S'assurer que l'order a une propriété restaurant
+    if (!order.restaurant) {
+      return {
+        ...order,
+        restaurant: {
+          id: order.restaurantId || 'unknown',
+          name: getRestaurantName(order.restaurantId || 'unknown'),
+          image: 'https://via.placeholder.com/400x300',
+          cuisine: 'Restaurant',
+          rating: 4.5,
+          deliveryTime: '20-30 min',
+          deliveryFee: 2.99,
+          distance: '1.2 km',
+          featured: false,
+          isOpen: true,
+          description: 'Restaurant',
+        }
+      };
+    }
+
+    return order;
   }, [orders]);
 
   const clearOrders = useCallback(() => {

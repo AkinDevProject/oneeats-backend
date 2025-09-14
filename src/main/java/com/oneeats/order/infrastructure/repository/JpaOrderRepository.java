@@ -43,8 +43,9 @@ public class JpaOrderRepository implements IOrderRepository {
     }
 
     @Override
+    @Transactional
     public List<Order> findByUserId(UUID userId) {
-        return OrderEntity.<OrderEntity>find("userId", userId).stream()
+        return OrderEntity.<OrderEntity>find("userId", userId).list().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -52,14 +53,15 @@ public class JpaOrderRepository implements IOrderRepository {
     @Override
     @Transactional
     public List<Order> findByRestaurantId(UUID restaurantId) {
-        return OrderEntity.<OrderEntity>find("restaurantId", restaurantId).stream()
+        return OrderEntity.<OrderEntity>find("restaurantId", restaurantId).list().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public List<Order> findByStatus(OrderStatus status) {
-        return OrderEntity.<OrderEntity>find("status", status).stream()
+        return OrderEntity.<OrderEntity>find("status", status).list().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -68,20 +70,23 @@ public class JpaOrderRepository implements IOrderRepository {
     @Transactional
     public Order save(Order order) {
         if (order.getId() == null) {
-            // Nouvelle entité
+            // Nouvelle entité sans ID
             OrderEntity entity = mapper.toEntity(order);
             entity.persist();
             return mapper.toDomain(entity);
         } else {
-            // Entité existante - la charger et la modifier
+            // Vérifier si l'entité existe déjà
             OrderEntity existingEntity = OrderEntity.findById(order.getId());
             if (existingEntity != null) {
-                // Mettre à jour directement les champs nécessaires
+                // Entité existante - mettre à jour
                 existingEntity.setStatus(order.getStatus());
                 existingEntity.setUpdatedAt(order.getUpdatedAt());
                 return mapper.toDomain(existingEntity);
             } else {
-                throw new RuntimeException("Order not found: " + order.getId());
+                // Nouvelle entité avec ID pré-assigné
+                OrderEntity entity = mapper.toEntity(order);
+                entity.persist();
+                return mapper.toDomain(entity);
             }
         }
     }

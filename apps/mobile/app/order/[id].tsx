@@ -154,7 +154,7 @@ export default function OrderDetailScreen() {
     
     Alert.alert(
       'Appeler le restaurant',
-      `Contacter ${order.restaurant.name} ?`,
+      `Contacter ${order.restaurant?.name || 'le restaurant'} ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -199,7 +199,7 @@ export default function OrderDetailScreen() {
             Commande #{order.id.substring(0, 8)}
           </Text>
           <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            {order.restaurant.name}
+            {order.restaurant?.name || 'Restaurant'}
           </Text>
         </View>
         <IconButton
@@ -265,7 +265,7 @@ export default function OrderDetailScreen() {
             <View key={index} style={styles.orderItem}>
               <View style={styles.itemInfo}>
                 <Text style={[styles.itemName, { color: currentTheme.colors.onSurface }]}>
-                  {item.quantity}x {item.menuItem.name}
+                  {item.quantity}x {item.menuItem?.name || item.menuItemName || 'Article'}
                 </Text>
                 {item.options && item.options.length > 0 && (
                   <Text style={[styles.itemOptions, { color: currentTheme.colors.onSurfaceVariant }]}>
@@ -281,7 +281,7 @@ export default function OrderDetailScreen() {
                 )}
               </View>
               <Text style={[styles.itemPrice, { color: currentTheme.colors.primary }]}>
-                {item.totalPrice.toFixed(2)}€
+                {(item.totalPrice || item.subtotal || 0).toFixed(2)}€
               </Text>
             </View>
           ))}
@@ -293,7 +293,7 @@ export default function OrderDetailScreen() {
               Total
             </Text>
             <Text style={[styles.totalPrice, { color: currentTheme.colors.primary }]}>
-              {order.total.toFixed(2)}€
+              {(order.total || order.totalAmount || 0).toFixed(2)}€
             </Text>
           </View>
         </Card.Content>
@@ -322,7 +322,7 @@ export default function OrderDetailScreen() {
           <View style={styles.pickupInfo}>
             <MaterialIcons name="location-on" size={20} color={currentTheme.colors.primary} />
             <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
-              {order.restaurant.name}
+              {order.restaurant?.name || 'Restaurant'}
             </Text>
           </View>
           
