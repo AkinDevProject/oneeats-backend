@@ -170,7 +170,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         <div className={`p-4 sm:p-6 border-b border-gray-200 ${urgency.bg}`}>
           <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0 truncate">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0 break-words">
                 Commande {order.orderNumber || `#${order.id.substring(0, 8)}...`}
               </h2>
               <div className="sm:hidden">
