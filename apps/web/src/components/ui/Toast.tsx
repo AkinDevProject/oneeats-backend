@@ -58,7 +58,7 @@ export const Toast: React.FC<ToastProps> = ({
 
   return (
     <div className={clsx(
-      'fixed top-4 right-4 max-w-sm w-full p-4 rounded-lg border shadow-medium z-50 animate-slide-in',
+      'fixed top-4 right-4 max-w-sm w-full p-4 rounded-lg border shadow-medium z-[9999] animate-slide-in',
       variants[type]
     )}>
       <div className="flex items-start space-x-3">
@@ -93,8 +93,12 @@ export interface ToastManager {
   info: (message: string, title?: string) => void;
 }
 
-export const useToast = (): ToastManager => {
+export const useToast = (): ToastManager & { toasts: React.ReactNode } => {
   const [toasts, setToasts] = useState<(ToastProps & { id: string })[]>([]);
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
   const show = (toast: Omit<ToastProps, 'show'>) => {
     const id = Date.now().toString();
@@ -106,5 +110,17 @@ export const useToast = (): ToastManager => {
   const warning = (message: string, title?: string) => show({ type: 'warning', message, title });
   const info = (message: string, title?: string) => show({ type: 'info', message, title });
 
-  return { show, success, error, warning, info };
+  const toastElements = (
+    <div className="fixed top-4 right-4 z-[9999] space-y-2">
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          {...toast}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
+    </div>
+  );
+
+  return { show, success, error, warning, info, toasts: toastElements };
 };

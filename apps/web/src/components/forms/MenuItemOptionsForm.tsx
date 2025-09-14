@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, X, Trash2, GripVertical } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Plus, X, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { MenuItemOption, MenuItemChoice } from '../../types';
@@ -10,8 +10,19 @@ interface MenuItemOptionsFormProps {
 }
 
 export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ options, onChange }) => {
-  const [draggedOption, setDraggedOption] = useState<number | null>(null);
-  const [draggedChoice, setDraggedChoice] = useState<{optionId: string, choiceIndex: number} | null>(null);
+  const optionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const lastAddedOptionId = useRef<string | null>(null);
+
+  // Scroll vers la nouvelle option créée
+  useEffect(() => {
+    if (lastAddedOptionId.current && optionRefs.current[lastAddedOptionId.current]) {
+      optionRefs.current[lastAddedOptionId.current]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+      lastAddedOptionId.current = null;
+    }
+  }, [options]);
 
   // Fonction pour réorganiser les displayOrder séquentiellement
   const normalizeDisplayOrders = (opts: MenuItemOption[]) => {
@@ -21,81 +32,29 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
     }));
   };
 
-  // Gestion du drag and drop pour les options
-  const handleOptionDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedOption(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
-
-    // Ajouter un style visuel pendant le drag
-    const target = e.currentTarget as HTMLElement;
-    target.style.opacity = '0.5';
-    target.style.transform = 'rotate(2deg)';
-  };
-
-  const handleOptionDragEnd = (e: React.DragEvent) => {
-    // Restaurer le style après le drag
-    const target = e.currentTarget as HTMLElement;
-    target.style.opacity = '1';
-    target.style.transform = 'rotate(0deg)';
-    setDraggedOption(null);
-  };
-
-  const handleOptionDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-
-    // Ajouter un effet visuel sur la zone de drop
-    const target = e.currentTarget as HTMLElement;
-    target.style.borderColor = '#3b82f6';
-    target.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-  };
-
-  const handleOptionDragLeave = (e: React.DragEvent) => {
-    // Retirer l'effet visuel
-    const target = e.currentTarget as HTMLElement;
-    target.style.borderColor = '';
-    target.style.backgroundColor = '';
-  };
-
-  const handleOptionDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-
-    // Retirer l'effet visuel
-    const target = e.currentTarget as HTMLElement;
-    target.style.borderColor = '';
-    target.style.backgroundColor = '';
-
-    if (draggedOption === null || draggedOption === dropIndex) return;
+  // Fonction pour changer la position d'une option
+  const changeOptionPosition = (optionId: string, newPosition: number) => {
+    const currentIndex = options.findIndex(opt => opt.id === optionId);
+    if (currentIndex === -1 || newPosition < 0 || newPosition >= options.length) return;
 
     const newOptions = [...options];
-    const draggedItem = newOptions[draggedOption];
-    newOptions.splice(draggedOption, 1);
-    newOptions.splice(dropIndex, 0, draggedItem);
+    const [movedOption] = newOptions.splice(currentIndex, 1);
+    newOptions.splice(newPosition, 0, movedOption);
 
     const normalizedOptions = normalizeDisplayOrders(newOptions);
     onChange(normalizedOptions);
-    setDraggedOption(null);
   };
 
-  // Gestion du drag and drop pour les choix
-  const handleChoiceDragStart = (e: React.DragEvent, optionId: string, choiceIndex: number) => {
-    setDraggedChoice({optionId, choiceIndex});
-    e.dataTransfer.effectAllowed = 'move';
-    e.stopPropagation();
-  };
-
-  const handleChoiceDrop = (e: React.DragEvent, optionId: string, dropIndex: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!draggedChoice || draggedChoice.optionId !== optionId || draggedChoice.choiceIndex === dropIndex) return;
-
+  // Fonction pour changer la position d'un choix
+  const changeChoicePosition = (optionId: string, choiceId: string, newPosition: number) => {
     const updatedOptions = options.map(option => {
       if (option.id === optionId) {
+        const currentIndex = option.choices.findIndex(choice => choice.id === choiceId);
+        if (currentIndex === -1 || newPosition < 0 || newPosition >= option.choices.length) return option;
+
         const newChoices = [...option.choices];
-        const draggedItem = newChoices[draggedChoice.choiceIndex];
-        newChoices.splice(draggedChoice.choiceIndex, 1);
-        newChoices.splice(dropIndex, 0, draggedItem);
+        const [movedChoice] = newChoices.splice(currentIndex, 1);
+        newChoices.splice(newPosition, 0, movedChoice);
 
         const normalizedChoices = newChoices.map((choice, index) => ({
           ...choice,
@@ -107,16 +66,17 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
       return option;
     });
     onChange(updatedOptions);
-    setDraggedChoice(null);
   };
+
   const addOption = () => {
     // Trouver le displayOrder le plus élevé et ajouter 1
     const maxDisplayOrder = options.length > 0
       ? Math.max(...options.map(opt => opt.displayOrder || 0))
       : -1;
 
+    const newOptionId = Date.now().toString();
     const newOption: MenuItemOption = {
-      id: Date.now().toString(),
+      id: newOptionId,
       name: '',
       type: 'CHOICE',
       isRequired: false,
@@ -124,6 +84,9 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
       displayOrder: maxDisplayOrder + 1,
       choices: []
     };
+
+    // Stocker l'ID pour le scroll automatique
+    lastAddedOptionId.current = newOptionId;
     onChange([...options, newOption]);
   };
 
@@ -188,9 +151,8 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-lg font-medium text-gray-900">Options du plat</h4>
-          <p className="text-sm text-gray-500 mt-1 flex items-center">
-            <GripVertical className="inline h-4 w-4 mr-1 text-blue-500" />
-            Cliquez et glissez la poignée <GripVertical className="inline h-3 w-3 mx-1" /> pour réorganiser
+          <p className="text-sm text-gray-500 mt-1">
+            Utilisez les sélecteurs de position pour réorganiser l'ordre des options
           </p>
         </div>
         <Button
@@ -214,37 +176,33 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
           {options.map((option, optionIndex) => (
             <div
               key={option.id}
-              className="border border-gray-200 rounded-lg p-4 space-y-4 transition-all duration-200 cursor-move hover:border-blue-300 hover:shadow-md"
-              draggable
-              onDragStart={(e) => handleOptionDragStart(e, optionIndex)}
-              onDragEnd={handleOptionDragEnd}
-              onDragOver={handleOptionDragOver}
-              onDragLeave={handleOptionDragLeave}
-              onDrop={(e) => handleOptionDrop(e, optionIndex)}
+              ref={(el) => (optionRefs.current[option.id] = el)}
+              className="border border-gray-200 rounded-lg p-4 space-y-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  {/* Poignée de drag - Zone principale pour initier le drag */}
-                  <div
-                    className="cursor-move text-gray-400 hover:text-gray-600 p-2 -ml-2 rounded hover:bg-gray-100"
-                    title="Glissez pour réorganiser les options"
-                  >
-                    <GripVertical className="h-5 w-5" />
-                  </div>
                   <h5 className="font-medium text-gray-900">Option {optionIndex + 1}</h5>
-                  <span className="text-xs text-gray-500 bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
-                    #{option.displayOrder}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-700">Position:</label>
+                    <select
+                      value={optionIndex}
+                      onChange={(e) => changeOptionPosition(option.id, parseInt(e.target.value))}
+                      className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    >
+                      {options.map((_, index) => (
+                        <option key={index} value={index}>
+                          {index + 1}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 className="h-4 w-4" />}
-                  onClick={(e) => {
-                    e.stopPropagation(); // Empêcher le drag lors du clic sur supprimer
-                    removeOption(option.id);
-                  }}
+                  onClick={() => removeOption(option.id)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   title="Supprimer cette option"
                 >
@@ -252,10 +210,7 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
                 </Button>
               </div>
 
-              <div
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                onMouseDown={(e) => e.stopPropagation()} // Empêcher le drag sur les champs de saisie
-              >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="Nom de l'option"
                   value={option.name}
@@ -341,10 +296,7 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
                     variant="outline"
                     size="sm"
                     icon={<Plus className="h-3 w-3" />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addChoice(option.id);
-                    }}
+                    onClick={() => addChoice(option.id)}
                   >
                     Ajouter
                   </Button>
@@ -359,26 +311,24 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
                     {option.choices.map((choice, choiceIndex) => (
                       <div
                         key={choice.id}
-                        className={`flex items-center space-x-2 bg-gray-50 p-3 rounded-md transition-all duration-200 ${
-                          draggedChoice?.optionId === option.id && draggedChoice?.choiceIndex === choiceIndex
-                            ? 'opacity-50 scale-95'
-                            : 'hover:bg-gray-100'
-                        }`}
-                        draggable
-                        onDragStart={(e) => handleChoiceDragStart(e, option.id, choiceIndex)}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onDrop={(e) => handleChoiceDrop(e, option.id, choiceIndex)}
+                        className="flex items-center space-x-2 bg-gray-50 p-3 rounded-md hover:bg-gray-100"
                       >
-                        {/* Poignée de drag pour les choix */}
-                        <div className="cursor-move text-gray-300 hover:text-gray-500">
-                          <GripVertical className="h-4 w-4" />
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-500 w-4 font-medium">
+                            {choiceIndex + 1}.
+                          </span>
+                          <select
+                            value={choiceIndex}
+                            onChange={(e) => changeChoicePosition(option.id, choice.id, parseInt(e.target.value))}
+                            className="px-1 py-0.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          >
+                            {option.choices.map((_, index) => (
+                              <option key={index} value={index}>
+                                {index + 1}
+                              </option>
+                            ))}
+                          </select>
                         </div>
-                        <span className="text-sm text-gray-500 w-6 font-medium">
-                          {choiceIndex + 1}.
-                        </span>
                         <Input
                           value={choice.name}
                           onChange={(e) => updateChoice(option.id, choice.id, 'name', e.target.value)}
@@ -411,6 +361,22 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
               </div>
             </div>
           ))}
+
+          {/* Bouton dupliqué en bas si plusieurs options */}
+          {options.length >= 2 && (
+            <div className="pt-4 border-t border-gray-100">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={<Plus className="h-4 w-4" />}
+                onClick={addOption}
+                className="w-full"
+              >
+                Ajouter une autre option
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

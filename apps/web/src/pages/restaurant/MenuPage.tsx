@@ -8,6 +8,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
+import { useToast } from '../../components/ui/Toast';
 import { MenuItemOptionsForm } from '../../components/forms/MenuItemOptionsForm';
 import { MenuItem, MenuItemOption } from '../../types';
 import { useRestaurantData } from '../../hooks/useRestaurantData';
@@ -17,6 +18,7 @@ const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111'; // Pizza Palace ID
 
 const MenuPage: React.FC = () => {
   const { menuItems, loading, error, refetch } = useRestaurantData();
+  const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -164,12 +166,19 @@ const MenuPage: React.FC = () => {
 
       // Refresh menu items from backend
       await refetch();
-      
-      setShowModal(false);
-      setEditingItem(null);
+
+      // Show success toast and keep modal open
+      if (editingItem) {
+        toast.success('Plat modifié avec succès !', 'Modification sauvegardée');
+      } else {
+        toast.success('Nouveau plat ajouté avec succès !', 'Plat créé');
+        // Only close modal for new items
+        setShowModal(false);
+        setEditingItem(null);
+      }
     } catch (error) {
       console.error('Error saving menu item:', error);
-      // You might want to show an error toast here
+      toast.error('Erreur lors de la sauvegarde du plat', 'Erreur de sauvegarde');
     }
   };
 
@@ -178,9 +187,10 @@ const MenuPage: React.FC = () => {
       await apiService.menuItems.delete(id);
       // Refresh menu items from backend
       await refetch();
+      toast.success('Plat supprimé avec succès', 'Suppression effectuée');
     } catch (error) {
       console.error('Error deleting menu item:', error);
-      // You might want to show an error toast here
+      toast.error('Erreur lors de la suppression du plat', 'Erreur de suppression');
     }
   };
 
@@ -189,16 +199,21 @@ const MenuPage: React.FC = () => {
       // Find the current item to get its availability status
       const currentItem = menuItems.find(item => item.id === id);
       if (!currentItem) return;
-      
+
       // Toggle the availability
       const newAvailability = !currentItem.available;
       await apiService.menuItems.toggleAvailability(id, newAvailability);
-      
+
       // Refresh menu items from backend
       await refetch();
+
+      toast.success(
+        `Plat ${newAvailability ? 'rendu disponible' : 'masqué'} avec succès`,
+        'Disponibilité mise à jour'
+      );
     } catch (error) {
       console.error('Error toggling menu item availability:', error);
-      // You might want to show an error toast here
+      toast.error('Erreur lors de la modification de la disponibilité', 'Erreur de modification');
     }
   };
 
@@ -209,6 +224,8 @@ const MenuPage: React.FC = () => {
 
   return (
     <div className="bg-gray-50">
+      {/* Toast notifications */}
+      {toast.toasts}
       {/* Mobile & Tablet Optimized Header - Identical to Orders Page */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         {/* Mobile Header */}
