@@ -33,6 +33,7 @@ import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { MenuItem, Restaurant } from '../../src/data/mockData';
 import apiService from '../../src/services/api';
+import { buildRestaurantImageUrl, buildMenuItemImageUrl } from '../../src/utils/imageUtils';
 
 const { width } = Dimensions.get('window');
 const HEADER_HEIGHT = 280;
@@ -66,7 +67,7 @@ export default function RestaurantScreen() {
       const mappedRestaurant: Restaurant = {
         id: restaurantData.id,
         name: restaurantData.name,
-        image: restaurantData.imageUrl || 'https://via.placeholder.com/400x300',
+        image: buildRestaurantImageUrl(restaurantData.imageUrl),
         cuisine: restaurantData.cuisineType || 'Restaurant',
         rating: restaurantData.rating || 4.5,
         deliveryTime: '20-30 min',
@@ -90,7 +91,7 @@ export default function RestaurantScreen() {
         name: item.name,
         description: item.description,
         price: item.price,
-        image: item.imageUrl || 'https://via.placeholder.com/300x300',
+        image: buildMenuItemImageUrl(item.imageUrl),
         category: item.category,
         popular: item.isPopular || false,
         available: item.available,

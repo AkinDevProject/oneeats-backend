@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
 import { Restaurant } from '../data/mockData';
+import { buildRestaurantImageUrl } from '../utils/imageUtils';
 
 interface UseRestaurantsResult {
   restaurants: Restaurant[];
@@ -26,7 +27,7 @@ export const useRestaurants = (): UseRestaurantsResult => {
       const mappedData = data.map((restaurant: any) => ({
         id: restaurant.id,
         name: restaurant.name,
-        image: restaurant.imageUrl || 'https://via.placeholder.com/400x300',
+        image: buildRestaurantImageUrl(restaurant.imageUrl),
         cuisine: restaurant.cuisineType || 'Restaurant',
         rating: restaurant.rating || 4.5,
         deliveryTime: '20-30 min', // Mock - sera ajouté plus tard
