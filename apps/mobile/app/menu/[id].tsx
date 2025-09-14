@@ -37,7 +37,9 @@ import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { mockMenuItems, mockRestaurants, MenuItemOption, MenuItemChoice } from '../../src/data/mockData';
+import { MenuItemOption, MenuItemChoice } from '../../src/data/mockData';
+import apiService from '../../src/services/api';
+import { buildMenuItemImageUrl } from '../../src/utils/imageUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -98,17 +100,66 @@ export default function MenuItemDetail() {
   const loadMenuData = async () => {
     try {
       setIsLoading(true);
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      const foundMenuItem = mockMenuItems.find(item => item.id === id);
-      if (foundMenuItem) {
-        setMenuItem(foundMenuItem);
-        const foundRestaurant = mockRestaurants.find(r => r.id === foundMenuItem.restaurantId);
-        setRestaurant(foundRestaurant);
+      console.log('🔄 Loading menu item data for ID:', id);
+
+      // Récupérer les détails du menu item depuis l'API
+      const menuItemData = await apiService.menuItems.getById(id as string);
+      console.log('🍽️ Menu item data:', menuItemData);
+
+      if (menuItemData) {
+        // Mapper les options API vers le format attendu par l'interface mobile
+        const mappedOptions = menuItemData.options ? menuItemData.options.map((option: any) => ({
+          id: option.id,
+          name: option.name,
+          type: option.type.toLowerCase(), // CHOICE -> choice, EXTRA -> extra, etc.
+          isRequired: option.isRequired || false,
+          maxChoices: option.maxChoices !== undefined ? option.maxChoices : 1, // Préserver 0 !
+          choices: option.choices ? option.choices.map((choice: any) => ({
+            id: choice.id,
+            name: choice.name,
+            price: choice.additionalPrice || 0, // additionalPrice -> price
+          })) : []
+        })) : [];
+
+        // Mapper les données au format attendu par l'interface
+        const mappedMenuItem = {
+          id: menuItemData.id,
+          restaurantId: menuItemData.restaurantId,
+          name: menuItemData.name,
+          description: menuItemData.description,
+          price: menuItemData.price,
+          image: buildMenuItemImageUrl(menuItemData.imageUrl),
+          category: menuItemData.category,
+          popular: menuItemData.isPopular || false,
+          available: menuItemData.isAvailable !== false, // isAvailable -> available
+          options: mappedOptions,
+        };
+
+        setMenuItem(mappedMenuItem);
+
+        // Récupérer les détails du restaurant
+        const restaurantData = await apiService.restaurants.getById(menuItemData.restaurantId);
+        console.log('🏪 Restaurant data:', restaurantData);
+
+        if (restaurantData) {
+          const mappedRestaurant = {
+            id: restaurantData.id,
+            name: restaurantData.name,
+            image: restaurantData.imageUrl,
+            cuisine: restaurantData.cuisineType || 'Restaurant',
+            rating: restaurantData.rating || 4.5,
+            deliveryTime: '20-30 min',
+            deliveryFee: 2.99,
+            distance: '1.2 km',
+            featured: false,
+            isOpen: restaurantData.isOpen,
+            description: restaurantData.description || 'Délicieux restaurant',
+          };
+          setRestaurant(mappedRestaurant);
+        }
       }
     } catch (error) {
-      console.error('Erreur lors du chargement de l\'item:', error);
+      console.error('❌ Erreur lors du chargement de l\'item:', error);
     } finally {
       setIsLoading(false);
     }
@@ -301,8 +352,16 @@ export default function MenuItemDetail() {
     }
   };
 
-  const renderOption = (option: MenuItemOption) => {
-    const isMultiple = option.type === 'extra' || option.type === 'remove' || (option.maxChoices && option.maxChoices > 1);
+  const renderOption = (option: any) => {
+    // Déterminer si c'est une option multiple basée sur le type et maxChoices
+    // maxChoices = 0 = illimité = multiple sélections (checkboxes)
+    // maxChoices = 1 = un seul choix (radio button)
+    // maxChoices > 1 = limité à N choix (checkboxes)
+    const isMultiple = option.maxChoices === 0 || // 0 = illimité, donc multiple
+                       option.maxChoices > 1 || // Plus de 1 = limité mais multiple
+                       (option.type === 'extra') || // EXTRA est toujours multiple
+                       (option.type === 'modification'); // MODIFICATION est toujours multiple
+
     const selectedChoices = selectedOptions[option.id] || [];
 
     return (
@@ -322,13 +381,24 @@ export default function MenuItemDetail() {
                 Max {option.maxChoices}
               </Chip>
             )}
+            {option.maxChoices === 0 && isMultiple && (
+              <Chip
+                compact
+                style={{ backgroundColor: currentTheme.colors.secondaryContainer }}
+                textStyle={{ color: currentTheme.colors.onSecondaryContainer }}
+              >
+                Illimité
+              </Chip>
+            )}
           </View>
           
           {option.choices.map((choice) => {
             const isSelected = selectedChoices.includes(choice.id);
-            const canSelect = !option.maxChoices || 
-                            selectedChoices.length < option.maxChoices || 
-                            isSelected;
+            // maxChoices = 0 signifie illimité, maxChoices = 1 signifie un seul choix, etc.
+            const canSelect = option.maxChoices === 0 || // 0 = illimité
+                            !option.maxChoices || // pas de limite définie
+                            selectedChoices.length < option.maxChoices || // encore de la place
+                            isSelected; // déjà sélectionné (pour le déselectionner)
 
             return (
               <View key={choice.id} style={styles.choiceItem}>
