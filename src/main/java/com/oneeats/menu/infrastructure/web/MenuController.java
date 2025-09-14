@@ -3,6 +3,7 @@ package com.oneeats.menu.infrastructure.web;
 import com.oneeats.menu.application.command.CreateMenuItemCommand;
 import com.oneeats.menu.application.command.CreateMenuItemCommandHandler;
 import com.oneeats.menu.application.command.UpdateMenuItemCommand;
+import com.oneeats.menu.application.command.UpdateMenuItemRequest;
 import com.oneeats.menu.application.command.UpdateMenuItemCommandHandler;
 import com.oneeats.menu.application.command.DeleteMenuItemCommand;
 import com.oneeats.menu.application.command.DeleteMenuItemCommandHandler;
@@ -61,27 +62,22 @@ public class MenuController {
     
     @PUT
     @Path("/{id}")
-    public Response updateMenuItem(@PathParam("id") UUID id, @Valid UpdateMenuItemCommand command) {
+    public Response updateMenuItem(@PathParam("id") UUID id, @Valid UpdateMenuItemRequest request) {
         try {
-            UpdateMenuItemCommand commandWithId = new UpdateMenuItemCommand(
-                id,
-                command.name(),
-                command.description(),
-                command.price(),
-                command.category(),
-                command.imageUrl(),
-                command.preparationTimeMinutes(),
-                command.isVegetarian(),
-                command.isVegan(),
-                command.isAvailable(),
-                command.allergens()
-            );
-            
-            MenuItemDTO menuItem = updateMenuItemCommandHandler.handle(commandWithId);
+            UpdateMenuItemCommand command = request.toCommand(id);
+            MenuItemDTO menuItem = updateMenuItemCommandHandler.handle(command);
             return Response.ok(menuItem).build();
         } catch (EntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                 .entity(e.getMessage())
+                .build();
+        } catch (jakarta.validation.ConstraintViolationException e) {
+            // Log détaillé des violations de contraintes
+            String violations = e.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(java.util.stream.Collectors.joining(", "));
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Constraint violations: " + violations)
                 .build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)

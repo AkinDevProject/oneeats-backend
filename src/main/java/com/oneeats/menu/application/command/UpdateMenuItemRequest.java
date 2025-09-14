@@ -9,34 +9,30 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * Commande pour mettre à jour un item de menu existant
+ * Request DTO pour mettre à jour un item de menu (sans ID qui vient du path parameter)
  */
-public record UpdateMenuItemCommand(
+public record UpdateMenuItemRequest(
 
-    // ID vient du path parameter, pas du body JSON
-    UUID id,
-    
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     String name,
-    
+
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     String description,
-    
+
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.01", message = "Price must be greater than 0")
     BigDecimal price,
-    
+
     @NotBlank(message = "Category is required")
     String category,
-    
+
     String imageUrl,
-    
+
     Integer preparationTimeMinutes,
-    
+
     Boolean isVegetarian,
 
     Boolean isVegan,
@@ -52,16 +48,11 @@ public record UpdateMenuItemCommand(
     List<MenuItemOptionCommandDTO> options
 
 ) {
-    
-    /**
-     * Constructeur avec validation
-     */
-    public UpdateMenuItemCommand {
-        // Validation de l'ID (il doit être présent même s'il vient du path parameter)
-        if (id == null) {
-            throw new IllegalArgumentException("Menu item ID is required");
-        }
 
+    /**
+     * Constructeur avec validation et valeurs par défaut
+     */
+    public UpdateMenuItemRequest {
         // Support pour les deux formats : "available" du frontend ou "isAvailable" de l'API
         if (isAvailable == null && available != null) {
             isAvailable = available;
@@ -75,5 +66,26 @@ public record UpdateMenuItemCommand(
         if (isVegan != null && isVegetarian != null && isVegan && !isVegetarian) {
             throw new IllegalArgumentException("If item is vegan, it must also be vegetarian");
         }
+    }
+
+    /**
+     * Convertir en UpdateMenuItemCommand en ajoutant l'ID
+     */
+    public UpdateMenuItemCommand toCommand(java.util.UUID id) {
+        return new UpdateMenuItemCommand(
+            id,
+            name,
+            description,
+            price,
+            category,
+            imageUrl,
+            preparationTimeMinutes,
+            isVegetarian,
+            isVegan,
+            isAvailable,
+            available,
+            allergens,
+            options
+        );
     }
 }

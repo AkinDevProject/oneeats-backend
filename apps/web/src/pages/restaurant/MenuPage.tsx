@@ -108,6 +108,21 @@ const MenuPage: React.FC = () => {
     try {
       if (editingItem) {
         // Update existing item
+        // Nettoyer les options avant de les envoyer
+        const cleanOptions = formData.options.map((option, index) => ({
+          name: option.name,
+          type: option.type, // Le type est déjà correct (CHOICE, EXTRA, etc.)
+          isRequired: option.isRequired || false,
+          maxChoices: option.maxChoices !== undefined ? option.maxChoices : (option.type === 'CHOICE' ? 1 : 0),
+          displayOrder: option.displayOrder !== undefined ? option.displayOrder : index,
+          choices: option.choices.map((choice, choiceIndex) => ({
+            name: choice.name,
+            additionalPrice: choice.price || 0,
+            displayOrder: choice.displayOrder !== undefined ? choice.displayOrder : choiceIndex,
+            isAvailable: choice.isAvailable !== undefined ? choice.isAvailable : true
+          }))
+        }));
+
         const updateData = {
           name: formData.name,
           description: formData.description,
@@ -115,11 +130,26 @@ const MenuPage: React.FC = () => {
           category: formData.category,
           available: formData.available,
           restaurantId: RESTAURANT_ID,
-          options: formData.options
+          options: cleanOptions
         };
         await apiService.menuItems.update(editingItem.id, updateData);
       } else {
         // Create new item
+        // Nettoyer les options avant de les envoyer
+        const cleanOptions = formData.options.map((option, index) => ({
+          name: option.name,
+          type: option.type, // Le type est déjà correct (CHOICE, EXTRA, etc.)
+          isRequired: option.isRequired || false,
+          maxChoices: option.maxChoices !== undefined ? option.maxChoices : (option.type === 'CHOICE' ? 1 : 0),
+          displayOrder: option.displayOrder !== undefined ? option.displayOrder : index,
+          choices: option.choices.map((choice, choiceIndex) => ({
+            name: choice.name,
+            additionalPrice: choice.price || 0,
+            displayOrder: choice.displayOrder !== undefined ? choice.displayOrder : choiceIndex,
+            isAvailable: choice.isAvailable !== undefined ? choice.isAvailable : true
+          }))
+        }));
+
         const createData = {
           name: formData.name,
           description: formData.description,
@@ -127,7 +157,7 @@ const MenuPage: React.FC = () => {
           category: formData.category,
           available: formData.available,
           restaurantId: RESTAURANT_ID,
-          options: formData.options
+          options: cleanOptions
         };
         await apiService.menuItems.create(createData);
       }

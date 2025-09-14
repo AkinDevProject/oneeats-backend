@@ -71,7 +71,23 @@ export const useRestaurantData = () => {
       // Transform backend data to frontend format
       const transformedMenuItems = menuData.map((item: any) => ({
         ...item,
-        available: item.isAvailable // Map backend isAvailable to frontend available
+        available: item.isAvailable, // Map backend isAvailable to frontend available
+        options: (item.options || []).map((option: any) => ({
+          id: option.id,
+          name: option.name,
+          type: option.type, // Backend already sends the enum value (CHOICE, EXTRA, etc.)
+          isRequired: option.isRequired,
+          maxChoices: option.maxChoices,
+          displayOrder: option.displayOrder,
+          choices: (option.choices || []).map((choice: any) => ({
+            id: choice.id,
+            name: choice.name,
+            price: choice.additionalPrice || 0, // Map backend additionalPrice to frontend price
+            additionalPrice: choice.additionalPrice,
+            displayOrder: choice.displayOrder,
+            isAvailable: choice.isAvailable
+          }))
+        }))
       }));
       console.log('Transformed menu items:', transformedMenuItems);
       setMenuItems(transformedMenuItems);

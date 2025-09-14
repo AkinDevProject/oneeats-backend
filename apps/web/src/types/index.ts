@@ -28,9 +28,10 @@ export interface Restaurant {
 export interface MenuItemOption {
   id: string;
   name: string;
-  type: 'remove' | 'choice' | 'extra';
+  type: 'CHOICE' | 'EXTRA' | 'MODIFICATION' | 'COOKING' | 'SAUCE';
   isRequired?: boolean;
   maxChoices?: number;
+  displayOrder?: number;
   choices: MenuItemChoice[];
 }
 
@@ -38,6 +39,9 @@ export interface MenuItemChoice {
   id: string;
   name: string;
   price: number;
+  additionalPrice?: number;
+  displayOrder?: number;
+  isAvailable?: boolean;
 }
 
 export interface MenuItem {

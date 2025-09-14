@@ -332,6 +332,20 @@ public class MenuItem extends BaseEntity {
         this.lastUpdated = LocalDateTime.now();
         addDomainEvent(new MenuItemUpdatedEvent(getId(), getRestaurantId()));
     }
+
+    /**
+     * Remplacer toutes les options par une nouvelle liste
+     */
+    public void updateOptions(List<MenuItemOption> newOptions) {
+        if (newOptions == null) {
+            this.options.clear();
+        } else {
+            this.options.clear();
+            this.options.addAll(newOptions);
+        }
+        this.lastUpdated = LocalDateTime.now();
+        addDomainEvent(new MenuItemUpdatedEvent(getId(), getRestaurantId()));
+    }
     
     @Override
     public String toString() {
