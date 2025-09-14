@@ -121,7 +121,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <h3 className="font-bold text-gray-900">{order.orderNumber || `#${order.id.substring(0, 8)}...`}</h3>
+          <h3 className="font-bold text-gray-900">#{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)}</h3>
           {getStatusBadge(order.status)}
         </div>
         <div className="text-right">

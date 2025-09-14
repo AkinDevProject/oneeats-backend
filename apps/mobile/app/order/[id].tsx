@@ -196,7 +196,7 @@ export default function OrderDetailScreen() {
         {/* Bouton retour supprimé - remplacé par la barre native */}
         <View style={styles.headerInfo}>
           <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
-            Commande #{order.id.substring(0, 8)}
+            Commande #{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)}
           </Text>
           <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
             {order.restaurant?.name || 'Restaurant'}
@@ -405,7 +405,7 @@ export default function OrderDetailScreen() {
     <>
       <Stack.Screen 
         options={{
-          title: order ? `Commande #${order.id.slice(-4)}` : 'Commande',
+          title: order ? `Commande #${order.orderNumber ? order.orderNumber.split('-').pop() : order.id.slice(-4)}` : 'Commande',
           headerStyle: { backgroundColor: currentTheme.colors.surface },
           headerTitleStyle: { 
             color: currentTheme.colors.onSurface,

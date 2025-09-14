@@ -642,7 +642,7 @@ const OrdersManagementPage: React.FC = () => {
                             <div className={`w-3 h-3 ${config.dot} rounded-full animate-pulse`} />
                             <div>
                               <div className="flex items-center space-x-2">
-                                <span className="font-bold text-gray-900">{order.orderNumber || `#${order.id.substring(0, 8)}...`}</span>
+                                <span className="font-bold text-gray-900">#{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)}</span>
                                 <Badge 
                                   variant={order.status === 'PENDING' ? 'warning' : (order.status === 'PREPARING') ? 'primary' : 'success'}
                                   size="sm"
