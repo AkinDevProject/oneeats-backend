@@ -4,10 +4,18 @@ import { Order } from '../data/mockData';
 import { useAuth } from './AuthContext';
 import apiService from '../services/api';
 import { ENV } from '../config/env';
+import { usePushNotifications } from './PushNotificationContext';
 
 // Fonction pour mapper les statuts API vers les statuts mobile
 const mapApiStatusToMobileStatus = (apiStatus: string): Order['status'] => {
   switch (apiStatus) {
+    case 'PENDING': return 'pending';
+    case 'CONFIRMED': return 'confirmed';
+    case 'PREPARING': return 'preparing';
+    case 'READY': return 'ready';
+    case 'COMPLETED': return 'completed';
+    case 'CANCELLED': return 'cancelled';
+    // Support des anciens formats si nécessaire
     case 'EN_ATTENTE': return 'pending';
     case 'EN_PREPARATION': return 'preparing';
     case 'PRETE': return 'ready';
@@ -50,35 +58,86 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { sendOrderStatusNotification } = usePushNotifications();
 
-  // Auto-update order statuses (mock simulation)
+  // Auto-refresh orders from API to get real-time updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setOrders(currentOrders => 
-        currentOrders.map(order => {
-          if (order.status === 'pending') {
-            // After 2 minutes, move to confirmed
-            if (Date.now() - order.orderTime.getTime() > 2 * 60 * 1000) {
-              return { ...order, status: 'confirmed' as const };
-            }
-          } else if (order.status === 'confirmed') {
-            // After 5 minutes total, move to preparing
-            if (Date.now() - order.orderTime.getTime() > 5 * 60 * 1000) {
-              return { ...order, status: 'preparing' as const };
-            }
-          } else if (order.status === 'preparing') {
-            // After 15 minutes total, move to ready
-            if (Date.now() - order.orderTime.getTime() > 15 * 60 * 1000) {
-              return { ...order, status: 'ready' as const };
-            }
-          }
-          return order;
-        })
-      );
-    }, 30000); // Check every 30 seconds
+    let intervalId: NodeJS.Timeout;
 
-    return () => clearInterval(interval);
-  }, []);
+    // Only start polling if user is authenticated and has orders
+    if (user && orders.length > 0) {
+      intervalId = setInterval(async () => {
+        // Only refresh if there are active orders
+        const hasActiveOrders = orders.some(order =>
+          ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
+        );
+
+        if (hasActiveOrders) {
+          console.log('🔄 Polling for order status updates...');
+          try {
+            // Refresh orders silently (without loading state)
+            const userId = user.id || ENV.MOCK_USER_ID;
+            const apiOrders = await apiService.orders.getByUserId(userId);
+
+            const processedOrders = apiOrders.map((order: any) => ({
+              ...order,
+              orderTime: new Date(order.createdAt || order.orderTime),
+              pickupTime: new Date(order.estimatedPickupTime || order.pickupTime),
+              total: order.totalAmount || order.total,
+              status: mapApiStatusToMobileStatus(order.status),
+              items: order.items?.map((item: any) => ({
+                ...item,
+                menuItem: {
+                  id: item.menuItemId,
+                  name: item.menuItemName,
+                  price: item.unitPrice,
+                  restaurantId: order.restaurantId,
+                },
+                totalPrice: item.subtotal || item.totalPrice,
+                specialInstructions: item.specialNotes || item.specialInstructions,
+              })) || [],
+              restaurant: {
+                id: order.restaurantId,
+                name: getRestaurantName(order.restaurantId),
+                image: 'https://via.placeholder.com/400x300',
+                cuisine: 'Restaurant',
+                rating: 4.5,
+                deliveryTime: '20-30 min',
+                deliveryFee: 2.99,
+                distance: '1.2 km',
+                featured: false,
+                isOpen: true,
+                description: 'Restaurant',
+              }
+            }));
+
+            // Check for status changes to trigger notifications
+            const oldOrders = orders;
+            processedOrders.forEach(newOrder => {
+              const oldOrder = oldOrders.find(o => o.id === newOrder.id);
+              if (oldOrder && oldOrder.status !== newOrder.status) {
+                console.log(`📱 Order ${newOrder.id} status changed: ${oldOrder.status} → ${newOrder.status}`);
+
+                // Trigger push notification for status change
+                sendOrderStatusNotification(newOrder.id, newOrder.status, newOrder.restaurant.name);
+              }
+            });
+
+            setOrders(processedOrders);
+
+          } catch (error) {
+            console.error('Error polling order updates:', error);
+          }
+        }
+      }, 15000); // Poll every 15 seconds for active orders
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [user, orders.length, orders]);
 
   const getOrdersKey = useCallback(() => {
     return user ? `orders_${user.id}` : 'orders_guest';
@@ -320,7 +379,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
 
   // Get current active order (most recent non-completed order)
   const currentOrder = useMemo(() => {
-    return orders.find(order => 
+    return orders.find(order =>
       ['pending', 'confirmed', 'preparing', 'ready'].includes(order.status)
     ) || null;
   }, [orders]);

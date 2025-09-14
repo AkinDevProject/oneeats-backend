@@ -9,6 +9,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -75,13 +76,14 @@ export default function CartMVP() {
   const [availableSlots] = useState(getAvailableTimeSlots());
   const [selectedPickupTime, setSelectedPickupTime] = useState(availableSlots[2]?.value);
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Référence au ScrollView
   const scrollViewRef = React.useRef<ScrollView>(null);
 
   const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart, createOrder } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { addOrder, orders, currentOrder } = useOrder();
+  const { addOrder, orders, currentOrder, refreshOrders } = useOrder();
   const { currentTheme } = useAppTheme();
 
   const headerOpacity = useSharedValue(0);
@@ -165,6 +167,20 @@ export default function CartMVP() {
       Alert.alert('Erreur', 'Impossible de créer la commande.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Fonction de refresh pour pull-to-refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshOrders();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Erreur refresh:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -472,27 +488,60 @@ export default function CartMVP() {
       );
     }
 
-    const activeOrders = orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status));
+    const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status));
 
     return (
-      <ScrollView style={styles.ordersContent}>
+      <ScrollView
+        style={styles.ordersContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={currentTheme.colors.primary}
+            colors={[currentTheme.colors.primary]}
+          />
+        }
+      >
         {activeOrders.map((order) => (
           <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content>
               <View style={styles.orderHeader}>
                 <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
-                  {order.restaurant.name}
+                  {order.restaurant?.name || 'Restaurant'}
                 </Text>
-                <Chip 
-                  icon={order.status === 'ready' ? 'check' : 'clock'}
-                  style={{ backgroundColor: order.status === 'ready' ? currentTheme.colors.primary : currentTheme.colors.secondary }}
+                <Chip
+                  icon={
+                    order.status === 'ready' ? 'check' :
+                    order.status === 'confirmed' ? 'check-circle' :
+                    order.status === 'preparing' ? 'chef-hat' :
+                    'clock'
+                  }
+                  style={{
+                    backgroundColor:
+                      order.status === 'pending' ? '#FED7AA' :      // Orange clair comme dashboard
+                      order.status === 'confirmed' ? '#A7F3D0' :    // Vert émeraude clair comme dashboard
+                      order.status === 'preparing' ? '#FDE68A' :    // Jaune clair comme dashboard
+                      order.status === 'ready' ? '#BBF7D0' :        // Vert clair comme dashboard
+                      currentTheme.colors.secondary
+                  }}
+                  textStyle={{
+                    color:
+                      order.status === 'pending' ? '#9A3412' :       // Orange foncé comme dashboard
+                      order.status === 'confirmed' ? '#047857' :     // Vert émeraude foncé comme dashboard
+                      order.status === 'preparing' ? '#92400E' :     // Jaune foncé comme dashboard
+                      order.status === 'ready' ? '#166534' :         // Vert foncé comme dashboard
+                      currentTheme.colors.onSurface
+                  }}
                 >
-                  {order.status === 'pending' ? 'En attente' : 
-                   order.status === 'preparing' ? 'En préparation' : 'Prête !'}
+                  {order.status === 'pending' ? '⏳ En attente' :
+                   order.status === 'confirmed' ? '✅ Confirmée' :
+                   order.status === 'preparing' ? '👨‍🍳 En préparation' :
+                   order.status === 'ready' ? '✅ Prête !' :
+                   'Statut inconnu'}
                 </Chip>
               </View>
               <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Commande #{order.id.substring(0, 8)} • {order.total.toFixed(2)}€
+                Commande #{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)} • {(order.total || 0).toFixed(2)}€
               </Text>
               <Button
                 mode="outlined"
@@ -527,20 +576,45 @@ export default function CartMVP() {
     }
 
     return (
-      <ScrollView style={styles.ordersContent}>
+      <ScrollView
+        style={styles.ordersContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={currentTheme.colors.primary}
+            colors={[currentTheme.colors.primary]}
+          />
+        }
+      >
         {completedOrders.map((order) => (
           <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content>
               <View style={styles.orderHeader}>
                 <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
-                  {order.restaurant.name}
+                  {order.restaurant?.name || 'Restaurant'}
                 </Text>
-                <Text style={[styles.orderDate, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  {new Date(order.orderTime).toLocaleDateString()}
-                </Text>
+                <View style={styles.historyStatusContainer}>
+                  <Chip
+                    icon={order.status === 'completed' ? 'check' : 'close'}
+                    style={{
+                      backgroundColor: order.status === 'completed' ? '#BBF7D0' : '#FECACA',
+                      marginBottom: 4
+                    }}
+                    textStyle={{
+                      color: order.status === 'completed' ? '#166534' : '#DC2626',
+                      fontSize: 12
+                    }}
+                  >
+                    {order.status === 'completed' ? '✅ Récupérée' : '❌ Annulée'}
+                  </Chip>
+                  <Text style={[styles.orderDate, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    {new Date(order.orderTime).toLocaleDateString()}
+                  </Text>
+                </View>
               </View>
               <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                {order.total.toFixed(2)}€ • {order.items.length} articles
+                {(order.total || 0).toFixed(2)}€ • {order.items?.length || 0} articles
               </Text>
               <View style={styles.historyActions}>
                 <Button
@@ -786,6 +860,9 @@ const styles = StyleSheet.create({
   historyButton: {
     flex: 1,
     borderRadius: 8,
+  },
+  historyStatusContainer: {
+    alignItems: 'flex-end',
   },
   // Nouveaux styles pour les options
   optionsContainer: {
