@@ -1,738 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import * as Haptics from 'expo-haptics';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  FadeIn,
-  FadeInLeft,
-  SlideInRight,
-  withSpring,
-} from 'react-native-reanimated';
-import {
-  Card,
-  Button,
-  Divider,
-  Surface,
-  Avatar,
-  Badge,
-  List,
-  IconButton,
-} from 'react-native-paper';
-import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { useAuth } from '../../src/contexts/AuthContext';
-import { useNotification } from '../../src/contexts/NotificationContext';
-import { useOrder } from '../../src/contexts/OrderContext';
-import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { mockRestaurants } from '../../src/data/mockData';
-
-// Types pour les sections
-type ProfileSection = 'account' | 'favorites' | 'settings' | 'support';
-
 export default function ProfileMVP() {
-  const [activeSection, setActiveSection] = useState<ProfileSection | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [marketingEnabled, setMarketingEnabled] = useState(false);
+  console.log('📋 Profile page rendering');
 
-  const { user, isAuthenticated, logout } = useAuth();
-  const { notifications, unreadCount, markAllAsRead, clearNotifications } = useNotification();
-  const { orders } = useOrder();
-  const { currentTheme, selectedTheme, themeMetadata } = useAppTheme();
-
-  const headerOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    headerOpacity.value = withTiming(1, { duration: 600 });
-  }, []);
-
-  const headerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: headerOpacity.value,
-  }));
-
-  // Calculer les statistiques utilisateur
-  const stats = {
-    totalOrders: orders.filter(o => o.status === 'completed').length,
-    favoriteRestaurants: user?.favoriteRestaurants?.length || 0,
-    totalSpent: orders.reduce((sum, order) => sum + order.total, 0),
-    level: orders.length >= 10 ? 'Gold' : orders.length >= 5 ? 'Silver' : 'Bronze',
+  const navigateToSection = (section: string) => {
+    console.log(`Navigating to ${section}`);
+    // TODO: Navigation logic
   };
-
-  // Actions
-  const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Déconnexion',
-          style: 'destructive',
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            logout();
-            router.replace('/auth/login' as any);
-          }
-        }
-      ]
-    );
-  };
-
-  const handleClearNotifications = () => {
-    Alert.alert(
-      'Supprimer toutes les notifications',
-      'Cette action est irréversible.',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
-          style: 'destructive', 
-          onPress: () => {
-            clearNotifications();
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
-        }
-      ]
-    );
-  };
-
-  // Favoris simulés
-  const favoriteRestaurants = mockRestaurants.slice(0, stats.favoriteRestaurants || 3);
-
-  // Fonction pour retourner au menu principal avec transition fluide
-  const goBackToMenu = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Transition fluide
-    setTimeout(() => {
-      setActiveSection(null);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  // Fonction pour naviguer vers une section avec animation
-  const navigateToSection = (section: ProfileSection) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // Transition fluide
-    setTimeout(() => {
-      setActiveSection(section);
-      setIsTransitioning(false);
-    }, 150);
-  };
-
-  // Menu principal (Menu 2)
-  const renderMainMenu = () => (
-    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-      {/* Menu principal */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="apps" size={20} color={currentTheme.colors.primary} />
-            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-              Menu
-            </Text>
-          </View>
-          <List.Item
-            title="Compte"
-            description="Informations personnelles et statistiques"
-            left={(props) => <List.Icon {...props} icon="account" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => navigateToSection('account')}
-          />
-          <List.Item
-            title="Favoris"
-            description="Mes restaurants préférés"
-            left={(props) => <List.Icon {...props} icon="heart" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => navigateToSection('favorites')}
-          />
-          <List.Item
-            title="Réglages"
-            description="Préférences et configuration"
-            left={(props) => <List.Icon {...props} icon="cog" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push('/settings/' as any)}
-          />
-          <List.Item
-            title="Aide & Support"
-            description="Besoin d'aide ?"
-            left={(props) => <List.Icon {...props} icon="help-circle" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => navigateToSection('support')}
-          />
-          {__DEV__ && (
-            <List.Item
-              title="🧪 Test Notifications"
-              description="Tester les notifications push"
-              left={(props) => <List.Icon {...props} icon="bell-ring" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => router.push('/test-notifications/' as any)}
-            />
-          )}
-        </Card.Content>
-      </Card>
-    </ScrollView>
-  );
-
-
-  // Section Compte
-  const renderAccountSection = () => {
-    if (!isAuthenticated) {
-      return (
-        <View style={styles.section}>
-          {/* Bouton retour amélioré */}
-          <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-            <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
-              <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-                <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-              </View>
-              <View style={styles.backButtonContent}>
-                <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
-                  Retour au menu
-                </Text>
-                <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  Connexion utilisateur
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </Surface>
-          
-          <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content style={styles.loginPrompt}>
-              <Avatar.Icon size={80} icon="account-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-              <Text style={[styles.promptTitle, { color: currentTheme.colors.onSurface }]}>
-                Connectez-vous
-              </Text>
-              <Text style={[styles.promptSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Accédez à votre profil et vos commandes
-              </Text>
-              <Button
-                mode="contained"
-                onPress={() => router.push('/auth/login' as any)}
-                style={styles.loginButton}
-                buttonColor={currentTheme.colors.primary}
-              >
-                Se connecter
-              </Button>
-            </Card.Content>
-          </Card>
-        </View>
-      );
-    }
-
-    return (
-      <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-        {/* Bouton retour amélioré */}
-        <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-          <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
-            <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-              <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-            </View>
-            <View style={styles.backButtonContent}>
-              <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
-                Retour au menu
-              </Text>
-              <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Profil principal
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </Surface>
-        {/* Info utilisateur */}
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content>
-            <View style={styles.userInfo}>
-              <Avatar.Text
-                size={64}
-                label={user?.name?.substring(0, 2).toUpperCase() || 'U'}
-                style={{ backgroundColor: currentTheme.colors.primary }}
-              />
-              <View style={styles.userDetails}>
-                <Text style={[styles.userName, { color: currentTheme.colors.onSurface }]}>
-                  {user?.name || 'Utilisateur'}
-                </Text>
-                <Text style={[styles.userEmail, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  {user?.email || user?.phone || 'Non renseigné'}
-                </Text>
-                <Badge style={{ backgroundColor: currentTheme.colors.tertiary }}>
-                  Niveau {stats.level}
-                </Badge>
-              </View>
-              <IconButton
-                icon="pencil"
-                size={24}
-                onPress={() => Alert.alert('Modifier profil', 'Fonctionnalité bientôt disponible')}
-              />
-            </View>
-          </Card.Content>
-        </Card>
-
-        {/* Statistiques */}
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content>
-            <View style={styles.sectionHeader}>
-              <MaterialIcons name="bar-chart" size={20} color={currentTheme.colors.primary} />
-              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-                Mes statistiques
-              </Text>
-            </View>
-            <View style={styles.statsGrid}>
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: currentTheme.colors.primary }]}>
-                  {stats.totalOrders}
-                </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  Commandes
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: currentTheme.colors.primary }]}>
-                  {stats.favoriteRestaurants}
-                </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  Favoris
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: currentTheme.colors.primary }]}>
-                  {stats.totalSpent.toFixed(0)}€
-                </Text>
-                <Text style={[styles.statLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  Dépensé
-                </Text>
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
-
-
-        {/* Notifications */}
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content>
-            <View style={styles.sectionHeader}>
-              <MaterialIcons name="notifications" size={20} color={currentTheme.colors.primary} />
-              <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-                Notifications
-              </Text>
-            </View>
-            <List.Item
-              title="Notifications"
-              description={`${unreadCount} messages non lus`}
-              left={(props) => <List.Icon {...props} icon="bell" />}
-              right={() => unreadCount > 0 ? <Badge>{unreadCount}</Badge> : <List.Icon icon="chevron-right" />}
-              onPress={() => setActiveSection('support')}
-            />
-          </Card.Content>
-        </Card>
-
-        {/* Déconnexion */}
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content>
-            <Button
-              mode="outlined"
-              onPress={handleLogout}
-              icon="logout"
-              textColor={currentTheme.colors.error}
-              style={[styles.logoutButton, { borderColor: currentTheme.colors.error }]}
-            >
-              Se déconnecter
-            </Button>
-          </Card.Content>
-        </Card>
-      </ScrollView>
-    );
-  };
-
-  // Section Favoris
-  const renderFavoritesSection = () => (
-    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-      {/* Bouton retour amélioré */}
-      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
-          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-          </View>
-          <View style={styles.backButtonContent}>
-            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
-              Retour au menu
-            </Text>
-            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Mes favoris
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Surface>
-      {favoriteRestaurants.length === 0 ? (
-        <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-          <Card.Content style={styles.emptyState}>
-            <Avatar.Icon size={80} icon="heart-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-            <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
-              Aucun favori
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Ajoutez vos restaurants préférés pour les retrouver facilement
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => router.push('/(tabs)/' as any)}
-              style={styles.emptyButton}
-              buttonColor={currentTheme.colors.primary}
-            >
-              Découvrir des restaurants
-            </Button>
-          </Card.Content>
-        </Card>
-      ) : (
-        <>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="favorite" size={24} color={currentTheme.colors.primary} />
-            <Text style={[styles.pageTitle, { color: currentTheme.colors.onSurface }]}>
-              Mes restaurants favoris ({favoriteRestaurants.length})
-            </Text>
-          </View>
-          {favoriteRestaurants.map((restaurant) => (
-            <Card key={restaurant.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-              <Card.Content>
-                <View style={styles.restaurantItem}>
-                  <View style={styles.restaurantInfo}>
-                    <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>
-                      {restaurant.name}
-                    </Text>
-                    <Text style={[styles.restaurantCuisine, { color: currentTheme.colors.onSurfaceVariant }]}>
-                      {restaurant.cuisine} • ★ {restaurant.rating}
-                    </Text>
-                    <Text style={[styles.restaurantDetails, { color: currentTheme.colors.onSurfaceVariant }]}>
-                      {restaurant.deliveryTime} • {restaurant.distance}
-                    </Text>
-                  </View>
-                  <View style={styles.restaurantActions}>
-                    <IconButton
-                      icon="heart"
-                      size={24}
-                      iconColor={currentTheme.colors.error}
-                      onPress={() => Alert.alert('Retirer des favoris', 'Fonctionnalité bientôt disponible')}
-                    />
-                    <Button
-                      mode="contained"
-                      onPress={() => router.push(`/restaurant/${restaurant.id}`)}
-                      buttonColor={currentTheme.colors.primary}
-                      style={styles.viewButton}
-                    >
-                      Voir
-                    </Button>
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          ))}
-        </>
-      )}
-    </ScrollView>
-  );
-
-  // Section Paramètres
-  const renderSettingsSection = () => (
-    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-      {/* Bouton retour amélioré */}
-      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
-          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-          </View>
-          <View style={styles.backButtonContent}>
-            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
-              Retour au menu
-            </Text>
-            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Réglages
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Surface>
-      {/* Thème */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            🎨 Apparence
-          </Text>
-          <View style={styles.settingItem}>
-            <Text style={[styles.settingLabel, { color: currentTheme.colors.onSurface }]}>
-              Thème de couleur
-            </Text>
-            <Text style={[styles.settingValue, { color: currentTheme.colors.onSurfaceVariant }]}>
-              {themeMetadata[selectedTheme]?.emoji} {themeMetadata[selectedTheme]?.name}
-            </Text>
-          </View>
-          <Text style={[styles.settingDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Changement de thème bientôt disponible
-          </Text>
-        </Card.Content>
-      </Card>
-
-      {/* Notifications */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            🔔 Notifications
-          </Text>
-          <View style={styles.settingItem}>
-            <View>
-              <Text style={[styles.settingLabel, { color: currentTheme.colors.onSurface }]}>
-                Notifications push
-              </Text>
-              <Text style={[styles.settingDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Recevoir les mises à jour de commandes
-              </Text>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={(value) => {
-                setNotificationsEnabled(value);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-              trackColor={{ false: currentTheme.colors.outline, true: currentTheme.colors.primary }}
-            />
-          </View>
-          <Divider />
-          <View style={styles.settingItem}>
-            <View>
-              <Text style={[styles.settingLabel, { color: currentTheme.colors.onSurface }]}>
-                Marketing
-              </Text>
-              <Text style={[styles.settingDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Promotions et offres spéciales
-              </Text>
-            </View>
-            <Switch
-              value={marketingEnabled}
-              onValueChange={setMarketingEnabled}
-              trackColor={{ false: currentTheme.colors.outline, true: currentTheme.colors.primary }}
-            />
-          </View>
-        </Card.Content>
-      </Card>
-
-      {/* Localisation */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            📍 Localisation
-          </Text>
-          <View style={styles.settingItem}>
-            <View>
-              <Text style={[styles.settingLabel, { color: currentTheme.colors.onSurface }]}>
-                Services de localisation
-              </Text>
-              <Text style={[styles.settingDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Pour trouver les restaurants proches
-              </Text>
-            </View>
-            <Switch
-              value={locationEnabled}
-              onValueChange={setLocationEnabled}
-              trackColor={{ false: currentTheme.colors.outline, true: currentTheme.colors.primary }}
-            />
-          </View>
-        </Card.Content>
-      </Card>
-    </ScrollView>
-  );
-
-  // Section Support
-  const renderSupportSection = () => (
-    <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
-      {/* Bouton retour amélioré */}
-      <Surface style={[styles.backButtonSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-        <TouchableOpacity style={styles.backButton} onPress={goBackToMenu}>
-          <View style={[styles.backButtonIcon, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-            <MaterialIcons name="arrow-back" size={20} color={currentTheme.colors.primary} />
-          </View>
-          <View style={styles.backButtonContent}>
-            <Text style={[styles.backButtonText, { color: currentTheme.colors.onSurface }]}>
-              Retour au menu
-            </Text>
-            <Text style={[styles.backButtonSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Aide & Support
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Surface>
-      {/* Notifications */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <View style={styles.notificationHeader}>
-            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-              🔔 Notifications ({notifications.length})
-            </Text>
-            {notifications.length > 0 && (
-              <Button
-                mode="text"
-                onPress={handleClearNotifications}
-                textColor={currentTheme.colors.error}
-              >
-                Tout supprimer
-              </Button>
-            )}
-          </View>
-          
-          {notifications.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Avatar.Icon size={60} icon="bell-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-              <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface, fontSize: 16 }]}>
-                Aucune notification
-              </Text>
-            </View>
-          ) : (
-            notifications.slice(0, 5).map((notification) => (
-              <View key={notification.id} style={styles.notificationItem}>
-                <Avatar.Icon
-                  size={32}
-                  icon="bell"
-                  style={{ backgroundColor: currentTheme.colors.primaryContainer }}
-                />
-                <View style={styles.notificationContent}>
-                  <Text style={[styles.notificationTitle, { color: currentTheme.colors.onSurface }]}>
-                    {notification.title}
-                  </Text>
-                  <Text style={[styles.notificationMessage, { color: currentTheme.colors.onSurfaceVariant }]}>
-                    {notification.message}
-                  </Text>
-                </View>
-              </View>
-            ))
-          )}
-        </Card.Content>
-      </Card>
-
-      {/* Support */}
-      <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-        <Card.Content>
-          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            🆘 Support & Aide
-          </Text>
-          <List.Item
-            title="FAQ"
-            description="Questions fréquemment posées"
-            left={(props) => <List.Icon {...props} icon="help-circle" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => Alert.alert('FAQ', 'Fonctionnalité bientôt disponible')}
-          />
-          <List.Item
-            title="Nous contacter"
-            description="Besoin d'aide ? Contactez-nous"
-            left={(props) => <List.Icon {...props} icon="email" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => Alert.alert('Contact', 'support@oneeats.com')}
-          />
-          <List.Item
-            title="À propos"
-            description="OneEats v1.0.0"
-            left={(props) => <List.Icon {...props} icon="information" />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => Alert.alert('OneEats', 'Version 1.0.0\nApplication de commande de repas')}
-          />
-        </Card.Content>
-      </Card>
-    </ScrollView>
-  );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-      <StatusBar style="dark" backgroundColor={currentTheme.colors.background} />
-      
-      {/* Header dynamique avec breadcrumb */}
-      <Animated.View style={[styles.header, headerAnimatedStyle]}>
-        <Surface style={[styles.headerSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-          {/* Breadcrumb Navigation */}
-          <View style={styles.breadcrumbContainer}>
-            <TouchableOpacity 
-              style={[styles.breadcrumbItem, activeSection === null && styles.breadcrumbActive]}
-              onPress={activeSection ? goBackToMenu : undefined}
-              disabled={isTransitioning}
-            >
-              <MaterialIcons name="home" size={16} color={currentTheme.colors.primary} />
-              <Text style={[styles.breadcrumbText, { color: activeSection === null ? currentTheme.colors.primary : currentTheme.colors.onSurfaceVariant }]}>
-                Accueil
-              </Text>
-            </TouchableOpacity>
-            
-            {activeSection && (
-              <>
-                <MaterialIcons name="chevron-right" size={16} color={currentTheme.colors.onSurfaceVariant} />
-                <View style={[styles.breadcrumbItem, styles.breadcrumbActive]}>
-                  <Text style={[styles.breadcrumbText, { color: currentTheme.colors.primary }]}>
-                    {activeSection === 'account' ? 'Compte' :
-                     activeSection === 'favorites' ? 'Favoris' :
-                     activeSection === 'settings' ? 'Réglages' : 
-                     activeSection === 'support' ? 'Support' : ''}
-                  </Text>
-                </View>
-              </>
-            )}
-          </View>
-          
-          <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
-            {activeSection === null ? 'Mon Compte' : 
-             activeSection === 'account' ? 'Mon Compte' :
-             activeSection === 'favorites' ? 'Mes Favoris' :
-             activeSection === 'settings' ? 'Réglages' : 
-             activeSection === 'support' ? 'Aide & Support' : 'Mon Compte'}
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            {activeSection === null ? 'Profil, favoris et paramètres' :
-             activeSection === 'account' ? 'Informations personnelles et statistiques' :
-             activeSection === 'favorites' ? 'Vos restaurants préférés' :
-             activeSection === 'settings' ? 'Préférences et configuration' :
-             activeSection === 'support' ? 'Aide, FAQ et support client' : 'Profil, favoris et paramètres'}
-          </Text>
-        </Surface>
-      </Animated.View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" backgroundColor="#ffffff" />
 
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Mon Compte</Text>
+          <Text style={styles.headerSubtitle}>Profil, favoris et paramètres</Text>
+        </View>
+      </View>
 
-      {/* Content avec animations */}
+      {/* Content */}
       <View style={styles.content}>
-        {activeSection === null && (
-          <Animated.View entering={FadeIn.duration(400).springify()}>
-            {renderMainMenu()}
-          </Animated.View>
-        )}
-        {activeSection === 'account' && (
-          <Animated.View entering={FadeInLeft.duration(400).springify()}>
-            {renderAccountSection()}
-          </Animated.View>
-        )}
-        {activeSection === 'favorites' && (
-          <Animated.View entering={SlideInRight.duration(400).springify()}>
-            {renderFavoritesSection()}
-          </Animated.View>
-        )}
-        {activeSection === 'settings' && (
-          <Animated.View entering={FadeInLeft.duration(400).springify()}>
-            {renderSettingsSection()}
-          </Animated.View>
-        )}
-        {activeSection === 'support' && (
-          <Animated.View entering={SlideInRight.duration(400).springify()}>
-            {renderSupportSection()}
-          </Animated.View>
-        )}
+        <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+          {/* Menu principal */}
+          <View style={styles.card}>
+            <View style={styles.cardContent}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="apps" size={20} color="#007AFF" />
+                <Text style={styles.sectionTitle}>Menu</Text>
+              </View>
+
+              <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('account')}>
+                <View style={styles.listLeft}>
+                  <MaterialIcons name="account-circle" size={24} color="#666" />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>Compte</Text>
+                  <Text style={styles.listDescription}>Informations personnelles et statistiques</Text>
+                </View>
+                <View style={styles.listRight}>
+                  <MaterialIcons name="chevron-right" size={24} color="#666" />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('favorites')}>
+                <View style={styles.listLeft}>
+                  <MaterialIcons name="favorite" size={24} color="#666" />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>Favoris</Text>
+                  <Text style={styles.listDescription}>Mes restaurants préférés</Text>
+                </View>
+                <View style={styles.listRight}>
+                  <MaterialIcons name="chevron-right" size={24} color="#666" />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('settings')}>
+                <View style={styles.listLeft}>
+                  <MaterialIcons name="settings" size={24} color="#666" />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>Réglages</Text>
+                  <Text style={styles.listDescription}>Préférences et configuration</Text>
+                </View>
+                <View style={styles.listRight}>
+                  <MaterialIcons name="chevron-right" size={24} color="#666" />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('support')}>
+                <View style={styles.listLeft}>
+                  <MaterialIcons name="help" size={24} color="#666" />
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle}>Aide & Support</Text>
+                  <Text style={styles.listDescription}>Besoin d'aide ?</Text>
+                </View>
+                <View style={styles.listRight}>
+                  <MaterialIcons name="chevron-right" size={24} color="#666" />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -741,38 +103,51 @@ export default function ProfileMVP() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  headerSurface: {
-    padding: 16,
+  headerContent: {
+    backgroundColor: '#ffffff',
     borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 14,
-    marginTop: 4,
+    color: '#666',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
   },
   section: {
     flex: 1,
-  },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginLeft: 8,
+    paddingHorizontal: 16,
   },
   card: {
-    marginBottom: 12,
+    backgroundColor: '#ffffff',
     borderRadius: 12,
+    marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  cardContent: {
+    padding: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -782,219 +157,33 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#000',
     marginLeft: 8,
   },
-  userInfo: {
+  listItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userDetails: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  loginPrompt: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  promptTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 16,
-  },
-  promptSubtitle: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  loginButton: {
-    marginTop: 24,
-    borderRadius: 12,
-  },
-  logoutButton: {
-    borderRadius: 12,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  emptyButton: {
-    marginTop: 24,
-    borderRadius: 12,
-  },
-  restaurantItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  restaurantInfo: {
-    flex: 1,
-  },
-  restaurantName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  restaurantCuisine: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  restaurantDetails: {
-    fontSize: 12,
-  },
-  restaurantActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  viewButton: {
-    borderRadius: 8,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  settingDescription: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  settingValue: {
-    fontSize: 14,
-  },
-  themeSelector: {
-    marginTop: 12,
-  },
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: '#f0f0f0',
   },
-  notificationContent: {
-    flex: 1,
-    marginLeft: 12,
+  listLeft: {
+    marginRight: 16,
   },
-  notificationTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  notificationMessage: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  backButtonSurface: {
-    borderRadius: 12,
-    marginBottom: 16,
-    marginHorizontal: 4,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  backButtonIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  backButtonContent: {
+  listContent: {
     flex: 1,
   },
-  backButtonText: {
+  listTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  backButtonSubtext: {
-    fontSize: 12,
-    opacity: 0.8,
-  },
-  backButtonPressed: {
-    transform: [{ scale: 0.98 }],
-    opacity: 0.8,
-  },
-  // Styles pour de meilleures interactions
-  menuItemActive: {
-    backgroundColor: 'rgba(0, 204, 188, 0.08)',
-    borderRadius: 8,
-    marginVertical: 2,
-  },
-  menuItemDisabled: {
-    opacity: 0.6,
-  },
-  // Breadcrumb styles
-  breadcrumbContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 4,
-  },
-  breadcrumbItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginHorizontal: 2,
-  },
-  breadcrumbActive: {
-    backgroundColor: 'rgba(0, 204, 188, 0.1)',
-  },
-  breadcrumbText: {
-    fontSize: 12,
     fontWeight: '500',
-    marginLeft: 4,
+    color: '#000',
+    marginBottom: 4,
+  },
+  listDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  listRight: {
+    marginLeft: 8,
   },
 });

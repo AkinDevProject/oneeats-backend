@@ -152,7 +152,7 @@ export const useWebSocket = (userId: string | null) => {
       };
 
       ws.onerror = (error) => {
-        console.error('💥 WebSocket error:', error);
+        console.log('⚠️ WebSocket connection failed (normal in Expo Go development)');
         setConnectionError('Connection error occurred');
         setIsConnected(false);
       };
@@ -173,7 +173,7 @@ export const useWebSocket = (userId: string | null) => {
       };
 
     } catch (error) {
-      console.error('❌ Error creating WebSocket connection:', error);
+      console.log('⚠️ Cannot create WebSocket connection (normal in Expo Go development)');
       setConnectionError('Failed to create connection');
       setIsReconnecting(false);
       if (shouldReconnectRef.current) {

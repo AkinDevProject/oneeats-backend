@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+
+// Conditional import pour éviter les erreurs avec Expo Go
+let Notifications: any = null;
+if (!__DEV__) {
+  try {
+    Notifications = require('expo-notifications');
+  } catch (error) {
+    console.warn('expo-notifications not available in Expo Go');
+  }
+}
 
 interface NotificationData {
   id: string;
@@ -23,14 +32,16 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-// Configure notifications
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+// Configure notifications (seulement si disponible)
+if (Notifications) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 interface NotificationProviderProps {
   children: ReactNode;
@@ -47,9 +58,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   }, []);
 
   const requestPermissions = async () => {
-    // Vérifier si on est sur web pour éviter les erreurs
-    if (Platform.OS === 'web') {
-      console.log('Notifications not supported on web');
+    // Vérifier si on est sur web ou si Notifications n'est pas disponible
+    if (Platform.OS === 'web' || !Notifications) {
+      console.log('Notifications not supported on web or in Expo Go');
       return;
     }
 
@@ -64,12 +75,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus !== 'granted') {
       console.log('Permission for notifications was denied');
     }
@@ -88,6 +99,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   };
 
   const sendLocalNotification = async (title: string, message: string, data?: any) => {
+    if (!Notifications) {
+      console.log('Notifications not available, skipping notification:', title);
+      return;
+    }
+
     try {
       await Notifications.scheduleNotificationAsync({
         content: {

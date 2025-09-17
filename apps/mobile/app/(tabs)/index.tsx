@@ -525,40 +525,39 @@ function HomeIndex() {
           renderLoadingState()
         ) : (
           <>
-            <ScrollView
-              style={baseStyles.scrollView}
-              showsVerticalScrollIndicator={false}
+            <OptimizedFlatListMemo
+              data={filteredRestaurants}
+              renderItem={({ item, index }) => renderRestaurant(item, index)}
+              estimatedItemSize={350}
+              style={baseStyles.restaurantsList}
+              contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
               refreshControl={
-                <RefreshControl 
-                  refreshing={refreshing} 
+                <RefreshControl
+                  refreshing={refreshing}
                   onRefresh={onRefresh}
                   colors={[customTheme.colors.primary]}
                   tintColor={customTheme.colors.primary}
                 />
               }
-            >
-              {renderHeader()}
-              {renderSearch()}
-              {renderFilters()}
-              {renderCategories()}
-              
-              <View style={baseStyles.restaurantsSection}>
-                <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
-                  Restaurants recommandés ({filteredRestaurants.length})
-                </Text>
-                
-                <OptimizedFlatListMemo
-                  data={filteredRestaurants}
-                  renderItem={({ item, index }) => renderRestaurant(item, index)}
-                  estimatedItemSize={350}
-                  style={baseStyles.restaurantsList}
-                  contentContainerStyle={{ gap: 16 }}
-                />
-              </View>
-            </ScrollView>
-            
+              ListHeaderComponent={
+                <View>
+                  {renderHeader()}
+                  {renderSearch()}
+                  {renderFilters()}
+                  {renderCategories()}
+
+                  <View style={baseStyles.restaurantsSection}>
+                    <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
+                      Restaurants recommandés ({filteredRestaurants.length})
+                    </Text>
+                  </View>
+                </View>
+              }
+              showsVerticalScrollIndicator={false}
+            />
+
             {renderFilterModal()}
-            
+
             <FAB
               icon="tune"
               style={[baseStyles.fab, dynamicStyles.fab]}

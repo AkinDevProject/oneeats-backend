@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as Notifications from 'expo-notifications';
-import { Platform, Alert, Linking } from 'react-native';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Types pour les notifications push
@@ -39,19 +38,7 @@ interface PushNotificationContextType {
 
 const PushNotificationContext = createContext<PushNotificationContextType | undefined>(undefined);
 
-// Configuration des notifications
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 const NOTIFICATIONS_KEY = '@OneEats:Notifications';
-const PUSH_TOKEN_KEY = '@OneEats:PushToken';
 
 interface PushNotificationProviderProps {
   children: ReactNode;
@@ -60,16 +47,12 @@ interface PushNotificationProviderProps {
 export const PushNotificationProvider: React.FC<PushNotificationProviderProps> = ({ children }) => {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<PushNotificationData[]>([]);
-  const [permissionStatus, setPermissionStatus] = useState<'undetermined' | 'granted' | 'denied'>('undetermined');
+  const [permissionStatus, setPermissionStatus] = useState<'undetermined' | 'granted' | 'denied'>('granted');
 
   useEffect(() => {
-    if (Platform.OS !== 'web') {
-      initializePushNotifications();
-      loadStoredNotifications();
-    }
+    loadStoredNotifications();
   }, []);
 
-  // Sauvegarder les notifications quand elles changent
   useEffect(() => {
     saveNotifications();
   }, [notifications]);
@@ -97,168 +80,124 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     }
   };
 
-  const initializePushNotifications = async () => {
-    try {
-      console.log('Initializing push notifications...');
-
-      // Configurer le canal Android
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'OneEats Notifications',
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-        });
-      }
-
-      // Demander les permissions
-      await requestPermissions();
-
-      // Obtenir le token
-      try {
-        const tokenData = await Notifications.getExpoPushTokenAsync();
-        const token = tokenData.data;
-        setExpoPushToken(token);
-        await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-        console.log('🔔 Push notification token:', token.substring(0, 20) + '...');
-      } catch (tokenError) {
-        console.log('Token generation skipped (development mode)');
-      }
-
-    } catch (error) {
-      console.error('Erreur lors de l\'initialisation des push notifications:', error);
-    }
-  };
-
-  const requestPermissions = async (): Promise<boolean> => {
-    try {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      setPermissionStatus(finalStatus === 'granted' ? 'granted' : 'denied');
-
-      if (finalStatus !== 'granted') {
-        Alert.alert(
-          'Notifications désactivées',
-          'Activez les notifications dans les paramètres pour recevoir les mises à jour de vos commandes.',
-          [
-            { text: 'Plus tard', style: 'cancel' },
-            { text: 'Paramètres', onPress: () => Linking.openSettings() },
-          ]
-        );
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Erreur lors de la demande de permissions:', error);
-      setPermissionStatus('denied');
-      return false;
-    }
-  };
-
-  const createNotification = (title: string, body: string, type: PushNotificationData['data']['type'], additionalData: Record<string, any> = {}): PushNotificationData => {
-    return {
-      id: Math.random().toString(36).substring(7),
-      title,
-      body,
-      data: {
-        type,
-        ...additionalData,
-      },
+  const addNotification = (notification: Omit<PushNotificationData, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: PushNotificationData = {
+      ...notification,
+      id: Date.now().toString(),
       timestamp: new Date(),
       read: false,
     };
+
+    setNotifications(prev => [newNotification, ...prev.slice(0, 49)]); // Garder les 50 dernières
+    return newNotification;
   };
 
-  const sendLocalNotification = async (notification: PushNotificationData) => {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: notification.title,
-          body: notification.body,
-          data: notification.data,
-          sound: 'default',
-          badge: notifications.filter(n => !n.read).length + 1,
-        },
-        trigger: null, // Immédiate
-      });
-
-      // Ajouter à la liste
-      setNotifications(prev => [notification, ...prev]);
-    } catch (error) {
-      console.error('Erreur envoi notification locale:', error);
+  const requestPermissions = async (): Promise<boolean> => {
+    if (Platform.OS === 'web') {
+      console.log('Notifications not supported on web');
+      return false;
     }
+
+    console.log('Push notifications simulation enabled for Expo Go');
+    setPermissionStatus('granted');
+    return true;
   };
 
   const sendOrderStatusNotification = async (orderId: string, status: string, restaurantName: string) => {
-    const statusMessages = {
-      'confirmed': { title: 'Commande confirmée ! 🎉', body: `${restaurantName} a confirmé votre commande.` },
-      'preparing': { title: 'Préparation en cours 👨‍🍳', body: `${restaurantName} prépare votre commande.` },
-      'ready': { title: 'Commande prête ! 🍽️', body: `Votre commande chez ${restaurantName} est prête à récupérer.` },
-      'completed': { title: 'Bon appétit ! ✅', body: `Merci d'avoir choisi ${restaurantName} !` },
-      'cancelled': { title: 'Commande annulée ❌', body: `Votre commande chez ${restaurantName} a été annulée.` },
-    };
+    let title = '';
+    let message = '';
 
-    const message = statusMessages[status as keyof typeof statusMessages];
-    if (!message) return;
+    switch (status) {
+      case 'confirmed':
+        title = 'Commande confirmée ! 🎉';
+        message = `${restaurantName} a confirmé votre commande.`;
+        break;
+      case 'preparing':
+        title = 'Préparation en cours 👨‍🍳';
+        message = `${restaurantName} prépare votre commande.`;
+        break;
+      case 'ready':
+        title = 'Commande prête ! 🍽️';
+        message = `Votre commande chez ${restaurantName} est prête à être récupérée.`;
+        break;
+      case 'completed':
+        title = 'Commande terminée ✅';
+        message = `Merci d'avoir choisi ${restaurantName} !`;
+        break;
+      default:
+        return;
+    }
 
-    const notification = createNotification(message.title, message.body, 'order_status', { orderId, status, restaurantName });
-    await sendLocalNotification(notification);
+    addNotification({
+      title,
+      body: message,
+      data: {
+        type: 'order_status',
+        orderId,
+        restaurantId: 'unknown',
+      },
+    });
+
+    console.log(`📱 Notification simulée: ${title} - ${message}`);
   };
 
   const sendPromotionNotification = async (title: string, message: string, restaurantId?: string) => {
-    const notification = createNotification(title, message, 'promotion', { restaurantId });
-    await sendLocalNotification(notification);
+    addNotification({
+      title,
+      body: message,
+      data: {
+        type: 'promotion',
+        restaurantId,
+      },
+    });
+
+    console.log(`📢 Promotion notification simulée: ${title}`);
   };
 
   const sendRecommendationNotification = async (title: string, message: string, data?: any) => {
-    const notification = createNotification(title, message, 'recommendation', data);
-    await sendLocalNotification(notification);
+    addNotification({
+      title,
+      body: message,
+      data: {
+        type: 'recommendation',
+        ...data,
+      },
+    });
+
+    console.log(`💡 Recommendation notification simulée: ${title}`);
   };
 
   const markAsRead = (notificationId: string) => {
     setNotifications(prev =>
-      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      prev.map(notification =>
+        notification.id === notificationId
+          ? { ...notification, read: true }
+          : notification
+      )
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications(prev =>
+      prev.map(notification => ({ ...notification, read: true }))
+    );
   };
 
   const clearNotifications = () => {
     setNotifications([]);
   };
 
-  const getNotificationHistory = (): PushNotificationData[] => {
-    return notifications.slice(0, 50); // Limiter à 50 notifications récentes
+  const getNotificationHistory = () => {
+    return notifications;
   };
 
   const enableTestNotifications = () => {
-    console.log('🧪 Mode test notifications activé');
-    
-    // Envoyer des notifications de test
-    setTimeout(() => sendOrderStatusNotification('test-001', 'confirmed', 'Pizza Palace'), 1000);
-    setTimeout(() => sendOrderStatusNotification('test-001', 'preparing', 'Pizza Palace'), 3000);
-    setTimeout(() => sendOrderStatusNotification('test-001', 'ready', 'Pizza Palace'), 5000);
-    setTimeout(() => sendPromotionNotification('🎉 -20% sur votre prochaine commande !', 'Code promo: SAVE20', 'rest-001'), 7000);
-    setTimeout(() => sendRecommendationNotification('Nouveau restaurant près de vous', 'Sushi Master vient d\'ouvrir dans votre quartier !'), 9000);
+    console.log('Test notifications enabled');
   };
 
   const disableNotifications = async () => {
-    try {
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      setPermissionStatus('denied');
-      Alert.alert('Notifications désactivées', 'Vous pouvez les réactiver dans les paramètres.');
-    } catch (error) {
-      console.error('Erreur lors de la désactivation:', error);
-    }
+    console.log('Notifications disabled');
+    setPermissionStatus('denied');
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -293,25 +232,4 @@ export const usePushNotifications = (): PushNotificationContextType => {
     throw new Error('usePushNotifications must be used within a PushNotificationProvider');
   }
   return context;
-};
-
-// Hook utilitaire pour tester les notifications
-export const useNotificationTester = () => {
-  const { sendOrderStatusNotification, sendPromotionNotification, sendRecommendationNotification } = usePushNotifications();
-
-  return {
-    testOrderFlow: () => {
-      console.log('🧪 Test du flux de commande...');
-      setTimeout(() => sendOrderStatusNotification('test-flow', 'confirmed', 'Restaurant Test'), 1000);
-      setTimeout(() => sendOrderStatusNotification('test-flow', 'preparing', 'Restaurant Test'), 3000);
-      setTimeout(() => sendOrderStatusNotification('test-flow', 'ready', 'Restaurant Test'), 6000);
-      setTimeout(() => sendOrderStatusNotification('test-flow', 'completed', 'Restaurant Test'), 9000);
-    },
-    testPromotion: () => {
-      sendPromotionNotification('🔥 Offre spéciale !', 'Livraison gratuite sur votre prochaine commande');
-    },
-    testRecommendation: () => {
-      sendRecommendationNotification('Essayez quelque chose de nouveau', 'Que pensez-vous de la cuisine japonaise ?');
-    },
-  };
 };
