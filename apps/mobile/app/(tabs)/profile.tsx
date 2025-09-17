@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
+import { NotificationSimulator } from '../../src/services/NotificationSimulator';
 
 export default function ProfileMVP() {
   console.log('📋 Profile page rendering');
@@ -92,6 +93,24 @@ export default function ProfileMVP() {
                   <MaterialIcons name="chevron-right" size={24} color="#666" />
                 </View>
               </TouchableOpacity>
+
+              {__DEV__ && (
+                <TouchableOpacity
+                  style={[styles.listItem, styles.testButton]}
+                  onPress={() => NotificationSimulator.simulateNotifications()}
+                >
+                  <View style={styles.listLeft}>
+                    <MaterialIcons name="notifications" size={24} color="#007AFF" />
+                  </View>
+                  <View style={styles.listContent}>
+                    <Text style={[styles.listTitle, styles.testText]}>🧪 Test Notifications</Text>
+                    <Text style={styles.listDescription}>Simuler les notifications (dev seulement)</Text>
+                  </View>
+                  <View style={styles.listRight}>
+                    <MaterialIcons name="play-arrow" size={24} color="#007AFF" />
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </ScrollView>
@@ -185,5 +204,14 @@ const styles = StyleSheet.create({
   },
   listRight: {
     marginLeft: 8,
+  },
+  testButton: {
+    backgroundColor: '#f0f8ff',
+    borderColor: '#007AFF',
+    borderWidth: 1,
+  },
+  testText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });

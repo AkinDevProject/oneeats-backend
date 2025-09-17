@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useOrder } from './OrderContext';
 import { ENV } from '../config/env';
 
 interface WebSocketContextType {
@@ -23,6 +24,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   // Use the mock user ID for development
   const userId = ENV.MOCK_USER_ID;
 
+  // Get refreshOrders function from OrderContext
+  const { refreshOrders } = useOrder();
+
   const {
     isConnected,
     connectionError,
@@ -32,7 +36,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     disconnect,
     reconnect,
     sendMessage
-  } = useWebSocket(userId);
+  } = useWebSocket(userId, refreshOrders);
 
   const value: WebSocketContextType = {
     isConnected,

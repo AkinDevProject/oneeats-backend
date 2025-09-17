@@ -12,7 +12,7 @@ export interface WebSocketMessage {
   timestamp?: number;
 }
 
-export const useWebSocket = (userId: string | null) => {
+export const useWebSocket = (userId: string | null, onOrderUpdate?: () => void) => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
@@ -134,6 +134,12 @@ export const useWebSocket = (userId: string | null) => {
                   message.orderStatus,
                   'Restaurant' // We don't have restaurant name in the message, using default
                 );
+
+                // Trigger immediate order list refresh
+                if (onOrderUpdate) {
+                  console.log('🔄 Triggering immediate order list refresh from WebSocket');
+                  onOrderUpdate();
+                }
               }
               break;
 
@@ -180,7 +186,7 @@ export const useWebSocket = (userId: string | null) => {
         scheduleReconnect();
       }
     }
-  }, [userId, sendOrderNotification, reconnectAttempts, clearTimers, startHeartbeat, scheduleReconnect]);
+  }, [userId, sendOrderNotification, onOrderUpdate, reconnectAttempts, clearTimers, startHeartbeat, scheduleReconnect]);
 
   const disconnect = useCallback(() => {
     console.log('🔌 Disconnecting WebSocket...');

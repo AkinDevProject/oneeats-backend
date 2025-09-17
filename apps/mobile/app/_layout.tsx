@@ -47,9 +47,9 @@ function AppContent() {
         <AuthProvider>
           <PushNotificationProvider>
             <NotificationProvider>
-              <WebSocketProvider>
-                <CartProvider>
+              <CartProvider>
                 <OrderProvider>
+                  <WebSocketProvider>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                   <Stack>
                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -62,9 +62,9 @@ function AppContent() {
                   </Stack>
                   <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
                 </ThemeProvider>
+                  </WebSocketProvider>
                 </OrderProvider>
               </CartProvider>
-              </WebSocketProvider>
             </NotificationProvider>
           </PushNotificationProvider>
         </AuthProvider>

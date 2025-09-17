@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 
 // Conditional import pour éviter les erreurs avec Expo Go
 let Notifications: any = null;
@@ -99,8 +99,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   };
 
   const sendLocalNotification = async (title: string, message: string, data?: any) => {
+    console.log('📱 sendLocalNotification called:', { title, message, data });
+
     if (!Notifications) {
-      console.log('Notifications not available, skipping notification:', title);
+      console.log('⚠️ Notifications not available, using Alert for Expo Go:', title);
+      // Fallback to Alert for Expo Go
+      Alert.alert(title, message, [
+        { text: 'OK', style: 'default' }
+      ]);
       return;
     }
 
@@ -114,16 +120,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         },
         trigger: null, // Show immediately
       });
+      console.log('✅ Local notification sent:', title);
     } catch (error) {
-      console.error('Error sending local notification:', error);
+      console.error('❌ Error sending local notification:', error);
+      // Fallback to Alert in case of error
+      Alert.alert(title, message, [
+        { text: 'OK', style: 'default' }
+      ]);
     }
   };
 
   const sendOrderNotification = async (orderId: string, status: string, restaurantName: string) => {
+    console.log('🔔 sendOrderNotification called:', { orderId, status, restaurantName });
+
     let title = '';
     let message = '';
 
-    switch (status) {
+    // Normaliser le statut en minuscules pour la comparaison
+    const normalizedStatus = status.toLowerCase();
+
+    switch (normalizedStatus) {
       case 'confirmed':
         title = 'Commande confirmée ! 🎉';
         message = `${restaurantName} a confirmé votre commande.`;
@@ -140,9 +156,16 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         title = 'Commande terminée ✅';
         message = `Merci d'avoir choisi ${restaurantName} !`;
         break;
+      case 'cancelled':
+        title = 'Commande annulée ❌';
+        message = `Votre commande chez ${restaurantName} a été annulée.`;
+        break;
       default:
+        console.log('❌ Unknown status:', status, '(normalized:', normalizedStatus, ')');
         return;
     }
+
+    console.log('📝 Notification content:', { title, message });
 
     // Add to local notifications list
     addNotification({
