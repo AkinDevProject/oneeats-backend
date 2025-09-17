@@ -2,7 +2,6 @@ package com.oneeats.integration.user.web;
 
 import com.oneeats.user.application.command.CreateUserCommand;
 import com.oneeats.user.application.command.UpdateUserCommand;
-import com.oneeats.user.application.command.AuthenticateUserCommand;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.transaction.Transactional;
@@ -256,8 +255,7 @@ class UserControllerIntegrationTest {
             UpdateUserCommand updateCommand = new UpdateUserCommand(
                 UUID.fromString(userId),
                 "Updated",
-                "User",
-                "0987654321"
+                "User"
             );
             
             // Then
@@ -272,7 +270,6 @@ class UserControllerIntegrationTest {
                 .body("id", equalTo(userId))
                 .body("firstName", equalTo("Updated"))
                 .body("lastName", equalTo("User"))
-                .body("phone", equalTo("0987654321"))
                 .body("updatedAt", notNullValue());
         }
         
@@ -283,7 +280,7 @@ class UserControllerIntegrationTest {
             // Given
             UUID nonExistentId = UUID.randomUUID();
             UpdateUserCommand command = new UpdateUserCommand(
-                nonExistentId, "Updated", "Name", "0123456789"
+                nonExistentId, "Updated", "Name"
             );
             
             // When & Then
@@ -416,8 +413,9 @@ class UserControllerIntegrationTest {
                 .statusCode(201);
             
             // When & Then - Authenticate
-            AuthenticateUserCommand authCommand = new AuthenticateUserCommand(
-                "authuser@test.fr", "Password123!"
+            Map<String, String> authCommand = Map.of(
+                "email", "authuser@test.fr",
+                "password", "Password123!"
             );
             
             given()
@@ -449,8 +447,9 @@ class UserControllerIntegrationTest {
                 .statusCode(201);
             
             // When & Then - Try to authenticate with wrong password
-            AuthenticateUserCommand authCommand = new AuthenticateUserCommand(
-                "authuser2@test.fr", "WrongPassword!"
+            Map<String, String> authCommand = Map.of(
+                "email", "authuser2@test.fr",
+                "password", "WrongPassword!"
             );
             
             given()
@@ -467,8 +466,9 @@ class UserControllerIntegrationTest {
         @DisplayName("Should return 401 for non-existent user")
         void shouldReturn401ForNonExistentUser() {
             // When & Then
-            AuthenticateUserCommand authCommand = new AuthenticateUserCommand(
-                "nonexistent@test.fr", "Password123!"
+            Map<String, String> authCommand = Map.of(
+                "email", "nonexistent@test.fr",
+                "password", "Password123!"
             );
             
             given()

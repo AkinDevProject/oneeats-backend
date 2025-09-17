@@ -50,11 +50,11 @@ class MenuControllerIntegrationTest {
                 new BigDecimal("15.50"),
                 "PIZZA",
                 "/uploads/api-pizza.jpg",
-                true, // available
                 25, // preparation time
                 true, // vegetarian
                 false, // not vegan
-                "gluten,dairy" // allergens
+                true, // available
+                Arrays.asList("GLUTEN", "DAIRY") // allergens
             );
             
             // When & Then - HTTP POST request
@@ -75,7 +75,7 @@ class MenuControllerIntegrationTest {
                 .body("preparationTimeMinutes", equalTo(25))
                 .body("isVegetarian", equalTo(true))
                 .body("isVegan", equalTo(false))
-                .body("allergens", hasItems("gluten", "dairy"))
+                .body("allergens", hasItems("GLUTEN", "DAIRY"))
                 .body("restaurantId", equalTo(restaurantId))
                 .body("id", notNullValue())
                 .body("createdAt", notNullValue());
@@ -95,10 +95,10 @@ class MenuControllerIntegrationTest {
                 new BigDecimal("-5.00"), // Invalid: negative price
                 "INVALID_CATEGORY",
                 null,
-                true,
                 -10, // Invalid: negative preparation time
                 false,
                 false,
+                true,
                 null
             );
             
@@ -126,10 +126,10 @@ class MenuControllerIntegrationTest {
                 new BigDecimal("10.00"),
                 "ORPHANED",
                 null,
-                true,
                 15,
                 false,
                 false,
+                true,
                 null
             );
             
@@ -242,12 +242,12 @@ class MenuControllerIntegrationTest {
             String restaurantId = createTestRestaurant("Category Restaurant");
             
             CreateMenuItemCommand pizzaCommand = new CreateMenuItemCommand(
-                UUID.fromString(restaurantId), "Margherita", "Pizza desc", 
-                new BigDecimal("12.00"), "PIZZA", null, true, 15, true, false, null
+                UUID.fromString(restaurantId), "Margherita", "Pizza desc",
+                new BigDecimal("12.00"), "PIZZA", null, 15, true, false, true, null
             );
             CreateMenuItemCommand saladCommand = new CreateMenuItemCommand(
                 UUID.fromString(restaurantId), "Caesar", "Salad desc",
-                new BigDecimal("8.00"), "SALAD", null, true, 10, true, false, null
+                new BigDecimal("8.00"), "SALAD", null, 10, true, false, true, null
             );
             
             given().contentType(ContentType.JSON).body(pizzaCommand).post("/api/menu-items");
@@ -286,11 +286,13 @@ class MenuControllerIntegrationTest {
                 new BigDecimal("18.00"),
                 "UPDATED_PIZZA",
                 "/uploads/updated-pizza.jpg",
-                true,
                 30,
                 false,
                 true,
-                "nuts,soy"
+                true,
+                null,
+                Arrays.asList("TREE_NUTS", "SOY"),
+                null
             );
             
             // Then
@@ -322,7 +324,7 @@ class MenuControllerIntegrationTest {
             // Given
             UUID nonExistentId = UUID.randomUUID();
             UpdateMenuItemCommand command = new UpdateMenuItemCommand(
-                nonExistentId, "Updated Name", null, null, null, null, null, null, null, null, null
+                nonExistentId, "Updated Name", null, null, null, null, null, null, null, null, null, null, null
             );
             
             // When & Then
@@ -442,11 +444,11 @@ class MenuControllerIntegrationTest {
             
             CreateMenuItemCommand vegetarianCommand = new CreateMenuItemCommand(
                 UUID.fromString(restaurantId), "Veggie Pizza", "Vegetarian pizza",
-                new BigDecimal("13.00"), "PIZZA", null, true, 15, true, false, null
+                new BigDecimal("13.00"), "PIZZA", null, 15, true, false, true, null
             );
             CreateMenuItemCommand meatCommand = new CreateMenuItemCommand(
                 UUID.fromString(restaurantId), "Meat Pizza", "Pizza with meat",
-                new BigDecimal("15.00"), "PIZZA", null, true, 15, false, false, null
+                new BigDecimal("15.00"), "PIZZA", null, 15, false, false, true, null
             );
             
             given().contentType(ContentType.JSON).body(vegetarianCommand).post("/api/menu-items");
@@ -555,7 +557,7 @@ class MenuControllerIntegrationTest {
             CreateMenuItemCommand invalidPriceCommand = new CreateMenuItemCommand(
                 UUID.fromString(restaurantId), "Free Item", "Description",
                 BigDecimal.ZERO, // Invalid: zero price
-                "FREE", null, true, 15, false, false, null
+                "FREE", null, 15, false, false, true, null
             );
             
             // When & Then
@@ -590,7 +592,7 @@ class MenuControllerIntegrationTest {
     private String createTestMenuItem(String restaurantId, String name) {
         CreateMenuItemCommand command = new CreateMenuItemCommand(
             UUID.fromString(restaurantId), name, "Test description",
-            new BigDecimal("12.00"), "TEST", null, true, 15, false, false, null
+            new BigDecimal("12.00"), "TEST", null, 15, false, false, true, null
         );
         
         return given()

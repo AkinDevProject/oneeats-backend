@@ -49,8 +49,8 @@ class RestaurantRepositoryIntegrationTest {
     @BeforeEach
     @Transactional
     void setUp() {
-        // Clean slate for each test
-        repository.deleteAll();
+        // Clean slate for each test - using entity manager to delete all
+        entityManager.createQuery("DELETE FROM RestaurantEntity").executeUpdate();
         
         testRestaurantId = UUID.randomUUID();
         testRestaurant = new Restaurant(
