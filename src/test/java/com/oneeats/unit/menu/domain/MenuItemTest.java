@@ -3,9 +3,8 @@ package com.oneeats.unit.menu.domain;
 import com.oneeats.menu.domain.model.MenuItem;
 import com.oneeats.menu.domain.vo.Price;
 import com.oneeats.menu.domain.vo.MenuItemName;
-import com.oneeats.menu.domain.vo.MenuItemCategory;
 import com.oneeats.menu.domain.vo.PreparationTime;
-import com.oneeats.menu.domain.vo.AllergenList;
+import com.oneeats.menu.domain.vo.Allergens.AllergenType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -219,7 +218,7 @@ class MenuItemTest {
         @DisplayName("Should update dietary information")
         void shouldUpdateDietaryInformation() {
             // Given
-            List<String> allergens = Arrays.asList("gluten", "dairy");
+            List<String> allergens = Arrays.asList("GLUTEN", "DAIRY");
             
             // When
             menuItem.updateDietaryInfo(true, false, allergens);
@@ -282,21 +281,22 @@ class MenuItemTest {
         @DisplayName("Should handle allergen management")
         void shouldHandleAllergenManagement() {
             // When
-            menuItem.addAllergen("nuts");
-            menuItem.addAllergen("shellfish");
+            List<String> testAllergens = Arrays.asList("TREE_NUTS", "SHELLFISH");
+            menuItem.updateDietaryInfo(false, false, testAllergens);
             
             // Then
-            assertTrue(menuItem.getAllergens().contains("nuts"));
-            assertTrue(menuItem.getAllergens().contains("shellfish"));
-            assertEquals(2, menuItem.getAllergens().size());
+            assertTrue(menuItem.getAllergens().contains(AllergenType.TREE_NUTS));
+            assertTrue(menuItem.getAllergens().contains(AllergenType.SHELLFISH));
+            assertEquals(2, menuItem.getAllergens().getAllergens().size());
             
             // When - Remove allergen
-            menuItem.removeAllergen("nuts");
+            List<String> reducedAllergens = Arrays.asList("SHELLFISH");
+            menuItem.updateDietaryInfo(false, false, reducedAllergens);
             
             // Then
-            assertFalse(menuItem.getAllergens().contains("nuts"));
-            assertTrue(menuItem.getAllergens().contains("shellfish"));
-            assertEquals(1, menuItem.getAllergens().size());
+            assertFalse(menuItem.getAllergens().contains(AllergenType.TREE_NUTS));
+            assertTrue(menuItem.getAllergens().contains(AllergenType.SHELLFISH));
+            assertEquals(1, menuItem.getAllergens().getAllergens().size());
         }
     }
     
@@ -354,7 +354,11 @@ class MenuItemTest {
             boolean initialAvailability = menuItem.getIsAvailable();
             
             // When
-            menuItem.toggleAvailability();
+            if (menuItem.getIsAvailable()) {
+                menuItem.makeUnavailable();
+            } else {
+                menuItem.makeAvailable();
+            }
             
             // Then
             assertEquals(!initialAvailability, menuItem.getIsAvailable());
@@ -414,7 +418,7 @@ class MenuItemTest {
         @DisplayName("Should format price correctly")
         void shouldFormatPriceCorrectly() {
             // When
-            String formattedPrice = menuItem.getFormattedPrice();
+            String formattedPrice = menuItem.getPrice().toString();
             
             // Then
             assertTrue(formattedPrice.contains("12,50"));
@@ -426,13 +430,13 @@ class MenuItemTest {
         void shouldCheckDietaryCompatibility() {
             // Given
             menuItem.markAsVegetarian();
-            menuItem.addAllergen("gluten");
+            menuItem.updateDietaryInfo(true, false, Arrays.asList("GLUTEN"));
             
             // When & Then
-            assertTrue(menuItem.isCompatibleWith("vegetarian"));
-            assertFalse(menuItem.isCompatibleWith("vegan"));
-            assertFalse(menuItem.isCompatibleWith("gluten-free"));
-            assertTrue(menuItem.isCompatibleWith("dairy-free")); // No dairy allergen
+            assertTrue(menuItem.getIsVegetarian());
+            assertFalse(menuItem.getIsVegan());
+            assertTrue(menuItem.getAllergens().contains(AllergenType.GLUTEN));
+            assertFalse(menuItem.getAllergens().contains(AllergenType.DAIRY)); // No dairy allergen
         }
     }
     

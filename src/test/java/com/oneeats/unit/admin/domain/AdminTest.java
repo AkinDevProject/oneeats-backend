@@ -141,7 +141,7 @@ class AdminTest {
             // Then
             assertTrue(admin.isActive());
             assertEquals(AdminStatus.ACTIVE, admin.getStatus());
-            assertNotNull(admin.getLastModified());
+            assertNotNull(admin.getUpdatedAt());
         }
         
         @Test
@@ -156,7 +156,7 @@ class AdminTest {
             // Then
             assertFalse(admin.isActive());
             assertEquals(AdminStatus.INACTIVE, admin.getStatus());
-            assertNotNull(admin.getLastModified());
+            assertNotNull(admin.getUpdatedAt());
         }
         
         @Test
@@ -171,7 +171,7 @@ class AdminTest {
             // Then
             assertFalse(admin.isActive());
             assertEquals(AdminStatus.SUSPENDED, admin.getStatus());
-            assertNotNull(admin.getLastModified());
+            assertNotNull(admin.getUpdatedAt());
         }
         
         @Test

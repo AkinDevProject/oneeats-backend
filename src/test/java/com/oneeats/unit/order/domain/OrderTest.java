@@ -61,7 +61,7 @@ class OrderTest {
                 "ORD-002",
                 userId,
                 restaurantId,
-                new Money(new BigDecimal("30.00"), "EUR"),
+                Money.euro(new BigDecimal("30.00")),
                 "Extra sauce please"
             );
             
@@ -193,7 +193,7 @@ class OrderTest {
             OrderItem item = OrderItem.create(
                 UUID.randomUUID(),
                 "Margherita Pizza",
-                new Money(new BigDecimal("12.50"), "EUR"),
+                Money.euro(new BigDecimal("12.50")),
                 2,
                 "Extra cheese"
             );
@@ -214,7 +214,7 @@ class OrderTest {
             OrderItem item = OrderItem.create(
                 UUID.randomUUID(),
                 "Pepperoni Pizza",
-                new Money(new BigDecimal("14.00"), "EUR"),
+                Money.euro(new BigDecimal("14.00")),
                 1,
                 null
             );
@@ -236,14 +236,14 @@ class OrderTest {
             OrderItem item1 = OrderItem.create(
                 UUID.randomUUID(),
                 "Pizza",
-                new Money(new BigDecimal("12.50"), "EUR"),
+                Money.euro(new BigDecimal("12.50")),
                 2, // 2 × 12.50 = 25.00
                 null
             );
             OrderItem item2 = OrderItem.create(
                 UUID.randomUUID(),
                 "Drink",
-                new Money(new BigDecimal("3.50"), "EUR"),
+                Money.euro(new BigDecimal("3.50")),
                 1, // 1 × 3.50 = 3.50
                 null
             );

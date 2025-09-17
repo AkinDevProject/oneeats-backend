@@ -34,8 +34,8 @@ class UserTest {
             "John",
             "Doe",
             new Email("john.doe@test.fr"),
-            "0123456789",
-            UserStatus.ACTIVE
+            UserStatus.ACTIVE,
+            "0123456789"
         );
     }
     
@@ -83,10 +83,10 @@ class UserTest {
             assertDoesNotThrow(() -> new User(
                 UUID.randomUUID(),
                 "Valid",
-                "User", 
+                "User",
                 new Email("valid@email.fr"),
-                "0123456789",
-                UserStatus.ACTIVE
+                UserStatus.ACTIVE,
+                "0123456789"
             ));
         }
     }

@@ -157,7 +157,7 @@ class NotificationTest {
             assertNotNull(notification.getSentAt());
             assertTrue(notification.getSentAt().isAfter(beforeSent.minusSeconds(1)));
             assertTrue(notification.getSentAt().isBefore(afterSent.plusSeconds(1)));
-            assertNotNull(notification.getLastModified());
+            assertNotNull(notification.getUpdatedAt());
         }
         
         @Test
@@ -172,7 +172,7 @@ class NotificationTest {
             // Then
             assertEquals(NotificationStatus.FAILED, notification.getStatus());
             assertNull(notification.getSentAt()); // Should remain null for failed notifications
-            assertNotNull(notification.getLastModified());
+            assertNotNull(notification.getUpdatedAt());
         }
         
         @Test
@@ -187,7 +187,7 @@ class NotificationTest {
             // Then
             assertEquals(NotificationStatus.READ, notification.getStatus());
             assertNotNull(notification.getSentAt()); // Should preserve sent time
-            assertNotNull(notification.getLastModified());
+            assertNotNull(notification.getUpdatedAt());
         }
         
         @Test

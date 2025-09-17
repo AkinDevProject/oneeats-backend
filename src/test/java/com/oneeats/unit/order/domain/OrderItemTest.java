@@ -30,7 +30,7 @@ class OrderItemTest {
     @BeforeEach
     void setUp() {
         menuItemId = UUID.randomUUID();
-        unitPrice = new Money(new BigDecimal("12.50"), "EUR");
+        unitPrice = Money.euro(new BigDecimal("12.50"));
         
         orderItem = OrderItem.create(
             menuItemId,
@@ -52,7 +52,7 @@ class OrderItemTest {
             OrderItem newItem = OrderItem.create(
                 UUID.randomUUID(),
                 "Pepperoni Pizza",
-                new Money(new BigDecimal("14.00"), "EUR"),
+                Money.euro(new BigDecimal("14.00")),
                 1,
                 "No onions"
             );
@@ -138,7 +138,7 @@ class OrderItemTest {
             OrderItem singleItem = OrderItem.create(
                 menuItemId,
                 "Drink",
-                new Money(new BigDecimal("3.50"), "EUR"),
+                Money.euro(new BigDecimal("3.50")),
                 1,
                 null
             );
@@ -157,7 +157,7 @@ class OrderItemTest {
             OrderItem item = OrderItem.create(
                 menuItemId,
                 "Special Item",
-                new Money(new BigDecimal("7.33"), "EUR"),
+                Money.euro(new BigDecimal("7.33")),
                 3,
                 null
             );
@@ -185,7 +185,7 @@ class OrderItemTest {
             
             // Then
             assertEquals(5, orderItem.getQuantity());
-            assertNotNull(orderItem.getLastModified());
+            assertNotNull(orderItem.getUpdatedAt());
         }
         
         @Test
@@ -286,7 +286,7 @@ class OrderItemTest {
                 "ORD-001",
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                new Money(new BigDecimal("30.00"), "EUR"),
+                Money.euro(new BigDecimal("30.00")),
                 null,
                 com.oneeats.order.domain.model.OrderStatus.PENDING
             );
