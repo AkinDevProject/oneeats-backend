@@ -21,6 +21,8 @@ const getApiUrl = () => {
 export const ENV = {
   // Configuration de l'API
   API_URL: getApiUrl(),
+  API_HOST: __DEV__ ? '192.168.1.36' : 'your-production-api.com',
+  API_PORT: __DEV__ ? 8080 : 443,
   
   API_TIMEOUT: 10000,
   

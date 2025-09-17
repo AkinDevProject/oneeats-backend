@@ -145,7 +145,7 @@ quarkus:
     # SPA routing pour production
     spa-routing: true
     spa-routing-path: "/"
-    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*"
+    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/ws/*"
 
 # Configuration métier OneEats
 oneeats:

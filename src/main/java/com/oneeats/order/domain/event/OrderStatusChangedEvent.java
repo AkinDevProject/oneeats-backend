@@ -7,14 +7,18 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class OrderStatusChangedEvent implements IDomainEvent {
-    
+
     private final UUID orderId;
+    private final UUID userId;
+    private final UUID restaurantId;
     private final OrderStatus previousStatus;
     private final OrderStatus newStatus;
     private final LocalDateTime occurredOn;
 
-    public OrderStatusChangedEvent(UUID orderId, OrderStatus previousStatus, OrderStatus newStatus) {
+    public OrderStatusChangedEvent(UUID orderId, UUID userId, UUID restaurantId, OrderStatus previousStatus, OrderStatus newStatus) {
         this.orderId = orderId;
+        this.userId = userId;
+        this.restaurantId = restaurantId;
         this.previousStatus = previousStatus;
         this.newStatus = newStatus;
         this.occurredOn = LocalDateTime.now();
@@ -35,5 +39,13 @@ public class OrderStatusChangedEvent implements IDomainEvent {
 
     public OrderStatus getNewStatus() {
         return newStatus;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public UUID getRestaurantId() {
+        return restaurantId;
     }
 }

@@ -54,7 +54,7 @@ quarkus:
     # SPA routing pour React Router
     spa-routing: true
     spa-routing-path: "/"
-    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/favicon.ico"
+    spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/favicon.ico,/ws/*"
 
     # Build configuration
     build-dir: dist

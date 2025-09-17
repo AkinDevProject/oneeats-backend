@@ -77,13 +77,7 @@ public class Order extends BaseEntity {
             }
             case COMPLETED -> this.actualPickupTime = LocalDateTime.now();
         }
-        
-        this.addDomainEvent(new OrderStatusChangedEvent(
-            this.getId(),
-            previousStatus,
-            newStatus
-        ));
-        
+
         this.markAsModified();
     }
     
@@ -213,7 +207,7 @@ public class Order extends BaseEntity {
         this.status = newStatus;
         
         // Publier un événement de changement de statut
-        addDomainEvent(new OrderStatusChangedEvent(this.getId(), oldStatus, newStatus));
+        addDomainEvent(new OrderStatusChangedEvent(this.getId(), this.userId, this.restaurantId, oldStatus, newStatus));
         
         // Actions spécifiques selon le nouveau statut
         if (newStatus == OrderStatus.COMPLETED) {

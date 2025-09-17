@@ -296,6 +296,7 @@ public class MenuItem extends BaseEntity {
         this.lastUpdated = LocalDateTime.now();
         addDomainEvent(new MenuItemUpdatedEvent(getId(), getRestaurantId()));
     }
+
     
     public void markAsVegetarian() {
         this.isVegetarian = true;
