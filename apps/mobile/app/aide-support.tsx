@@ -4,13 +4,34 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Linking,
   Alert,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import {
+  Card,
+  List,
+  Divider,
+  Dialog,
+  Portal,
+  Button,
+  Chip,
+  IconButton,
+  TextInput,
+} from 'react-native-paper';
+import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import Animated, {
+  FadeIn,
+  SlideInRight,
+} from 'react-native-reanimated';
+
+import { useAppTheme } from '../src/contexts/ThemeContext';
+
+type SupportSection = 'contact' | 'faq' | 'feedback' | 'about';
 
 // Interface pour les questions FAQ
 interface FAQItem {
@@ -18,6 +39,7 @@ interface FAQItem {
   question: string;
   answer: string;
   category: 'commande' | 'livraison' | 'paiement' | 'compte' | 'autre';
+  emoji: string;
 }
 
 // Interface pour les méthodes de contact
@@ -25,15 +47,22 @@ interface ContactMethod {
   id: string;
   title: string;
   subtitle: string;
+  description: string;
   icon: string;
   action: () => void;
   available: boolean;
   hours?: string;
+  color: string;
 }
 
 export default function SupportPage() {
+  const [activeSection, setActiveSection] = useState<SupportSection | null>(null);
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+
+  const { currentTheme } = useAppTheme();
 
   // Données FAQ
   const faqData: FAQItem[] = [
@@ -41,49 +70,57 @@ export default function SupportPage() {
       id: '1',
       question: 'Comment passer une commande ?',
       answer: 'Parcourez les restaurants disponibles, sélectionnez vos plats, ajoutez-les au panier et procédez au paiement. Vous recevrez une confirmation par notification.',
-      category: 'commande'
+      category: 'commande',
+      emoji: '🛒'
     },
     {
       id: '2',
       question: 'Quels sont les délais de livraison ?',
       answer: 'Les délais varient selon le restaurant et votre localisation, généralement entre 20-45 minutes. Le temps estimé est affiché avant la commande.',
-      category: 'livraison'
+      category: 'livraison',
+      emoji: '🚚'
     },
     {
       id: '3',
       question: 'Comment suivre ma commande ?',
       answer: 'Après confirmation, vous pouvez suivre votre commande en temps réel dans l\'onglet "Commandes". Vous recevrez des notifications à chaque étape.',
-      category: 'commande'
+      category: 'commande',
+      emoji: '📱'
     },
     {
       id: '4',
       question: 'Quels moyens de paiement acceptez-vous ?',
       answer: 'Nous acceptons les cartes bancaires (Visa, Mastercard), PayPal, Apple Pay, Google Pay et le paiement en espèces à la livraison.',
-      category: 'paiement'
+      category: 'paiement',
+      emoji: '💳'
     },
     {
       id: '5',
       question: 'Que faire si ma commande est en retard ?',
       answer: 'Si votre commande dépasse le délai estimé de plus de 15 minutes, contactez-nous immédiatement. Nous vous proposerons une solution adaptée.',
-      category: 'livraison'
+      category: 'livraison',
+      emoji: '⏰'
     },
     {
       id: '6',
       question: 'Comment modifier mes informations de compte ?',
       answer: 'Rendez-vous dans l\'onglet "Profil" puis "Compte" pour modifier vos informations personnelles, adresse de livraison et moyens de paiement.',
-      category: 'compte'
+      category: 'compte',
+      emoji: '👤'
     },
     {
       id: '7',
       question: 'Puis-je annuler ma commande ?',
       answer: 'Vous pouvez annuler votre commande gratuitement dans les 5 minutes suivant la confirmation. Après ce délai, des frais peuvent s\'appliquer.',
-      category: 'commande'
+      category: 'commande',
+      emoji: '❌'
     },
     {
       id: '8',
       question: 'Comment ajouter un restaurant à mes favoris ?',
       answer: 'Appuyez sur l\'icône cœur sur la page du restaurant ou dans la liste des restaurants. Retrouvez tous vos favoris dans l\'onglet dédié.',
-      category: 'autre'
+      category: 'autre',
+      emoji: '❤️'
     }
   ];
 
@@ -91,52 +128,76 @@ export default function SupportPage() {
   const contactMethods: ContactMethod[] = [
     {
       id: 'email',
-      title: 'Email',
+      title: 'Email Support',
       subtitle: 'support@oneeats.com',
+      description: 'Réponse garantie sous 24h',
       icon: 'email',
       action: () => handleContact('email'),
       available: true,
-      hours: 'Réponse sous 24h'
+      hours: 'Réponse sous 24h',
+      color: '#2196F3'
     },
     {
       id: 'phone',
-      title: 'Téléphone',
+      title: 'Support Téléphonique',
       subtitle: '+33 1 23 45 67 89',
+      description: 'Assistance directe avec nos experts',
       icon: 'phone',
       action: () => handleContact('phone'),
       available: true,
-      hours: 'Lun-Ven 9h-18h'
+      hours: 'Lun-Ven 9h-18h',
+      color: '#4CAF50'
     },
     {
       id: 'whatsapp',
-      title: 'WhatsApp',
-      subtitle: 'Chat en direct',
+      title: 'Chat WhatsApp',
+      subtitle: 'Chat en temps réel',
+      description: 'Support instantané via WhatsApp',
       icon: 'chat',
       action: () => handleContact('whatsapp'),
       available: true,
-      hours: 'Lun-Dim 8h-22h'
+      hours: 'Lun-Dim 8h-22h',
+      color: '#25D366'
     },
     {
       id: 'website',
-      title: 'Site Web',
+      title: 'Centre d\'Aide Web',
       subtitle: 'www.oneeats.com/support',
+      description: 'Documentation complète et guides',
       icon: 'language',
       action: () => handleContact('website'),
-      available: true
+      available: true,
+      color: '#FF9800'
     }
   ];
 
   const categories = [
-    { id: 'all', label: 'Toutes' },
-    { id: 'commande', label: 'Commandes' },
-    { id: 'livraison', label: 'Livraison' },
-    { id: 'paiement', label: 'Paiement' },
-    { id: 'compte', label: 'Compte' },
-    { id: 'autre', label: 'Autre' }
+    { id: 'all', label: '🌍 Toutes', count: faqData.length },
+    { id: 'commande', label: '🛒 Commandes', count: faqData.filter(f => f.category === 'commande').length },
+    { id: 'livraison', label: '🚚 Livraison', count: faqData.filter(f => f.category === 'livraison').length },
+    { id: 'paiement', label: '💳 Paiement', count: faqData.filter(f => f.category === 'paiement').length },
+    { id: 'compte', label: '👤 Compte', count: faqData.filter(f => f.category === 'compte').length },
+    { id: 'autre', label: '❓ Autre', count: faqData.filter(f => f.category === 'autre').length }
   ];
+
+  const handleSectionPress = (section: SupportSection) => {
+    setActiveSection(section);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const goBack = () => {
+    if (activeSection) {
+      setActiveSection(null);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      router.back();
+    }
+  };
 
   const handleContact = async (method: string) => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
       switch (method) {
         case 'email':
           await Linking.openURL('mailto:support@oneeats.com?subject=Demande de support OneEats');
@@ -158,300 +219,449 @@ export default function SupportPage() {
 
   const toggleFAQ = (id: string) => {
     setExpandedFAQ(expandedFAQ === id ? null : id);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleFeedback = async () => {
+    if (!feedbackText.trim()) {
+      Alert.alert('Erreur', 'Veuillez saisir votre commentaire');
+      return;
+    }
+
+    try {
+      await Share.share({
+        message: `Feedback OneEats: ${feedbackText}`,
+        title: 'Feedback OneEats',
+      });
+
+      setShowFeedbackDialog(false);
+      setFeedbackText('');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Merci !', 'Votre commentaire a été envoyé avec succès.');
+    } catch (error) {
+      Alert.alert('Erreur', 'Impossible d\'envoyer le commentaire');
+    }
   };
 
   const filteredFAQ = selectedCategory === 'all'
     ? faqData
     : faqData.filter(item => item.category === selectedCategory);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
+  // Menu principal
+  const renderMainMenu = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Contact rapide */}
+      <Animated.View entering={FadeIn.delay(100)}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="Nous Contacter"
+            description="Email, téléphone, chat et support web"
+            left={(props) => <List.Icon {...props} icon="contact-support" color={currentTheme.colors.primary} />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => handleSectionPress('contact')}
+          />
+        </Card>
+      </Animated.View>
 
+      {/* FAQ */}
+      <Animated.View entering={FadeIn.delay(200)}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="Questions Fréquentes"
+            description={`${faqData.length} questions et réponses détaillées`}
+            left={(props) => <List.Icon {...props} icon="help" color={currentTheme.colors.primary} />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => handleSectionPress('faq')}
+          />
+        </Card>
+      </Animated.View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Contact rapide */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <MaterialIcons name="contact-support" size={20} color="#007AFF" />
-            <Text style={styles.cardTitle}>Contactez-nous</Text>
-          </View>
+      {/* Feedback */}
+      <Animated.View entering={FadeIn.delay(300)}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="Envoyer un Commentaire"
+            description="Partagez vos suggestions et améliorations"
+            left={(props) => <List.Icon {...props} icon="feedback" color={currentTheme.colors.primary} />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => handleSectionPress('feedback')}
+          />
+        </Card>
+      </Animated.View>
 
-          {contactMethods.map((method) => (
-            <TouchableOpacity
-              key={method.id}
-              style={styles.contactItem}
-              onPress={method.action}
-              disabled={!method.available}
-            >
-              <View style={styles.contactLeft}>
-                <View style={[styles.contactIcon, !method.available && styles.contactIconDisabled]}>
-                  <MaterialIcons name={method.icon as any} size={20} color={method.available ? "#007AFF" : "#999"} />
-                </View>
-                <View style={styles.contactInfo}>
-                  <Text style={[styles.contactTitle, !method.available && styles.contactTitleDisabled]}>
-                    {method.title}
-                  </Text>
-                  <Text style={styles.contactSubtitle}>{method.subtitle}</Text>
-                  {method.hours && (
-                    <Text style={styles.contactHours}>{method.hours}</Text>
-                  )}
-                </View>
-              </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={method.available ? "#666" : "#ccc"}
+      {/* À propos */}
+      <Animated.View entering={FadeIn.delay(400)}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="À Propos de OneEats"
+            description="Informations, version et mentions légales"
+            left={(props) => <List.Icon {...props} icon="info" color={currentTheme.colors.primary} />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => handleSectionPress('about')}
+          />
+        </Card>
+      </Animated.View>
+
+      {/* Contact urgent */}
+      <Animated.View entering={FadeIn.delay(500)}>
+        <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <Card.Content>
+            <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+              🚨 Contact Urgent
+            </Text>
+
+            <List.Item
+              title="Problème avec ma commande"
+              description="Support prioritaire pour les commandes"
+              left={(props) => <List.Icon {...props} icon="priority-high" />}
+              right={(props) => <List.Icon {...props} icon="phone" />}
+              onPress={() => handleContact('phone')}
+            />
+
+            <Divider />
+
+            <List.Item
+              title="Signaler un problème"
+              description="Incident technique ou sécurité"
+              left={(props) => <List.Icon {...props} icon="report-problem" />}
+              right={(props) => <List.Icon {...props} icon="email" />}
+              onPress={() => handleContact('email')}
+            />
+          </Card.Content>
+        </Card>
+      </Animated.View>
+    </ScrollView>
+  );
+
+  // Section Contact
+  const renderContactSection = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+            📞 Nous Contacter
+          </Text>
+          <Text style={[styles.sectionDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Choisissez le moyen de contact qui vous convient le mieux
+          </Text>
+
+          {contactMethods.map((method, index) => (
+            <View key={method.id}>
+              <List.Item
+                title={method.title}
+                description={`${method.subtitle}\n${method.description}`}
+                left={(props) => <List.Icon {...props} icon={method.icon} color={method.color} />}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                onPress={method.action}
+                titleNumberOfLines={2}
+                descriptionNumberOfLines={3}
               />
-            </TouchableOpacity>
+              {index < contactMethods.length - 1 && <Divider />}
+            </View>
           ))}
-        </View>
+        </Card.Content>
+      </Card>
+    </ScrollView>
+  );
 
-        {/* FAQ */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <MaterialIcons name="help" size={20} color="#007AFF" />
-            <Text style={styles.cardTitle}>Questions Fréquentes</Text>
-          </View>
+  // Section FAQ
+  const renderFAQSection = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+            ❓ Questions Fréquentes
+          </Text>
 
           {/* Filtres de catégories */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.categoriesContainer}
-            contentContainerStyle={styles.categoriesContent}
           >
             {categories.map((category) => (
-              <TouchableOpacity
+              <Chip
                 key={category.id}
-                style={[
-                  styles.categoryChip,
-                  selectedCategory === category.id && styles.categoryChipSelected
-                ]}
-                onPress={() => setSelectedCategory(category.id)}
+                mode={selectedCategory === category.id ? 'flat' : 'outlined'}
+                selected={selectedCategory === category.id}
+                onPress={() => {
+                  setSelectedCategory(category.id);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                style={styles.categoryChip}
               >
-                <Text style={[
-                  styles.categoryChipText,
-                  selectedCategory === category.id && styles.categoryChipTextSelected
-                ]}>
-                  {category.label}
-                </Text>
-              </TouchableOpacity>
+                {category.label} ({category.count})
+              </Chip>
             ))}
           </ScrollView>
 
           {/* Liste FAQ */}
-          <View style={styles.faqContainer}>
-            {filteredFAQ.map((item, index) => (
-              <View key={item.id} style={styles.faqItem}>
-                <TouchableOpacity
-                  style={styles.faqQuestion}
-                  onPress={() => toggleFAQ(item.id)}
-                >
-                  <Text style={styles.faqQuestionText}>{item.question}</Text>
+          {filteredFAQ.map((item, index) => (
+            <View key={item.id}>
+              <List.Item
+                title={`${item.emoji} ${item.question}`}
+                titleNumberOfLines={2}
+                onPress={() => toggleFAQ(item.id)}
+                right={(props) => (
                   <MaterialIcons
                     name={expandedFAQ === item.id ? "expand-less" : "expand-more"}
                     size={24}
-                    color="#666"
+                    color={currentTheme.colors.onSurfaceVariant}
                   />
-                </TouchableOpacity>
-
-                {expandedFAQ === item.id && (
-                  <View style={styles.faqAnswer}>
-                    <Text style={styles.faqAnswerText}>{item.answer}</Text>
-                  </View>
                 )}
+              />
 
-                {index < filteredFAQ.length - 1 && <View style={styles.faqDivider} />}
-              </View>
-            ))}
-          </View>
+              {expandedFAQ === item.id && (
+                <View style={styles.faqAnswer}>
+                  <Text style={[styles.faqAnswerText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    {item.answer}
+                  </Text>
+                </View>
+              )}
+
+              {index < filteredFAQ.length - 1 && <Divider />}
+            </View>
+          ))}
+        </Card.Content>
+      </Card>
+    </ScrollView>
+  );
+
+  // Section Feedback
+  const renderFeedbackSection = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+            💭 Votre Avis Compte
+          </Text>
+
+          <Button
+            mode="contained"
+            icon="star"
+            onPress={() => Alert.alert('Évaluer', 'Merci ! Cette fonctionnalité sera bientôt disponible.')}
+            style={styles.actionButton}
+          >
+            Évaluer l'application
+          </Button>
+
+          <Button
+            mode="outlined"
+            icon="feedback"
+            onPress={() => setShowFeedbackDialog(true)}
+            style={styles.actionButton}
+          >
+            Envoyer un commentaire
+          </Button>
+
+          <Button
+            mode="outlined"
+            icon="share"
+            onPress={async () => {
+              try {
+                await Share.share({
+                  message: 'Découvrez OneEats, votre app de livraison de repas préférée !',
+                  title: 'OneEats - Livraison de repas',
+                });
+              } catch (error) {
+                Alert.alert('Erreur', 'Impossible de partager');
+              }
+            }}
+            style={styles.actionButton}
+          >
+            Partager l'application
+          </Button>
+        </Card.Content>
+      </Card>
+    </ScrollView>
+  );
+
+  // Section À propos
+  const renderAboutSection = () => (
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
+        <Card.Content>
+          <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
+            ℹ️ À Propos
+          </Text>
+
+          <List.Item
+            title="Version de l'application"
+            description="OneEats v1.0.0 (Build 1)"
+            left={(props) => <List.Icon {...props} icon="information" />}
+          />
+
+          <Divider />
+
+          <List.Item
+            title="Conditions d'utilisation"
+            description="Lire les CGU"
+            left={(props) => <List.Icon {...props} icon="file-document" />}
+            right={(props) => <List.Icon {...props} icon="open-in-new" />}
+            onPress={() => Linking.openURL('https://oneeats.com/terms')}
+          />
+
+          <Divider />
+
+          <List.Item
+            title="Politique de confidentialité"
+            description="Protection de vos données"
+            left={(props) => <List.Icon {...props} icon="shield-check" />}
+            right={(props) => <List.Icon {...props} icon="open-in-new" />}
+            onPress={() => Linking.openURL('https://oneeats.com/privacy')}
+          />
+
+          <Divider />
+
+          <List.Item
+            title="© 2024 OneEats"
+            description="Tous droits réservés"
+            left={(props) => <List.Icon {...props} icon="copyright" />}
+          />
+        </Card.Content>
+      </Card>
+    </ScrollView>
+  );
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.colors.background }]}>
+      <StatusBar style="auto" />
+
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: currentTheme.colors.surface }]}>
+        {activeSection && (
+          <IconButton
+            icon="arrow-left"
+            size={24}
+            iconColor={currentTheme.colors.onSurface}
+            onPress={goBack}
+          />
+        )}
+        <View style={styles.headerContent}>
+          <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
+            {activeSection
+              ? {
+                  contact: 'Nous Contacter',
+                  faq: 'Questions Fréquentes',
+                  feedback: 'Votre Avis',
+                  about: 'À Propos',
+                }[activeSection]
+              : 'Aide & Support'}
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+            {activeSection
+              ? 'Nous sommes là pour vous aider'
+              : 'FAQ, contact et assistance complète'}
+          </Text>
         </View>
+      </View>
 
-        {/* Informations supplémentaires */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <MaterialIcons name="info" size={20} color="#007AFF" />
-            <Text style={styles.cardTitle}>Informations Utiles</Text>
-          </View>
+      <Animated.View entering={SlideInRight} style={styles.content}>
+        {activeSection === null && renderMainMenu()}
+        {activeSection === 'contact' && renderContactSection()}
+        {activeSection === 'faq' && renderFAQSection()}
+        {activeSection === 'feedback' && renderFeedbackSection()}
+        {activeSection === 'about' && renderAboutSection()}
+      </Animated.View>
 
-          <View style={styles.infoItem}>
-            <MaterialIcons name="schedule" size={16} color="#666" />
-            <Text style={styles.infoText}>Service client disponible 7j/7</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <MaterialIcons name="security" size={16} color="#666" />
-            <Text style={styles.infoText}>Vos données sont protégées et sécurisées</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <MaterialIcons name="thumb-up" size={16} color="#666" />
-            <Text style={styles.infoText}>Satisfaction client garantie à 100%</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <MaterialIcons name="local-shipping" size={16} color="#666" />
-            <Text style={styles.infoText}>Livraison gratuite dès 25€ d'achat</Text>
-          </View>
-        </View>
-
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+      {/* Dialog Feedback */}
+      <Portal>
+        <Dialog visible={showFeedbackDialog} onDismiss={() => setShowFeedbackDialog(false)}>
+          <Dialog.Title>Votre Commentaire</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Partagez votre avis ou vos suggestions"
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              mode="outlined"
+              multiline
+              numberOfLines={4}
+              style={styles.feedbackInput}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowFeedbackDialog(false)}>Annuler</Button>
+            <Button mode="contained" onPress={handleFeedback}>Envoyer</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
   },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    marginTop: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  container: {
+    flex: 1,
     padding: 16,
-    paddingBottom: 12,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginLeft: 8,
+  menuCard: {
+    marginBottom: 12,
+    borderRadius: 12,
   },
-  contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+  sectionCard: {
+    marginBottom: 12,
+    borderRadius: 12,
   },
-  contactLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  contactIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f8ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  contactIconDisabled: {
-    backgroundColor: '#f5f5f5',
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#000',
-    marginBottom: 2,
-  },
-  contactTitleDisabled: {
-    color: '#999',
-  },
-  contactSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 2,
-  },
-  contactHours: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  categoriesContainer: {
-    marginHorizontal: 16,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     marginBottom: 8,
   },
-  categoriesContent: {
-    paddingRight: 16,
+  sectionDescription: {
+    fontSize: 14,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  categoriesContainer: {
+    marginBottom: 16,
   },
   categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
     marginRight: 8,
-  },
-  categoryChipSelected: {
-    backgroundColor: '#007AFF',
-  },
-  categoryChipText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  categoryChipTextSelected: {
-    color: '#ffffff',
-  },
-  faqContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  faqItem: {
-    marginVertical: 4,
-  },
-  faqQuestion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-  },
-  faqQuestionText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#000',
-    flex: 1,
-    marginRight: 8,
+    marginBottom: 8,
   },
   faqAnswer: {
+    paddingHorizontal: 16,
     paddingTop: 4,
     paddingBottom: 12,
-    paddingRight: 32,
   },
   faqAnswerText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
   },
-  faqDivider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 8,
+  actionButton: {
+    marginBottom: 12,
+    borderRadius: 8,
   },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 12,
-  },
-  bottomSpacer: {
-    height: 32,
+  feedbackInput: {
+    marginBottom: 8,
   },
 });
