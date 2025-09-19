@@ -19,5 +19,10 @@ public record OrderDTO(
     LocalDateTime actualPickupTime,
     List<OrderItemDTO> items,
     LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    LocalDateTime updatedAt,
+    // Enriched client data
+    String clientFirstName,
+    String clientLastName,
+    String clientEmail,
+    String clientPhone
 ) {}

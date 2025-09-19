@@ -34,11 +34,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Si auth désactivé, récupérer l'utilisateur fixe depuis l'API
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
-        console.log('🔄 Loading fixed user from API:', ENV.MOCK_USER_ID);
+        console.log('🔄 Loading fixed user from API:', ENV.DEV_USER_ID);
 
         try {
           // Essayer de récupérer l'utilisateur depuis l'API
-          const apiUser = await apiService.users.getById(ENV.MOCK_USER_ID);
+          const apiUser = await apiService.users.getById(ENV.DEV_USER_ID);
           console.log('✅ User loaded from API:', apiUser);
 
           // Convertir les données API au format mobile
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           // Fallback vers un user par défaut si API échoue
           const defaultUser: User = {
-            id: ENV.MOCK_USER_ID,
+            id: ENV.DEV_USER_ID,
             name: 'Utilisateur Mobile',
             email: 'mobile@oneeats.com',
             phone: '+33 6 45 67 89 01',

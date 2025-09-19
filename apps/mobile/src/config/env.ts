@@ -32,6 +32,9 @@ export const ENV = {
   
   // User ID fixe pour les tests sans auth (UUID valide)
   MOCK_USER_ID: '12345678-1234-1234-1234-123456789012',
+
+  // User ID de développement avec vraies données API
+  DEV_USER_ID: '4ffe5398-4599-4c33-98ec-18a96fd9e200',
   
   // Configuration des notifications push
   NOTIFICATIONS_ENABLED: __DEV__ ? false : true,

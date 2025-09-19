@@ -76,7 +76,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
           console.log('🔄 Polling for order status updates...');
           try {
             // Refresh orders silently (without loading state)
-            const userId = user.id || ENV.MOCK_USER_ID;
+            const userId = user.id || ENV.DEV_USER_ID;
             const apiOrders = await apiService.orders.getByUserId(userId);
 
             const processedOrders = apiOrders.map((order: any) => ({
@@ -148,11 +148,17 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       setIsLoading(true);
       setError(null);
       
+      // FORCE RESET CACHE - Vider AsyncStorage pour forcer le rechargement
+      await AsyncStorage.removeItem(getOrdersKey());
+      console.log('🧹 Cache cleared, forcing fresh data load');
+
       if (user) {
         // Charger depuis l'API
         console.log('🔄 Loading orders for user:', user.id);
-        const userId = user.id || ENV.MOCK_USER_ID;
+        const userId = user.id || ENV.DEV_USER_ID;
         console.log('🎯 Using userId for orders request:', userId);
+        console.log('🎯 ENV.DEV_USER_ID:', ENV.DEV_USER_ID);
+        console.log('🎯 ENV.MOCK_USER_ID:', ENV.MOCK_USER_ID);
         const apiOrders = await apiService.orders.getByUserId(userId);
         console.log('🎯 API returned orders:', apiOrders);
         
@@ -193,6 +199,15 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
           }
         }));
         console.log('✅ Processed orders:', processedOrders);
+        console.log('🔍 Orders count:', processedOrders.length);
+        processedOrders.forEach((order, index) => {
+          console.log(`📦 Order ${index + 1}:`, {
+            id: order.id,
+            status: order.status,
+            total: order.total,
+            restaurant: order.restaurant?.name
+          });
+        });
         setOrders(processedOrders);
         
         // Sauvegarder en cache local
@@ -257,7 +272,7 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
       
       // Créer la commande via l'API - Format attendu par CreateOrderCommand
       const createdOrder = await apiService.orders.create({
-        userId: user?.id || ENV.MOCK_USER_ID,
+        userId: user?.id || ENV.DEV_USER_ID,
         restaurantId: order.restaurantId,
         totalAmount: order.total,
         specialInstructions: order.customerNotes,

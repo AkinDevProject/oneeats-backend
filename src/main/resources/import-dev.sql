@@ -42,7 +42,8 @@ INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), 'ACTIVE', true, 0),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), 'ACTIVE', true, 0),
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), 'ACTIVE', true, 0),
-('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), 'ACTIVE', true, 0);
+('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), 'ACTIVE', true, 0),
+('4ffe5398-4599-4c33-98ec-18a96fd9e200', 'jean.dupont@oneats.dev', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '+33 6 12 34 56 78', '123 Rue de la Paix, 75001 Paris', NOW(), NOW(), 'ACTIVE', true, 0);
 
 -- Menu items pour Pizza Palace
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at, version) VALUES
@@ -210,7 +211,12 @@ INSERT INTO orders (id, order_number, user_id, restaurant_id, status, total_amou
 
 -- Commandes utilisateur mobile
 ('12340101-0101-0101-0101-010101010101', 'CMD-017', '12345678-1234-1234-1234-123456789012', '11111111-1111-1111-1111-111111111111', 'PENDING', 19.50, 'Commande depuis mobile', NOW() - INTERVAL '2 minutes', NOW(), NOW() + INTERVAL '20 minutes', 0),
-('12340202-0202-0202-0202-020202020202', 'CMD-018', '12345678-1234-1234-1234-123456789012', '22222222-2222-2222-2222-222222222222', 'PREPARING', 16.50, 'Test app mobile', NOW() - INTERVAL '10 minutes', NOW() - INTERVAL '5 minutes', NOW() + INTERVAL '10 minutes', 0);
+('12340202-0202-0202-0202-020202020202', 'CMD-018', '12345678-1234-1234-1234-123456789012', '22222222-2222-2222-2222-222222222222', 'PREPARING', 16.50, 'Test app mobile', NOW() - INTERVAL '10 minutes', NOW() - INTERVAL '5 minutes', NOW() + INTERVAL '10 minutes', 0),
+
+-- Commandes utilisateur Jean Dupont (dev)
+('4ffe0001-0001-0001-0001-000000000001', 'CMD-019', '4ffe5398-4599-4c33-98ec-18a96fd9e200', '11111111-1111-1111-1111-111111111111', 'COMPLETED', 25.50, 'Première commande', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days', 0),
+('4ffe0002-0002-0002-0002-000000000002', 'CMD-020', '4ffe5398-4599-4c33-98ec-18a96fd9e200', '22222222-2222-2222-2222-222222222222', 'COMPLETED', 18.00, 'Super burger!', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day', 0),
+('4ffe0003-0003-0003-0003-000000000003', 'CMD-021', '4ffe5398-4599-4c33-98ec-18a96fd9e200', '11111111-1111-1111-1111-111111111111', 'READY', 32.50, 'Commande du soir', NOW() - INTERVAL '30 minutes', NOW(), NOW() + INTERVAL '5 minutes', 0);
 
 -- Order Items pour toutes les commandes
 INSERT INTO order_items (id, order_id, menu_item_id, menu_item_name, unit_price, quantity, special_notes, created_at, updated_at, version) VALUES
@@ -278,4 +284,16 @@ INSERT INTO order_items (id, order_id, menu_item_id, menu_item_name, unit_price,
 ('12340001-0001-0001-0001-000000000002', '12340101-0101-0101-0101-010101010101', '91111111-1111-1111-1111-111111111114', 'Coca-Cola', 3.50, 2, '', NOW(), NOW(), 0),
 
 ('12340002-0002-0002-0002-000000000001', '12340202-0202-0202-0202-020202020202', '92222222-2222-2222-2222-222222222221', 'Classic Burger', 11.00, 1, 'Test mobile', NOW(), NOW(), 0),
-('12340002-0002-0002-0002-000000000002', '12340202-0202-0202-0202-020202020202', '92222222-2222-2222-2222-222222222223', 'Frites', 5.50, 1, '', NOW(), NOW(), 0);
+('12340002-0002-0002-0002-000000000002', '12340202-0202-0202-0202-020202020202', '92222222-2222-2222-2222-222222222223', 'Frites', 5.50, 1, '', NOW(), NOW(), 0),
+
+-- Items pour commandes Jean Dupont (dev)
+('4ffe0001-0001-0001-0001-000000000001', '4ffe0001-0001-0001-0001-000000000001', '91111111-1111-1111-1111-111111111115', 'Pizza 4 Fromages', 15.50, 1, '', NOW(), NOW(), 0),
+('4ffe0001-0001-0001-0001-000000000002', '4ffe0001-0001-0001-0001-000000000001', '91111111-1111-1111-1111-111111111113', 'Tiramisu', 7.00, 1, '', NOW(), NOW(), 0),
+('4ffe0001-0001-0001-0001-000000000003', '4ffe0001-0001-0001-0001-000000000001', '91111111-1111-1111-1111-111111111114', 'Coca-Cola', 3.00, 1, '', NOW(), NOW(), 0),
+
+('4ffe0002-0002-0002-0002-000000000001', '4ffe0002-0002-0002-0002-000000000002', '92222222-2222-2222-2222-222222222222', 'Cheese Burger', 12.50, 1, '', NOW(), NOW(), 0),
+('4ffe0002-0002-0002-0002-000000000002', '4ffe0002-0002-0002-0002-000000000002', '92222222-2222-2222-2222-222222222223', 'Frites', 4.50, 1, '', NOW(), NOW(), 0),
+
+('4ffe0003-0003-0003-0003-000000000001', '4ffe0003-0003-0003-0003-000000000003', '91111111-1111-1111-1111-111111111111', 'Pizza Margherita', 12.50, 1, '', NOW(), NOW(), 0),
+('4ffe0003-0003-0003-0003-000000000002', '4ffe0003-0003-0003-0003-000000000003', '91111111-1111-1111-1111-111111111112', 'Pizza Pepperoni', 14.00, 1, '', NOW(), NOW(), 0),
+('4ffe0003-0003-0003-0003-000000000003', '4ffe0003-0003-0003-0003-000000000003', '91111111-1111-1111-1111-111111111114', 'Coca-Cola', 3.00, 2, '', NOW(), NOW(), 0);

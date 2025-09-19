@@ -18,7 +18,7 @@ const defaultHeaders = {
 };
 
 // User ID fixe pour les tests sans auth
-const MOCK_USER_ID = ENV.MOCK_USER_ID;
+const DEV_USER_ID = ENV.DEV_USER_ID;
 
 class ApiService {
   private async request<T>(
@@ -91,14 +91,14 @@ class ApiService {
       this.request<any>('/orders', {
         method: 'POST',
         headers: {
-          'User-Id': MOCK_USER_ID, // Header requis par le backend
+          'User-Id': DEV_USER_ID, // Header requis par le backend
         },
         body: JSON.stringify(orderData),
       }),
     
     getByUserId: (userId?: string) => {
-      const finalUserId = userId || MOCK_USER_ID;
-      console.log('🔍 getByUserId called with:', { userId, finalUserId, MOCK_USER_ID });
+      const finalUserId = userId || DEV_USER_ID;
+      console.log('🔍 getByUserId called with:', { userId, finalUserId, DEV_USER_ID });
       return this.request<any[]>(`/orders?userId=${finalUserId}`);
     },
     

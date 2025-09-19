@@ -21,8 +21,8 @@ interface WebSocketProviderProps {
 }
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
-  // Use the mock user ID for development
-  const userId = ENV.MOCK_USER_ID;
+  // Use the dev user ID for development
+  const userId = ENV.DEV_USER_ID;
 
   // Get refreshOrders function from OrderContext
   const { refreshOrders } = useOrder();

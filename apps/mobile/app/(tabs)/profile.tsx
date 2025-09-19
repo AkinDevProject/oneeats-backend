@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { NotificationSimulator } from '../../src/services/NotificationSimulator';
 
 export default function ProfileMVP() {
@@ -16,7 +17,25 @@ export default function ProfileMVP() {
 
   const navigateToSection = (section: string) => {
     console.log(`Navigating to ${section}`);
-    // TODO: Navigation logic
+
+    switch (section) {
+      case 'account':
+        router.push('/account');
+        break;
+      case 'favorites':
+        // TODO: Créer la page favoris
+        console.log('Page favoris à créer');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'support':
+        // TODO: Créer la page aide & support
+        console.log('Page aide & support à créer');
+        break;
+      default:
+        console.log(`Section ${section} non implémentée`);
+    }
   };
 
   return (

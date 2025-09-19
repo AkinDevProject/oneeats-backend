@@ -602,6 +602,23 @@ cd apps/mobile && npm run android
   - Navigation fluide avec animations Reanimated
 - **Intégration** : Connecté aux contextes Auth et Theme existants, accessible depuis le profil utilisateur
 
+**✅ Page Compte Utilisateur Complète**
+- **Route** : `/account/` - Gestion complète du profil utilisateur
+- **Fonctionnalités principales** :
+  - 👤 **Profil utilisateur** : Avatar, nom complet, email, date d'inscription
+  - 📊 **Statistiques personnelles** : Nombre commandes, favoris, montant total dépensé
+  - ✏️ **Modification informations** : Prénom, nom, email, téléphone, adresse avec modal d'édition
+  - 🔒 **Sécurité** : Changement mot de passe, confidentialité, export données
+  - ⚠️ **Zone danger** : Suppression de compte avec confirmation
+- **Interface utilisateur** :
+  - Modal d'édition réactive avec validation des champs
+  - Design Material Design avec cartes et sections organisées
+  - Navigation avec bouton retour vers profil principal
+  - Gestion des types de clavier (email, téléphone, texte multiligne)
+- **Données** : Connecté aux vraies données API (User ID dev: 4ffe5398-4599-4c33-98ec-18a96fd9e200)
+- **Statistiques en temps réel** : Calcul automatique commandes et montant dépensé depuis l'API
+- **Navigation** : Accessible depuis l'onglet "Mon Compte" → "Compte"
+
 **✅ Système de Notifications Push Expo**
 - **Configuration Expo** : Ajout du plugin `expo-notifications` dans `app.json` avec icônes, canaux Android et permissions iOS
 - **Contexte PushNotificationContext** : Gestion complète des notifications push avec :
