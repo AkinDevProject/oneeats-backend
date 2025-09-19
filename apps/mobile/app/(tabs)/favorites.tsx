@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { apiService } from '../../src/services/api';
-import { ENV } from '../../src/config/env';
+import { useFavorites } from '../../src/hooks/useFavorites';
 
 // Interface pour un restaurant
 interface Restaurant {
@@ -41,61 +40,16 @@ interface UserFavorite {
 }
 
 export default function Favorites() {
-  const [favorites, setFavorites] = useState<UserFavorite[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { favorites, isLoading, toggleFavorite, refreshFavorites } = useFavorites();
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Charger les favoris
-  useEffect(() => {
-    loadFavorites();
-  }, []);
-
-  const loadFavorites = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Appel API réel pour récupérer les favoris
-      const favoritesData = await apiService.favorites.getByUserId(ENV.DEV_USER_ID);
-
-      // Transformer les données du backend en format attendu par l'app
-      const transformedFavorites: UserFavorite[] = favoritesData.map((fav: any) => ({
-        id: fav.id,
-        userId: fav.userId,
-        restaurantId: fav.restaurantId,
-        restaurant: {
-          id: fav.restaurantId,
-          name: fav.restaurantName || 'Restaurant',
-          cuisine: fav.restaurantCuisine || 'Non spécifié',
-          rating: fav.restaurantRating || 0,
-          reviewCount: fav.restaurantReviewCount || 0,
-          deliveryTime: fav.restaurantDeliveryTime || '30-45 min',
-          deliveryFee: fav.restaurantDeliveryFee || 2.99,
-          isOpen: fav.restaurantIsOpen !== false,
-          imageUrl: fav.restaurantImageUrl,
-          distance: '-- km', // Distance non fournie par l'API pour l'instant
-        },
-        createdAt: fav.createdAt,
-      }));
-
-      setFavorites(transformedFavorites);
-
-    } catch (err) {
-      console.error('Erreur lors du chargement des favoris:', err);
-      setError('Impossible de charger vos favoris');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadFavorites();
+    await refreshFavorites();
     setRefreshing(false);
   };
 
-  const removeFavorite = async (favoriteId: string, restaurantName: string) => {
+  const removeFavorite = async (restaurantId: string, restaurantName: string) => {
     Alert.alert(
       'Retirer des favoris',
       `Voulez-vous retirer "${restaurantName}" de vos favoris ?`,
@@ -109,17 +63,7 @@ export default function Favorites() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Trouver le restaurant ID correspondant au favori
-              const favorite = favorites.find(fav => fav.id === favoriteId);
-              if (!favorite) {
-                Alert.alert('Erreur', 'Favori non trouvé');
-                return;
-              }
-
-              // Appel API pour supprimer le favori (utilise restaurant ID comme requis par l'API)
-              await apiService.favorites.remove(ENV.DEV_USER_ID, favorite.restaurantId);
-
-              setFavorites(prev => prev.filter(fav => fav.id !== favoriteId));
+              await toggleFavorite(restaurantId);
               Alert.alert('Succès', 'Restaurant retiré de vos favoris');
             } catch (err) {
               console.error('Erreur lors de la suppression du favori:', err);
@@ -194,7 +138,7 @@ export default function Favorites() {
         {/* Bouton de suppression */}
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => removeFavorite(favorite.id, restaurant.name)}
+          onPress={() => removeFavorite(restaurant.id, restaurant.name)}
         >
           <MaterialIcons name="favorite" size={24} color="#FF3B30" />
         </TouchableOpacity>
@@ -202,8 +146,28 @@ export default function Favorites() {
     );
   }, [removeFavorite]);
 
+  // Transformer les données du contexte en format UserFavorite pour compatibilité
+  const transformedFavorites: UserFavorite[] = favorites.map((fav) => ({
+    id: fav.id,
+    userId: fav.userId,
+    restaurantId: fav.restaurantId,
+    restaurant: {
+      id: fav.restaurantId,
+      name: fav.restaurantName,
+      cuisine: fav.restaurantCuisine,
+      rating: fav.restaurantRating,
+      reviewCount: fav.restaurantReviewCount,
+      deliveryTime: fav.restaurantDeliveryTime,
+      deliveryFee: fav.restaurantDeliveryFee,
+      isOpen: fav.restaurantIsOpen,
+      imageUrl: fav.restaurantImageUrl,
+      distance: '-- km',
+    },
+    createdAt: fav.createdAt,
+  }));
+
   // Affichage du loading
-  if (loading) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar style="dark" backgroundColor="#ffffff" />
@@ -236,15 +200,7 @@ export default function Favorites() {
       </View>
 
       {/* Contenu */}
-      {error ? (
-        <View style={styles.errorContainer}>
-          <MaterialIcons name="error" size={48} color="#FF3B30" />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadFavorites}>
-            <Text style={styles.retryText}>Réessayer</Text>
-          </TouchableOpacity>
-        </View>
-      ) : favorites.length === 0 ? (
+      {transformedFavorites.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialIcons name="favorite-border" size={64} color="#ccc" />
           <Text style={styles.emptyTitle}>Aucun favori</Text>
@@ -265,10 +221,10 @@ export default function Favorites() {
           }
         >
           <Text style={styles.favoritesCount}>
-            {favorites.length} restaurant{favorites.length > 1 ? 's' : ''} favori{favorites.length > 1 ? 's' : ''}
+            {transformedFavorites.length} restaurant{transformedFavorites.length > 1 ? 's' : ''} favori{transformedFavorites.length > 1 ? 's' : ''}
           </Text>
 
-          {favorites.map((favorite) => (
+          {transformedFavorites.map((favorite) => (
             <React.Fragment key={favorite.id}>
               {renderFavoriteItem(favorite)}
             </React.Fragment>

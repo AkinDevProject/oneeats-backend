@@ -72,23 +72,15 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
 }) => {
   const handlePress = useCallback(() => onPress(restaurant), [restaurant, onPress]);
   const { toggleFavorite, checkFavoriteStatus, isLoading } = useFavorites();
-  const [isFavorite, setIsFavorite] = useState(false);
 
-  // Vérifier le statut favori au montage du composant
-  useEffect(() => {
-    const checkStatus = async () => {
-      const status = await checkFavoriteStatus(restaurant.id);
-      setIsFavorite(status);
-    };
-    checkStatus();
-  }, [restaurant.id, checkFavoriteStatus]);
+  // Utiliser directement l'état global du contexte
+  const isFavorite = checkFavoriteStatus(restaurant.id);
 
   const handleFavoriteToggle = useCallback(async (e: any) => {
     e.stopPropagation(); // Empêcher la navigation vers le restaurant
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    const newStatus = await toggleFavorite(restaurant.id);
-    setIsFavorite(newStatus);
+    await toggleFavorite(restaurant.id);
   }, [restaurant.id, toggleFavorite]);
 
   return (
