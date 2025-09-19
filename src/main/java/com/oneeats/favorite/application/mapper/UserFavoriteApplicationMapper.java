@@ -20,33 +20,42 @@ public class UserFavoriteApplicationMapper {
             return null;
         }
 
-        // Pour le moment, utilisons les données depuis import-dev.sql
-        // Les restaurants ont des noms réels dans la base
-        String restaurantName = "Restaurant";
-        String cuisine = "Cuisine";
+        // Récupérer les vraies données du restaurant depuis la base de données
+        Optional<Restaurant> restaurantOpt = restaurantRepository.findById(favorite.getRestaurantId());
 
-        // Mappage simple basé sur les IDs connus
-        if ("11111111-1111-1111-1111-111111111111".equals(favorite.getRestaurantId().toString())) {
-            restaurantName = "Burger Palace";
-            cuisine = "Fast Food";
-        } else if ("22222222-2222-2222-2222-222222222222".equals(favorite.getRestaurantId().toString())) {
-            restaurantName = "Pizza Express";
-            cuisine = "Italien";
+        if (restaurantOpt.isPresent()) {
+            Restaurant restaurant = restaurantOpt.get();
+
+            return new UserFavoriteDTO(
+                favorite.getId(),
+                favorite.getUserId(),
+                favorite.getRestaurantId(),
+                restaurant.getName(),
+                restaurant.getCuisineType().toString(),
+                restaurant.getRating(),
+                50, // Reviews par défaut (TODO: ajouter le système de reviews)
+                "30-45 min", // Temps de livraison par défaut (TODO: calculer selon la distance)
+                2.99, // Frais de livraison par défaut (TODO: calculer selon la distance)
+                restaurant.canAcceptOrders(),
+                restaurant.getImageUrl(),
+                favorite.getCreatedAt()
+            );
+        } else {
+            // Fallback si le restaurant n'existe plus
+            return new UserFavoriteDTO(
+                favorite.getId(),
+                favorite.getUserId(),
+                favorite.getRestaurantId(),
+                "Restaurant supprimé",
+                "Non disponible",
+                0.0,
+                0,
+                "Non disponible",
+                0.0,
+                false,
+                null,
+                favorite.getCreatedAt()
+            );
         }
-
-        return new UserFavoriteDTO(
-            favorite.getId(),
-            favorite.getUserId(),
-            favorite.getRestaurantId(),
-            restaurantName,
-            cuisine,
-            4.2, // Rating par défaut
-            50, // Reviews par défaut
-            "30-45 min", // Temps de livraison par défaut
-            2.99, // Frais de livraison par défaut
-            true, // Ouvert par défaut
-            null, // Pas d'image pour l'instant
-            favorite.getCreatedAt()
-        );
     }
 }

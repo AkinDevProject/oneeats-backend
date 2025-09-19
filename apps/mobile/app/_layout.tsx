@@ -22,6 +22,7 @@ import { PushNotificationProvider } from '../src/contexts/PushNotificationContex
 import { WebSocketProvider } from '../src/contexts/WebSocketContext';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/ThemeContext';
 import { SettingsProvider } from '../src/contexts/SettingsContext';
+import { FavoritesProvider } from '../src/contexts/FavoritesContext';
 
 // Create a client for React Query - Optimisé pour de meilleures performances
 const queryClient = new QueryClient({
@@ -45,11 +46,12 @@ function AppContent() {
     <PaperProvider theme={currentTheme} key={selectedTheme}>
       <SettingsProvider>
         <AuthProvider>
-          <PushNotificationProvider>
-            <NotificationProvider>
-              <CartProvider>
-                <OrderProvider>
-                  <WebSocketProvider>
+          <FavoritesProvider>
+            <PushNotificationProvider>
+              <NotificationProvider>
+                <CartProvider>
+                  <OrderProvider>
+                    <WebSocketProvider>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                   <Stack>
                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -64,11 +66,12 @@ function AppContent() {
                   </Stack>
                   <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
                 </ThemeProvider>
-                  </WebSocketProvider>
-                </OrderProvider>
-              </CartProvider>
-            </NotificationProvider>
-          </PushNotificationProvider>
+                    </WebSocketProvider>
+                  </OrderProvider>
+                </CartProvider>
+              </NotificationProvider>
+            </PushNotificationProvider>
+          </FavoritesProvider>
         </AuthProvider>
       </SettingsProvider>
     </PaperProvider>

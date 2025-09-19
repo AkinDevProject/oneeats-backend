@@ -40,6 +40,7 @@ import {
 
 import { cuisineCategories, Restaurant } from '../../src/data/mockData';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
+import { useFavorites } from '../../src/hooks/useFavorites';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import OptimizedImage from '../../src/components/OptimizedImage';
 import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
@@ -70,17 +71,36 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
   theme: any;
 }) => {
   const handlePress = useCallback(() => onPress(restaurant), [restaurant, onPress]);
-  
+  const { toggleFavorite, checkFavoriteStatus, isLoading } = useFavorites();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Vérifier le statut favori au montage du composant
+  useEffect(() => {
+    const checkStatus = async () => {
+      const status = await checkFavoriteStatus(restaurant.id);
+      setIsFavorite(status);
+    };
+    checkStatus();
+  }, [restaurant.id, checkFavoriteStatus]);
+
+  const handleFavoriteToggle = useCallback(async (e: any) => {
+    e.stopPropagation(); // Empêcher la navigation vers le restaurant
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    const newStatus = await toggleFavorite(restaurant.id);
+    setIsFavorite(newStatus);
+  }, [restaurant.id, toggleFavorite]);
+
   return (
     <Card style={[baseStyles.card, { backgroundColor: theme.colors.surface }]} elevation={2}>
       <TouchableRipple onPress={handlePress} borderless>
         <View>
-          <Image 
+          <Image
             source={{ uri: restaurant.image }}
             style={baseStyles.cardCover}
             resizeMode="cover"
           />
-          
+
           {!restaurant.isOpen && (
             <View style={baseStyles.closedOverlay}>
               <Surface style={[baseStyles.closedSurface, { backgroundColor: theme.colors.errorContainer }]} elevation={2}>
@@ -88,7 +108,7 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
               </Surface>
             </View>
           )}
-          
+
           <View style={baseStyles.cardBadges}>
             <Badge style={[baseStyles.ratingBadge, { backgroundColor: theme.colors.surface }]}>
               <Text style={{ color: theme.colors.onSurface, fontSize: 12, fontWeight: '600' }}>
@@ -102,6 +122,23 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
                 </Text>
               </Badge>
             )}
+          </View>
+
+          {/* Icône cœur pour les favoris */}
+          <View style={baseStyles.favoriteButton}>
+            <IconButton
+              icon={isFavorite ? "heart" : "heart-outline"}
+              size={24}
+              iconColor={isFavorite ? "#FF4444" : "#FFFFFF"}
+              style={[
+                baseStyles.favoriteIcon,
+                {
+                  backgroundColor: isFavorite ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.5)',
+                }
+              ]}
+              onPress={handleFavoriteToggle}
+              disabled={isLoading}
+            />
           </View>
           
           <Card.Content style={baseStyles.cardContent}>
@@ -740,6 +777,23 @@ const baseStyles = StyleSheet.create({
   },
   featuredBadge: {
     // backgroundColor sera appliqué dynamiquement
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
+  },
+  favoriteIcon: {
+    margin: 0,
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   cardContent: {
     paddingTop: 16,

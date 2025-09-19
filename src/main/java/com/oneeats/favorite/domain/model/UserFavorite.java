@@ -13,7 +13,6 @@ public class UserFavorite extends BaseEntity {
 
     // Constructeur privé pour forcer l'utilisation des factory methods
     private UserFavorite(UUID userId, UUID restaurantId) {
-        this.setId(UUID.randomUUID());
         this.userId = Objects.requireNonNull(userId, "User ID cannot be null");
         this.restaurantId = Objects.requireNonNull(restaurantId, "Restaurant ID cannot be null");
         this.createdAt = LocalDateTime.now();
