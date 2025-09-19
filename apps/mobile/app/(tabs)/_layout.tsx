@@ -140,6 +140,23 @@ export default function TabLayout() {
         }}
       />
 
+      {/* ❤️ FAVORIS - Restaurants favoris */}
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favoris',
+          tabBarIcon: ({ color, focused }) => {
+            return (
+              <MaterialIcons
+                name={focused ? 'favorite' : 'favorite-border'}
+                size={26}
+                color={color}
+              />
+            );
+          },
+        }}
+      />
+
       {/* 👤 PROFIL - Personnel & Paramètres */}
       <Tabs.Screen
         name="profile"

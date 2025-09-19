@@ -130,9 +130,12 @@ export default function AccountPage() {
       const totalSpent = orders.reduce((sum: number, order: any) => sum + order.totalAmount, 0);
       const ordersCount = orders.length;
 
+      // TODO: Récupérer les vrais favoris depuis l'API
+      const favoriteRestaurantsCount = 3; // Valeur simulée pour correspondre aux favoris mock
+
       setStats({
         ordersCount,
-        favoriteRestaurantsCount: 0, // TODO: Implémenter les favoris
+        favoriteRestaurantsCount,
         totalSpent,
       });
 
@@ -344,6 +347,34 @@ export default function AccountPage() {
           </TouchableOpacity>
         </View>
 
+        {/* Quick Actions */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <MaterialIcons name="dashboard" size={20} color="#007AFF" />
+            <Text style={styles.cardTitle}>Actions Rapides</Text>
+          </View>
+
+
+          <TouchableOpacity style={styles.actionItem}>
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="history" size={20} color="#666" />
+              <Text style={styles.actionLabel}>Historique des commandes</Text>
+            </View>
+            <View style={styles.actionRight}>
+              <Text style={styles.actionBadge}>{stats.ordersCount}</Text>
+              <MaterialIcons name="chevron-right" size={20} color="#666" />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.actionItem}>
+            <View style={styles.actionLeft}>
+              <MaterialIcons name="location-on" size={20} color="#666" />
+              <Text style={styles.actionLabel}>Mes adresses</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
+          </TouchableOpacity>
+        </View>
+
         {/* Account Actions */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -552,6 +583,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#000',
     marginLeft: 12,
+  },
+  actionRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionBadge: {
+    backgroundColor: '#007AFF',
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginRight: 8,
+    minWidth: 20,
+    textAlign: 'center',
   },
   dangerText: {
     color: '#FF3B30',
