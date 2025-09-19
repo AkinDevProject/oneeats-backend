@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -56,63 +56,30 @@ export default function Favorites() {
       setLoading(true);
       setError(null);
 
-      // TODO: Remplacer par l'API réelle des favoris quand elle sera implémentée
-      // Pour l'instant, on simule des données
-      const mockFavorites: UserFavorite[] = [
-        {
-          id: '1',
-          userId: ENV.DEV_USER_ID,
-          restaurantId: '11111111-1111-1111-1111-111111111111',
-          restaurant: {
-            id: '11111111-1111-1111-1111-111111111111',
-            name: 'Pizza Palace',
-            cuisine: 'Italien',
-            rating: 4.5,
-            reviewCount: 127,
-            deliveryTime: '25-35 min',
-            deliveryFee: 2.99,
-            isOpen: true,
-            distance: '1.2 km',
-          },
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          userId: ENV.DEV_USER_ID,
-          restaurantId: '22222222-2222-2222-2222-222222222222',
-          restaurant: {
-            id: '22222222-2222-2222-2222-222222222222',
-            name: 'Burger Bistro',
-            cuisine: 'Américain',
-            rating: 4.2,
-            reviewCount: 89,
-            deliveryTime: '20-30 min',
-            deliveryFee: 1.99,
-            isOpen: true,
-            distance: '0.8 km',
-          },
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          userId: ENV.DEV_USER_ID,
-          restaurantId: '33333333-3333-3333-3333-333333333333',
-          restaurant: {
-            id: '33333333-3333-3333-3333-333333333333',
-            name: 'Sushi Express',
-            cuisine: 'Japonais',
-            rating: 4.7,
-            reviewCount: 201,
-            deliveryTime: '30-45 min',
-            deliveryFee: 3.49,
-            isOpen: false,
-            distance: '2.1 km',
-          },
-          createdAt: new Date().toISOString(),
-        },
-      ];
+      // Appel API réel pour récupérer les favoris
+      const favoritesData = await apiService.favorites.getByUserId(ENV.DEV_USER_ID);
 
-      setFavorites(mockFavorites);
+      // Transformer les données du backend en format attendu par l'app
+      const transformedFavorites: UserFavorite[] = favoritesData.map((fav: any) => ({
+        id: fav.id,
+        userId: fav.userId,
+        restaurantId: fav.restaurantId,
+        restaurant: {
+          id: fav.restaurantId,
+          name: fav.restaurantName || 'Restaurant',
+          cuisine: fav.restaurantCuisine || 'Non spécifié',
+          rating: fav.restaurantRating || 0,
+          reviewCount: fav.restaurantReviewCount || 0,
+          deliveryTime: fav.restaurantDeliveryTime || '30-45 min',
+          deliveryFee: fav.restaurantDeliveryFee || 2.99,
+          isOpen: fav.restaurantIsOpen !== false,
+          imageUrl: fav.restaurantImageUrl,
+          distance: '-- km', // Distance non fournie par l'API pour l'instant
+        },
+        createdAt: fav.createdAt,
+      }));
+
+      setFavorites(transformedFavorites);
 
     } catch (err) {
       console.error('Erreur lors du chargement des favoris:', err);
@@ -142,7 +109,16 @@ export default function Favorites() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // TODO: Implémenter l'API de suppression des favoris
+              // Trouver le restaurant ID correspondant au favori
+              const favorite = favorites.find(fav => fav.id === favoriteId);
+              if (!favorite) {
+                Alert.alert('Erreur', 'Favori non trouvé');
+                return;
+              }
+
+              // Appel API pour supprimer le favori (utilise restaurant ID comme requis par l'API)
+              await apiService.favorites.remove(ENV.DEV_USER_ID, favorite.restaurantId);
+
               setFavorites(prev => prev.filter(fav => fav.id !== favoriteId));
               Alert.alert('Succès', 'Restaurant retiré de vos favoris');
             } catch (err) {
@@ -156,15 +132,15 @@ export default function Favorites() {
   };
 
   const navigateToRestaurant = (restaurant: Restaurant) => {
-    // TODO: Naviguer vers la page du restaurant
-    Alert.alert('Navigation', `Redirection vers ${restaurant.name}`);
+    // Navigation vers la page du restaurant
+    router.push(`/restaurant/${restaurant.id}`);
   };
 
-  const renderFavoriteItem = (favorite: UserFavorite) => {
+  const renderFavoriteItem = useCallback((favorite: UserFavorite) => {
     const { restaurant } = favorite;
 
     return (
-      <View key={favorite.id} style={styles.restaurantCard}>
+      <View style={styles.restaurantCard}>
         <TouchableOpacity
           style={styles.cardContent}
           onPress={() => navigateToRestaurant(restaurant)}
@@ -224,7 +200,7 @@ export default function Favorites() {
         </TouchableOpacity>
       </View>
     );
-  };
+  }, [removeFavorite]);
 
   // Affichage du loading
   if (loading) {
@@ -292,7 +268,11 @@ export default function Favorites() {
             {favorites.length} restaurant{favorites.length > 1 ? 's' : ''} favori{favorites.length > 1 ? 's' : ''}
           </Text>
 
-          {favorites.map(renderFavoriteItem)}
+          {favorites.map((favorite) => (
+            <React.Fragment key={favorite.id}>
+              {renderFavoriteItem(favorite)}
+            </React.Fragment>
+          ))}
 
           <View style={styles.bottomSpacer} />
         </ScrollView>

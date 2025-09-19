@@ -127,6 +127,30 @@ class ApiService {
     getById: (id: string) => this.request<any>(`/users/${id}`),
   };
 
+  // Favorites
+  favorites = {
+    getByUserId: (userId: string) =>
+      this.request<any[]>(`/users/${userId}/favorites`),
+
+    add: (userId: string, restaurantId: string) =>
+      this.request<any>(`/users/${userId}/favorites/${restaurantId}`, {
+        method: 'POST',
+      }),
+
+    remove: (userId: string, restaurantId: string) =>
+      this.request<any>(`/users/${userId}/favorites/${restaurantId}`, {
+        method: 'DELETE',
+      }),
+
+    check: (userId: string, restaurantId: string) =>
+      this.request<{ isFavorite: boolean }>(`/users/${userId}/favorites/${restaurantId}`),
+
+    toggle: (userId: string, restaurantId: string) =>
+      this.request<any>(`/users/${userId}/favorites/${restaurantId}/toggle`, {
+        method: 'PUT',
+      }),
+  };
+
   // Health check
   health = {
     check: () => this.request<{ status: string }>('/q/health'),
