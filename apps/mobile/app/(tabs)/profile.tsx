@@ -10,7 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { NotificationSimulator } from '../../src/services/NotificationSimulator';
 
 export default function ProfileMVP() {
   console.log('📋 Profile page rendering');
@@ -22,16 +21,11 @@ export default function ProfileMVP() {
       case 'account':
         router.push('/account');
         break;
-      case 'favorites':
-        // TODO: Créer la page favoris
-        console.log('Page favoris à créer');
-        break;
       case 'settings':
         router.push('/settings');
         break;
       case 'support':
-        // TODO: Créer la page aide & support
-        console.log('Page aide & support à créer');
+        router.push('/aide-support');
         break;
       default:
         console.log(`Section ${section} non implémentée`);
@@ -74,18 +68,6 @@ export default function ProfileMVP() {
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('favorites')}>
-                <View style={styles.listLeft}>
-                  <MaterialIcons name="favorite" size={24} color="#666" />
-                </View>
-                <View style={styles.listContent}>
-                  <Text style={styles.listTitle}>Favoris</Text>
-                  <Text style={styles.listDescription}>Mes restaurants préférés</Text>
-                </View>
-                <View style={styles.listRight}>
-                  <MaterialIcons name="chevron-right" size={24} color="#666" />
-                </View>
-              </TouchableOpacity>
 
               <TouchableOpacity style={styles.listItem} onPress={() => navigateToSection('settings')}>
                 <View style={styles.listLeft}>
@@ -113,23 +95,6 @@ export default function ProfileMVP() {
                 </View>
               </TouchableOpacity>
 
-              {__DEV__ && (
-                <TouchableOpacity
-                  style={[styles.listItem, styles.testButton]}
-                  onPress={() => NotificationSimulator.simulateNotifications()}
-                >
-                  <View style={styles.listLeft}>
-                    <MaterialIcons name="notifications" size={24} color="#007AFF" />
-                  </View>
-                  <View style={styles.listContent}>
-                    <Text style={[styles.listTitle, styles.testText]}>🧪 Test Notifications</Text>
-                    <Text style={styles.listDescription}>Simuler les notifications (dev seulement)</Text>
-                  </View>
-                  <View style={styles.listRight}>
-                    <MaterialIcons name="play-arrow" size={24} color="#007AFF" />
-                  </View>
-                </TouchableOpacity>
-              )}
             </View>
           </View>
         </ScrollView>
@@ -223,14 +188,5 @@ const styles = StyleSheet.create({
   },
   listRight: {
     marginLeft: 8,
-  },
-  testButton: {
-    backgroundColor: '#f0f8ff',
-    borderColor: '#007AFF',
-    borderWidth: 1,
-  },
-  testText: {
-    color: '#007AFF',
-    fontWeight: '600',
   },
 });
