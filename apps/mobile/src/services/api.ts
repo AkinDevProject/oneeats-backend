@@ -129,7 +129,7 @@ class ApiService {
 
   // Health check
   health = {
-    check: () => this.request<{ status: string }>('/health'),
+    check: () => this.request<{ status: string }>('/q/health'),
   };
 }
 
