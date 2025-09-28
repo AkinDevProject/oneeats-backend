@@ -7,6 +7,10 @@ import com.oneeats.menu.application.command.UpdateMenuItemRequest;
 import com.oneeats.menu.application.command.UpdateMenuItemCommandHandler;
 import com.oneeats.menu.application.command.DeleteMenuItemCommand;
 import com.oneeats.menu.application.command.DeleteMenuItemCommandHandler;
+import com.oneeats.menu.application.command.UploadMenuItemImageCommand;
+import com.oneeats.menu.application.command.UploadMenuItemImageCommandHandler;
+import com.oneeats.menu.application.command.DeleteMenuItemImageCommand;
+import com.oneeats.menu.application.command.DeleteMenuItemImageCommandHandler;
 import com.oneeats.menu.application.query.GetMenuItemQuery;
 import com.oneeats.menu.application.query.GetMenuItemQueryHandler;
 import com.oneeats.menu.application.query.GetRestaurantMenuQuery;
@@ -21,6 +25,9 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +54,12 @@ public class MenuController {
     
     @Inject
     SearchMenuItemsQueryHandler searchMenuItemsQueryHandler;
+
+    @Inject
+    UploadMenuItemImageCommandHandler uploadMenuItemImageCommandHandler;
+
+    @Inject
+    DeleteMenuItemImageCommandHandler deleteMenuItemImageCommandHandler;
     
     @POST
     public Response createMenuItem(@Valid CreateMenuItemCommand command) {
@@ -149,6 +162,76 @@ public class MenuController {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("Error searching menu items: " + e.getMessage())
+                .build();
+        }
+    }
+
+    @POST
+    @Path("/{id}/image")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response uploadMenuItemImage(
+        @PathParam("id") UUID id,
+        @FormParam("file") InputStream fileStream,
+        @FormParam("filename") String filename
+    ) {
+        try {
+            if (fileStream == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("File is required")
+                    .build();
+            }
+            if (filename == null || filename.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Filename is required")
+                    .build();
+            }
+
+            // Read file into byte array for size validation
+            byte[] fileBytes = fileStream.readAllBytes();
+            if (fileBytes.length == 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Empty file")
+                    .build();
+            }
+
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(fileBytes);
+            UploadMenuItemImageCommand command = new UploadMenuItemImageCommand(
+                id,
+                byteStream,
+                filename,
+                fileBytes.length
+            );
+            MenuItemDTO menuItem = uploadMenuItemImageCommandHandler.handle(command);
+            return Response.ok(menuItem).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(e.getMessage())
+                .build();
+        } catch (IOException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Failed to read uploaded file")
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Upload failed: " + e.getMessage())
+                .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}/image")
+    public Response deleteMenuItemImage(@PathParam("id") UUID id) {
+        try {
+            DeleteMenuItemImageCommand command = new DeleteMenuItemImageCommand(id);
+            MenuItemDTO menuItem = deleteMenuItemImageCommandHandler.handle(command);
+            return Response.ok(menuItem).build();
+        } catch (EntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to delete image: " + e.getMessage())
                 .build();
         }
     }

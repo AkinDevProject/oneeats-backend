@@ -5,6 +5,7 @@ import com.oneeats.shared.domain.vo.Email;
 import com.oneeats.restaurant.domain.event.RestaurantCreatedEvent;
 import com.oneeats.restaurant.domain.event.RestaurantOpenedEvent;
 import com.oneeats.restaurant.domain.event.RestaurantClosedEvent;
+import com.oneeats.restaurant.domain.event.RestaurantApprovedEvent;
 
 import java.util.UUID;
 
@@ -79,6 +80,8 @@ public class Restaurant extends BaseEntity {
         }
         this.status = RestaurantStatus.APPROVED;
         this.markAsModified();
+        // Generate domain event for restaurant approval
+        this.addDomainEvent(new RestaurantApprovedEvent(this.getId(), this.getName()));
     }
 
     public void block() {

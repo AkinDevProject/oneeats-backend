@@ -17,15 +17,30 @@ public class OpeningHours {
         if (openTime == null || closeTime == null || openTime.trim().isEmpty() || closeTime.trim().isEmpty()) {
             return null;
         }
-        
+
         try {
             return new OpeningHours(
-                LocalTime.parse(openTime),
-                LocalTime.parse(closeTime)
+                parseFlexibleTime(openTime.trim()),
+                parseFlexibleTime(closeTime.trim())
             );
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid time format: " + openTime + " - " + closeTime);
         }
+    }
+
+    /**
+     * Parse time with flexible format support (handles both "9:00" and "09:00")
+     */
+    private static LocalTime parseFlexibleTime(String timeStr) {
+        // Handle various formats: "9:00", "09:00", "9:00:00", "09:00:00"
+        if (timeStr.matches("\\d{1,2}:\\d{2}(:\\d{2})?")) {
+            // Ensure hour has leading zero for ISO-8601 compliance
+            if (timeStr.indexOf(':') == 1) {
+                timeStr = "0" + timeStr;
+            }
+            return LocalTime.parse(timeStr);
+        }
+        throw new IllegalArgumentException("Invalid time format: " + timeStr);
     }
 
     public static OpeningHours of(LocalTime openTime, LocalTime closeTime) {

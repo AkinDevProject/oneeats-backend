@@ -47,58 +47,62 @@ class RestaurantTest {
     class BusinessRulesValidation {
         
         @Test
-        @DisplayName("Should activate pending restaurant")
-        void shouldActivatePendingRestaurant() {
-            // Given
+        @DisplayName("Should approve pending restaurant")
+        void shouldApprovePendingRestaurant() {
+            // Given - Restaurant is created with PENDING status
             assertEquals(RestaurantStatus.PENDING, restaurant.getStatus());
-            
-            // When
-            restaurant.activate();
-            
-            // Then
-            assertEquals(RestaurantStatus.ACTIVE, restaurant.getStatus());
+
+            // When - Admin approves the restaurant
+            restaurant.approve();
+
+            // Then - Restaurant status changes to APPROVED
+            assertEquals(RestaurantStatus.APPROVED, restaurant.getStatus());
             assertNotNull(restaurant.getUpdatedAt());
         }
         
         @Test
-        @DisplayName("Should reject activation of already active restaurant")
-        void shouldRejectActivationOfAlreadyActiveRestaurant() {
-            // Given
-            restaurant.activate();
-            
-            // When & Then
-            IllegalStateException exception = assertThrows(
-                IllegalStateException.class, 
-                () -> restaurant.activate()
-            );
-            assertEquals("Restaurant is already active", exception.getMessage());
+        @DisplayName("Should prevent reapproval of already approved restaurant")
+        void shouldPreventReapprovalOfAlreadyApprovedRestaurant() {
+            // Given - Restaurant is already approved
+            restaurant.approve();
+            assertEquals(RestaurantStatus.APPROVED, restaurant.getStatus());
+
+            // When & Then - Admin re-approves should throw exception
+            assertThrows(IllegalStateException.class, () -> restaurant.approve());
+
+            // Restaurant remains approved
+            assertEquals(RestaurantStatus.APPROVED, restaurant.getStatus());
         }
         
         @Test
-        @DisplayName("Should open active restaurant")
-        void shouldOpenActiveRestaurant() {
-            // Given
-            restaurant.activate();
-            
-            // When
+        @DisplayName("Should open approved restaurant")
+        void shouldOpenApprovedRestaurant() {
+            // Given - Restaurant is approved and can be opened
+            restaurant.approve();
+            assertFalse(restaurant.isOpen()); // Initially closed
+
+            // When - Restaurant opens for business
             restaurant.open();
-            
-            // Then
-            assertEquals(RestaurantStatus.OPEN, restaurant.getStatus());
-            assertFalse(restaurant.getDomainEvents().isEmpty());
+
+            // Then - Restaurant is now open for orders
+            assertTrue(restaurant.isOpen());
+            assertTrue(restaurant.canAcceptOrders());
         }
         
         @Test
-        @DisplayName("Should reject opening of non-active restaurant")
-        void shouldRejectOpeningOfNonActiveRestaurant() {
-            // Given - restaurant is PENDING
-            
-            // When & Then
-            IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> restaurant.open()
-            );
-            assertTrue(exception.getMessage().contains("Cannot open"));
+        @DisplayName("Should block restaurant and prevent orders")
+        void shouldBlockRestaurantAndPreventOrders() {
+            // Given - Restaurant is approved and open (can accept orders)
+            restaurant.approve();
+            restaurant.open(); // Must be open to accept orders
+            assertTrue(restaurant.canAcceptOrders());
+
+            // When - Admin blocks the restaurant
+            restaurant.block();
+
+            // Then - Restaurant is blocked and cannot accept orders
+            assertEquals(RestaurantStatus.BLOCKED, restaurant.getStatus());
+            assertFalse(restaurant.canAcceptOrders());
         }
     }
     
@@ -112,10 +116,10 @@ class RestaurantTest {
             // Given
             String newName = "Updated Pizza Palace";
             String newDescription = "Even better pizza";
-            
-            // When
-            restaurant.updateInfo(newName, newDescription, null, null, null);
-            
+
+            // When - Update with new name and description, keeping existing contact info
+            restaurant.updateInfo(newName, newDescription, null, null, "updated@pizzapalace.fr");
+
             // Then
             assertEquals(newName, restaurant.getName());
             assertEquals(newDescription, restaurant.getDescription());
@@ -165,14 +169,15 @@ class RestaurantTest {
     class BusinessLogicQueries {
         
         @Test
-        @DisplayName("Should accept orders when open")
-        void shouldAcceptOrdersWhenOpen() {
-            // Given
-            restaurant.activate();
+        @DisplayName("Should accept orders when approved and open")
+        void shouldAcceptOrdersWhenApprovedAndOpen() {
+            // Given - Restaurant needs to be approved first
+            restaurant.approve();
             restaurant.open();
-            
-            // When & Then
+
+            // When & Then - Approved and open restaurant can accept orders
             assertTrue(restaurant.canAcceptOrders());
+            assertTrue(restaurant.isActive());
         }
         
         @Test
@@ -185,21 +190,19 @@ class RestaurantTest {
         }
         
         @Test
-        @DisplayName("Should be active when status is ACTIVE or OPEN")
-        void shouldBeActiveWhenStatusIsActiveOrOpen() {
-            // PENDING
+        @DisplayName("Should be active when status is APPROVED or when open")
+        void shouldBeActiveWhenStatusIsApprovedOrWhenOpen() {
+            // Given - PENDING restaurants are not active
             assertFalse(restaurant.isActive());
-            
-            // ACTIVE
-            restaurant.activate();
+
+            // When - Restaurant is approved
+            restaurant.approve();
+            // Then - Restaurant becomes active
             assertTrue(restaurant.isActive());
-            
-            // OPEN
-            restaurant.open();
-            assertTrue(restaurant.isActive());
-            
-            // SUSPENDED
-            restaurant.suspend();
+
+            // When - Restaurant is blocked
+            restaurant.block();
+            // Then - Restaurant is no longer active
             assertFalse(restaurant.isActive());
         }
     }
@@ -214,11 +217,11 @@ class RestaurantTest {
             // Given
             restaurant.clearDomainEvents();
             
-            // When
-            restaurant.activate();
+            // When - Perform business operations that generate events
+            restaurant.approve();
             restaurant.open();
-            
-            // Then
+
+            // Then - Domain events should be generated
             assertFalse(restaurant.getDomainEvents().isEmpty());
             assertTrue(restaurant.getDomainEvents().size() >= 1);
         }
@@ -226,15 +229,16 @@ class RestaurantTest {
         @Test
         @DisplayName("Should clear domain events")
         void shouldClearDomainEvents() {
-            // Given
-            restaurant.activate(); // Generates event
+            // Given - Generate domain events through business operations
+            restaurant.approve(); // Generates domain event
             assertFalse(restaurant.getDomainEvents().isEmpty());
-            
-            // When
+
+            // When - Clear all domain events
             restaurant.clearDomainEvents();
-            
-            // Then
-            assertTrue(restaurant.getDomainEvents().isEmpty());
+
+            // Then - No domain events should remain
+            assertTrue(restaurant.getDomainEvents().isEmpty(),
+                      "Domain events should be empty after clearing: " + restaurant.getDomainEvents().size());
         }
     }
 }

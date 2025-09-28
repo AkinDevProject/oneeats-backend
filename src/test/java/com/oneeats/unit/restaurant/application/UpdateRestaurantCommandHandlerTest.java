@@ -61,7 +61,7 @@ class UpdateRestaurantCommandHandlerTest {
             "0123456789",
             new Email("original@restaurant.fr"),
             "PIZZA",
-            RestaurantStatus.ACTIVE
+            RestaurantStatus.APPROVED
         );
         
         command = new UpdateRestaurantCommand(
@@ -79,16 +79,19 @@ class UpdateRestaurantCommandHandlerTest {
         expectedDTO = new RestaurantDTO(
             restaurantId,
             "Updated Restaurant",
-            "Updated description", 
+            "Updated description",
             "Updated address",
             "0987654321",
             "updated@restaurant.fr",
             "ITALIAN",
+            "ITALIAN",  // category field
             0.0,
             null,
-            RestaurantStatus.ACTIVE,
+            RestaurantStatus.APPROVED,
             false,
+            true,  // isActive field
             null,
+            null,  // registrationDate
             null,
             null
         );

@@ -33,13 +33,15 @@ public class MenuItem extends BaseEntity {
     private LocalDateTime lastUpdated;
     
     // Constructeur privé - utiliser les factory methods
-    private MenuItem(UUID restaurantId, MenuItemName name, String description, 
+    private MenuItem(UUID restaurantId, MenuItemName name, String description,
                     Price price, Category category) {
+        super(); // Initialize BaseEntity with auto-generated ID
+        this.setId(UUID.randomUUID()); // Ensure ID is set for new items
         this.restaurantId = validateRestaurantId(restaurantId);
-        this.name = name;
+        this.name = validateMenuItemName(name);
         this.description = description;
-        this.price = price;
-        this.category = category;
+        this.price = validatePrice(price);
+        this.category = validateCategory(category);
         this.isAvailable = true; // Disponible par défaut
         this.preparationTime = PreparationTime.standard(); // 15 minutes par défaut
         this.isVegetarian = false;
@@ -236,6 +238,27 @@ public class MenuItem extends BaseEntity {
             throw new ValidationException("Restaurant ID cannot be null");
         }
         return restaurantId;
+    }
+
+    private MenuItemName validateMenuItemName(MenuItemName name) {
+        if (name == null) {
+            throw new ValidationException("Menu item name cannot be null");
+        }
+        return name;
+    }
+
+    private Price validatePrice(Price price) {
+        if (price == null) {
+            throw new ValidationException("Price cannot be null");
+        }
+        return price;
+    }
+
+    private Category validateCategory(Category category) {
+        if (category == null) {
+            throw new ValidationException("Category cannot be null");
+        }
+        return category;
     }
     
     // Getters

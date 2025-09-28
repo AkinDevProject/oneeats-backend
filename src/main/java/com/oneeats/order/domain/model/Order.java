@@ -79,8 +79,11 @@ public class Order extends BaseEntity {
         }
 
         this.markAsModified();
+
+        // Générer l'événement de changement de statut
+        this.addDomainEvent(new OrderStatusChangedEvent(this.getId(), this.userId, this.restaurantId, previousStatus, newStatus));
     }
-    
+
     /**
      * Ajouter un item à la commande
      */

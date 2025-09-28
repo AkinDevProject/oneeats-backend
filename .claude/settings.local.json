@@ -50,7 +50,11 @@
       "Bash(npm update:*)",
       "Bash(findstr:*)",
       "Bash(\"C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2025.1.2\\jbr\\bin\\java.exe\" -version)",
-      "Bash(start http://localhost:8080/test-restaurant-management.html)"
+      "Bash(start http://localhost:8080/test-restaurant-management.html)",
+      "Bash(mvn test-compile:*)",
+      "Bash(.mvnw.cmd test-compile -q)",
+      "Bash(mvnw.cmd compile:*)",
+      "Bash(./mvnw.cmd:*)"
     ],
     "deny": [],
     "ask": []

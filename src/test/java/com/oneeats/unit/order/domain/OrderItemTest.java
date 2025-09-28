@@ -128,7 +128,7 @@ class OrderItemTest {
             
             // Then
             assertEquals(new BigDecimal("25.00"), subtotal.getAmount()); // 2 × 12.50
-            assertEquals("EUR", subtotal.getCurrency());
+            assertEquals("EUR", subtotal.getCurrency().getCurrencyCode());
         }
         
         @Test
@@ -332,13 +332,14 @@ class OrderItemTest {
     class EqualityAndHashing {
         
         @Test
-        @DisplayName("Should be equal when same menu item and order")
-        void shouldBeEqualWhenSameMenuItemAndOrder() {
-            // Given
-            OrderItem item1 = OrderItem.create(menuItemId, "Pizza", unitPrice, 1, null);
-            OrderItem item2 = OrderItem.create(menuItemId, "Pizza", unitPrice, 2, "Different notes");
-            
-            // When & Then - Same menu item, no order assigned
+        @DisplayName("Should be equal when same ID")
+        void shouldBeEqualWhenSameId() {
+            // Given - Create two OrderItem with the same ID (simulating persistence)
+            UUID sameId = UUID.randomUUID();
+            OrderItem item1 = new OrderItem(sameId, menuItemId, "Pizza", unitPrice, 1, null);
+            OrderItem item2 = new OrderItem(sameId, menuItemId, "Pizza", unitPrice, 1, null);
+
+            // When & Then - Same ID means equal entities
             assertEquals(item1, item2);
             assertEquals(item1.hashCode(), item2.hashCode());
         }

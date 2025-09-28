@@ -29,6 +29,9 @@ public enum OrderStatus {
      * Vérifie si une transition vers un nouveau statut est autorisée
      */
     public boolean canTransitionTo(OrderStatus newStatus) {
+        if (newStatus == null) {
+            return false;  // Null transitions are not allowed
+        }
         Set<OrderStatus> allowed = getAllowedTransitions();
         return allowed.contains(newStatus);
     }
