@@ -146,8 +146,24 @@ class ApiService {
         body: JSON.stringify({ available }),
       }),
     
-    delete: (id: string): Promise<void> => 
+    delete: (id: string): Promise<void> =>
       this.request(`/api/menu-items/${id}`, {
+        method: 'DELETE',
+      }),
+
+    uploadImage: (id: string, file: File): Promise<MenuItem> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('filename', file.name);
+      return this.request(`/api/menu-items/${id}/image`, {
+        method: 'POST',
+        body: formData,
+        headers: {} // Let browser set Content-Type for FormData
+      });
+    },
+
+    deleteImage: (id: string): Promise<void> =>
+      this.request(`/api/menu-items/${id}/image`, {
         method: 'DELETE',
       }),
   };

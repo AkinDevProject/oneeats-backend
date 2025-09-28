@@ -10,6 +10,7 @@ import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { MenuItemOptionsForm } from '../../components/forms/MenuItemOptionsForm';
+import { ImageUpload } from '../../components/ui/ImageUpload';
 import { MenuItem, MenuItemOption } from '../../types';
 import { useRestaurantData } from '../../hooks/useRestaurantData';
 import apiService from '../../services/api';
@@ -218,6 +219,38 @@ const MenuPage: React.FC = () => {
     } catch (error) {
       console.error('Error toggling menu item availability:', error);
       toast.error('Erreur lors de la modification de la disponibilité', 'Erreur de modification');
+    }
+  };
+
+  const handleImageUpload = async (itemId: string, file: File) => {
+    try {
+      await apiService.menuItems.uploadImage(itemId, file);
+
+      // Refresh menu items from backend
+      await refetch();
+
+      const item = menuItems.find(item => item.id === itemId);
+      toast.success(`Image uploadée pour "${item?.name || 'le plat'}"`, 'Image mise à jour');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Erreur lors de l\'upload de l\'image', 'Erreur d\'upload');
+      throw error; // Re-throw pour que ImageUpload puisse gérer l'erreur
+    }
+  };
+
+  const handleImageDelete = async (itemId: string) => {
+    try {
+      await apiService.menuItems.deleteImage(itemId);
+
+      // Refresh menu items from backend
+      await refetch();
+
+      const item = menuItems.find(item => item.id === itemId);
+      toast.success(`Image supprimée pour "${item?.name || 'le plat'}"`, 'Image supprimée');
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Erreur lors de la suppression de l\'image', 'Erreur de suppression');
+      throw error; // Re-throw pour que ImageUpload puisse gérer l'erreur
     }
   };
 
@@ -622,6 +655,8 @@ const MenuPage: React.FC = () => {
                           onEdit={() => handleOpenModal(item)}
                           onDelete={() => handleDelete(item.id)}
                           onToggleAvailability={() => toggleAvailability(item.id)}
+                          onImageUpload={(file) => handleImageUpload(item.id, file)}
+                          onImageDelete={() => handleImageDelete(item.id)}
                         />
                       ))}
                     </div>
@@ -640,6 +675,8 @@ const MenuPage: React.FC = () => {
                 onEdit={() => handleOpenModal(item)}
                 onDelete={() => handleDelete(item.id)}
                 onToggleAvailability={() => toggleAvailability(item.id)}
+                onImageUpload={(file) => handleImageUpload(item.id, file)}
+                onImageDelete={() => handleImageDelete(item.id)}
               />
             ))}
           </div>
@@ -698,6 +735,26 @@ const MenuPage: React.FC = () => {
             </label>
           </div>
 
+          {/* Upload d'image */}
+          <div className="border-t border-gray-200 pt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Image du plat
+            </label>
+            {editingItem && (
+              <ImageUpload
+                currentImage={editingItem.imageUrl || undefined}
+                onUpload={(file) => handleImageUpload(editingItem.id, file)}
+                onDelete={editingItem.imageUrl ? () => handleImageDelete(editingItem.id) : undefined}
+                compact={false}
+              />
+            )}
+            {!editingItem && (
+              <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-lg">
+                💡 Vous pourrez ajouter une image après avoir créé le plat
+              </div>
+            )}
+          </div>
+
           {/* Options du plat */}
           <div className="border-t border-gray-200 pt-6">
             <MenuItemOptionsForm
@@ -725,7 +782,9 @@ const MenuItemCard: React.FC<{
   onEdit: () => void;
   onDelete: () => void;
   onToggleAvailability: () => void;
-}> = ({ item, onEdit, onDelete, onToggleAvailability }) => {
+  onImageUpload: (file: File) => Promise<void>;
+  onImageDelete: () => Promise<void>;
+}> = ({ item, onEdit, onDelete, onToggleAvailability, onImageUpload, onImageDelete }) => {
   return (
     <Card
       hover
@@ -737,12 +796,16 @@ const MenuItemCard: React.FC<{
       data-testid="menu-item-card"
     >
       <div className="space-y-4">
-        {/* Image placeholder - Responsive */}
+        {/* Image avec tailles uniformes - Ratio fixe 16:9 */}
         <div className="relative">
-          <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-md sm:rounded-lg flex items-center justify-center">
-            <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-gray-400" />
-          </div>
-          <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2">
+          <ImageUpload
+            currentImage={item.imageUrl || undefined}
+            onUpload={onImageUpload}
+            onDelete={item.imageUrl ? onImageDelete : undefined}
+            compact={true}
+            className="w-full"
+          />
+          <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10">
             <Badge
               variant={item.available ? 'success' : 'danger'}
               size="sm"

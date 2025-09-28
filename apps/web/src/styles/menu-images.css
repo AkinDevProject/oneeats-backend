@@ -1,0 +1,122 @@
+/* Styles pour l'uniformité des images de menu */
+
+/* Forcer le ratio 16:9 pour toutes les images de menu */
+.menu-item-image-container {
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.375rem; /* rounded-md */
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.menu-item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.menu-item-image:hover {
+  transform: scale(1.05);
+}
+
+/* Effet de shimmer pour les images en cours de chargement */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+  pointer-events: none;
+}
+
+/* Placeholder uniforme quand pas d'image */
+.menu-item-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+/* Overlay hover pour l'upload */
+.menu-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.menu-item-image-container:hover .menu-image-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+}
+
+/* Badge de statut avec position fixe */
+.menu-item-status-badge {
+  position: absolute;
+  top: 0.375rem; /* 6px */
+  right: 0.375rem; /* 6px */
+  z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .menu-item-status-badge {
+    top: 0.5rem; /* 8px */
+    right: 0.5rem; /* 8px */
+  }
+}
+
+/* Amélioration de la lisibilité du texte sur les badges */
+.menu-item-status-badge .badge {
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les miniatures dans les listes */
+.menu-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  border: 2px solid #f3f4f6;
+}
+
+.menu-thumbnail-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.375rem;
+}
+
+.menu-thumbnail-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 0.5rem;
+}
