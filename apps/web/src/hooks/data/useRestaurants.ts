@@ -7,7 +7,7 @@ interface UseRestaurantsResult {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  updateRestaurantStatus: (id: string, status: string) => Promise<void>;
+  updateRestaurantStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'BLOCKED') => Promise<void>;
   deleteRestaurant: (id: string) => Promise<void>;
 }
 
@@ -30,13 +30,13 @@ export const useRestaurants = (): UseRestaurantsResult => {
     }
   };
 
-  const updateRestaurantStatus = async (id: string, status: string) => {
+  const updateRestaurantStatus = async (id: string, status: 'PENDING' | 'APPROVED' | 'BLOCKED') => {
     try {
       const updatedRestaurant = await apiService.restaurants.updateStatus(id, status);
-      
-      setRestaurants(prev => 
-        prev.map(restaurant => 
-          restaurant.id === id 
+
+      setRestaurants(prev =>
+        prev.map(restaurant =>
+          restaurant.id === id
             ? { ...restaurant, status: updatedRestaurant.status }
             : restaurant
         )
@@ -49,9 +49,9 @@ export const useRestaurants = (): UseRestaurantsResult => {
 
   const deleteRestaurant = async (id: string) => {
     try {
-      // Note: API n'a pas de delete restaurant, on simule
+      await apiService.restaurants.delete(id);
+
       setRestaurants(prev => prev.filter(restaurant => restaurant.id !== id));
-      console.warn('Restaurant deletion is simulated - API endpoint not available');
     } catch (err) {
       console.error('Error deleting restaurant:', err);
       throw err;

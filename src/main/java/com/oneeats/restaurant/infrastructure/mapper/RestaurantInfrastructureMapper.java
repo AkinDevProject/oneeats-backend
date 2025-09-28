@@ -17,14 +17,7 @@ import java.util.stream.Collectors;
 public class RestaurantInfrastructureMapper {
 
     public Restaurant toDomain(RestaurantEntity entity) {
-        RestaurantStatus status;
-        if (entity.getIsOpen()) {
-            status = RestaurantStatus.OPEN;
-        } else if (entity.getIsActive()) {
-            status = RestaurantStatus.ACTIVE;
-        } else {
-            status = RestaurantStatus.SUSPENDED;
-        }
+        RestaurantStatus status = entity.getStatus();
         
         Restaurant restaurant = new Restaurant(
             entity.getId(),
@@ -41,6 +34,7 @@ public class RestaurantInfrastructureMapper {
         restaurant.setUpdatedAt(entity.getUpdatedAt());
         restaurant.setImageUrl(entity.getImageUrl());
         restaurant.updateRating(entity.getRating());
+        restaurant.setIsOpen(entity.getIsOpen());
         
         // Convertir les horaires d'ouverture
         if (entity.getOpeningHours() != null && !entity.getOpeningHours().isEmpty()) {
@@ -52,9 +46,9 @@ public class RestaurantInfrastructureMapper {
     }
 
     public RestaurantEntity toEntity(Restaurant restaurant) {
-        boolean isOpen = restaurant.getStatus() == RestaurantStatus.OPEN;
-        boolean isActive = restaurant.getStatus() == RestaurantStatus.ACTIVE || restaurant.getStatus() == RestaurantStatus.OPEN;
-        
+        boolean isOpen = restaurant.isOpen();
+        boolean isActive = restaurant.isActive();
+
         RestaurantEntity entity = new RestaurantEntity(
             restaurant.getId(),
             restaurant.getName(),
@@ -67,6 +61,7 @@ public class RestaurantInfrastructureMapper {
             restaurant.getImageUrl(),
             isOpen,
             isActive,
+            restaurant.getStatus(),
             restaurant.getCreatedAt(),
             restaurant.getUpdatedAt()
         );

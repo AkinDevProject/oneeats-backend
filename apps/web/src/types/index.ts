@@ -9,20 +9,39 @@ export interface User {
   restaurantId?: string; // Pour les users de type restaurant
 }
 
+export interface DaySchedule {
+  openTime: string;
+  closeTime: string;
+}
+
+export interface Schedule {
+  monday: DaySchedule | null;
+  tuesday: DaySchedule | null;
+  wednesday: DaySchedule | null;
+  thursday: DaySchedule | null;
+  friday: DaySchedule | null;
+  saturday: DaySchedule | null;
+  sunday: DaySchedule | null;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
-  email: string;
+  description: string;
   address: string;
   phone: string;
-  logo?: string;
-  category: string;
-  registrationDate: Date;
-  status: 'pending' | 'approved' | 'blocked';
+  email: string;
+  cuisineType: string;
+  category: string;                    // Mapping depuis cuisineType
+  rating: number;
+  imageUrl?: string;
+  status: 'PENDING' | 'APPROVED' | 'BLOCKED';
   isOpen: boolean;
-  schedule: {
-    [key: string]: { open: string; close: string } | null;
-  };
+  isActive: boolean;
+  schedule: Schedule;
+  registrationDate: Date;              // Mapping depuis createdAt
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MenuItemOption {

@@ -46,14 +46,14 @@ const LoginPage: React.FC = () => {
     const quickAccessUsers = [
       {
         name: 'Admin Restaurant',
-        email: 'admin@delishgo.com',
-        password: 'admin123',
+        email: 'jean.dupont@oneats.dev',
+        password: 'dev123',
         role: 'Admin',
         color: 'from-purple-500 to-pink-600',
         icon: Shield
       },
       {
-        name: 'Utilisateur Restaurant', 
+        name: 'Utilisateur Restaurant',
         email: 'luigi@restaurant.com',
         password: 'resto123',
         role: 'Restaurant',
@@ -64,10 +64,10 @@ const LoginPage: React.FC = () => {
 
     const handleQuickLogin = (userType: 'admin' | 'restaurant') => {
       const credentials = {
-        admin: { email: 'admin@delishgo.com', password: 'admin123' },
+        admin: { email: 'jean.dupont@oneats.dev', password: 'dev123' },
         restaurant: { email: 'luigi@restaurant.com', password: 'resto123' }
       };
-      
+
       setEmail(credentials[userType].email);
       setPassword(credentials[userType].password);
     };

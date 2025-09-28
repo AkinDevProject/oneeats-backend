@@ -73,37 +73,36 @@ public class Restaurant extends BaseEntity {
         this.markAsModified();
     }
 
-    public void activate() {
-        if (this.status == RestaurantStatus.ACTIVE) {
-            throw new IllegalStateException("Restaurant is already active");
+    public void approve() {
+        if (this.status == RestaurantStatus.APPROVED) {
+            throw new IllegalStateException("Restaurant is already approved");
         }
-        this.status = RestaurantStatus.ACTIVE;
+        this.status = RestaurantStatus.APPROVED;
         this.markAsModified();
     }
 
+    public void block() {
+        this.status = RestaurantStatus.BLOCKED;
+        this.markAsModified();
+    }
+
+    private boolean isOpen = false;
+
     public void open() {
-        if (this.status != RestaurantStatus.ACTIVE) {
-            throw new IllegalStateException("Cannot open inactive restaurant");
+        if (this.status != RestaurantStatus.APPROVED) {
+            throw new IllegalStateException("Cannot open non-approved restaurant");
         }
-        if (this.status == RestaurantStatus.OPEN) {
-            throw new IllegalStateException("Restaurant is already open");
-        }
-        this.status = RestaurantStatus.OPEN;
+        this.isOpen = true;
         this.addDomainEvent(new RestaurantOpenedEvent(this.getId(), this.getName()));
         this.markAsModified();
     }
 
     public void close() {
-        if (this.status != RestaurantStatus.OPEN) {
+        if (!this.isOpen) {
             throw new IllegalStateException("Restaurant is not open");
         }
-        this.status = RestaurantStatus.ACTIVE;
+        this.isOpen = false;
         this.addDomainEvent(new RestaurantClosedEvent(this.getId(), this.getName()));
-        this.markAsModified();
-    }
-
-    public void suspend() {
-        this.status = RestaurantStatus.SUSPENDED;
         this.markAsModified();
     }
 
@@ -115,12 +114,26 @@ public class Restaurant extends BaseEntity {
         this.markAsModified();
     }
 
+    public void updateStatus(RestaurantStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        this.status = newStatus;
+        this.markAsModified();
+    }
+
     public boolean canAcceptOrders() {
-        return this.status == RestaurantStatus.OPEN;
+        // Un restaurant peut accepter des commandes s'il est APPROVED et isOpen
+        return this.status == RestaurantStatus.APPROVED && this.isOpen;
     }
 
     public boolean isActive() {
-        return this.status == RestaurantStatus.ACTIVE || this.status == RestaurantStatus.OPEN;
+        // Un restaurant est actif s'il est APPROVED (non bloqué, non en attente)
+        return this.status == RestaurantStatus.APPROVED;
+    }
+
+    public boolean isOpen() {
+        return this.isOpen;
     }
 
     // Getters
@@ -135,8 +148,13 @@ public class Restaurant extends BaseEntity {
     public RestaurantStatus getStatus() { return status; }
     public WeeklySchedule getSchedule() { return schedule; }
 
-    public void setImageUrl(String imageUrl) { 
-        this.imageUrl = imageUrl; 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        this.markAsModified();
+    }
+
+    public void setIsOpen(boolean isOpen) {
+        this.isOpen = isOpen;
         this.markAsModified();
     }
 }

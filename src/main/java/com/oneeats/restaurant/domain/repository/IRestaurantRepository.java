@@ -19,10 +19,14 @@ public interface IRestaurantRepository {
     List<Restaurant> findByStatus(RestaurantStatus status);
     
     List<Restaurant> findByCuisineType(String cuisineType);
-    
+
+    List<Restaurant> findByStatusAndIsActive(RestaurantStatus status, boolean isActive);
+
+    Optional<Restaurant> findByOwnerId(UUID ownerId);
+
     Restaurant save(Restaurant restaurant);
-    
+
     void delete(Restaurant restaurant);
-    
+
     boolean existsByEmail(Email email);
 }

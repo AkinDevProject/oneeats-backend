@@ -11,6 +11,8 @@ import com.oneeats.order.application.query.GetOrdersByRestaurantQuery;
 import com.oneeats.order.application.query.GetOrdersByRestaurantQueryHandler;
 import com.oneeats.order.application.query.GetOrdersByUserQuery;
 import com.oneeats.order.application.query.GetOrdersByUserQueryHandler;
+import com.oneeats.order.application.query.GetAllOrdersQuery;
+import com.oneeats.order.application.query.GetAllOrdersQueryHandler;
 import com.oneeats.order.domain.model.OrderStatus;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -41,6 +43,9 @@ public class OrderController {
     @Inject
     UpdateOrderStatusCommandHandler updateOrderStatusCommandHandler;
 
+    @Inject
+    GetAllOrdersQueryHandler getAllOrdersQueryHandler;
+
     @POST
     public Response createOrder(@Valid CreateOrderCommand command) {
         OrderDTO order = createOrderCommandHandler.handle(command);
@@ -55,26 +60,36 @@ public class OrderController {
     }
 
     @GET
-    public Response getOrders(@QueryParam("restaurantId") UUID restaurantId, @QueryParam("userId") UUID userId) {
+    public Response getOrders(@QueryParam("restaurantId") UUID restaurantId,
+                             @QueryParam("userId") UUID userId,
+                             @QueryParam("all") boolean allOrders) {
         if (restaurantId != null && userId != null) {
             return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Cannot specify both restaurantId and userId parameters")
                 .build();
         }
 
-        if (restaurantId == null && userId == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Either restaurantId or userId parameter is required")
-                .build();
-        }
-
         List<OrderDTO> orders;
-        if (restaurantId != null) {
+
+        // Admin endpoint to get all orders
+        if (allOrders) {
+            orders = getAllOrdersQueryHandler.handle(new GetAllOrdersQuery());
+        }
+        // Get orders by restaurant
+        else if (restaurantId != null) {
             orders = getOrdersByRestaurantQueryHandler.handle(
                 new GetOrdersByRestaurantQuery(restaurantId));
-        } else {
+        }
+        // Get orders by user
+        else if (userId != null) {
             orders = getOrdersByUserQueryHandler.handle(
                 new GetOrdersByUserQuery(userId));
+        }
+        // No valid parameters provided
+        else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Either restaurantId, userId parameter or all=true is required")
+                .build();
         }
 
         return Response.ok(orders).build();

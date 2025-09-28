@@ -97,8 +97,13 @@ class ApiService {
       });
     },
 
-    deleteImage: (id: string): Promise<Restaurant> => 
+    deleteImage: (id: string): Promise<Restaurant> =>
       this.request(`/api/restaurants/${id}/image`, {
+        method: 'DELETE',
+      }),
+
+    delete: (id: string): Promise<void> =>
+      this.request(`/api/restaurants/${id}`, {
         method: 'DELETE',
       }),
   };
@@ -149,8 +154,8 @@ class ApiService {
 
   // Orders API
   orders = {
-    getAll: (): Promise<Order[]> => 
-      this.request('/api/orders'),
+    getAll: (): Promise<Order[]> =>
+      this.request('/api/orders?all=true'),
     
     getById: (id: string): Promise<Order> => 
       this.request(`/api/orders/${id}`),

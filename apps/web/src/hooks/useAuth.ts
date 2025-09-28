@@ -66,11 +66,11 @@ export const useAuthProvider = () => {
     // Mode auth réel (sera implémenté en Sprint 3)
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    if (email === 'admin@oneeats.com' && password === 'admin123') {
+    if (email === 'jean.dupont@oneats.dev' && password === 'dev123') {
       const adminUser: User = {
-        id: 'admin-1',
-        email: 'admin@oneeats.com',
-        name: 'Administrateur OneEats',
+        id: '4ffe5398-4599-4c33-98ec-18a96fd9e200',
+        email: 'jean.dupont@oneats.dev',
+        name: 'Jean Dupont (Dev)',
         role: 'admin',
         createdAt: new Date()
       };
@@ -79,12 +79,12 @@ export const useAuthProvider = () => {
       setIsLoading(false);
       return true;
     }
-    
-    if (email === 'restaurant@oneeats.com' && password === 'resto123') {
+
+    if (email === 'luigi@restaurant.com' && password === 'resto123') {
       const restaurantUser: User = {
-        id: DEFAULT_USER_ID,
-        email: 'restaurant@oneeats.com',
-        name: 'Pizza Palace',
+        id: '11111111-1111-1111-1111-111111111111',
+        email: 'luigi@restaurant.com',
+        name: 'Luigi - Pizza Palace',
         role: 'restaurant',
         createdAt: new Date(),
         restaurantId: DEFAULT_RESTAURANT_ID

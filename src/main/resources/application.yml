@@ -136,7 +136,7 @@ quarkus:
 
   # Frontend intégration (Quinoa) - Production
   quinoa:
-    enabled: false  # Désactivé par défaut, activé en dev/prod
+    enabled: true  # Désactivé par défaut, activé en dev/prod
     package-manager: npm
     package-manager-install: false
     build-dir: dist

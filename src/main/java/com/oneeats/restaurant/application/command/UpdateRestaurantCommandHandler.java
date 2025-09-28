@@ -38,15 +38,15 @@ public class UpdateRestaurantCommandHandler {
         if (command.isOpen() != null) {
             try {
                 if (command.isOpen()) {
-                    // S'assurer que le restaurant est actif avant de l'ouvrir
+                    // S'assurer que le restaurant est approuvé avant de l'ouvrir
                     if (restaurant.getStatus().name().equals("PENDING")) {
-                        restaurant.activate();
+                        restaurant.approve();
                     }
-                    if (!restaurant.getStatus().name().equals("OPEN")) {
+                    if (!restaurant.isOpen()) {
                         restaurant.open();
                     }
                 } else {
-                    if (restaurant.getStatus().name().equals("OPEN")) {
+                    if (restaurant.isOpen()) {
                         restaurant.close();
                     }
                 }

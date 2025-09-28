@@ -2,10 +2,12 @@
 -- Ce fichier contient toutes les données nécessaires pour le développement et les tests
 
 -- Restaurants (table 'restaurant')
-INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_type, rating, image_url, is_open, is_active, created_at, updated_at, version) VALUES
-('11111111-1111-1111-1111-111111111111', 'Pizza Palace', 'Les meilleures pizzas italiennes de la ville', '123 Rue de la Pizza', '0123456789', 'contact@pizzapalace.fr', 'PIZZA', 4.5, 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b', true, true, NOW(), NOW(), 0),
-('22222222-2222-2222-2222-222222222222', 'Burger House', 'Burgers artisanaux et frites maison', '456 Avenue des Burgers', '0198765432', 'info@burgerhouse.fr', 'AMERICAIN', 4.2, 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd', true, true, NOW(), NOW(), 0),
-('33333333-3333-3333-3333-333333333333', 'Sushi Express', 'Sushis frais préparés quotidiennement', '789 Boulevard Tokyo', '0156789012', 'commande@sushiexpress.fr', 'JAPONAIS', 4.7, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351', true, true, NOW(), NOW(), 0);
+INSERT INTO restaurant (id, name, description, address, phone, email, cuisine_type, rating, image_url, is_open, is_active, status, created_at, updated_at, version) VALUES
+('11111111-1111-1111-1111-111111111111', 'Pizza Palace', 'Les meilleures pizzas italiennes de la ville', '123 Rue de la Pizza', '0123456789', 'contact@pizzapalace.fr', 'PIZZA', 4.5, 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b', true, true, 'APPROVED', NOW(), NOW(), 0),
+('22222222-2222-2222-2222-222222222222', 'Burger House', 'Burgers artisanaux et frites maison', '456 Avenue des Burgers', '0198765432', 'info@burgerhouse.fr', 'AMERICAIN', 4.2, 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd', true, true, 'APPROVED', NOW(), NOW(), 0),
+('33333333-3333-3333-3333-333333333333', 'Sushi Express', 'Sushis frais préparés quotidiennement', '789 Boulevard Tokyo', '0156789012', 'commande@sushiexpress.fr', 'JAPONAIS', 4.7, 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351', true, true, 'PENDING', NOW(), NOW(), 0),
+('44444444-4444-4444-4444-444444444444', 'Pasta Roma', 'Pasta authentique italienne', '321 Via Roma', '0167890123', 'hello@pastaroma.fr', 'ITALIEN', 3.8, 'https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5', false, true, 'PENDING', NOW(), NOW(), 0),
+('55555555-5555-5555-5555-555555555555', 'Kebab Express', 'Kebabs et specialités turques', '654 Avenue Istanbul', '0145678901', 'contact@kebabexpress.fr', 'TURC', 4.1, 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba', true, false, 'BLOCKED', NOW(), NOW(), 0);
 
 -- Horaires d'ouverture pour Pizza Palace
 INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES 
@@ -28,7 +30,7 @@ INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time
     (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'SUNDAY', '12:00', '21:00');
 
 -- Horaires d'ouverture pour Sushi Express
-INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES 
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'MONDAY', null, null),
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'TUESDAY', '18:00', '23:00'),
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'WEDNESDAY', '18:00', '23:00'),
@@ -36,6 +38,26 @@ INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'FRIDAY', '18:00', '00:00'),
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'SATURDAY', '18:00', '00:00'),
     (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'SUNDAY', '18:00', '22:00');
+
+-- Horaires d'ouverture pour Pasta Roma
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'MONDAY', '11:30', '14:30'),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'TUESDAY', '11:30', '14:30'),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'WEDNESDAY', '11:30', '14:30'),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'THURSDAY', '11:30', '14:30'),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'FRIDAY', '11:30', '14:30'),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'SATURDAY', null, null),
+    (gen_random_uuid(), '44444444-4444-4444-4444-444444444444', 'SUNDAY', null, null);
+
+-- Horaires d'ouverture pour Kebab Express
+INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time) VALUES
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'MONDAY', '10:00', '02:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'TUESDAY', '10:00', '02:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'WEDNESDAY', '10:00', '02:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'THURSDAY', '10:00', '02:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'FRIDAY', '10:00', '03:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'SATURDAY', '10:00', '03:00'),
+    (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'SUNDAY', '12:00', '02:00');
 
 -- Utilisateurs (table 'user_account')
 INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, status, is_active, version) VALUES

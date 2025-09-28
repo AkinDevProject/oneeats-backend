@@ -17,16 +17,16 @@ const RestaurantsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'blocked'>('all');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalAction, setModalAction] = useState<'approve' | 'block' | 'delete' | null>(null);
+  const [modalAction, setModalAction] = useState<'approve' | 'block' | 'delete' | 'details' | null>(null);
 
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          restaurant.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || restaurant.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || restaurant.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const handleAction = (restaurant: Restaurant, action: 'approve' | 'block' | 'delete') => {
+  const handleAction = (restaurant: Restaurant, action: 'approve' | 'block' | 'delete' | 'details') => {
     setSelectedRestaurant(restaurant);
     setModalAction(action);
     setShowModal(true);
@@ -37,11 +37,14 @@ const RestaurantsPage: React.FC = () => {
 
     try {
       if (modalAction === 'approve') {
-        await updateRestaurantStatus(selectedRestaurant.id, 'approved');
+        await updateRestaurantStatus(selectedRestaurant.id, 'APPROVED');
       } else if (modalAction === 'block') {
-        await updateRestaurantStatus(selectedRestaurant.id, 'blocked');
+        await updateRestaurantStatus(selectedRestaurant.id, 'BLOCKED');
       } else if (modalAction === 'delete') {
         await deleteRestaurant(selectedRestaurant.id);
+      } else if (modalAction === 'details') {
+        // Les détails sont affichés dans le modal, pas d'action à confirmer
+        return;
       }
     } catch (error) {
       console.error('Erreur lors de l\'action:', error);
@@ -52,13 +55,26 @@ const RestaurantsPage: React.FC = () => {
     setModalAction(null);
   };
 
+  const handleStatusChange = async (newStatus: 'PENDING' | 'APPROVED' | 'BLOCKED') => {
+    if (!selectedRestaurant) return;
+
+    try {
+      await updateRestaurantStatus(selectedRestaurant.id, newStatus);
+      setShowModal(false);
+      setSelectedRestaurant(null);
+      setModalAction(null);
+    } catch (error) {
+      console.error('Erreur lors du changement de statut:', error);
+    }
+  };
+
   const getStatusBadge = (status: Restaurant['status']) => {
-    switch (status) {
-      case 'approved':
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
         return <Badge variant="success">Validé</Badge>;
-      case 'pending':
+      case 'PENDING':
         return <Badge variant="warning">En attente</Badge>;
-      case 'blocked':
+      case 'BLOCKED':
         return <Badge variant="danger">Bloqué</Badge>;
       default:
         return <Badge>Inconnu</Badge>;
@@ -71,7 +87,8 @@ const RestaurantsPage: React.FC = () => {
     const actions = {
       approve: { title: 'Valider le restaurant', message: 'Êtes-vous sûr de vouloir valider ce restaurant ?' },
       block: { title: 'Bloquer le restaurant', message: 'Êtes-vous sûr de vouloir bloquer ce restaurant ?' },
-      delete: { title: 'Supprimer le restaurant', message: 'Êtes-vous sûr de vouloir supprimer définitivement ce restaurant ?' }
+      delete: { title: 'Supprimer le restaurant', message: 'Êtes-vous sûr de vouloir supprimer définitivement ce restaurant ?' },
+      details: { title: 'Détails du restaurant', message: '' }
     };
 
     return actions[modalAction];
@@ -79,9 +96,9 @@ const RestaurantsPage: React.FC = () => {
 
   const stats = {
     total: restaurants.length,
-    pending: restaurants.filter(r => r.status === 'pending').length,
-    approved: restaurants.filter(r => r.status === 'approved').length,
-    blocked: restaurants.filter(r => r.status === 'blocked').length,
+    pending: restaurants.filter(r => r.status.toUpperCase() === 'PENDING').length,
+    approved: restaurants.filter(r => r.status.toUpperCase() === 'APPROVED').length,
+    blocked: restaurants.filter(r => r.status.toUpperCase() === 'BLOCKED').length,
     active: restaurants.filter(r => r.isOpen).length
   };
 
@@ -248,8 +265,8 @@ const RestaurantsPage: React.FC = () => {
               key={restaurant.id} 
               hover
               className={`transition-all duration-300 ${
-                restaurant.status === 'pending' ? 'border-warning-200 bg-gradient-to-br from-warning-50 to-warning-100' :
-                restaurant.status === 'blocked' ? 'border-danger-200 bg-gradient-to-br from-danger-50 to-danger-100' :
+                restaurant.status.toUpperCase() === 'PENDING' ? 'border-warning-200 bg-gradient-to-br from-warning-50 to-warning-100' :
+                restaurant.status.toUpperCase() === 'BLOCKED' ? 'border-danger-200 bg-gradient-to-br from-danger-50 to-danger-100' :
                 'border-gray-200'
               } animate-fade-in`}
               style={{ animationDelay: `${index * 100}ms` }}
@@ -263,7 +280,7 @@ const RestaurantsPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{restaurant.name}</h3>
-                      <p className="text-sm text-gray-500">{restaurant.category}</p>
+                      <p className="text-sm text-gray-500">{restaurant.cuisineType}</p>
                       <div className="flex items-center space-x-1 text-xs text-gray-400 mt-1">
                         <MapPin className="h-3 w-3" />
                         <span>{restaurant.address}</span>
@@ -305,10 +322,16 @@ const RestaurantsPage: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="h-4 w-4" />} className="flex-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<Eye className="h-4 w-4" />}
+                    className="flex-1"
+                    onClick={() => handleAction(restaurant, 'details')}
+                  >
                     Voir détails
                   </Button>
-                  {restaurant.status === 'pending' && (
+                  {restaurant.status.toUpperCase() === 'PENDING' && (
                     <Button 
                       size="sm" 
                       variant="success"
@@ -319,7 +342,7 @@ const RestaurantsPage: React.FC = () => {
                       Valider
                     </Button>
                   )}
-                  {restaurant.status !== 'blocked' && (
+                  {restaurant.status.toUpperCase() !== 'BLOCKED' && (
                     <Button 
                       size="sm" 
                       variant="warning"
@@ -344,27 +367,125 @@ const RestaurantsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* Modal */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={getModalContent()?.title || ''}
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            {getModalContent()?.message}
-          </p>
-          <div className="flex justify-end space-x-2">
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Annuler
-            </Button>
-            <Button 
-              variant={modalAction === 'delete' ? 'danger' : 'primary'}
-              onClick={confirmAction}
-            >
-              Confirmer
-            </Button>
-          </div>
+          {modalAction === 'details' && selectedRestaurant ? (
+            /* Modal détails */
+            <div className="space-y-6">
+              {/* Informations générales */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Nom</label>
+                  <p className="text-sm text-gray-900">{selectedRestaurant.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cuisine</label>
+                  <p className="text-sm text-gray-900">{selectedRestaurant.cuisineType}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <p className="text-sm text-gray-900">{selectedRestaurant.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Téléphone</label>
+                  <p className="text-sm text-gray-900">{selectedRestaurant.phone}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Adresse</label>
+                <p className="text-sm text-gray-900">{selectedRestaurant.address}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Description</label>
+                <p className="text-sm text-gray-900">{selectedRestaurant.description}</p>
+              </div>
+
+              {/* Statut actuel et actions */}
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Statut actuel</label>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedRestaurant.status)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-600">
+                      Note: {selectedRestaurant.rating}/5 ⭐
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {selectedRestaurant.isOpen ? '🟢 Ouvert' : '🔴 Fermé'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions de changement de statut */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Changer le statut</label>
+                  <div className="flex space-x-2">
+                    {selectedRestaurant.status.toUpperCase() !== 'PENDING' && (
+                      <Button
+                        size="sm"
+                        variant="warning"
+                        onClick={() => handleStatusChange('PENDING')}
+                      >
+                        En attente
+                      </Button>
+                    )}
+                    {selectedRestaurant.status.toUpperCase() !== 'APPROVED' && (
+                      <Button
+                        size="sm"
+                        variant="success"
+                        onClick={() => handleStatusChange('APPROVED')}
+                      >
+                        Approuver
+                      </Button>
+                    )}
+                    {selectedRestaurant.status.toUpperCase() !== 'BLOCKED' && (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleStatusChange('BLOCKED')}
+                      >
+                        Bloquer
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* Modal de confirmation pour les autres actions */
+            <div>
+              <p className="text-sm text-gray-600">
+                {getModalContent()?.message}
+              </p>
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                  Annuler
+                </Button>
+                <Button
+                  variant={modalAction === 'delete' ? 'danger' : 'primary'}
+                  onClick={confirmAction}
+                >
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

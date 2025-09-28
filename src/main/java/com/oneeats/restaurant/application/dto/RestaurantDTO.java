@@ -13,11 +13,14 @@ public record RestaurantDTO(
     String phone,
     String email,
     String cuisineType,
+    String category,       // Mapping depuis cuisineType pour frontend
     Double rating,
     String imageUrl,
     RestaurantStatus status,
     boolean isOpen,
+    boolean isActive,      // Ajouté pour correspondre au model Restaurant
     ScheduleDTO schedule,
+    LocalDateTime registrationDate,  // Mapping depuis createdAt pour frontend
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}

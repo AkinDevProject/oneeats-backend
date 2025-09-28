@@ -12,7 +12,7 @@ public class RestaurantApplicationMapper {
     
     public RestaurantDTO toDTO(Restaurant restaurant) {
         ScheduleDTO scheduleDTO = convertToScheduleDTO(restaurant.getSchedule());
-        
+
         return new RestaurantDTO(
             restaurant.getId(),
             restaurant.getName(),
@@ -21,11 +21,14 @@ public class RestaurantApplicationMapper {
             restaurant.getPhone(),
             restaurant.getEmail().getValue(),
             restaurant.getCuisineType(),
+            restaurant.getCuisineType(), // category = mapping depuis cuisineType
             restaurant.getRating(),
             restaurant.getImageUrl(),
             restaurant.getStatus(),
-            restaurant.canAcceptOrders(),
+            restaurant.canAcceptOrders(), // isOpen
+            restaurant.isActive(),        // isActive
             scheduleDTO,
+            restaurant.getCreatedAt(),    // registrationDate = createdAt
             restaurant.getCreatedAt(),
             restaurant.getUpdatedAt()
         );

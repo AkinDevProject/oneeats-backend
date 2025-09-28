@@ -10,11 +10,20 @@ import com.oneeats.restaurant.application.command.UploadRestaurantImageCommand;
 import com.oneeats.restaurant.application.command.UploadRestaurantImageCommandHandler;
 import com.oneeats.restaurant.application.command.DeleteRestaurantImageCommand;
 import com.oneeats.restaurant.application.command.DeleteRestaurantImageCommandHandler;
+import com.oneeats.restaurant.application.command.DeleteRestaurantCommand;
+import com.oneeats.restaurant.application.command.DeleteRestaurantCommandHandler;
+import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommand;
+import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommandHandler;
 import com.oneeats.restaurant.application.dto.RestaurantDTO;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQuery;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQueryHandler;
 import com.oneeats.restaurant.application.query.GetRestaurantQuery;
 import com.oneeats.restaurant.application.query.GetRestaurantQueryHandler;
+import com.oneeats.restaurant.application.query.GetActiveRestaurantsQuery;
+import com.oneeats.restaurant.application.query.GetActiveRestaurantsQueryHandler;
+import com.oneeats.restaurant.application.query.GetRestaurantByOwnerQuery;
+import com.oneeats.restaurant.application.query.GetRestaurantByOwnerQueryHandler;
+import com.oneeats.restaurant.domain.model.RestaurantStatus;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -53,6 +62,18 @@ public class RestaurantController {
 
     @Inject
     DeleteRestaurantImageCommandHandler deleteRestaurantImageCommandHandler;
+
+    @Inject
+    DeleteRestaurantCommandHandler deleteRestaurantCommandHandler;
+
+    @Inject
+    UpdateRestaurantStatusCommandHandler updateRestaurantStatusCommandHandler;
+
+    @Inject
+    GetActiveRestaurantsQueryHandler getActiveRestaurantsQueryHandler;
+
+    @Inject
+    GetRestaurantByOwnerQueryHandler getRestaurantByOwnerQueryHandler;
 
     @POST
     public Response createRestaurant(@Valid CreateRestaurantCommand command) {
@@ -174,6 +195,70 @@ public class RestaurantController {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("Failed to delete image: " + e.getMessage())
+                .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteRestaurant(@PathParam("id") UUID id) {
+        try {
+            DeleteRestaurantCommand command = new DeleteRestaurantCommand(id);
+            deleteRestaurantCommandHandler.handle(command);
+            return Response.status(Response.Status.NO_CONTENT).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to delete restaurant: " + e.getMessage())
+                .build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}/status")
+    public Response updateRestaurantStatus(@PathParam("id") UUID id, @QueryParam("status") String statusStr) {
+        try {
+            RestaurantStatus status = RestaurantStatus.valueOf(statusStr.toUpperCase());
+            UpdateRestaurantStatusCommand command = new UpdateRestaurantStatusCommand(id, status);
+            RestaurantDTO restaurant = updateRestaurantStatusCommandHandler.handle(command);
+            return Response.ok(restaurant).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Invalid status or restaurant not found: " + e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to update restaurant status: " + e.getMessage())
+                .build();
+        }
+    }
+
+    @GET
+    @Path("/active")
+    public Response getActiveRestaurants() {
+        List<RestaurantDTO> restaurants = getActiveRestaurantsQueryHandler.handle(new GetActiveRestaurantsQuery());
+        return Response.ok(restaurants).build();
+    }
+
+    @GET
+    @Path("/owner/{ownerId}")
+    public Response getRestaurantByOwner(@PathParam("ownerId") UUID ownerId) {
+        try {
+            RestaurantDTO restaurant = getRestaurantByOwnerQueryHandler.handle(new GetRestaurantByOwnerQuery(ownerId));
+            return Response.ok(restaurant).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to get restaurant by owner: " + e.getMessage())
                 .build();
         }
     }

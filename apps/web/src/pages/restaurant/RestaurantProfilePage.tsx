@@ -29,7 +29,7 @@ const RestaurantProfilePage: React.FC = () => {
     phone: '',
     email: '',
     website: '',
-    logo: '/placeholder-restaurant.jpg',
+    imageUrl: '/placeholder-restaurant.jpg',
     coverImage: '/placeholder-cover.jpg',
     category: '',
     priceRange: '€€',
@@ -72,7 +72,7 @@ const RestaurantProfilePage: React.FC = () => {
         phone: restaurant.phone,
         email: restaurant.email,
         website: restaurant.website || '',
-        logo: restaurant.imageUrl || '/placeholder-restaurant.jpg',
+        imageUrl: restaurant.imageUrl || '/placeholder-restaurant.jpg',
         coverImage: restaurant.imageUrl || '/placeholder-cover.jpg',
         category: restaurant.cuisineType,
         priceRange: '€€',
@@ -316,7 +316,7 @@ const RestaurantProfilePage: React.FC = () => {
             <div className="relative">
               <div className="w-32 h-32 bg-white rounded-xl shadow-xl border-4 border-white overflow-hidden">
                 <ImageWithFallback
-                  src={tempData.logo}
+                  src={tempData.imageUrl}
                   alt={tempData.name}
                   className="w-full h-full object-cover"
                   fallbackText="Logo restaurant"
@@ -585,7 +585,7 @@ const RestaurantProfilePage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Logo du restaurant</label>
             <div className="flex items-center space-x-4">
               <ImageWithFallback
-                src={tempData.logo}
+                src={tempData.imageUrl}
                 alt="Logo"
                 className="w-16 h-16 rounded-lg object-cover border"
                 fallbackSrc="/placeholder-restaurant.jpg"

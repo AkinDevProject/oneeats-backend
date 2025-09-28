@@ -56,6 +56,10 @@ public class RestaurantEntity extends PanacheEntityBase {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private RestaurantStatus status = RestaurantStatus.PENDING;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OpeningHoursEntity> openingHours;
 
@@ -63,7 +67,8 @@ public class RestaurantEntity extends PanacheEntityBase {
 
     public RestaurantEntity(UUID id, String name, String description, String address, String phone,
                            String email, String cuisineType, Double rating, String imageUrl,
-                           Boolean isOpen, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                           Boolean isOpen, Boolean isActive, RestaurantStatus status,
+                           LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -77,6 +82,7 @@ public class RestaurantEntity extends PanacheEntityBase {
         this.imageUrl = imageUrl;
         this.isOpen = isOpen;
         this.isActive = isActive;
+        this.status = status;
     }
 
     public String getName() {
@@ -199,14 +205,22 @@ public class RestaurantEntity extends PanacheEntityBase {
         if (this.openingHours == null) {
             this.openingHours = new ArrayList<>();
         }
-        
+
         // Supprimer tous les anciens horaires (orphanRemoval = true se chargera de la suppression en DB)
         this.openingHours.clear();
-        
+
         // Ajouter les nouveaux horaires
         if (newOpeningHours != null) {
             this.openingHours.addAll(newOpeningHours);
             newOpeningHours.forEach(hours -> hours.setRestaurant(this));
         }
+    }
+
+    public RestaurantStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RestaurantStatus status) {
+        this.status = status;
     }
 }

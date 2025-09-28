@@ -84,6 +84,21 @@ public class JpaRestaurantRepository implements IRestaurantRepository {
     }
 
     @Override
+    public List<Restaurant> findByStatusAndIsActive(RestaurantStatus status, boolean isActive) {
+        return RestaurantEntity.<RestaurantEntity>find("status = ?1 and isActive = ?2", status, isActive).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Restaurant> findByOwnerId(UUID ownerId) {
+        // Note: Pour le moment, nous n'avons pas de relation ownerId dans Restaurant
+        // Cet endpoint sera implémenté quand la relation User-Restaurant sera établie
+        // Pour maintenant, on retourne empty
+        return Optional.empty();
+    }
+
+    @Override
     public boolean existsByEmail(Email email) {
         return RestaurantEntity.count("email", email.getValue()) > 0;
     }
