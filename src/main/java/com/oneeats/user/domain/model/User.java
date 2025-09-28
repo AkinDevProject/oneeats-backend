@@ -116,6 +116,15 @@ public class User extends BaseEntity {
         this.updatedAt = LocalDateTime.now();
         addDomainEvent(new UserUpdatedEvent(getId(), getEmail()));
     }
+
+    public void updateStatus(UserStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        this.status = newStatus;
+        this.updatedAt = LocalDateTime.now();
+        addDomainEvent(new UserUpdatedEvent(getId(), getEmail()));
+    }
     
     public boolean canBeDeleted() {
         return status == UserStatus.INACTIVE;

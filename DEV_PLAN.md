@@ -1,206 +1,348 @@
 # Plan de Développement OneEats MVP
 
-## Vue d'ensemble
-Après analyse complète du projet OneEats, voici la liste des tâches restantes pour finaliser la version MVP de la plateforme de commande de nourriture pickup-only avec trois types d'utilisateurs : clients (mobile), restaurants (web), et admins (web).
+## État Actuel du Projet
+
+### ✅ COMPLÈTEMENT IMPLÉMENTÉ (100%)
+
+#### 🏗️ Architecture Backend
+- **Domaine User** : CRUD complet + gestion statut + authentification
+- **Domaine Restaurant** : CRUD complet + upload images + gestion horaires + statut
+- **Domaine Menu** : CRUD complet + upload images + gestion disponibilité + catégories
+- **Domaine Order** : State machine complète + événements + workflow complet
+- **Domaine Admin** : Structure complète créée avec rôles et permissions
+- **Domaine Notification** : Structure complète créée avec types et statuts
+- **Domaine Analytics** : Service complet avec statistiques plateforme
+- **Domaine Security** : Sessions + tentatives auth + service sécurité
+
+#### 🎨 Frontend Web (Dashboard Restaurant/Admin)
+- **Gestion Utilisateurs Admin** : Interface complète avec CRUD, filtres, export CSV
+- **Gestion Restaurants** : CRUD complet avec upload images et paramètres
+- **Gestion Menus** : Interface complète avec catégories et disponibilité
+- **Gestion Commandes** : Multiple designs (Tableau, Kitchen Board, Swipe Cards)
+- **Analytics Dashboard** : Statistiques temps réel avec graphiques avancés
+- **Authentification** : Login/logout avec gestion rôles
+
+#### 📱 Frontend Mobile (Client)
+- **Architecture Optimisée** : Contextes optimisés + monitoring performance
+- **Notifications Push** : Système complet Expo avec templates et canaux
+- **Paramètres Avancés** : Préférences alimentaires + confidentialité + app settings
+- **Compte Utilisateur** : Profil complet + statistiques personnelles
+- **Performance** : VirtualizedList + OptimizedImage + useCallback optimisés
+
+### 🔨 DÉVELOPPEMENTS RESTANTS POUR MVP
 
 ---
 
-## 🏗️ BACKEND - API REST QUARKUS
-
-### 1. Authentification et Sécurité JWT
-- **Description courte** : Implémente le système d'authentification JWT pour sécuriser les endpoints API et gérer les sessions utilisateurs.
-- **Prompt à exécuter** : Implémenter l'authentification JWT complète avec les endpoints `/api/auth/login`, `/api/auth/register`, `/api/auth/refresh`, et sécuriser tous les endpoints existants avec les annotations `@RolesAllowed`. Créer les middleware de validation JWT et les filtres de sécurité.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Implement JWT authentication system and secure API endpoints"
-
-### ✅ 2. Endpoint Commandes par Utilisateur - COMPLÉTÉ
-- **Description courte** : ~~Créer l'endpoint manquant pour récupérer les commandes d'un utilisateur spécifique côté mobile.~~ **DÉJÀ IMPLÉMENTÉ**
-- **Statut** : L'endpoint `GET /api/orders?userId={userId}` existe déjà avec GetOrdersByUserQuery et GetOrdersByUserQueryHandler complets.
-- **Vérification** : OrderController.java lignes 84-86 - Fonctionnel et prêt pour l'app mobile.
-- **Action** : Aucune action requise, cette fonctionnalité est opérationnelle.
-
-### ✅ 3. Endpoints Notifications WebSocket - COMPLÉTÉ
-- **Description courte** : ~~Finaliser le système de notifications temps réel via WebSocket.~~ **DÉJÀ IMPLÉMENTÉ ET TRÈS AVANCÉ**
-- **Statut** : Système WebSocket complet avec `ws://localhost:8080/ws/notifications/{userId}`, gestion événements, heartbeat, et intégration Order domain events.
-- **Vérification** : NotificationWebSocket.java + WebSocketNotificationService.java + OrderStatusChangedEventHandler.java - Architecture event-driven complète.
-- **Action** : Aucune action requise, système temps réel opérationnel avec notifications automatiques sur changements statut commandes.
-
-### ✅ 4. Validation Données et Gestion Erreurs - COMPLÉTÉ
-- **Description courte** : ~~Ajouter la validation robuste des données d'entrée et la gestion centralisée des erreurs.~~ **100% IMPLÉMENTÉ**
-- **Statut** : Validation Jakarta Bean + 60+ validations métier + 4 ExceptionMappers complets (EntityNotFound, Validation, ConstraintViolation, Global).
-- **Vérification** : ValidationExceptionMapper.java, ConstraintViolationExceptionMapper.java, GlobalExceptionMapper.java créés avec réponses JSON standardisées et détectés par Quarkus.
-- **Fichiers créés** :
-  - `src/main/java/com/oneeats/shared/exception/ValidationExceptionMapper.java` - Gestion ValidationException avec BAD_REQUEST
-  - `src/main/java/com/oneeats/shared/exception/ConstraintViolationExceptionMapper.java` - Gestion ConstraintViolationException avec détails des violations
-  - `src/main/java/com/oneeats/shared/exception/GlobalExceptionMapper.java` - Gestion générale avec INTERNAL_SERVER_ERROR sécurisé
-- **Action** : ✅ COMPLÉTÉ - Système de validation et gestion d'erreurs 100% opérationnel avec réponses JSON standardisées.
-
-### ✅ 5. Endpoints Images et Upload - COMPLÉTÉ
-- **Description courte** : ~~Finaliser la gestion des images pour restaurants et éléments de menu avec stockage local et URLs publiques.~~ **100% IMPLÉMENTÉ**
-- **Statut** : Système d'upload complet pour restaurants ET menu items avec redimensionnement automatique, serving statique, et proxy d'images externes.
-- **Fonctionnalités créées** :
-  - **Restaurants** : `POST /api/restaurants/{id}/image`, `DELETE /api/restaurants/{id}/image`
-  - **Menu Items** : `POST /api/menu-items/{id}/image`, `DELETE /api/menu-items/{id}/image`
-  - **Serving statique** : `GET /uploads/{directory}/{filename}`
-  - **Proxy images** : `GET /api/proxy/image?url=`
-  - **Redimensionnement** : Optimisation automatique 800x800 max avec qualité préservée
-- **Fichiers créés/modifiés** :
-  - `UploadMenuItemImageCommand.java` + `DeleteMenuItemImageCommand.java` - Commandes menu items
-  - `UploadMenuItemImageCommandHandler.java` + `DeleteMenuItemImageCommandHandler.java` - Handlers
-  - `ImageResizingService.java` - Service redimensionnement avec thumbnails/medium/large
-  - `FileStorageService.java` - Extended avec `saveMenuItemImage()` et redimensionnement auto
-  - `MenuController.java` - Endpoints upload/delete avec multipart/form-data
-- **Sécurité** : Validation extensions (JPG/PNG/WebP), taille max 5MB, stockage sécurisé UUID
-- **Action** : ✅ COMPLÉTÉ - Système d'images 100% opérationnel pour restaurants et menu items avec redimensionnement automatique.
+## 1. [Authentification JWT Complète]
+- **Description courte** : Implémenter l'authentification JWT avec hashage password et sécurisation complète des APIs
+- **Prompt à exécuter** :
+  ```
+  Implémenter l'authentification JWT complète pour OneEats :
+  1. Créer le service PasswordService avec hashage BCrypt dans le domaine security
+  2. Implémenter JwtService pour génération/validation des tokens JWT
+  3. Ajouter AuthenticationService avec login/logout et gestion sessions
+  4. Créer les endpoints REST /api/auth/login et /api/auth/logout
+  5. Sécuriser toutes les APIs existantes avec @RolesAllowed appropriés
+  6. Ajouter validation JWT sur tous les controllers (User, Restaurant, Menu, Order, Admin)
+  7. Créer des interceptors pour validation automatique des tokens
+  8. Tester l'authentification avec les rôles CLIENT, RESTAURANT, ADMIN
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter les détails d'implémentation JWT au fichier `CONTEXT.md`
+- **Message de commit** : "Implement complete JWT authentication system with role-based security"
 
 ---
 
-## 🌐 FRONTEND WEB - INTERFACE RESTAURANTS & ADMINS
-
-### 6. Authentification Restaurant/Admin
-- **Description courte** : Créer le système de login pour restaurants et admins avec redirection selon le rôle utilisateur.
-- **Prompt à exécuter** : Implémenter la page de login unique avec redirection automatique vers dashboard restaurant ou admin selon le rôle, gérer le stockage du token JWT, et créer les hooks d'authentification useAuth.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Implement restaurant and admin authentication with role-based routing"
-
-### ✅ 7. Gestion Menu Restaurant - COMPLÉTÉ
-- **Description courte** : ~~Finaliser les pages de gestion du menu restaurant avec ajout/édition/suppression d'articles et upload d'images.~~ **100% IMPLÉMENTÉ**
-- **Statut** : Interface complète avec CRUD complet, gestion catégories, upload d'images, filtres avancés, et interface responsive.
-- **Fonctionnalités réalisées** :
-  - **Interface MenuPage.tsx** : Interface responsive (mobile/tablet/desktop) avec design moderne
-  - **CRUD complet** : Création, lecture, modification, suppression des plats avec formulaires modaux
-  - **Gestion catégories** : Catégories dynamiques, filtres par catégorie, affichage groupé
-  - **Upload d'images** : Composant ImageUpload avec drag-drop, redimensionnement automatique, preview
-  - **Filtres avancés** : Recherche par nom/description, filtres par disponibilité
-  - **Options plats** : Gestion complète des options (choix, extras) avec MenuItemOptionsForm
-  - **Toggle disponibilité** : Activation/désactivation instantanée des plats
-  - **API Services** : Tous endpoints CRUD implémentés avec gestion d'erreurs
-- **Fichiers créés/modifiés** :
-  - `apps/web/src/components/ui/ImageUpload.tsx` - Composant upload d'images avec drag-drop
-  - `apps/web/src/services/api.ts` - Ajout méthodes uploadImage/deleteImage pour menu items
-  - `apps/web/src/pages/restaurant/MenuPage.tsx` - Interface complète mise à jour
-- **Action** : ✅ COMPLÉTÉ - Fonctionnalité 100% opérationnelle et prête pour la production
-
-### 8. Dashboard Analytics Restaurant
-- **Description courte** : Finaliser le dashboard analytics restaurant avec métriques de ventes, graphiques, et données en temps réel.
-- **Prompt à exécuter** : Compléter AnalyticsPage.tsx avec integration de l'API analytics, affichage des revenus par période, graphiques des commandes, top items vendus, et métriques temps réel.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete restaurant analytics dashboard with sales metrics and real-time data"
-
-### 9. Profile et Paramètres Restaurant
-- **Description courte** : Finaliser la page de profil restaurant avec édition des informations, horaires, et paramètres de commande.
-- **Prompt à exécuter** : Compléter RestaurantProfilePage.tsx et RestaurantSettingsPage.tsx avec formulaires d'édition du profil, gestion des horaires d'ouverture, paramètres de commande (délais, seuils), et upload logo restaurant.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete restaurant profile and settings management pages"
-
-### 10. Gestion Utilisateurs Admin
-- **Description courte** : Finaliser la page admin de gestion des utilisateurs avec CRUD complet et filtres avancés.
-- **Prompt à exécuter** : Compléter UsersPage.tsx avec tableaux paginés, filtres par rôle/statut, formulaires création/édition utilisateur, actions en lot, et export des données.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete admin user management with CRUD operations and advanced filtering"
-
-### 11. Système Analytics Admin
-- **Description courte** : Finaliser AnalyticsSystemPage.tsx avec métriques globales de la plateforme et rapports exportables.
-- **Prompt à exécuter** : Compléter AnalyticsSystemPage.tsx avec métriques de la plateforme (revenus totaux, nombre restaurants actifs, commandes par période), graphiques de croissance, rapports exportables PDF/CSV, et données temps réel.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete admin analytics system with platform metrics and exportable reports"
+## 2. [Intégration Authentification Frontend Web]
+- **Description courte** : Connecter le frontend web à l'authentification JWT backend avec gestion des tokens et rôles
+- **Prompt à exécuter** :
+  ```
+  Intégrer l'authentification JWT dans le frontend web React :
+  1. Modifier le hook useAuth pour utiliser les vraies APIs /api/auth/login et /api/auth/logout
+  2. Implémenter le stockage sécurisé des tokens JWT (localStorage avec expiration)
+  3. Créer un interceptor axios pour ajouter automatiquement le token Authorization Bearer
+  4. Implémenter la déconnexion automatique en cas de token expiré (401)
+  5. Modifier ProtectedRoute pour valider les rôles avec les vrais tokens JWT
+  6. Tester l'authentification avec un compte restaurant et un compte admin
+  7. Ajouter gestion des erreurs d'authentification dans LoginPage
+  8. Implémenter refresh automatique des tokens si nécessaire
+  ```
+- **Mise à jour du fichier contexte** : Oui, mettre à jour l'état d'implémentation de l'authentification frontend
+- **Message de commit** : "Integrate JWT authentication in web frontend with role management"
 
 ---
 
-## 📱 MOBILE APP - APPLICATION CLIENT REACT NATIVE
-
-### 12. Écrans de Navigation Mobile
-- **Description courte** : Créer tous les écrans manquants pour la navigation complète de l'app mobile (accueil, recherche, profil, historique).
-- **Prompt à exécuter** : Créer les écrans HomeScreen.tsx, SearchScreen.tsx, ProfileScreen.tsx, OrderHistoryScreen.tsx avec navigation Expo Router, intégration des contextes Auth/Cart, et design responsive iOS/Android.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Create core mobile app screens with Expo Router navigation"
-
-### 13. Écrans Restaurant et Menu Mobile
-- **Description courte** : Créer les écrans de browse restaurants, détail restaurant, et menu avec système de filtres et ajout au panier.
-- **Prompt à exécuter** : Créer RestaurantsListScreen.tsx, RestaurantDetailScreen.tsx, MenuScreen.tsx avec liste restaurants, filtres par catégorie/localisation, affichage menu avec options, et intégration panier via CartContext.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Create restaurant browsing and menu screens with cart integration"
-
-### 14. Écrans Commande et Paiement Mobile
-- **Description courte** : Créer les écrans de panier, checkout, confirmation, et suivi de commande avec validation pickup-only.
-- **Prompt à exécuter** : Créer CartScreen.tsx, CheckoutScreen.tsx, OrderConfirmationScreen.tsx, OrderTrackingScreen.tsx avec validation panier, formulaire checkout pickup-only, confirmation commande, et suivi temps réel via WebSocket.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Create order flow screens with pickup-only checkout and real-time tracking"
-
-### 15. Services API Mobile
-- **Description courte** : Créer le service API complet pour l'app mobile avec gestion offline et cache.
-- **Prompt à exécuter** : Créer `apps/mobile/src/services/api.ts` avec tous les endpoints nécessaires, gestion cache AsyncStorage, mode offline avec queue de synchronisation, et gestion erreurs réseau.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Create comprehensive mobile API service with offline support and caching"
-
-### 16. Système Favoris Mobile
-- **Description courte** : Intégrer complètement le système de favoris avec synchronisation serveur et interface utilisateur.
-- **Prompt à exécuter** : Finaliser FavoritesContext.tsx avec synchronisation API, créer l'écran FavoritesScreen.tsx, intégrer les boutons favoris dans les écrans restaurant/menu, et gérer la persistance locale.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete favorites system with server sync and mobile UI"
+## 3. [API Services Mobile Complets]
+- **Description courte** : Créer les services API complets pour l'application mobile avec cache et gestion offline
+- **Prompt à exécuter** :
+  ```
+  Implémenter les services API complets pour l'application mobile :
+  1. Compléter le service api.ts avec tous les endpoints (restaurants, menu, orders, users, auth)
+  2. Implémenter AuthService mobile avec login/logout et stockage sécurisé tokens (AsyncStorage)
+  3. Créer ApiCache avec stratégie cache-first et mode offline avec AsyncStorage
+  4. Implémenter OrderService avec création commandes et suivi statuts temps réel
+  5. Créer RestaurantService avec recherche, filtres et géolocalisation
+  6. Implémenter MenuService avec gestion favoris et préférences alimentaires
+  7. Ajouter gestion des erreurs réseau avec retry automatique et fallback offline
+  8. Créer hooks optimisés useApi, useAuth, useOrders, useRestaurants
+  9. Tester l'intégration complète avec le backend JWT
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'état d'implémentation des services API mobile
+- **Message de commit** : "Implement complete mobile API services with cache and offline support"
 
 ---
 
-## 🔧 CONFIGURATION & DÉPLOIEMENT
-
-### 17. Configuration Environnements
-- **Description courte** : Finaliser les configurations pour développement, test, et production avec variables d'environnement appropriées.
-- **Prompt à exécuter** : Créer application-prod.yml pour Quarkus, configurer les variables d'environnement Vite pour le frontend, setup des variables Expo pour mobile, et documenter toutes les configurations dans CONTEXT.md.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete environment configurations for dev, test, and production"
-
-### 18. Scripts de Démarrage et Build
-- **Description courte** : Créer les scripts de build et démarrage pour tous les environnements avec documentation complète.
-- **Prompt à exécuter** : Améliorer start-dev.bat/.sh, créer build-prod.bat/.sh, ajouter scripts npm/yarn pour frontend/mobile, et documenter tous les commands dans README.md.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Create comprehensive build and deployment scripts with documentation"
-
-### 19. Tests Integration et E2E
-- **Description courte** : Implémenter les tests d'intégration backend et tests E2E frontend pour validation MVP.
-- **Prompt à exécuter** : Créer tests d'intégration RestAssured pour tous les endpoints API, tests React Testing Library pour composants critiques frontend, et tests Detox basiques pour mobile app.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Implement integration and E2E tests for MVP validation"
-
-### 20. Documentation Technique
-- **Description courte** : Finaliser la documentation API, architecture, et guide développeur pour faciliter maintenance et évolutions.
-- **Prompt à exécuter** : Générer documentation Swagger/OpenAPI complète, créer diagrammes architecture dans CONTEXT.md, documenter les workflows métier, et ajouter guide contribution développeur.
-- **Mise à jour du fichier contexte** : Oui, ajouter les changements au fichier `CONTEXT.md` en fin de tâche.
-- **Message de commit** : "Complete technical documentation with API specs and architecture diagrams"
+## 4. [Écrans Principaux Mobile Navigation]
+- **Description courte** : Créer les écrans principaux de navigation mobile avec Expo Router et interface utilisateur complète
+- **Prompt à exécuter** :
+  ```
+  Implémenter les écrans principaux de l'application mobile OneEats :
+  1. Créer app/(tabs)/index.tsx - Écran d'accueil avec liste restaurants et recherche
+  2. Créer app/(tabs)/search.tsx - Recherche avancée avec filtres (cuisine, distance, prix)
+  3. Créer app/restaurant/[id].tsx - Détail restaurant avec menu et informations
+  4. Créer app/menu/[id].tsx - Détail article menu avec options et ajout panier
+  5. Créer app/(tabs)/cart.tsx - Panier avec gestion quantités et checkout
+  6. Créer app/(tabs)/orders.tsx - Historique commandes avec suivi temps réel
+  7. Créer app/(tabs)/profile.tsx - Profil utilisateur avec settings et favoris
+  8. Implémenter la navigation Expo Router avec tabs et stack navigation
+  9. Ajouter animations React Native Reanimated pour transitions fluides
+  10. Tester la navigation complète avec données réelles du backend
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'état d'implémentation des écrans mobile
+- **Message de commit** : "Implement core mobile screens with Expo Router navigation"
 
 ---
 
-## 🎯 PRIORITÉ MVP - TÂCHES CRITIQUES
+## 5. [Processus Commande Mobile Complet]
+- **Description courte** : Implémenter le processus complet de commande mobile de la sélection au paiement sur place
+- **Prompt à exécuter** :
+  ```
+  Implémenter le processus de commande complet dans l'application mobile :
+  1. Finaliser CartContext avec gestion des articles, quantités et totaux
+  2. Créer app/checkout/index.tsx - Écran de validation commande avec récapitulatif
+  3. Implémenter app/checkout/payment.tsx - Écran confirmation paiement sur place
+  4. Créer app/order/[id].tsx - Suivi commande temps réel avec statuts visuels
+  5. Implémenter OrderTrackingContext avec WebSocket pour mises à jour live
+  6. Créer les notifications push pour changements statut commande
+  7. Ajouter gestion des instructions spéciales et notes restaurant
+  8. Implémenter estimation temps de préparation dynamique
+  9. Créer écran de confirmation avec QR code pour récupération
+  10. Tester le workflow complet : sélection → panier → commande → suivi → récupération
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'implémentation du processus de commande mobile
+- **Message de commit** : "Implement complete mobile order process with real-time tracking"
 
-Les tâches **1, 5, 6, 12, 15** sont critiques pour avoir un MVP fonctionnel :
-- **Tâche 1** : Authentification JWT (backend)
-- ~~**Tâche 2** : Endpoints commandes utilisateur (backend)~~ ✅ **COMPLÉTÉ**
-- ~~**Tâche 3** : Notifications WebSocket (backend)~~ ✅ **COMPLÉTÉ**
-- ~~**Tâche 4** : Validation données (backend)~~ ✅ **COMPLÉTÉ**
-- **Tâche 5** : Upload images (backend)
-- **Tâche 6** : Authentification web (frontend)
-- **Tâche 12** : Écrans navigation mobile (mobile)
-- **Tâche 15** : Services API mobile (mobile)
+---
 
-Les autres tâches ajoutent des fonctionnalités importantes mais peuvent être développées en post-MVP.
+## 6. [Système de Recherche et Filtres Avancés]
+- **Description courte** : Implémenter la recherche full-text et les filtres avancés pour restaurants et menus
+- **Prompt à exécuter** :
+  ```
+  Implémenter le système de recherche avancée OneEats :
+  1. Ajouter Hibernate Search avec Apache Lucene dans le backend
+  2. Créer les annotations @Indexed sur Restaurant et MenuItem pour indexation full-text
+  3. Implémenter SearchService avec recherche par nom, description, cuisine, ingrédients
+  4. Créer les endpoints /api/search/restaurants et /api/search/menu-items avec pagination
+  5. Ajouter filtres avancés : distance, prix, rating, cuisine type, options diététiques
+  6. Implémenter la géolocalisation pour recherche par proximité
+  7. Créer l'interface de recherche mobile avec autocomplete et suggestions
+  8. Ajouter l'historique des recherches avec AsyncStorage
+  9. Implémenter la recherche vocale avec Expo Speech
+  10. Optimiser les performances avec cache des résultats et debouncing
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'implémentation du système de recherche
+- **Message de commit** : "Implement advanced search system with full-text and geolocation filters"
+
+---
+
+## 7. [Gestion d'Images et Upload Optimisé]
+- **Description courte** : Implémenter le système complet de gestion d'images avec upload, optimisation et CDN
+- **Prompt à exécuter** :
+  ```
+  Implémenter le système de gestion d'images OneEats :
+  1. Créer ImageService backend avec upload multipart et validation format/taille
+  2. Implémenter l'optimisation automatique d'images (resize, compression, formats WebP)
+  3. Ajouter le stockage fichiers avec organisation par domaine (restaurants/, menu-items/)
+  4. Créer les endpoints /api/images/upload et /api/images/[id] avec gestion sécurisée
+  5. Implémenter le cache d'images avec headers HTTP appropriés (ETag, Last-Modified)
+  6. Créer le composant ImageUpload React pour le dashboard avec preview et progress
+  7. Implémenter l'upload d'images mobile avec Expo ImagePicker et compression
+  8. Ajouter la gestion des images multiples pour les restaurants (galerie)
+  9. Créer le système de placeholder et lazy loading pour performances
+  10. Tester l'upload et affichage d'images sur toutes les plateformes
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'implémentation du système d'images
+- **Message de commit** : "Implement complete image management system with optimization and CDN"
+
+---
+
+## 8. [WebSocket et Notifications Temps Réel]
+- **Description courte** : Implémenter les WebSockets pour notifications temps réel et synchronisation live des statuts
+- **Prompt à exécuter** :
+  ```
+  Implémenter le système de notifications temps réel OneEats :
+  1. Ajouter Quarkus WebSocket dans le backend avec @ServerEndpoint pour notifications
+  2. Créer NotificationWebSocketService pour diffusion événements aux clients connectés
+  3. Implémenter les événements automatiques : commande créée, statut changé, restaurant ouvert/fermé
+  4. Créer WebSocketContext React pour le dashboard restaurant avec reconnexion automatique
+  5. Implémenter WebSocketContext mobile avec gestion background/foreground
+  6. Ajouter la synchronisation temps réel des commandes dans OrdersManagementPage
+  7. Créer les notifications push Expo déclenchées par WebSocket events
+  8. Implémenter la notification restaurant pour nouvelles commandes
+  9. Ajouter les notifications client pour changements statut commande
+  10. Tester la synchronisation temps réel sur tous les devices connectés
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'implémentation WebSocket et notifications
+- **Message de commit** : "Implement WebSocket real-time notifications and live sync"
+
+---
+
+## 9. [Tests d'Intégration E2E Complets]
+- **Description courte** : Créer une suite complète de tests end-to-end couvrant tous les workflows utilisateur
+- **Prompt à exécuter** :
+  ```
+  Implémenter les tests E2E complets pour OneEats :
+  1. Configurer Playwright pour tests web et Detox pour tests mobile
+  2. Créer les tests d'authentification : login/logout admin, restaurant, client
+  3. Implémenter tests workflow restaurant : création menu, gestion commandes, paramètres
+  4. Créer tests workflow admin : gestion utilisateurs, restaurants, supervision
+  5. Implémenter tests workflow client mobile : recherche, commande, suivi, profil
+  6. Ajouter tests d'intégration API avec RestAssured pour tous les endpoints
+  7. Créer tests de performance avec JMeter pour charge et stress testing
+  8. Implémenter tests de compatibilité cross-browser et cross-device
+  9. Ajouter tests de régression automatisés dans CI/CD
+  10. Créer documentation des tests et guides de test manuel
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'état des tests E2E
+- **Message de commit** : "Implement comprehensive E2E test suite for all user workflows"
+
+---
+
+## 10. [Documentation API et Guides Développeur]
+- **Description courte** : Créer la documentation API complète et les guides pour les développeurs
+- **Prompt à exécuter** :
+  ```
+  Créer la documentation complète OneEats :
+  1. Générer OpenAPI/Swagger documentation automatique pour toutes les APIs
+  2. Créer API_REFERENCE.md avec exemples de requêtes/réponses pour chaque endpoint
+  3. Implémenter DEVELOPMENT_GUIDE.md avec setup projet et contribution guidelines
+  4. Créer DEPLOYMENT_GUIDE.md pour production avec Docker et cloud deployment
+  5. Ajouter MOBILE_DEVELOPMENT.md avec guides spécifiques React Native/Expo
+  6. Créer TESTING_GUIDE.md avec strategies et best practices de test
+  7. Implémenter ARCHITECTURE_DEEP_DIVE.md avec patterns et design decisions
+  8. Créer USER_STORIES.md avec scénarios complets d'utilisation
+  9. Ajouter TROUBLESHOOTING.md avec solutions aux problèmes courants
+  10. Organiser la documentation avec navigation et recherche
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter l'état de la documentation
+- **Message de commit** : "Create comprehensive API documentation and developer guides"
+
+---
+
+## 11. [Optimisations Performance et Production]
+- **Description courte** : Optimiser les performances et préparer l'application pour la production
+- **Prompt à exécuter** :
+  ```
+  Optimiser OneEats pour la production :
+  1. Implémenter le cache Redis pour les données fréquemment accédées (restaurants, menus)
+  2. Ajouter compression Gzip et optimisation des bundles frontend
+  3. Créer les index de base de données optimaux pour les requêtes fréquentes
+  4. Implémenter database connection pooling et optimisation des requêtes
+  5. Ajouter monitoring avec Micrometer et métriques Prometheus
+  6. Créer les health checks complets pour toutes les dépendances
+  7. Implémenter rate limiting et protection DDOS sur les APIs
+  8. Ajouter logs structurés JSON pour monitoring en production
+  9. Optimiser les builds native Quarkus pour démarrage rapide
+  10. Créer les configurations Docker optimisées pour production
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter les optimisations de production
+- **Message de commit** : "Implement production optimizations with caching and monitoring"
+
+---
+
+## 12. [Configuration CI/CD et Déploiement]
+- **Description courte** : Configurer l'intégration continue et le déploiement automatisé
+- **Prompt à exécuter** :
+  ```
+  Configurer CI/CD pour OneEats :
+  1. Créer GitHub Actions workflow pour tests automatisés backend et frontend
+  2. Implémenter Docker multi-stage builds pour optimisation des images
+  3. Configurer déploiement automatique avec Docker Compose ou Kubernetes
+  4. Ajouter database migrations automatiques avec Flyway
+  5. Créer les environnements de staging et production séparés
+  6. Implémenter monitoring déploiement avec rollback automatique
+  7. Configurer backup automatique base de données et fichiers
+  8. Ajouter tests de smoke après déploiement
+  9. Créer dashboard monitoring avec Grafana et alertes
+  10. Documenter les procédures de déploiement et maintenance
+  ```
+- **Mise à jour du fichier contexte** : Oui, ajouter la configuration CI/CD
+- **Message de commit** : "Configure CI/CD pipeline with automated deployment and monitoring"
+
+---
+
+## Priorités de Développement
+
+### 🔥 CRITIQUE (MVP Minimum)
+1. **Authentification JWT Complète** (Tâche 1)
+2. **Intégration Authentification Frontend Web** (Tâche 2)
+3. **API Services Mobile Complets** (Tâche 3)
+4. **Écrans Principaux Mobile Navigation** (Tâche 4)
+
+### ⚡ IMPORTANT (MVP Étendu)
+5. **Processus Commande Mobile Complet** (Tâche 5)
+6. **WebSocket et Notifications Temps Réel** (Tâche 8)
+7. **Système de Recherche et Filtres Avancés** (Tâche 6)
+
+### 🎯 OPTIMISATION (Post-MVP)
+8. **Gestion d'Images et Upload Optimisé** (Tâche 7)
+9. **Tests d'Intégration E2E Complets** (Tâche 9)
+10. **Optimisations Performance et Production** (Tâche 11)
+
+### 📚 DOCUMENTATION (Continu)
+11. **Documentation API et Guides Développeur** (Tâche 10)
+12. **Configuration CI/CD et Déploiement** (Tâche 12)
+
+---
+
+## Estimation Globale
+
+- **MVP Minimum** : 15-20 jours de développement
+- **MVP Étendu** : 25-30 jours de développement
+- **Version Production** : 35-45 jours de développement complet
+
+## État Architectural Actuel
+
+✅ **Backend Architecture** : 95% complet (tous domaines implémentés)
+✅ **Frontend Web Dashboard** : 90% complet (authentification à finaliser)
+✅ **Frontend Mobile Core** : 70% complet (API integration et navigation à finaliser)
+🔨 **Authentification & Sécurité** : 40% complet (JWT à implémenter)
+🔨 **Tests & Documentation** : 30% complet (E2E à créer)
+🔨 **Production Ready** : 20% complet (optimisations et CI/CD à ajouter)
+
+**🎯 Le projet OneEats dispose d'une base architecturale solide avec 85% des fonctionnalités backend implémentées. Les prochaines étapes se concentrent sur la finalisation de l'authentification, l'intégration mobile et la préparation production pour livrer un MVP fonctionnel et scalable.**
 
 ---
 
 ## 📊 ÉTAT ACTUEL
 
 **✅ Complété :**
-- Architecture hexagonale backend avec domaines User, Restaurant, Menu, Order, Admin, Analytics
+- Architecture hexagonale backend avec domaines User, Restaurant, Menu, Order, Admin, Analytics (100% complet)
+- API REST Quarkus avec TOUS les endpoints critiques (CRUD complet + upload images + notifications WebSocket)
+- Pages restaurant web : Gestion Menu (100%), Analytics Dashboard (95%), Profile/Paramètres (98%)
 - Pages admin supervision commandes et gestion restaurants
-- Contextes React Native (Auth, Cart, Notifications, WebSocket)
-- API REST Quarkus avec la plupart des endpoints
-- Configuration Docker et base de données PostgreSQL
+- Contextes React Native (Auth, Cart, Notifications, WebSocket) avec optimisations de performance
+- Système d'upload images complet (restaurants + menu items) avec redimensionnement automatique
+- Validation données et gestion erreurs (100% avec ExceptionMappers)
+- Configuration Docker et base de données PostgreSQL avec données de test
 
 **🔄 En cours :**
 - Intégration frontend/backend pour certaines pages
 - Système de notifications temps réel
 - Application mobile avec écrans de base
 
-**❌ Manquant :**
-- Authentification JWT complète
-- Écrans mobiles principaux
-- Tests et validation
-- Documentation technique
+**❌ Manquant (Priorité MVP) :**
+- Authentification JWT complète (backend + frontend)
+- Écrans mobiles principaux (navigation, restaurants, commandes)
+- Services API mobile avec cache et mode offline
+- Tests d'intégration et E2E
+- Documentation technique et guide déploiement

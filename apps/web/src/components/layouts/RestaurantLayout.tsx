@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { 
-  ShoppingCart, 
-  Menu as MenuIcon, 
-  Settings, 
+import {
+  ShoppingCart,
+  Menu as MenuIcon,
+  Settings,
   LogOut,
   ChefHat,
   Menu as HamburgerMenu,
@@ -38,22 +38,22 @@ const RestaurantLayout: React.FC = () => {
   const isSettingsPage = location.pathname.includes('/settings');
 
   const navigation: NavigationItem[] = [
-    { 
-      name: 'Gestion des commandes', 
-      href: '/restaurant/orders', 
+    {
+      name: 'Gestion des commandes',
+      href: '/restaurant/orders',
       icon: ShoppingCart,
       badge: 3,
       description: 'Traitement des commandes'
     },
-    { 
-      name: 'Menu', 
-      href: '/restaurant/menu', 
+    {
+      name: 'Menu',
+      href: '/restaurant/menu',
       icon: MenuIcon,
       description: 'Gestion du menu'
     },
-    { 
-      name: 'Paramètres', 
-      href: '/restaurant/settings', 
+    {
+      name: 'Paramètres',
+      href: '/restaurant/settings',
       icon: Settings,
       description: 'Configuration'
     },

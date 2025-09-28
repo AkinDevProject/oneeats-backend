@@ -60,12 +60,12 @@ INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time
     (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'SUNDAY', '12:00', '02:00');
 
 -- Utilisateurs (table 'user_account')
-INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, status, is_active, version) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), 'ACTIVE', true, 0),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), 'ACTIVE', true, 0),
-('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), 'ACTIVE', true, 0),
-('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), 'ACTIVE', true, 0),
-('4ffe5398-4599-4c33-98ec-18a96fd9e200', 'jean.dupont@oneats.dev', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '+33 6 12 34 56 78', '123 Rue de la Paix, 75001 Paris', NOW(), NOW(), 'ACTIVE', true, 0);
+INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, status, version) VALUES
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), 'ACTIVE', 0),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), 'ACTIVE', 0),
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), 'ACTIVE', 0),
+('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), 'ACTIVE', 0),
+('4ffe5398-4599-4c33-98ec-18a96fd9e200', 'jean.dupont@oneats.dev', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '+33 6 12 34 56 78', '123 Rue de la Paix, 75001 Paris', NOW(), NOW(), 'ACTIVE', 0);
 
 -- Menu items pour Pizza Palace
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at, version) VALUES

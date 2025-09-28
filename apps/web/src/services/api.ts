@@ -241,6 +241,12 @@ class ApiService {
         body: JSON.stringify(data),
       }),
 
+    updateStatus: (id: string, status: UserStatus): Promise<User> =>
+      this.request(`/api/users/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ id, status }),
+      }),
+
     delete: (id: string): Promise<void> =>
       this.request(`/api/users/${id}`, {
         method: 'DELETE',

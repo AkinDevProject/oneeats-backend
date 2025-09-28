@@ -77,8 +77,8 @@ export const useUsers = (): UseUsersResult => {
 
   const updateUserStatus = async (id: string, status: UserStatus) => {
     try {
-      // Pour l'instant, on utilise update générique car il n'y a pas d'endpoint spécifique pour le status
-      const updatedUser = await apiService.users.update(id, { status } as any);
+      // Utiliser le nouvel endpoint spécialisé pour le statut
+      const updatedUser = await apiService.users.updateStatus(id, status);
       const userWithDates = {
         ...updatedUser,
         createdAt: new Date(updatedUser.createdAt),

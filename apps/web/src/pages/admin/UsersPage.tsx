@@ -8,11 +8,22 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '../../components/ui/Table';
 import { useUsers } from '../../hooks/data/useUsers';
-import { User, UserStatus } from '../../types';
+import { User, UserStatus, CreateUserRequest, UpdateUserRequest } from '../../types';
+import { UserModal } from '../../components/modals/UserModal';
 
 const UsersPage: React.FC = () => {
-  const { users, loading, error, updateUserStatus, createUser, deleteUser } = useUsers();
+  const { users, loading, error, updateUserStatus, createUser, updateUser, deleteUser } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<UserStatus | 'ALL'>('ALL');
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'edit' | 'view';
+    user?: User | null;
+  }>({
+    isOpen: false,
+    mode: 'create',
+    user: null,
+  });
 
   if (loading) {
     return (
@@ -37,10 +48,14 @@ const UsersPage: React.FC = () => {
     );
   }
 
-  const filteredUsers = users.filter(user =>
-    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === 'ALL' || user.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const handleToggleStatus = async (userId: string) => {
     const user = users.find(u => u.id === userId);
@@ -49,8 +64,35 @@ const UsersPage: React.FC = () => {
     const newStatus: UserStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     try {
       await updateUserStatus(userId, newStatus);
+      // Optionally show success message
+      console.log(`Statut utilisateur mis à jour vers ${newStatus}`);
     } catch (error) {
       console.error('Erreur lors de la mise à jour du statut:', error);
+      alert('Erreur lors de la mise à jour du statut utilisateur. Veuillez réessayer.');
+    }
+  };
+
+  const handleOpenModal = (mode: 'create' | 'edit' | 'view', user?: User) => {
+    setModalState({
+      isOpen: true,
+      mode,
+      user: user || null,
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalState({
+      isOpen: false,
+      mode: 'create',
+      user: null,
+    });
+  };
+
+  const handleModalSubmit = async (data: CreateUserRequest | UpdateUserRequest) => {
+    if (modalState.mode === 'create') {
+      await createUser(data as CreateUserRequest);
+    } else if (modalState.mode === 'edit' && modalState.user) {
+      await updateUser(modalState.user.id, data as UpdateUserRequest);
     }
   };
 
@@ -103,17 +145,26 @@ const UsersPage: React.FC = () => {
                 </button>
               </div>
               <div className="w-px h-6 bg-gray-300"></div>
-              <select className="bg-transparent text-sm font-medium text-gray-700 border-none focus:outline-none">
-                <option>Tous les rôles</option>
-                <option>Administrateurs</option>
-                <option>Restaurateurs</option>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as UserStatus | 'ALL')}
+                className="bg-transparent text-sm font-medium text-gray-700 border-none focus:outline-none"
+              >
+                <option value="ALL">Tous les statuts</option>
+                <option value="ACTIVE">Actifs</option>
+                <option value="INACTIVE">Inactifs</option>
+                <option value="SUSPENDED">Suspendus</option>
               </select>
             </div>
             <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
               <RefreshCcw className="h-4 w-4 text-gray-600" />
               <span className="hidden sm:inline text-sm font-medium text-gray-700">Actualiser</span>
             </button>
-            <Button variant="primary" icon={<UserPlus className="h-4 w-4" />}>
+            <Button
+              variant="primary"
+              icon={<UserPlus className="h-4 w-4" />}
+              onClick={() => handleOpenModal('create')}
+            >
               Nouvel utilisateur
             </Button>
             <button 
@@ -216,9 +267,36 @@ const UsersPage: React.FC = () => {
                   />
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:space-x-3">
+                <div className="flex items-center space-x-3">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as UserStatus | 'ALL')}
+                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="ALL">Tous les statuts</option>
+                    <option value="ACTIVE">Actifs</option>
+                    <option value="INACTIVE">Inactifs</option>
+                    <option value="SUSPENDED">Suspendus</option>
+                  </select>
+
+                  {statusFilter !== 'ALL' && (
+                    <button
+                      onClick={() => setStatusFilter('ALL')}
+                      className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                    >
+                      Effacer filtres
+                    </button>
+                  )}
+                </div>
+
                 <div className="text-sm text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
                   {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''} trouvé{filteredUsers.length > 1 ? 's' : ''}
+                  {statusFilter !== 'ALL' && (
+                    <span className="ml-2 text-purple-600 font-medium">
+                      • Filtre: {statusFilter === 'ACTIVE' ? 'Actifs' : statusFilter === 'INACTIVE' ? 'Inactifs' : 'Suspendus'}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -241,13 +319,16 @@ const UsersPage: React.FC = () => {
                 }
               </p>
             </div>
-            {searchTerm && (
-              <Button 
-                variant="outline" 
-                onClick={() => setSearchTerm('')}
+            {(searchTerm || statusFilter !== 'ALL') && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('ALL');
+                }}
                 className="mt-4"
               >
-                Effacer la recherche
+                Effacer tous les filtres
               </Button>
             )}
           </div>
@@ -328,6 +409,7 @@ const UsersPage: React.FC = () => {
                     variant="outline"
                     icon={<Eye className="h-4 w-4" />}
                     className="flex-1"
+                    onClick={() => handleOpenModal('view', user)}
                   >
                     Voir profil
                   </Button>
@@ -346,6 +428,15 @@ const UsersPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* User Modal */}
+      <UserModal
+        isOpen={modalState.isOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleModalSubmit}
+        user={modalState.user}
+        mode={modalState.mode}
+      />
       </div>
     </div>
   );

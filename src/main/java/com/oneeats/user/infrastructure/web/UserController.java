@@ -6,6 +6,8 @@ import com.oneeats.user.application.command.UpdateUserCommand;
 import com.oneeats.user.application.command.UpdateUserCommandHandler;
 import com.oneeats.user.application.command.DeleteUserCommand;
 import com.oneeats.user.application.command.DeleteUserCommandHandler;
+import com.oneeats.user.application.command.UpdateUserStatusCommand;
+import com.oneeats.user.application.command.UpdateUserStatusCommandHandler;
 import com.oneeats.user.application.dto.UserDTO;
 import com.oneeats.user.application.query.GetAllUsersQuery;
 import com.oneeats.user.application.query.GetAllUsersQueryHandler;
@@ -40,6 +42,9 @@ public class UserController {
     @Inject
     DeleteUserCommandHandler deleteUserCommandHandler;
 
+    @Inject
+    UpdateUserStatusCommandHandler updateUserStatusCommandHandler;
+
     @POST
     public Response createUser(@Valid CreateUserCommand command) {
         UserDTO user = createUserCommandHandler.handle(command);
@@ -72,5 +77,13 @@ public class UserController {
     public Response deleteUser(@PathParam("id") UUID id) {
         deleteUserCommandHandler.handle(new DeleteUserCommand(id));
         return Response.noContent().build();
+    }
+
+    @PATCH
+    @Path("/{id}/status")
+    public Response updateUserStatus(@PathParam("id") UUID id, @Valid UpdateUserStatusCommand command) {
+        UpdateUserStatusCommand commandWithId = new UpdateUserStatusCommand(id, command.status());
+        UserDTO user = updateUserStatusCommandHandler.handle(commandWithId);
+        return Response.ok(user).build();
     }
 }

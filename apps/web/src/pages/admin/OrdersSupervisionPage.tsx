@@ -23,7 +23,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useOrders } from '../../hooks/data/useOrders';
-import { OrderStatus } from '../../types';
+import { OrderStatus, Order } from '../../types';
+import OrderDetailModal from '../../components/modals/OrderDetailModal';
 
 const OrdersSupervisionPage: React.FC = () => {
   const {
@@ -38,7 +39,8 @@ const OrdersSupervisionPage: React.FC = () => {
   } = useOrders();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const stats = getOrderStats();
 
@@ -96,6 +98,16 @@ const OrdersSupervisionPage: React.FC = () => {
 
   const handleStatusFilter = (status?: OrderStatus) => {
     setFilters({ ...filters, status });
+  };
+
+  const handleOpenModal = (order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -497,11 +509,11 @@ const OrdersSupervisionPage: React.FC = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => setSelectedOrder(selectedOrder === order.id ? null : order.id)}
+                              onClick={() => handleOpenModal(order)}
                               className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
                             >
                               <Eye className="h-3 w-3 mr-1" />
-                              {selectedOrder === order.id ? 'Masquer' : 'Voir'}
+                              Voir détails
                             </Button>
 
                             {order.status === 'PENDING' && (
@@ -549,85 +561,13 @@ const OrdersSupervisionPage: React.FC = () => {
           )}
         </Card>
 
-      {/* Order Details Panel */}
-      {selectedOrder && (
-        <Card>
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Détails de la commande {filteredOrders.find(o => o.id === selectedOrder)?.orderNumber}
-            </h3>
-          </div>
-
-          {(() => {
-            const order = filteredOrders.find(o => o.id === selectedOrder);
-            if (!order) return null;
-
-            return (
-              <div className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card variant="outline">
-                    <h4 className="font-medium text-gray-900 mb-2 flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span>Informations client</span>
-                    </h4>
-                    <div className="space-y-1 text-sm">
-                      <p><span className="font-medium">Nom:</span> {order.clientFirstName} {order.clientLastName}</p>
-                      <p><span className="font-medium">Email:</span> {order.clientEmail}</p>
-                      {order.clientPhone && <p><span className="font-medium">Téléphone:</span> {order.clientPhone}</p>}
-                    </div>
-                  </Card>
-
-                  <Card variant="outline">
-                    <h4 className="font-medium text-gray-900 mb-2 flex items-center space-x-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>Informations commande</span>
-                    </h4>
-                    <div className="space-y-1 text-sm">
-                      <p><span className="font-medium">Montant total:</span> {order.totalAmount.toFixed(2)} €</p>
-                      <p><span className="font-medium">Créée le:</span> {format(order.createdAt, 'dd MMM yyyy à HH:mm', { locale: fr })}</p>
-                      <p><span className="font-medium">Dernière mise à jour:</span> {format(order.updatedAt, 'dd MMM yyyy à HH:mm', { locale: fr })}</p>
-                      {order.estimatedPickupTime && (
-                        <p><span className="font-medium">Récupération estimée:</span> {format(order.estimatedPickupTime, 'dd MMM yyyy à HH:mm', { locale: fr })}</p>
-                      )}
-                    </div>
-                  </Card>
-                </div>
-
-                {order.specialInstructions && (
-                  <Card variant="outline">
-                    <h4 className="font-medium text-gray-900 mb-2">Instructions spéciales</h4>
-                    <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                      {order.specialInstructions}
-                    </p>
-                  </Card>
-                )}
-
-                <Card variant="outline">
-                  <h4 className="font-medium text-gray-900 mb-2">Articles commandés</h4>
-                  <div className="space-y-2">
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-md">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.menuItemName}</p>
-                          <p className="text-sm text-gray-600">
-                            {item.quantity}x à {item.unitPrice.toFixed(2)} €
-                          </p>
-                          {item.specialNotes && (
-                            <p className="text-sm text-gray-500 italic">Note: {item.specialNotes}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-gray-900">{item.subtotal.toFixed(2)} €</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            );
-          })()}
-        </Card>
-      )}
+        {/* Order Detail Modal */}
+        <OrderDetailModal
+          order={selectedOrder}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onStatusChange={updateOrderStatus}
+        />
       </div>
     </div>
   );
