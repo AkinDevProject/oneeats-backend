@@ -4,6 +4,8 @@ import com.oneeats.order.domain.model.OrderStatus;
 import com.oneeats.shared.domain.vo.Money;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import com.oneeats.integration.IntegrationTestProfile;
 import io.restassured.http.ContentType;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,12 +31,13 @@ import static org.hamcrest.Matchers.*;
  * - Tests end-to-end complets
  */
 @QuarkusTest
+@TestProfile(IntegrationTestProfile.class)
 @DisplayName("Order Controller Integration Tests - Real HTTP + Database")
 class OrderControllerIntegrationTest {
     
-    private UUID testUserId;
-    private UUID testRestaurantId;
-    private UUID testMenuItemId;
+    private static UUID testUserId;
+    private static UUID testRestaurantId;
+    private static UUID testMenuItemId;
     
     @BeforeEach
     @Transactional
@@ -281,7 +284,7 @@ class OrderControllerIntegrationTest {
     @DisplayName("Order Status Updates")
     class OrderStatusUpdates {
         
-        private String createTestOrder() {
+        private static String createTestOrder() {
             Map<String, Object> orderData = Map.of(
                 "userId", testUserId.toString(),
                 "restaurantId", testRestaurantId.toString(),

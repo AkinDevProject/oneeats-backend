@@ -1,0 +1,78 @@
+package com.oneeats.integration.restaurant.web;
+
+import com.oneeats.restaurant.application.command.CreateRestaurantCommand;
+import com.oneeats.integration.IntegrationTestProfile;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import jakarta.transaction.Transactional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
+import io.restassured.http.ContentType;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+/**
+ * Tests d'intégration pour la création de restaurants via API REST
+ * Teste le flux complet : HTTP → Controller → UseCase → Repository → DB
+ */
+@QuarkusTest
+@TestProfile(IntegrationTestProfile.class)
+@DisplayName("Restaurant Creation API Integration Tests")
+class RestaurantCreationIntegrationTest {
+
+    @Test
+    @Transactional
+    @DisplayName("Should create restaurant via POST /api/restaurants")
+    void shouldCreateRestaurantViaPostApi() {
+        // Given
+        CreateRestaurantCommand command = new CreateRestaurantCommand(
+            "API Test Restaurant",
+            "Restaurant created via API test",
+            "456 API Street",
+            "0987654321",
+            "api@testrestaurant.fr",
+            "API_CUISINE"
+        );
+
+        // When & Then - HTTP POST request
+        given()
+            .contentType(ContentType.JSON)
+            .body(command)
+        .when()
+            .post("/api/restaurants")
+        .then()
+            .statusCode(201)
+            .body("id", notNullValue())
+            .body("name", equalTo("API Test Restaurant"))
+            .body("email", equalTo("api@testrestaurant.fr"))
+            .body("status", equalTo("PENDING"));
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Should reject restaurant creation with missing data")
+    void shouldRejectRestaurantCreationWithMissingData() {
+        // Given - Invalid command (missing required fields)
+        CreateRestaurantCommand invalidCommand = new CreateRestaurantCommand(
+            null, // Missing name
+            "Description",
+            "Address",
+            "Phone",
+            "email@test.fr",
+            "CUISINE"
+        );
+
+        // When & Then - HTTP POST request should fail
+        given()
+            .contentType(ContentType.JSON)
+            .body(invalidCommand)
+        .when()
+            .post("/api/restaurants")
+        .then()
+            .statusCode(400); // Bad Request
+    }
+}

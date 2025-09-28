@@ -7,6 +7,8 @@ import com.oneeats.restaurant.application.dto.ScheduleDTO;
 import com.oneeats.restaurant.application.dto.ScheduleDTO.DayScheduleDTO;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import com.oneeats.integration.IntegrationTestProfile;
 import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import static org.hamcrest.Matchers.*;
  * - Teste le flux complet : HTTP → Controller → UseCase → Repository → DB
  */
 @QuarkusTest
+@TestProfile(IntegrationTestProfile.class)
 @DisplayName("Restaurant Controller Integration Tests - End-to-End API")
 class RestaurantControllerIntegrationTest {
     

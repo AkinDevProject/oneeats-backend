@@ -4,6 +4,8 @@ import com.oneeats.user.application.command.CreateUserCommand;
 import com.oneeats.user.application.command.UpdateUserCommand;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import com.oneeats.integration.IntegrationTestProfile;
 import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import static org.hamcrest.Matchers.*;
  * - Teste le flux complet : HTTP → Controller → UseCase → Repository → DB
  */
 @QuarkusTest
+@TestProfile(IntegrationTestProfile.class)
 @DisplayName("User Controller Integration Tests - End-to-End API")
 class UserControllerIntegrationTest {
     
@@ -255,7 +258,8 @@ class UserControllerIntegrationTest {
             UpdateUserCommand updateCommand = new UpdateUserCommand(
                 UUID.fromString(userId),
                 "Updated",
-                "User"
+                "User",
+                "updated@user.com"
             );
             
             // Then
@@ -280,7 +284,7 @@ class UserControllerIntegrationTest {
             // Given
             UUID nonExistentId = UUID.randomUUID();
             UpdateUserCommand command = new UpdateUserCommand(
-                nonExistentId, "Updated", "Name"
+                nonExistentId, "Updated", "Name", "updated@test.com"
             );
             
             // When & Then

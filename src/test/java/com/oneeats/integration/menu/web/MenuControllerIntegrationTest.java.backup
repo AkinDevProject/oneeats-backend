@@ -5,6 +5,8 @@ import com.oneeats.menu.application.command.UpdateMenuItemCommand;
 import com.oneeats.restaurant.application.command.CreateRestaurantCommand;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import com.oneeats.integration.IntegrationTestProfile;
 import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import static org.hamcrest.Matchers.*;
  * - Teste le flux complet : HTTP → Controller → UseCase → Repository → DB
  */
 @QuarkusTest
+@TestProfile(IntegrationTestProfile.class)
 @DisplayName("Menu Controller Integration Tests - End-to-End API")
 class MenuControllerIntegrationTest {
     
@@ -572,7 +575,7 @@ class MenuControllerIntegrationTest {
     }
     
     // Helper methods
-    private String createTestRestaurant(String name) {
+    private static String createTestRestaurant(String name) {
         CreateRestaurantCommand command = new CreateRestaurantCommand(
             name, "Test restaurant", "Test address", 
             "0123456789", name.toLowerCase().replace(" ", "") + "@test.fr", "TEST"
@@ -589,7 +592,7 @@ class MenuControllerIntegrationTest {
             .path("id");
     }
     
-    private String createTestMenuItem(String restaurantId, String name) {
+    private static String createTestMenuItem(String restaurantId, String name) {
         CreateMenuItemCommand command = new CreateMenuItemCommand(
             UUID.fromString(restaurantId), name, "Test description",
             new BigDecimal("12.00"), "TEST", null, 15, false, false, true, null
