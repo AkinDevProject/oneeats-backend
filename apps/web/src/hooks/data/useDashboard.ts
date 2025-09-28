@@ -18,8 +18,23 @@ export const useDashboard = (): UseDashboardResult => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.admin.getDashboardStats();
-      setStats(data);
+
+      // Utiliser l'endpoint analytics existant au lieu de admin/dashboard/stats
+      const platformData = await apiService.analytics.getPlatformStats();
+
+      // Convertir les données analytics en format DashboardStats
+      const dashboardStats: DashboardStats = {
+        todayOrders: platformData.todayOrders || 0,
+        todayRevenue: Number(platformData.todayRevenue) || 0,
+        activeRestaurants: platformData.activeRestaurants || 0,
+        weeklyData: platformData.dailyStats?.map(day => ({
+          date: day.date,
+          orders: Number(day.orders) || 0,
+          revenue: Number(day.revenue) || 0
+        })) || []
+      };
+
+      setStats(dashboardStats);
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch dashboard stats');

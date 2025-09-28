@@ -1,5 +1,7 @@
-import { useMemo } from 'react';
-import { Order } from '../../types';
+import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useApiCall } from '../useApi';
+import apiService from '../../services/api';
+import { Order, PlatformStats, RevenueData, TrendsData } from '../../types';
 
 /**
  * Hook personnalisé pour la génération et gestion des analytics
@@ -232,3 +234,112 @@ export const useQuickMetrics = (orders: Order[] = []) => {
 };
 
 export default useAnalytics;
+
+export function usePlatformAnalytics() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await apiService.analytics.getPlatformStats();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useRevenueAnalytics(period: 'day' | 'week' | 'month' = 'week') {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await apiService.analytics.getRevenueStats(period);
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des revenus');
+    } finally {
+      setLoading(false);
+    }
+  }, [period]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useTrendsAnalytics() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await apiService.analytics.getTrendsStats();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des tendances');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch: fetchData };
+}
+
+export function useSystemAnalytics() {
+  const [platformStats, setPlatformStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPlatformStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Fetching platform stats...');
+      const result = await apiService.analytics.getPlatformStats();
+      console.log('Platform stats received:', result);
+      setPlatformStats(result);
+    } catch (err) {
+      console.error('Error fetching platform stats:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPlatformStats();
+  }, [fetchPlatformStats]);
+
+  return {
+    platformStats,
+    trendsStats: null, // Simplified for now
+    loading,
+    error,
+    refetch: fetchPlatformStats
+  };
+}

@@ -3,31 +3,41 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Download, Calendar, BarChart3, RefreshCcw, Eye, EyeOff, TrendingUp } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { mockDashboardStats } from '../../data/mockData';
 import { useDashboard } from '../../hooks/data/useDashboard';
 import { useRestaurants } from '../../hooks/data/useRestaurants';
+import { useSystemAnalytics } from '../../hooks/business/useAnalytics';
 
 const StatsPage: React.FC = () => {
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
-  const { stats: dashboardStats, loading: dashboardLoading, error: dashboardError } = useDashboard();
+  const { stats: dashboardStats, loading: dashboardLoading, error: dashboardError, refetch } = useDashboard();
   const { restaurants, loading: restaurantsLoading } = useRestaurants();
-  
-  // Utiliser les vraies données si disponibles, sinon fallback sur mock
-  const stats = dashboardStats || mockDashboardStats;
-  const loading = dashboardLoading || restaurantsLoading;
+  const { platformStats, loading: analyticsLoading, refetch: refetchAnalytics } = useSystemAnalytics();
 
-  // Construire les données des restaurants depuis l'API
-  const restaurantData = restaurants.length > 0 ? [
-    { name: restaurants.find(r => r.cuisineType === 'PIZZA')?.name || 'Pizza Palace', value: 35, color: '#3B82F6' },
-    { name: restaurants.find(r => r.cuisineType === 'JAPONAIS')?.name || 'Sushi Express', value: 25, color: '#10B981' },
-    { name: restaurants.find(r => r.cuisineType === 'AMERICAIN')?.name || 'Burger House', value: 20, color: '#F59E0B' },
-    { name: 'Autres', value: 20, color: '#8B5CF6' }
-  ] : [
-    { name: 'Pizza Palace', value: 35, color: '#3B82F6' },
-    { name: 'Sushi Express', value: 25, color: '#10B981' },
-    { name: 'Burger House', value: 20, color: '#F59E0B' },
-    { name: 'Autres', value: 20, color: '#8B5CF6' }
-  ];
+  // Utiliser les vraies données des analytics
+  const stats = dashboardStats;
+  const loading = dashboardLoading || restaurantsLoading || analyticsLoading;
+
+  // Construire les données des restaurants depuis les analytics réelles
+  const restaurantData = platformStats?.topRestaurants?.length > 0
+    ? platformStats.topRestaurants.slice(0, 4).map((restaurant, index) => {
+        const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+        const totalRevenue = platformStats.topRestaurants.reduce((sum, r) => sum + Number(r.totalRevenue || 0), 0);
+        const percentage = totalRevenue > 0 ? ((Number(restaurant.totalRevenue || 0) / totalRevenue) * 100) : 0;
+
+        return {
+          name: restaurant.name,
+          value: Math.round(percentage),
+          revenue: Number(restaurant.totalRevenue || 0),
+          orders: restaurant.totalOrders || 0,
+          color: colors[index] || '#8B5CF6'
+        };
+      })
+    : [
+        { name: 'Pizza Palace', value: 35, revenue: 0, orders: 0, color: '#3B82F6' },
+        { name: 'Sushi Express', value: 25, revenue: 0, orders: 0, color: '#10B981' },
+        { name: 'Burger House', value: 20, revenue: 0, orders: 0, color: '#F59E0B' },
+        { name: 'Autres', value: 20, revenue: 0, orders: 0, color: '#8B5CF6' }
+      ];
 
   const handleExport = () => {
     const csvContent = [
@@ -94,7 +104,13 @@ const StatsPage: React.FC = () => {
                 </select>
               </div>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={() => {
+                refetch();
+                refetchAnalytics();
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <RefreshCcw className="h-4 w-4 text-gray-600" />
               <span className="hidden sm:inline text-sm font-medium text-gray-700">Actualiser</span>
             </button>
@@ -114,8 +130,12 @@ const StatsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-100 text-sm font-medium">Commandes Totales</p>
-                  <p className="text-3xl font-bold">{stats.weeklyData.reduce((acc, curr) => acc + curr.orders, 0)}</p>
-                  <p className="text-purple-200 text-xs mt-1">+15% vs période préc.</p>
+                  <p className="text-3xl font-bold">
+                    {platformStats?.totalOrders || (stats?.weeklyData?.reduce((acc, curr) => acc + curr.orders, 0) || 0)}
+                  </p>
+                  <p className="text-purple-200 text-xs mt-1">
+                    {platformStats?.orderGrowth ? `+${platformStats.orderGrowth.toFixed(1)}%` : '+15%'} vs période préc.
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                   <BarChart3 className="h-6 w-6" />
@@ -123,14 +143,19 @@ const StatsPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-100 text-sm font-medium">CA Total</p>
-                  <p className="text-3xl font-bold">{stats.weeklyData.reduce((acc, curr) => acc + curr.revenue, 0).toFixed(0)}€</p>
-                  <p className="text-blue-200 text-xs mt-1">+8% vs semaine</p>
+                  <p className="text-3xl font-bold">
+                    {platformStats?.totalRevenue ? Number(platformStats.totalRevenue).toFixed(0) + '€' :
+                     (stats?.weeklyData?.reduce((acc, curr) => acc + curr.revenue, 0) || 0).toFixed(0) + '€'}
+                  </p>
+                  <p className="text-blue-200 text-xs mt-1">
+                    {platformStats?.revenueGrowth ? `+${platformStats.revenueGrowth.toFixed(1)}%` : '+8%'} vs semaine
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                   <TrendingUp className="h-6 w-6" />
@@ -138,13 +163,17 @@ const StatsPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100 text-sm font-medium">Commande Moy.</p>
-                  <p className="text-3xl font-bold">{(stats.weeklyData.reduce((acc, curr) => acc + curr.revenue, 0) / stats.weeklyData.reduce((acc, curr) => acc + curr.orders, 0)).toFixed(0)}€</p>
+                  <p className="text-3xl font-bold">
+                    {platformStats?.averageOrderValue ? Number(platformStats.averageOrderValue).toFixed(0) + '€' :
+                     ((stats?.weeklyData?.reduce((acc, curr) => acc + curr.revenue, 0) || 0) /
+                      (stats?.weeklyData?.reduce((acc, curr) => acc + curr.orders, 0) || 1)).toFixed(0) + '€'}
+                  </p>
                   <p className="text-green-200 text-xs mt-1">Panier moyen</p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
@@ -153,13 +182,15 @@ const StatsPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-gray-700 to-gray-800 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-300 text-sm font-medium">Croissance</p>
-                  <p className="text-3xl font-bold">+12%</p>
+                  <p className="text-3xl font-bold">
+                    {platformStats?.userGrowth ? `+${platformStats.userGrowth.toFixed(1)}%` : '+12%'}
+                  </p>
                   <p className="text-gray-400 text-xs mt-1">Taux mensuel</p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">

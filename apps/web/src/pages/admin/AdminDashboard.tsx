@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { 
-  TrendingUp, TrendingDown, Store, DollarSign, ShoppingCart, AlertCircle, Users, Clock, Activity, 
+import {
+  TrendingUp, TrendingDown, Store, DollarSign, ShoppingCart, AlertCircle, Users, Clock, Activity,
   Zap, CheckCircle2, Eye, EyeOff, RefreshCw, Download, Calendar, Target, PieChart,
   BarChart3, Shield, Database, Server, Globe
 } from 'lucide-react';
@@ -11,11 +11,13 @@ import { Button } from '../../components/ui/Button';
 import { useDashboard } from '../../hooks/data/useDashboard';
 import { useRestaurants } from '../../hooks/data/useRestaurants';
 import { useOrders } from '../../hooks/data/useOrders';
+import { useSystemAnalytics } from '../../hooks/business/useAnalytics';
 
 const AdminDashboard: React.FC = () => {
-  const { stats, loading: statsLoading, error: statsError } = useDashboard();
+  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useDashboard();
   const { restaurants, loading: restaurantsLoading } = useRestaurants();
   const { orders, loading: ordersLoading } = useOrders();
+  const { platformStats, loading: analyticsLoading, refetch: refetchAnalytics } = useSystemAnalytics();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isRealTime, setIsRealTime] = useState(true);
   const [showAnalytics, setShowAnalytics] = useState(true);
@@ -39,7 +41,7 @@ const AdminDashboard: React.FC = () => {
     return orderDate.toDateString() === today.toDateString();
   });
 
-  const loading = statsLoading || restaurantsLoading || ordersLoading;
+  const loading = statsLoading || restaurantsLoading || ordersLoading || analyticsLoading;
 
   if (loading) {
     return (
@@ -68,16 +70,20 @@ const AdminDashboard: React.FC = () => {
     return null;
   }
 
-  // Analytics Data
+  // Analytics Data - Mix de données réelles et simulées
   const analytics = {
     systemMetrics: {
       uptime: '99.8%',
       responseTime: '145ms',
-      activeConnections: 1247,
-      dataProcessed: '2.3TB'
+      activeConnections: platformStats ? (platformStats.totalUsers * 50) : 1247,
+      dataProcessed: platformStats ? `${(Number(platformStats.totalRevenue || 0) / 100).toFixed(1)}GB` : '2.3TB'
     },
-    
-    performanceData: [
+
+    performanceData: stats?.weeklyData ? stats.weeklyData.map((day, index) => ({
+      time: `${index * 4}:00`,
+      requests: day.orders * 10 + Math.floor(Math.random() * 50),
+      errors: Math.max(0, Math.floor(day.orders / 10))
+    })) : [
       { time: '00:00', requests: 120, errors: 2 },
       { time: '04:00', requests: 80, errors: 1 },
       { time: '08:00', requests: 340, errors: 5 },
@@ -86,14 +92,23 @@ const AdminDashboard: React.FC = () => {
       { time: '20:00', requests: 450, errors: 6 },
     ],
 
-    topRestaurants: [
+    topRestaurants: platformStats?.topRestaurants?.slice(0, 4)?.map(restaurant => ({
+      name: restaurant.name,
+      orders: restaurant.totalOrders || 0,
+      revenue: Number(restaurant.totalRevenue || 0),
+      status: restaurant.totalOrders > 2 ? 'online' : restaurant.totalOrders > 0 ? 'busy' : 'offline'
+    })) || [
       { name: 'Luigi Pizza Palace', orders: 47, revenue: 2340, status: 'online' },
       { name: 'Burger Express', orders: 38, revenue: 1890, status: 'online' },
       { name: 'Sushi Zen', orders: 31, revenue: 2180, status: 'busy' },
       { name: 'Pasta Corner', orders: 28, revenue: 1650, status: 'online' }
     ],
 
-    statusDistribution: [
+    statusDistribution: platformStats ? [
+      { status: 'En ligne', count: platformStats.activeRestaurants || 0, color: '#10b981' },
+      { status: 'En attente', count: platformStats.pendingRestaurants || 0, color: '#f59e0b' },
+      { status: 'Hors ligne', count: Math.max(0, (platformStats.totalRestaurants || 0) - (platformStats.activeRestaurants || 0) - (platformStats.pendingRestaurants || 0)), color: '#ef4444' }
+    ] : [
       { status: 'En ligne', count: 8, color: '#10b981' },
       { status: 'Occupé', count: 3, color: '#f59e0b' },
       { status: 'Hors ligne', count: 1, color: '#ef4444' }
@@ -128,7 +143,15 @@ const AdminDashboard: React.FC = () => {
                 <option value="week">Cette semaine</option>
                 <option value="month">Ce mois</option>
               </select>
-              <Button variant="ghost" size="sm" icon={<RefreshCw className="h-4 w-4" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<RefreshCw className="h-4 w-4" />}
+                onClick={() => {
+                  refetchStats();
+                  refetchAnalytics();
+                }}
+              >
                 Actualiser
               </Button>
               <Button variant="ghost" size="sm" icon={<Download className="h-4 w-4" />}>
@@ -152,7 +175,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex items-center text-purple-100 text-sm">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+18.5% vs hier</span>
+              <span>+{platformStats?.revenueGrowth?.toFixed(1) || 18.5}% vs hier</span>
             </div>
           </Card>
 
@@ -166,7 +189,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex items-center text-blue-100 text-sm">
               <TrendingUp className="h-4 w-4 mr-1" />
-              <span>+12% vs hier</span>
+              <span>+{platformStats?.orderGrowth?.toFixed(1) || 12}% vs hier</span>
             </div>
           </Card>
 

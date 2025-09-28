@@ -1,12 +1,26 @@
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+
 export interface User {
   id: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  name: string;
-  role: 'admin' | 'restaurant';
+  status: UserStatus;
   createdAt: Date;
-  ordersCount?: number;
-  status?: 'active' | 'inactive';
-  restaurantId?: string; // Pour les users de type restaurant
+  updatedAt: Date;
+}
+
+export interface CreateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
 }
 
 export interface DaySchedule {
@@ -75,18 +89,26 @@ export interface MenuItem {
   options?: MenuItemOption[];
 }
 
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
+
 export interface Order {
   id: string;
   orderNumber: string;
+  userId: string;
   restaurantId: string;
-  restaurantName: string;
-  clientName: string;
-  clientEmail: string;
+  status: OrderStatus;
+  totalAmount: number;
+  specialInstructions?: string;
+  estimatedPickupTime?: Date;
+  actualPickupTime?: Date;
   items: OrderItem[];
-  total: number;
-  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
   createdAt: Date;
-  estimatedTime?: number;
+  updatedAt: Date;
+  // Enriched client data
+  clientFirstName?: string;
+  clientLastName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
 }
 
 export interface OrderItemOption {
@@ -102,11 +124,28 @@ export interface OrderItemOption {
 export interface OrderItem {
   id: string;
   menuItemId: string;
-  name: string;
+  menuItemName: string;
+  unitPrice: number;
   quantity: number;
-  price: number;
-  options?: OrderItemOption[];
-  totalPrice: number;
+  specialNotes?: string;
+  subtotal: number;
+}
+
+export interface UpdateOrderStatusRequest {
+  newStatus: OrderStatus;
+}
+
+export interface CreateOrderRequest {
+  userId: string;
+  restaurantId: string;
+  items: CreateOrderItemRequest[];
+  specialInstructions?: string;
+}
+
+export interface CreateOrderItemRequest {
+  menuItemId: string;
+  quantity: number;
+  specialNotes?: string;
 }
 
 export interface DashboardStats {
@@ -114,4 +153,74 @@ export interface DashboardStats {
   todayRevenue: number;
   activeRestaurants: number;
   weeklyData: { date: string; orders: number; revenue: number }[];
+}
+
+export interface DailyStats {
+  date: string;
+  orders: number;
+  revenue: number;
+  newUsers: number;
+  activeRestaurants: number;
+}
+
+export interface TopRestaurant {
+  id: string;
+  name: string;
+  cuisineType: string;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  rating: number;
+  imageUrl?: string;
+}
+
+export interface PopularItem {
+  id: string;
+  name: string;
+  category: string;
+  restaurantName: string;
+  totalQuantity: number;
+  totalOrders: number;
+  totalRevenue: number;
+  averagePrice: number;
+}
+
+export interface PlatformStats {
+  totalRestaurants: number;
+  activeRestaurants: number;
+  pendingRestaurants: number;
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  pendingOrders: number;
+  confirmedOrders: number;
+  preparingOrders: number;
+  readyOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  todayOrders: number;
+  todayRevenue: number;
+  weekOrders: number;
+  weekRevenue: number;
+  monthOrders: number;
+  monthRevenue: number;
+  revenueGrowth: number;
+  orderGrowth: number;
+  userGrowth: number;
+  topRestaurants: TopRestaurant[];
+  popularItems: PopularItem[];
+  dailyStats: DailyStats[];
+}
+
+export interface RevenueData {
+  revenue: number;
+  orders: number;
+}
+
+export interface TrendsData {
+  dailyStats: DailyStats[];
+  revenueGrowth: number;
+  orderGrowth: number;
+  userGrowth: number;
 }

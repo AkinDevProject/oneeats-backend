@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
-  Store, Search, Filter, Eye, Edit3, Trash2, Check, X, 
-  AlertCircle, ChevronDown, MapPin, Phone, Mail, Star,
+import {
+  Store, Search, Filter, Eye, Edit3, Trash2, Check, X,
+  AlertCircle, MapPin, Phone, Mail, Star,
   Calendar, Users, Award, TrendingUp, Clock, Settings,
   CheckCircle, XCircle, AlertTriangle, MoreVertical,
   BarChart3, Download, RefreshCcw, EyeOff
@@ -12,18 +12,17 @@ import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import { mockRestaurants } from '../../data/mockData';
+import { useRestaurants } from '../../hooks/data/useRestaurants';
 import { Restaurant } from '../../types';
 
 const RestaurantsManagementPage: React.FC = () => {
-  const [restaurants, setRestaurants] = useState(mockRestaurants);
+  const { restaurants, loading, error, refetch, updateRestaurantStatus, deleteRestaurant } = useRestaurants();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'blocked'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'BLOCKED'>('all');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'block' | 'delete' | null>(null);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -35,11 +34,11 @@ const RestaurantsManagementPage: React.FC = () => {
 
   const getStatusBadge = (status: Restaurant['status']) => {
     switch (status) {
-      case 'pending':
+      case 'PENDING':
         return <Badge variant="warning" className="animate-pulse">⏳ En attente</Badge>;
-      case 'approved':
+      case 'APPROVED':
         return <Badge variant="success">✅ Approuvé</Badge>;
-      case 'blocked':
+      case 'BLOCKED':
         return <Badge variant="danger">🚫 Bloqué</Badge>;
       default:
         return <Badge>Inconnu</Badge>;
@@ -52,27 +51,27 @@ const RestaurantsManagementPage: React.FC = () => {
     setShowActionModal(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (!selectedRestaurant || !actionType) return;
 
-    setRestaurants(prev => prev.map(restaurant => {
-      if (restaurant.id === selectedRestaurant.id) {
-        switch (actionType) {
-          case 'approve':
-            return { ...restaurant, status: 'approved' as const };
-          case 'block':
-            return { ...restaurant, status: 'blocked' as const };
-          case 'delete':
-            return restaurant; // Will be filtered out below
-          default:
-            return restaurant;
-        }
+    try {
+      switch (actionType) {
+        case 'approve':
+          await updateRestaurantStatus(selectedRestaurant.id, 'APPROVED');
+          break;
+        case 'block':
+          await updateRestaurantStatus(selectedRestaurant.id, 'BLOCKED');
+          break;
+        case 'delete':
+          await deleteRestaurant(selectedRestaurant.id);
+          break;
       }
-      return restaurant;
-    }));
 
-    if (actionType === 'delete') {
-      setRestaurants(prev => prev.filter(r => r.id !== selectedRestaurant.id));
+      // Refresh la liste après l'action
+      await refetch();
+    } catch (error) {
+      console.error('Erreur lors de l\'action:', error);
+      // Optionnel: afficher un message d'erreur à l'utilisateur
     }
 
     setShowActionModal(false);
@@ -80,9 +79,32 @@ const RestaurantsManagementPage: React.FC = () => {
     setActionType(null);
   };
 
-  const pendingCount = restaurants.filter(r => r.status === 'pending').length;
-  const approvedCount = restaurants.filter(r => r.status === 'approved').length;
-  const blockedCount = restaurants.filter(r => r.status === 'blocked').length;
+  const pendingCount = restaurants.filter(r => r.status === 'PENDING').length;
+  const approvedCount = restaurants.filter(r => r.status === 'APPROVED').length;
+  const blockedCount = restaurants.filter(r => r.status === 'BLOCKED').length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement des restaurants...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
+          <p className="text-red-600">Erreur : {error}</p>
+          <Button onClick={refetch} className="mt-4">Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -114,7 +136,10 @@ const RestaurantsManagementPage: React.FC = () => {
                 <option>Bloqués</option>
               </select>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+            <button
+              onClick={refetch}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <RefreshCcw className="h-4 w-4 text-gray-600" />
               <span className="hidden sm:inline text-sm font-medium text-gray-700">Actualiser</span>
             </button>
@@ -220,9 +245,9 @@ const RestaurantsManagementPage: React.FC = () => {
                 <div className="flex space-x-2">
                   {[
                     { key: 'all', label: 'Tous', count: filteredRestaurants.length },
-                    { key: 'pending', label: 'En attente', count: pendingCount },
-                    { key: 'approved', label: 'Approuvés', count: approvedCount },
-                    { key: 'blocked', label: 'Bloqués', count: blockedCount }
+                    { key: 'PENDING', label: 'En attente', count: pendingCount },
+                    { key: 'APPROVED', label: 'Approuvés', count: approvedCount },
+                    { key: 'BLOCKED', label: 'Bloqués', count: blockedCount }
                   ].map(({ key, label, count }) => (
                     <button
                       key={key}
@@ -248,219 +273,192 @@ const RestaurantsManagementPage: React.FC = () => {
         </Card>
 
       {/* Liste des Restaurants */}
-      <div className="space-y-4">
-        {filteredRestaurants.length === 0 ? (
-          <Card className="text-center py-16 bg-gradient-to-br from-gray-50 to-blue-50">
-            <div className="text-6xl mb-4">🏪</div>
-            <p className="text-gray-500 text-xl font-medium">Aucun restaurant trouvé</p>
-            <p className="text-gray-400 text-sm mt-2">Essayez de modifier vos critères de recherche</p>
-          </Card>
-        ) : (
-          filteredRestaurants.map((restaurant) => {
-            const isExpanded = expandedCard === restaurant.id;
-            
-            return (
-              <Card 
-                key={restaurant.id}
-                className={`transition-all duration-500 hover:shadow-xl ${
-                  restaurant.status === 'pending' 
-                    ? 'border-orange-300 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg'
-                    : restaurant.status === 'approved'
-                    ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50'
-                    : restaurant.status === 'blocked'
-                    ? 'border-red-300 bg-gradient-to-r from-red-50 to-pink-50'
-                    : 'border-gray-200 bg-white'
-                }`}
+      {filteredRestaurants.length === 0 ? (
+        <Card className="text-center py-16 animate-fade-in">
+          <div className="flex flex-col items-center space-y-4">
+            <Store className="h-16 w-16 text-gray-300" />
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'Aucun restaurant trouvé' : 'Aucun restaurant pour le moment'}
+              </h3>
+              <p className="text-gray-500">
+                {searchTerm
+                  ? 'Essayez de modifier vos critères de recherche'
+                  : 'Les nouveaux restaurants apparaîtront ici'
+                }
+              </p>
+            </div>
+            {searchTerm && (
+              <Button
+                variant="outline"
+                onClick={() => setSearchTerm('')}
+                className="mt-4"
               >
-                <div className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0">
-                    <div className="flex-1">
-                      {/* Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                        <div className="flex items-center space-x-4 mb-2 sm:mb-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                            {restaurant.name.charAt(0)}
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900">{restaurant.name}</h3>
-                            <p className="text-sm text-gray-600">{restaurant.category}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-3">
-                          {getStatusBadge(restaurant.status)}
-                          <div className={`w-3 h-3 rounded-full ${
-                            restaurant.isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-                          }`}></div>
-                        </div>
-                      </div>
-
-                      {/* Infos principales */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Mail className="h-4 w-4" />
-                            <span>{restaurant.email}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Phone className="h-4 w-4" />
-                            <span>{restaurant.phone}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <MapPin className="h-4 w-4" />
-                            <span>{restaurant.address}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Calendar className="h-4 w-4" />
-                            <span>Inscrit le {format(restaurant.registrationDate, 'dd/MM/yyyy', { locale: fr })}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Store className="h-4 w-4" />
-                            <span>Statut: {restaurant.isOpen ? 'Ouvert' : 'Fermé'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions détaillées pour les restaurants en attente */}
-                      {restaurant.status === 'pending' && (
-                        <div className="bg-orange-100 border border-orange-200 rounded-xl p-4 mb-4">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <AlertTriangle className="h-5 w-5 text-orange-600" />
-                            <span className="font-medium text-orange-800">Action requise</span>
-                          </div>
-                          <p className="text-sm text-orange-700 mb-3">
-                            Ce restaurant attend votre validation pour rejoindre la plateforme.
-                          </p>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="success"
-                              onClick={() => handleAction(restaurant, 'approve')}
-                              className="bg-green-600 hover:bg-green-700 transform hover:scale-105 transition-all duration-200"
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Approuver
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              onClick={() => handleAction(restaurant, 'block')}
-                              className="bg-red-600 hover:bg-red-700 transform hover:scale-105 transition-all duration-200"
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Rejeter
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Bouton d'expansion pour les détails */}
-                      <button
-                        onClick={() => setExpandedCard(isExpanded ? null : restaurant.id)}
-                        className="flex items-center justify-between w-full text-left p-3 bg-white bg-opacity-50 rounded-xl hover:bg-opacity-75 transition-all duration-300"
-                      >
-                        <span className="text-sm font-medium text-gray-700">
-                          📋 Voir plus de détails
-                        </span>
-                        <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform duration-300 ${
-                          isExpanded ? 'rotate-180' : ''
-                        }`} />
-                      </button>
-
-                      {/* Détails étendus */}
-                      {isExpanded && (
-                        <div className="mt-4 p-4 bg-white bg-opacity-70 rounded-xl space-y-3 animate-in slide-in-from-top duration-300">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Horaires</h4>
-                              <div className="space-y-1">
-                                {Object.entries(restaurant.schedule).map(([day, schedule]) => (
-                                  <div key={day} className="flex justify-between text-sm">
-                                    <span className="capitalize text-gray-600">{day.substring(0, 3)}</span>
-                                    <span className="text-gray-800">
-                                      {schedule ? `${schedule.open} - ${schedule.close}` : 'Fermé'}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h4 className="font-medium text-gray-900 mb-2">Informations</h4>
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2 text-sm">
-                                  <span className="text-gray-600">Catégorie:</span>
-                                  <Badge className="bg-blue-100 text-blue-700">{restaurant.category}</Badge>
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  <span>Inscription: {format(restaurant.registrationDate, 'dd MMMM yyyy', { locale: fr })}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                Effacer la recherche
+              </Button>
+            )}
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredRestaurants.map((restaurant, index) => (
+            <Card
+              key={restaurant.id}
+              hover
+              className={`transition-all duration-300 ${
+                restaurant.status === 'PENDING' ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100' :
+                restaurant.status === 'BLOCKED' ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' :
+                'border-gray-200'
+              } animate-fade-in`}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                      {restaurant.name.charAt(0)}
                     </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{restaurant.name}</h3>
+                      <div className="flex items-center space-x-1 text-sm text-gray-500">
+                        <Mail className="h-3 w-3" />
+                        <span>{restaurant.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {getStatusBadge(restaurant.status)}
+                    <div className={`w-3 h-3 rounded-full ${
+                      restaurant.isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                    }`}></div>
+                  </div>
+                </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-6">
+                {/* Info */}
+                <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 flex items-center space-x-1">
+                      <Phone className="h-3 w-3" />
+                      <span>Téléphone:</span>
+                    </span>
+                    <span className="font-medium text-gray-900">
+                      {restaurant.phone}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 flex items-center space-x-1">
+                      <MapPin className="h-3 w-3" />
+                      <span>Adresse:</span>
+                    </span>
+                    <span className="font-medium text-gray-900 text-right max-w-[60%] truncate">
+                      {restaurant.address}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 flex items-center space-x-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>Inscription:</span>
+                    </span>
+                    <span className="font-medium text-gray-900">
+                      {format(restaurant.registrationDate, 'dd MMM yyyy', { locale: fr })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Catégorie:</span>
+                    <Badge className="bg-blue-100 text-blue-700">
+                      {restaurant.category}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Actions détaillées pour les restaurants en attente */}
+                {restaurant.status === 'PENDING' && (
+                  <div className="bg-orange-100 border border-orange-200 rounded-lg p-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-600" />
+                      <span className="font-medium text-orange-800 text-sm">Action requise</span>
+                    </div>
+                    <p className="text-xs text-orange-700 mb-3">
+                      Ce restaurant attend votre validation.
+                    </p>
+                    <div className="flex space-x-2">
                       <Button
                         size="sm"
-                        variant="secondary"
-                        onClick={() => {
-                          setSelectedRestaurant(restaurant);
-                          setShowDetailModal(true);
-                        }}
-                        className="flex-1 lg:flex-none hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 transform hover:scale-105"
+                        variant="success"
+                        onClick={() => handleAction(restaurant, 'approve')}
+                        className="bg-green-600 hover:bg-green-700 text-xs flex-1"
                       >
-                        <Eye className="h-4 w-4 lg:mr-2" />
-                        <span className="hidden lg:inline">Détails</span>
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Approuver
                       </Button>
-                      
-                      {restaurant.status === 'approved' && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleAction(restaurant, 'block')}
-                          className="flex-1 lg:flex-none hover:bg-red-100 hover:text-red-700 transition-all duration-200 transform hover:scale-105"
-                        >
-                          <X className="h-4 w-4 lg:mr-2" />
-                          <span className="hidden lg:inline">Bloquer</span>
-                        </Button>
-                      )}
-                      
-                      {restaurant.status === 'blocked' && (
-                        <Button
-                          size="sm"
-                          variant="success"
-                          onClick={() => handleAction(restaurant, 'approve')}
-                          className="flex-1 lg:flex-none bg-green-600 hover:bg-green-700 transition-all duration-200 transform hover:scale-105"
-                        >
-                          <Check className="h-4 w-4 lg:mr-2" />
-                          <span className="hidden lg:inline">Débloquer</span>
-                        </Button>
-                      )}
-                      
                       <Button
                         size="sm"
                         variant="danger"
-                        onClick={() => handleAction(restaurant, 'delete')}
-                        className="flex-1 lg:flex-none transition-all duration-200 transform hover:scale-105"
+                        onClick={() => handleAction(restaurant, 'block')}
+                        className="bg-red-600 hover:bg-red-700 text-xs flex-1"
                       >
-                        <Trash2 className="h-4 w-4 lg:mr-2" />
-                        <span className="hidden lg:inline">Supprimer</span>
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Rejeter
                       </Button>
                     </div>
                   </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedRestaurant(restaurant);
+                      setShowDetailModal(true);
+                    }}
+                    className="flex-1"
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Détails
+                  </Button>
+
+                  {restaurant.status === 'APPROVED' && (
+                    <Button
+                      size="sm"
+                      variant="warning"
+                      onClick={() => handleAction(restaurant, 'block')}
+                      className="flex-1"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Bloquer
+                    </Button>
+                  )}
+
+                  {restaurant.status === 'BLOCKED' && (
+                    <Button
+                      size="sm"
+                      variant="success"
+                      onClick={() => handleAction(restaurant, 'approve')}
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Débloquer
+                    </Button>
+                  )}
+
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => handleAction(restaurant, 'delete')}
+                    className="flex-1"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Supprimer
+                  </Button>
                 </div>
-              </Card>
-            );
-          })
-        )}
-      </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Modal de détails */}
       <Modal

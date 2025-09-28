@@ -6,10 +6,11 @@ import LoginPage from './pages/LoginPage';
 import AdminLayout from './components/layouts/AdminLayout';
 import RestaurantLayout from './components/layouts/RestaurantLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import RestaurantsPage from './pages/admin/RestaurantsPage';
+import RestaurantsManagementPage from './pages/admin/RestaurantsManagementPage';
 import UsersPage from './pages/admin/UsersPage';
-import OrdersPage from './pages/admin/OrdersPage';
+import OrdersSupervisionPage from './pages/admin/OrdersSupervisionPage';
 import StatsPage from './pages/admin/StatsPage';
+import AnalyticsSystemPage from './pages/admin/AnalyticsSystemPage';
 import DashboardDesignSelector from './pages/restaurant/DashboardDesignSelector';
 import MenuPage from './pages/restaurant/MenuPage';
 import RestaurantSettingsPage from './pages/restaurant/RestaurantSettingsPage';
@@ -31,10 +32,11 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<AdminDashboard />} />
-            <Route path="restaurants" element={<RestaurantsPage />} />
+            <Route path="restaurants" element={<RestaurantsManagementPage />} />
             <Route path="users" element={<UsersPage />} />
-            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders" element={<OrdersSupervisionPage />} />
             <Route path="stats" element={<StatsPage />} />
+            <Route path="analytics" element={<AnalyticsSystemPage />} />
           </Route>
 
           {/* Restaurant Routes */}

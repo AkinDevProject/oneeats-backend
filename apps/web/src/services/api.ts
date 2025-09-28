@@ -1,4 +1,4 @@
-import { Restaurant, MenuItem, Order, User } from '../types';
+import { Restaurant, MenuItem, Order, User, CreateUserRequest, UpdateUserRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -207,40 +207,46 @@ class ApiService {
 
   // Users API (for admin)
   users = {
-    getAll: (): Promise<User[]> => 
+    getAll: (): Promise<User[]> =>
       this.request('/api/users'),
-    
-    getById: (id: string): Promise<User> => 
+
+    getById: (id: string): Promise<User> =>
       this.request(`/api/users/${id}`),
-    
-    getByRole: (role: string): Promise<User[]> => 
-      this.request(`/api/users/role/${role}`),
-    
-    create: (data: Partial<User>): Promise<User> => 
+
+    create: (data: CreateUserRequest): Promise<User> =>
       this.request('/api/users', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    
-    update: (id: string, data: Partial<User>): Promise<User> => 
+
+    update: (id: string, data: UpdateUserRequest): Promise<User> =>
       this.request(`/api/users/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
-    
-    delete: (id: string): Promise<void> => 
+
+    delete: (id: string): Promise<void> =>
       this.request(`/api/users/${id}`, {
         method: 'DELETE',
       }),
   };
 
-  // Analytics API (simplified for demo)
+  // Analytics API
   analytics = {
-    getRestaurantStats: (restaurantId: string, period: string = 'week'): Promise<Record<string, unknown>> => 
+    getRestaurantStats: (restaurantId: string, period: string = 'week'): Promise<Record<string, unknown>> =>
       this.request(`/api/analytics/restaurant/${restaurantId}?period=${period}`),
-    
-    getPlatformStats: (): Promise<Record<string, unknown>> => 
+
+    getPlatformStats: (): Promise<import('../types').PlatformStats> =>
       this.request('/api/analytics/platform'),
+
+    getDashboardStats: (): Promise<import('../types').PlatformStats> =>
+      this.request('/api/analytics/dashboard'),
+
+    getRevenueStats: (period: 'day' | 'week' | 'month' = 'week'): Promise<import('../types').RevenueData> =>
+      this.request(`/api/analytics/revenue?period=${period}`),
+
+    getTrendsStats: (): Promise<import('../types').TrendsData> =>
+      this.request('/api/analytics/trends'),
   };
 
   // Admin API for dashboard stats

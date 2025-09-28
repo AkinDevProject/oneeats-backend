@@ -65,11 +65,17 @@ const AdminLayout: React.FC = () => {
       badge: 24,
       description: 'Monitoring global'
     },
-    { 
-      name: 'Analytics Système', 
-      href: '/admin/stats', 
+    {
+      name: 'Statistiques',
+      href: '/admin/stats',
       icon: BarChart3,
       description: 'Métriques détaillées'
+    },
+    {
+      name: 'Analytics Système',
+      href: '/admin/analytics',
+      icon: TrendingUp,
+      description: 'Vue d\'ensemble plateforme'
     },
   ];
 

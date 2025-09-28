@@ -2,6 +2,10 @@ package com.oneeats.user.infrastructure.web;
 
 import com.oneeats.user.application.command.CreateUserCommand;
 import com.oneeats.user.application.command.CreateUserCommandHandler;
+import com.oneeats.user.application.command.UpdateUserCommand;
+import com.oneeats.user.application.command.UpdateUserCommandHandler;
+import com.oneeats.user.application.command.DeleteUserCommand;
+import com.oneeats.user.application.command.DeleteUserCommandHandler;
 import com.oneeats.user.application.dto.UserDTO;
 import com.oneeats.user.application.query.GetAllUsersQuery;
 import com.oneeats.user.application.query.GetAllUsersQueryHandler;
@@ -30,6 +34,12 @@ public class UserController {
     @Inject
     GetAllUsersQueryHandler getAllUsersQueryHandler;
 
+    @Inject
+    UpdateUserCommandHandler updateUserCommandHandler;
+
+    @Inject
+    DeleteUserCommandHandler deleteUserCommandHandler;
+
     @POST
     public Response createUser(@Valid CreateUserCommand command) {
         UserDTO user = createUserCommandHandler.handle(command);
@@ -47,5 +57,20 @@ public class UserController {
     public Response getAllUsers() {
         List<UserDTO> users = getAllUsersQueryHandler.handle(new GetAllUsersQuery());
         return Response.ok(users).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateUser(@PathParam("id") UUID id, @Valid UpdateUserCommand command) {
+        UpdateUserCommand commandWithId = new UpdateUserCommand(id, command.firstName(), command.lastName(), command.email());
+        UserDTO user = updateUserCommandHandler.handle(commandWithId);
+        return Response.ok(user).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteUser(@PathParam("id") UUID id) {
+        deleteUserCommandHandler.handle(new DeleteUserCommand(id));
+        return Response.noContent().build();
     }
 }

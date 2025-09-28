@@ -22,7 +22,7 @@ export function useApiCall<T>(
     } finally {
       setLoading(false);
     }
-  }, [apiCall, ...dependencies]);
+  }, [apiCall]);
 
   useEffect(() => {
     refetch();

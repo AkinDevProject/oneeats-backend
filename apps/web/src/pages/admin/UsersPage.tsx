@@ -8,10 +8,10 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from '../../components/ui/Table';
 import { useUsers } from '../../hooks/data/useUsers';
-import { User } from '../../types';
+import { User, UserStatus } from '../../types';
 
 const UsersPage: React.FC = () => {
-  const { users, loading, error, updateUserStatus } = useUsers();
+  const { users, loading, error, updateUserStatus, createUser, deleteUser } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
 
   if (loading) {
@@ -37,16 +37,16 @@ const UsersPage: React.FC = () => {
     );
   }
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = users.filter(user =>
+    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleToggleStatus = async (userId: string) => {
     const user = users.find(u => u.id === userId);
     if (!user) return;
-    
-    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+
+    const newStatus: UserStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     try {
       await updateUserStatus(userId, newStatus);
     } catch (error) {
@@ -56,14 +56,13 @@ const UsersPage: React.FC = () => {
 
   const handleExportCSV = () => {
     const csvContent = [
-      ['Nom', 'Email', 'Rôle', 'Date d\'inscription', 'Nb commandes', 'Statut'],
+      ['Prénom', 'Nom', 'Email', 'Date d\'inscription', 'Statut'],
       ...filteredUsers.map(user => [
-        user.name,
+        user.firstName,
+        user.lastName,
         user.email,
-        user.role,
         format(user.createdAt, 'dd/MM/yyyy'),
-        user.ordersCount?.toString() || '0',
-        user.status || 'active'
+        user.status
       ])
     ].map(row => row.join(';')).join('\n');
 
@@ -76,10 +75,9 @@ const UsersPage: React.FC = () => {
 
   const stats = {
     total: users.length,
-    admins: users.filter(u => u.role === 'admin').length,
-    restaurants: users.filter(u => u.role === 'restaurant').length,
-    active: users.filter(u => u.status === 'active').length,
-    inactive: users.filter(u => u.status === 'inactive').length
+    active: users.filter(u => u.status === 'ACTIVE').length,
+    inactive: users.filter(u => u.status === 'INACTIVE').length,
+    suspended: users.filter(u => u.status === 'SUSPENDED').length,
   };
 
   return (
@@ -132,7 +130,7 @@ const UsersPage: React.FC = () => {
       <div className="p-8 space-y-6">
 
         {/* Analytics Metrics - Style Data-Driven */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
@@ -147,44 +145,14 @@ const UsersPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">Administrateurs</p>
-                  <p className="text-3xl font-bold">{stats.admins}</p>
-                  <p className="text-blue-200 text-xs mt-1">Super utilisateurs</p>
-                </div>
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                  <Shield className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-          </Card>
-          
+
           <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm font-medium">Restaurateurs</p>
-                  <p className="text-3xl font-bold">{stats.restaurants}</p>
-                  <p className="text-green-200 text-xs mt-1">Partenaires actifs</p>
-                </div>
-                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                  <UserIcon className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-          </Card>
-          
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100 text-sm font-medium">Actifs</p>
+                  <p className="text-green-100 text-sm font-medium">Actifs</p>
                   <p className="text-3xl font-bold">{stats.active}</p>
-                  <p className="text-orange-200 text-xs mt-1">En ligne récemment</p>
+                  <p className="text-green-200 text-xs mt-1">Utilisateurs actifs</p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                   <Activity className="h-6 w-6" />
@@ -192,14 +160,29 @@ const UsersPage: React.FC = () => {
               </div>
             </div>
           </Card>
-          
-          <Card className="bg-gradient-to-br from-gray-700 to-gray-800 text-white border-0 shadow-lg">
+
+          <Card className="bg-gradient-to-br from-gray-500 to-gray-600 text-white border-0 shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-300 text-sm font-medium">Inactifs</p>
+                  <p className="text-gray-100 text-sm font-medium">Inactifs</p>
                   <p className="text-3xl font-bold">{stats.inactive}</p>
-                  <p className="text-gray-400 text-xs mt-1">Comptes suspendus</p>
+                  <p className="text-gray-200 text-xs mt-1">Comptes inactifs</p>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <EyeOff className="h-6 w-6" />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0 shadow-lg">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-red-100 text-sm font-medium">Suspendus</p>
+                  <p className="text-3xl font-bold">{stats.suspended}</p>
+                  <p className="text-red-200 text-xs mt-1">Comptes suspendus</p>
                 </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                   <Ban className="h-6 w-6" />
@@ -276,8 +259,8 @@ const UsersPage: React.FC = () => {
               key={user.id} 
               hover
               className={`transition-all duration-300 ${
-                user.status === 'inactive' ? 'border-danger-200 bg-gradient-to-br from-danger-50 to-danger-100' :
-                user.role === 'admin' ? 'border-secondary-200 bg-gradient-to-br from-secondary-50 to-secondary-100' :
+                user.status === 'INACTIVE' ? 'border-danger-200 bg-gradient-to-br from-danger-50 to-danger-100' :
+                user.status === 'SUSPENDED' ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' :
                 'border-gray-200'
               } animate-fade-in`}
               style={{ animationDelay: `${index * 100}ms` }}
@@ -286,16 +269,11 @@ const UsersPage: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3">
-                    <div className={`p-2 rounded-lg ${
-                      user.role === 'admin' ? 'bg-secondary-100' : 'bg-primary-100'
-                    }`}>
-                      {user.role === 'admin' ? 
-                        <Shield className="h-6 w-6 text-secondary-600" /> :
-                        <UserIcon className="h-6 w-6 text-primary-600" />
-                      }
+                    <div className="p-2 rounded-lg bg-primary-100">
+                      <UserIcon className="h-6 w-6 text-primary-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                      <h3 className="font-semibold text-gray-900">{user.firstName} {user.lastName}</h3>
                       <div className="flex items-center space-x-1 text-sm text-gray-500">
                         <Mail className="h-3 w-3" />
                         <span>{user.email}</span>
@@ -303,14 +281,11 @@ const UsersPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant={user.role === 'admin' ? 'secondary' : 'info'} size="sm">
-                      {user.role === 'admin' ? 'Admin' : 'Restaurant'}
-                    </Badge>
-                    <Badge 
-                      variant={user.status === 'active' ? 'success' : 'danger'}
+                    <Badge
+                      variant={user.status === 'ACTIVE' ? 'success' : user.status === 'INACTIVE' ? 'warning' : 'danger'}
                       size="sm"
                     >
-                      {user.status === 'active' ? 'Actif' : 'Inactif'}
+                      {user.status === 'ACTIVE' ? 'Actif' : user.status === 'INACTIVE' ? 'Inactif' : 'Suspendu'}
                     </Badge>
                   </div>
                 </div>
@@ -328,39 +303,42 @@ const UsersPage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 flex items-center space-x-1">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>Commandes:</span>
+                      <Calendar className="h-3 w-3" />
+                      <span>Dernière MAJ:</span>
                     </span>
-                    <Badge variant="info" size="sm">
-                      {user.ordersCount || 0}
-                    </Badge>
+                    <span className="font-medium text-gray-900">
+                      {format(user.updatedAt, 'dd MMM yyyy', { locale: fr })}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Dernière activité:</span>
-                    <span className="font-medium text-gray-900">
-                      Il y a 2h
-                    </span>
+                    <span className="text-gray-600">Statut:</span>
+                    <Badge
+                      variant={user.status === 'ACTIVE' ? 'success' : user.status === 'INACTIVE' ? 'warning' : 'danger'}
+                      size="sm"
+                    >
+                      {user.status}
+                    </Badge>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex space-x-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    icon={<Eye className="h-4 w-4" />} 
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<Eye className="h-4 w-4" />}
                     className="flex-1"
                   >
                     Voir profil
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant={user.status === 'active' ? 'warning' : 'success'}
+                  <Button
+                    size="sm"
+                    variant={user.status === 'ACTIVE' ? 'warning' : 'success'}
                     icon={<Ban className="h-4 w-4" />}
                     onClick={() => handleToggleStatus(user.id)}
                     className="flex-1"
                   >
-                    {user.status === 'active' ? 'Désactiver' : 'Activer'}
+                    {user.status === 'ACTIVE' ? 'Désactiver' : 'Activer'}
                   </Button>
                 </div>
               </div>

@@ -43,9 +43,30 @@ public class JpaUserRepository implements IUserRepository {
 
     @Override
     public User save(User user) {
-        UserEntity entity = mapper.toEntity(user);
-        entity.persistAndFlush();
-        return mapper.toDomain(entity);
+        if (user.getId() != null) {
+            // Vérifier si l'entité existe déjà en base
+            UserEntity existingEntity = UserEntity.findById(user.getId());
+            if (existingEntity != null) {
+                // Update: mettre à jour l'entité existante
+                existingEntity.setFirstName(user.getFirstName());
+                existingEntity.setLastName(user.getLastName());
+                existingEntity.setEmail(user.getEmail().getValue());
+                existingEntity.setStatus(user.getStatus());
+                existingEntity.setUpdatedAt(user.getUpdatedAt());
+                // L'entité est automatiquement synchronisée avec la base
+                return mapper.toDomain(existingEntity);
+            } else {
+                // Create: l'ID est généré par le domaine mais l'entité n'existe pas en base
+                UserEntity entity = mapper.toEntity(user);
+                entity.persistAndFlush();
+                return mapper.toDomain(entity);
+            }
+        } else {
+            // Création: créer une nouvelle entité
+            UserEntity entity = mapper.toEntity(user);
+            entity.persistAndFlush();
+            return mapper.toDomain(entity);
+        }
     }
 
     public void delete(User user) {
