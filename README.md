@@ -40,12 +40,13 @@ cd apps/mobile && npm start
 
 **➡️ [docs/README.md](docs/README.md)** - **COMMENCER ICI** pour naviguer dans toute la documentation
 
-### 🎯 Documents Essentiels (les 6 piliers)
+### 🎯 Documents Essentiels (les 7 piliers)
 
 | Document | Description | Audience |
 |----------|-------------|----------|
 | **[ROADMAP.md](docs/ROADMAP.md)** | 📍 **Tâche en cours** et progression projet | Tous (commencer ici chaque session) |
 | **[BUSINESS_RULES.md](docs/BUSINESS_RULES.md)** | Règles métier, workflows, validations | Product + Dev |
+| **[USE_CASES.md](docs/USE_CASES.md)** | 19 scénarios utilisateur détaillés (Mobile, Web, Admin) | Product + Dev |
 | **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Vue d'ensemble architecture technique | Dev + Tech Lead |
 | **[API_SPECS.md](docs/API_SPECS.md)** | Spécifications des APIs REST | Dev Frontend + Backend |
 | **[DATA_MODEL.md](docs/DATA_MODEL.md)** | Schéma base de données, relations | Dev Backend + Data |

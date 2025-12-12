@@ -29,6 +29,7 @@ Bienvenue dans la documentation du projet OneEats ! Cette documentation a été 
 | Fichier | Description | Audience |
 |---------|-------------|----------|
 | **[BUSINESS_RULES.md](BUSINESS_RULES.md)** | Règles métier, workflows, validations | Tous |
+| **[USE_CASES.md](USE_CASES.md)** | Scénarios utilisateur détaillés (Mobile, Restaurateur, Admin) | Product + Dev |
 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | Architecture technique, patterns, structure | Développeurs |
 | **[ARCHITECTURE_HEXAGONALE.md](ARCHITECTURE_HEXAGONALE.md)** | Guide détaillé DDD/Architecture Hexagonale | Développeurs Backend |
 | **[ROADMAP.md](ROADMAP.md)** | Tâches en cours, progression, sprints | Tous |
@@ -81,11 +82,18 @@ Anciens fichiers fusionnés ou obsolètes (MVP_BACKLOG.md, MOBILE_ROADMAP.md)
 
 ## 🎯 Cas d'Usage
 
+### "Je veux voir tous les scénarios utilisateur de l'application"
+
+1. Lisez **[USE_CASES.md](USE_CASES.md)** → 19 use cases détaillés (Mobile, Web, Admin)
+2. Consultez la matrice de traçabilité pour les dépendances
+3. Référez-vous à **[BUSINESS_RULES.md](BUSINESS_RULES.md)** pour les règles métier associées
+
 ### "Je veux comprendre comment fonctionne le système de commandes"
 
-1. Lisez **[BUSINESS_RULES.md](BUSINESS_RULES.md)** → Section "Gestion des Commandes"
-2. Consultez **[DATA_MODEL.md](DATA_MODEL.md)** → Tables `orders` et `order_items`
-3. Regardez **[ARCHITECTURE.md](ARCHITECTURE.md)** → Domaine Order
+1. Lisez **[USE_CASES.md](USE_CASES.md)** → UC-004 (Commander), UC-101 (Recevoir commandes)
+2. Consultez **[BUSINESS_RULES.md](BUSINESS_RULES.md)** → Section "Gestion des Commandes"
+3. Regardez **[DATA_MODEL.md](DATA_MODEL.md)** → Tables `orders` et `order_items`
+4. Vérifiez **[ARCHITECTURE.md](ARCHITECTURE.md)** → Domaine Order
 
 ### "Je veux ajouter un nouvel endpoint API"
 
@@ -158,6 +166,7 @@ Date, version, responsable
 
 ### Par Thème
 
+- **Scénarios Utilisateur** → USE_CASES.md
 - **Architecture Backend** → ARCHITECTURE.md, DATA_MODEL.md
 - **Architecture Frontend** → ARCHITECTURE.md, API_SPECS.md
 - **Règles Métier** → BUSINESS_RULES.md
