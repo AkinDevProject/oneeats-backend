@@ -1,231 +1,188 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with the OneEats project.
 
-## 📋 Context File Reference
+---
 
-**IMPORTANT**: Always read the `CONTEXT.md` file at the start of each session. This file contains:
-- Complete project overview and architecture details
-- Specific development setup constraints (IntelliJ + Quinoa)
-- Available/unavailable commands for this environment
-- Domain structure and implementation status
-- All technical specifications and workflows
+## 🚀 Quick Start for Claude Code
 
-This context file is essential for understanding the OneEats project architecture and development environment.
+### 📖 Start of Each Session - Read These Files IN ORDER
 
-## 📚 Documentation Structure
+1. **[docs/ROADMAP.md](docs/ROADMAP.md)** ⭐ **START HERE**
+   - See current task and what's in progress
+   - Check "Tâche en cours" section
+   - Review recent session notes
 
-The documentation has been reorganized following best practices. Key documents are located in `/docs/`:
+2. **[CONTEXT.md](CONTEXT.md)** 📋 **Required Context**
+   - Complete project overview and architecture
+   - Domain structure and implementation status
+   - **⚠️ Important**: Development constraints (IntelliJ only, no CLI mvnw)
+   - All technical specifications
 
-| Document | Description | When to Read |
-|----------|-------------|--------------|
-| [BUSINESS_RULES.md](docs/BUSINESS_RULES.md) | **Business logic and domain rules** | When implementing features, understanding workflows |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | **Technical architecture and patterns** | When designing new components, understanding structure |
-| [ROADMAP.md](docs/ROADMAP.md) | **📍 Current tasks and project progression** | **START OF EACH SESSION** to see what's in progress |
-| [API_SPECS.md](docs/API_SPECS.md) | **API endpoints documentation** | When calling or creating APIs |
-| [DATA_MODEL.md](docs/DATA_MODEL.md) | **Database schema and relationships** | When working with entities, queries, migrations |
-| [BUGS.md](docs/BUGS.md) | **Known issues and solutions** | When encountering problems, reporting bugs |
+3. **[docs/README.md](docs/README.md)** 📚 **Documentation Guide**
+   - Navigate to specific documentation
+   - Find guides for your current task
 
-### Additional Documentation
+---
 
-- `/docs/guides/` - Deployment, security, getting started guides
-- `/docs/business/` - Product specifications and UI/UX requirements
-- `/docs/concepts/` - Future features and experimental ideas
-- `/docs/mobile/` - Mobile app specific documentation
-- `/docs/tests/` - Testing strategies and documentation
+## 📚 Essential Documentation (Reference When Needed)
 
-**💡 Pro tip**: Always check `ROADMAP.md` at the start of each session to understand the current task and priorities.
+| Document | Purpose | When to Read |
+|----------|---------|--------------|
+| **[BUSINESS_RULES.md](docs/BUSINESS_RULES.md)** | Business logic, workflows, validation rules | Implementing features, understanding domain |
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Technical architecture, patterns, structure | Designing components, understanding code |
+| **[API_SPECS.md](docs/API_SPECS.md)** | API endpoints documentation | Creating/calling APIs |
+| **[DATA_MODEL.md](docs/DATA_MODEL.md)** | Database schema, relations, migrations | Working with entities, queries, DB |
+| **[BUGS.md](docs/BUGS.md)** | Known issues, workarounds, solutions | Encountering problems, reporting bugs |
 
-## Project Overview
+### Additional Guides
 
-OneEats is a food delivery platform built with a monorepo architecture containing:
-- **Backend**: Java Quarkus REST API with hexagonal architecture
-- **Web Frontend**: React + TypeScript + Vite with Tailwind CSS
-- **Mobile App**: React Native with Expo
-- **Database**: PostgreSQL with Docker development setup
+- **[guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md)** - Development commands and setup
+- **[guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)** - Deployment instructions
+- **[guides/SECURITY_GUIDE.md](docs/guides/SECURITY_GUIDE.md)** - Security best practices
+- **[guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md)** - Common issues and fixes
 
-## Development Commands
+---
 
-### Backend (Quarkus)
+## 🎯 Project Overview
+
+**OneEats** is a food ordering platform for pickup (no delivery in MVP):
+- **Backend**: Java Quarkus 3.24.2 + PostgreSQL (Hexagonal Architecture)
+- **Web Dashboard**: React + TypeScript + Vite (served via Quinoa)
+- **Mobile App**: React Native + Expo
+- **Architecture**: Monolithic with Domain-Driven Design
+
+---
+
+## ⚙️ Development Setup (Quick Reference)
+
+### ⚠️ Environment Constraints - IMPORTANT
+
+**This project has specific constraints:**
+- ✅ **Backend**: Launch from **IntelliJ IDEA** (Quarkus dev mode)
+- ❌ **NOT available**: `./mvnw` commands in terminal (no JDK in CLI)
+- ✅ **Frontend Web**: Served automatically via Quinoa from backend
+- ✅ **Mobile**: Expo CLI available (`cd apps/mobile && npm start`)
+- ✅ **Database**: Docker Compose (`docker-compose -f docker-compose.dev.yml up -d`)
+
+### Quick Start Commands
+
 ```bash
-# Start development server with hot reload
-./mvnw quarkus:dev        # Linux/Mac
-mvnw.cmd quarkus:dev      # Windows
-
-# Run tests
-./mvnw test
-
-# Build for production
-./mvnw clean package
-
-# Build native executable
-./mvnw package -Dnative
-```
-
-### Web Frontend (React/Vite)
-```bash
-cd apps/web
-
-# Development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Preview production build
-npm run preview
-```
-
-### Mobile App (React Native/Expo)
-```bash
-cd apps/mobile
-
-# Start Expo development server
-npm start
-
-# Start for Android
-npm run android
-
-# Start for iOS
-npm run ios
-
-# Start for web
-npm run web
-
-# Lint code
-npm run lint
-```
-
-### Database Setup
-```bash
-# Start PostgreSQL + PgAdmin with Docker
+# 1. Start database
 docker-compose -f docker-compose.dev.yml up -d
 
-# Stop and remove volumes
-docker-compose -f docker-compose.dev.yml down -v
+# 2. Start backend (IntelliJ IDEA Quarkus dev mode)
+# → Backend: http://localhost:8080/api
+# → Frontend Dashboard: http://localhost:8080/restaurant
+
+# 3. Start mobile (optional)
+cd apps/mobile && npm start
 ```
 
-### Full Application Setup
-```bash
-# Quick setup (Windows)
-start-dev.bat
+For detailed commands, see [guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md)
 
-# Quick setup (Linux/Mac)
-./start-dev.sh
+---
+
+## 🏗️ Code Structure (Quick Reference)
+
+### Backend (Hexagonal Architecture)
+
+Each domain follows this structure:
+```
+src/main/java/com/oneeats/[domain]/
+├── api/            # DTOs and contracts (public interface)
+├── domain/         # Entities and business logic
+└── infrastructure/ # Controllers, repositories, mappers
 ```
 
-## Architecture Overview
+**Implemented Domains**: User, Restaurant, Menu, Order
+**To Implement**: Admin, Notification
 
-### Backend Architecture (Hexagonal/Clean Architecture)
-The backend follows Domain-Driven Design with hexagonal architecture:
+For detailed architecture, see [ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-```
-src/main/java/com/oneeats/
-├── [domain]/                     # Business domains
-│   ├── api/                     # Application layer
-│   │   ├── cqrs/               # Commands and queries
-│   │   ├── interface_/         # Repository interfaces
-│   │   └── model/              # DTOs
-│   ├── adapter/                # Infrastructure layer
-│   │   └── web/                # REST controllers
-│   └── internal/               # Domain layer
-│       ├── application/        # Use cases
-│       ├── client/             # Repository implementations
-│       ├── entity/             # Domain entities
-│       └── mapper/             # Entity-DTO mappers
-```
+---
 
-**Main Domains:**
-- `user/` - User management and authentication
-- `restaurant/` - Restaurant registration and management
-- `menu/` - Menu items and categories
-- `order/` - Order processing and lifecycle
-- `notification/` - Notification system
-- `admin/` - Administrative functions
+## 🔄 Typical Workflow for Claude Code
 
-### Frontend Architecture
-The web frontend uses a component-based architecture:
+### When Starting a New Task
 
-```
-apps/web/src/
-├── components/                  # Reusable UI components
-│   ├── auth/                   # Authentication components
-│   ├── dashboard/              # Dashboard widgets
-│   ├── forms/                  # Form components
-│   ├── layouts/                # Layout components
-│   └── ui/                     # Base UI components
-├── pages/                      # Route-based pages
-│   ├── admin/                  # Admin dashboard pages
-│   └── restaurant/             # Restaurant management pages
-├── hooks/                      # Custom React hooks
-│   ├── business/               # Business logic hooks
-│   ├── data/                   # Data fetching hooks
-│   └── ui/                     # UI-related hooks
-├── services/                   # API communication
-├── types/                      # TypeScript type definitions
-└── utils/                      # Utility functions
-```
+1. **Read** `docs/ROADMAP.md` → Identify current task
+2. **Read** relevant `docs/BUSINESS_RULES.md` section → Understand domain rules
+3. **Read** `docs/DATA_MODEL.md` → Check database schema if needed
+4. **Check** `docs/BUGS.md` → Avoid known issues
+5. **Implement** the task following existing patterns (use Order domain as reference)
+6. **Update** `docs/ROADMAP.md` → Mark task progress in "Notes de Session"
 
-### API Integration
-- **Quarkus + Quinoa**: Backend serves frontend automatically in dev mode
-- **CORS Configuration**: Configured for localhost:5173 and localhost:3000
-- **API Documentation**: Available at `/q/swagger-ui` when running
-- **Base API Path**: All endpoints prefixed with `/api`
+### When Encountering Issues
 
-### Database Configuration
-- **Development**: PostgreSQL via Docker (port 5432)
-- **Connection**: `oneeats_dev` database with user `oneeats_user`
-- **Admin Interface**: PgAdmin available at http://localhost:5050
-- **Test Data**: Loaded via `import.sql` on startup
+1. **Check** `docs/BUGS.md` → Is it a known issue?
+2. **Check** `guides/TROUBLESHOOTING.md` → Common problems
+3. **Check** `CONTEXT.md` → Environment constraints
+4. **Report** in `docs/BUGS.md` if new issue
 
-## Development Workflow
+### Before Ending Session
 
-### Starting Development
-1. Start database: `docker-compose -f docker-compose.dev.yml up -d`
-2. Start backend: `./mvnw quarkus:dev` (includes frontend via Quinoa)
-3. Access applications:
-   - Frontend: http://localhost:5173
-   - API: http://localhost:8080/api
-   - API Docs: http://localhost:8080/q/swagger-ui
+1. **Update** `docs/ROADMAP.md` → Add session notes (what was done, what's next)
+2. **Commit** changes with descriptive message
+3. **Update** `CONTEXT.md` if architecture/domains changed
 
-### Testing
-- **Backend Tests**: Use JUnit 5 with RestAssured for integration tests
-- **Test Profile**: Separate `application-test.yml` configuration
-- **Mock Data**: Available in `src/test/resources`
+---
 
-### Key Configuration Files
-- `pom.xml` - Maven dependencies and build configuration
-- `application.yml` - Main Quarkus configuration
-- `application-dev.yml` - Development-specific settings
-- `apps/web/vite.config.ts` - Vite build configuration
-- `apps/web/tailwind.config.js` - Tailwind CSS configuration
+## 📍 Current Project Status (Quick View)
 
-### Environment Profiles
-- **Development**: `application-dev.yml` (hot reload, debug logging)
-- **Production**: `application-prod.yml` (optimized settings)
-- **Test**: `application-test.yml` (in-memory H2 database)
+- **Backend APIs**: ✅ 95% (User, Restaurant, Menu, Order complete)
+- **Web Dashboard**: ⚠️ 90% (needs API integration)
+- **Mobile App**: ⚠️ 95% (needs API integration)
+- **Authentication JWT**: ❌ 30% (documented, not implemented)
+- **Tests**: ⚠️ 70% (unit tests OK, integration incomplete)
 
-## Important Notes
+For detailed status, see [ROADMAP.md](docs/ROADMAP.md)
 
-### Security
-- JWT authentication configured but not fully implemented
-- CORS enabled for development origins
-- Password hashing should be implemented for production
+---
 
-### Performance
-- Hibernate caching configured for users and restaurants
-- Frontend uses React Query for data caching
-- Database connection pooling via Quarkus defaults
+## 🐛 Known Critical Issues
 
-### Docker Integration
-- Quinoa extension serves React frontend from Quarkus
-- Development database runs in Docker
-- Production Docker images can be built with Maven
+See [docs/BUGS.md](docs/BUGS.md) for complete list. Critical blockers:
 
-### Mobile Development
-- Expo-based React Native app in `apps/mobile/`
-- Shared types and API contracts with web frontend
-- Uses Expo Router for navigation
+1. **BUG-001**: Frontend using mock data (not connected to real APIs)
+2. **BUG-002**: JWT authentication not implemented
+
+---
+
+## 📝 Coding Conventions
+
+- **Language**: French (comments, commits, documentation)
+- **Java**: CamelCase, follow DDD patterns
+- **TypeScript**: camelCase for variables, PascalCase for components
+- **Database**: snake_case for tables/columns
+- **Commits**: Conventional format (`feat:`, `fix:`, `docs:`, `refactor:`)
+
+For detailed conventions, see [CONTEXT.md](CONTEXT.md)
+
+---
+
+## 💡 Pro Tips for Claude Code
+
+1. **Always start** by reading `ROADMAP.md` → Know where you are
+2. **Use Order domain** as reference → Complete implementation example
+3. **Check environment constraints** in `CONTEXT.md` → Avoid CLI commands
+4. **Update ROADMAP.md** after each session → Keep context for next time
+5. **Follow existing patterns** → Consistency is key
+
+---
+
+## 📅 Last Updated
+
+**Date**: 2025-12-12
+**Version**: MVP 0.7
+**Status**: Documentation restructuring complete, ready for Sprint 1 (API integration)
+
+---
+
+## 🔗 Quick Links
+
+- 📋 [Full Documentation Index](docs/README.md)
+- 🗺️ [Current Roadmap](docs/ROADMAP.md)
+- 📖 [Project Context](CONTEXT.md)
+- 🏗️ [Architecture Details](docs/ARCHITECTURE.md)
+- 🐛 [Known Bugs](docs/BUGS.md)
