@@ -1,6 +1,6 @@
-# 📱 Spécifications UX/UI – Application Mobile Client (DelishGo)
+# 📱 Spécifications UX/UI – Application Mobile Client (OneEats)
 
-**Projet :** DelishGo
+**Projet :** OneEats
 **Date :** 9 juillet 2025
 **Auteur :** [À renseigner]
 **Destinataire :** UX/UI Designer

@@ -1,6 +1,6 @@
 # 📘 Spécifications UX/UI – Interfaces Administrateur et Restaurateur
 
-**Projet :** DelishGo
+**Projet :** OneEats
 **Date :** 9 juillet 2025
 **Auteur :** [À remplir par le porteur du projet]
 **Destinataire :** UX/UI Designer

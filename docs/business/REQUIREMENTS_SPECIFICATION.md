@@ -1,8 +1,8 @@
-# 📄 Cahier des Charges – Application de Commande de Repas "DelishGo"
+# 📄 Cahier des Charges – Application de Commande de Repas "OneEats"
 
 ## 1. Présentation Générale
 
-**Nom du projet :** DelishGo (nom provisoire)
+**Nom du projet :** OneEats
 **Client :** [Ton prénom et nom]
 **Date :** Juillet 2025
 
