@@ -30,6 +30,7 @@ Bienvenue dans la documentation du projet OneEats ! Cette documentation a été 
 |---------|-------------|----------|
 | **[BUSINESS_RULES.md](BUSINESS_RULES.md)** | Règles métier, workflows, validations | Tous |
 | **[USE_CASES.md](USE_CASES.md)** | Scénarios utilisateur détaillés (Mobile, Restaurateur, Admin) | Product + Dev |
+| **[TEST_STRATEGY.md](TEST_STRATEGY.md)** | Stratégie complète de tests (Unit, Integration, E2E) | Développeurs + QA |
 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | Architecture technique, patterns, structure | Développeurs |
 | **[ARCHITECTURE_HEXAGONALE.md](ARCHITECTURE_HEXAGONALE.md)** | Guide détaillé DDD/Architecture Hexagonale | Développeurs Backend |
 | **[ROADMAP.md](ROADMAP.md)** | Tâches en cours, progression, sprints | Tous |
@@ -87,6 +88,13 @@ Anciens fichiers fusionnés ou obsolètes (MVP_BACKLOG.md, MOBILE_ROADMAP.md)
 1. Lisez **[USE_CASES.md](USE_CASES.md)** → 19 use cases détaillés (Mobile, Web, Admin)
 2. Consultez la matrice de traçabilité pour les dépendances
 3. Référez-vous à **[BUSINESS_RULES.md](BUSINESS_RULES.md)** pour les règles métier associées
+
+### "Je veux écrire tous les tests du projet (TDD, Unit, Integration, E2E)"
+
+1. Lisez **[TEST_STRATEGY.md](TEST_STRATEGY.md)** → Méthodologie complète et templates
+2. Mappez depuis **[USE_CASES.md](USE_CASES.md)** → Tests d'intégration et E2E
+3. Mappez depuis **[BUSINESS_RULES.md](BUSINESS_RULES.md)** → Tests unitaires (règles RG-XXX)
+4. Suivez la répartition 70-20-10 (Unitaire / Intégration / E2E)
 
 ### "Je veux comprendre comment fonctionne le système de commandes"
 
@@ -167,6 +175,7 @@ Date, version, responsable
 ### Par Thème
 
 - **Scénarios Utilisateur** → USE_CASES.md
+- **Tests (TDD, Unit, Integration, E2E)** → TEST_STRATEGY.md
 - **Architecture Backend** → ARCHITECTURE.md, DATA_MODEL.md
 - **Architecture Frontend** → ARCHITECTURE.md, API_SPECS.md
 - **Règles Métier** → BUSINESS_RULES.md
