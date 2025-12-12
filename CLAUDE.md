@@ -13,6 +13,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This context file is essential for understanding the OneEats project architecture and development environment.
 
+## 📚 Documentation Structure
+
+The documentation has been reorganized following best practices. Key documents are located in `/docs/`:
+
+| Document | Description | When to Read |
+|----------|-------------|--------------|
+| [BUSINESS_RULES.md](docs/BUSINESS_RULES.md) | **Business logic and domain rules** | When implementing features, understanding workflows |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | **Technical architecture and patterns** | When designing new components, understanding structure |
+| [ROADMAP.md](docs/ROADMAP.md) | **📍 Current tasks and project progression** | **START OF EACH SESSION** to see what's in progress |
+| [API_SPECS.md](docs/API_SPECS.md) | **API endpoints documentation** | When calling or creating APIs |
+| [DATA_MODEL.md](docs/DATA_MODEL.md) | **Database schema and relationships** | When working with entities, queries, migrations |
+| [BUGS.md](docs/BUGS.md) | **Known issues and solutions** | When encountering problems, reporting bugs |
+
+### Additional Documentation
+
+- `/docs/guides/` - Deployment, security, getting started guides
+- `/docs/business/` - Product specifications and UI/UX requirements
+- `/docs/concepts/` - Future features and experimental ideas
+- `/docs/mobile/` - Mobile app specific documentation
+- `/docs/tests/` - Testing strategies and documentation
+
+**💡 Pro tip**: Always check `ROADMAP.md` at the start of each session to understand the current task and priorities.
+
 ## Project Overview
 
 OneEats is a food delivery platform built with a monorepo architecture containing:

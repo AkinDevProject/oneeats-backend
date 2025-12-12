@@ -54,7 +54,9 @@
       "Bash(mvn test-compile:*)",
       "Bash(.mvnw.cmd test-compile -q)",
       "Bash(mvnw.cmd compile:*)",
-      "Bash(./mvnw.cmd:*)"
+      "Bash(./mvnw.cmd:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRestructurer documentation selon bonnes pratiques Claude Code\n\nRéorganisation complète de la documentation du projet :\n\n✅ Fichiers principaux créés (selon guide Claude Code) :\n- BUSINESS_RULES.md : Règles métier complètes (acteurs, commandes, menus, restaurants)\n- ROADMAP.md : Consolidation MVP_BACKLOG + MOBILE_ROADMAP avec progression détaillée\n- DATA_MODEL.md : Schéma BDD complet avec migrations, relations et diagrammes ERD\n- BUGS.md : Suivi des bugs (critiques, importants, mineurs, résolus)\n- API_SPECS.md : Renommage de API_REFERENCE.md\n- ARCHITECTURE.md : Renommage de ARCHITECTURE_GUIDE.md\n\n📁 Organisation améliorée :\n- docs/guides/ : GETTING_STARTED, DEPLOYMENT, SECURITY, TROUBLESHOOTING\n- docs/archive/ : MVP_BACKLOG, MOBILE_ROADMAP (fusionnés dans ROADMAP.md)\n- docs/business/ : Specs métier et UX/UI (conservés)\n- docs/concepts/ : Concepts futurs (conservés)\n- docs/mobile/ : Docs techniques mobile (conservés)\n- docs/tests/ : Docs tests (conservés)\n\n📚 Nouveaux guides :\n- docs/README.md : Guide d''orientation de la documentation complète\n- CLAUDE.md mis à jour avec liens vers nouvelle structure\n\n🎯 Bénéfices :\n- Structure claire et standardisée pour Claude Code\n- Navigation facilitée avec README.md dans docs/\n- Consolidation des roadmaps (moins de redondance)\n- Documentation métier séparée de la documentation technique\n- Suivi des bugs centralisé\n\n📋 Checklist complétée :\n✅ Renommer fichiers selon conventions\n✅ Créer fichiers manquants (BUSINESS_RULES, DATA_MODEL, BUGS, ROADMAP)\n✅ Organiser fichiers dans sous-dossiers\n✅ Mettre à jour CLAUDE.md\n✅ Créer README.md guide\n\n🚀 Prochaine étape : Intégration frontend-backend (Sprint 1)\n\nGenerated with Claude Code\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
