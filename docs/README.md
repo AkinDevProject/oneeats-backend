@@ -30,6 +30,7 @@ Bienvenue dans la documentation du projet OneEats ! Cette documentation a été 
 |---------|-------------|----------|
 | **[BUSINESS_RULES.md](BUSINESS_RULES.md)** | Règles métier, workflows, validations | Tous |
 | **[ARCHITECTURE.md](ARCHITECTURE.md)** | Architecture technique, patterns, structure | Développeurs |
+| **[ARCHITECTURE_HEXAGONALE.md](ARCHITECTURE_HEXAGONALE.md)** | Guide détaillé DDD/Architecture Hexagonale | Développeurs Backend |
 | **[ROADMAP.md](ROADMAP.md)** | Tâches en cours, progression, sprints | Tous |
 | **[API_SPECS.md](API_SPECS.md)** | Documentation complète des APIs | Développeurs Frontend/Backend |
 | **[DATA_MODEL.md](DATA_MODEL.md)** | Schéma base de données, relations | Développeurs Backend/Data |

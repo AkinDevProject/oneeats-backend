@@ -1,124 +1,222 @@
-# OneEats - Plateforme de Commande Alimentaire
+# 🍽️ OneEats - Plateforme de Commande Alimentaire
 
-OneEats est une plateforme de commande de plats à récupérer sur place, construite avec une architecture monolithique modulaire moderne.
+**OneEats** est une plateforme moderne de commande de plats à récupérer sur place (pas de livraison dans le MVP), construite avec une architecture monolithique modulaire suivant les principes du Domain-Driven Design.
+
+---
 
 ## 🚀 Démarrage Rapide
 
+### Pour Claude Code 🤖
+
+**Commence TOUJOURS par lire ces fichiers dans cet ordre :**
+
+1. **[CLAUDE.md](CLAUDE.md)** ⭐ - Configuration et workflow pour Claude Code
+2. **[docs/ROADMAP.md](docs/ROADMAP.md)** 📍 - Tâche en cours et progression
+3. **[CONTEXT.md](CONTEXT.md)** 📋 - Contexte complet du projet
+4. **[docs/README.md](docs/README.md)** 📚 - Guide de navigation dans toute la documentation
+
+### Pour les Développeurs 👨‍💻
+
 ```bash
-# 1. Démarrer la base de données
+# 1. Démarrer la base de données PostgreSQL
 docker-compose -f docker-compose.dev.yml up -d
 
-# 2. Lancer le backend (inclut le frontend web via Quinoa)
-./mvnw quarkus:dev
+# 2. Démarrer le backend (depuis IntelliJ IDEA)
+# ⚠️ Important : Lancer Quarkus dev depuis IntelliJ (pas de ./mvnw en CLI)
+# → Backend API: http://localhost:8080/api
+# → Dashboard Web: http://localhost:8080/restaurant (via Quinoa)
 
-# 3. Lancer l'app mobile (optionnel)
+# 3. Démarrer l'app mobile (optionnel)
 cd apps/mobile && npm start
 ```
 
-**URLs importantes :**
-- Frontend Web : http://localhost:5173
-- API Backend : http://localhost:8080/api
-- Documentation API : http://localhost:8080/q/swagger-ui
+**📖 Guide complet** : [docs/guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md)
 
-## 🏗️ Architecture
+---
 
-**Monorepo** avec architecture **hexagonale/clean** et **Domain-Driven Design** :
+## 📚 Documentation Complète
+
+### 📂 Point d'Entrée Documentation
+
+**➡️ [docs/README.md](docs/README.md)** - **COMMENCER ICI** pour naviguer dans toute la documentation
+
+### 🎯 Documents Essentiels (les 6 piliers)
+
+| Document | Description | Audience |
+|----------|-------------|----------|
+| **[ROADMAP.md](docs/ROADMAP.md)** | 📍 **Tâche en cours** et progression projet | Tous (commencer ici chaque session) |
+| **[BUSINESS_RULES.md](docs/BUSINESS_RULES.md)** | Règles métier, workflows, validations | Product + Dev |
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Vue d'ensemble architecture technique | Dev + Tech Lead |
+| **[API_SPECS.md](docs/API_SPECS.md)** | Spécifications des APIs REST | Dev Frontend + Backend |
+| **[DATA_MODEL.md](docs/DATA_MODEL.md)** | Schéma base de données, relations | Dev Backend + Data |
+| **[BUGS.md](docs/BUGS.md)** | Bugs connus, solutions, workarounds | Tous |
+
+### 📖 Documentation par Catégorie
+
+#### 🏗️ Architecture & Design
+
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Vue d'ensemble de l'architecture
+- **[ARCHITECTURE_HEXAGONALE.md](docs/ARCHITECTURE_HEXAGONALE.md)** - Guide détaillé DDD/Architecture Hexagonale
+- **[BUSINESS_RULES.md](docs/BUSINESS_RULES.md)** - Règles métier et workflows
+- **[DATA_MODEL.md](docs/DATA_MODEL.md)** - Modèle de données complet
+
+#### 📡 APIs & Intégration
+
+- **[API_SPECS.md](docs/API_SPECS.md)** - Documentation complète des endpoints
+- **[apps/web/src/README.md](apps/web/src/README.md)** - Structure code frontend web
+- **[apps/web/src/pages/restaurant/designs/README.md](apps/web/src/pages/restaurant/designs/README.md)** - Variantes design UI
+
+#### 🧪 Tests & Qualité
+
+- **[tests/README.md](tests/README.md)** - Guide tests E2E (Playwright)
+- **[tests/COVERAGE_ANALYSIS.md](tests/COVERAGE_ANALYSIS.md)** - Analyse couverture de code
+- **[tests/WEB-TESTS.md](tests/WEB-TESTS.md)** - Tests spécifiques web
+- **[src/test/java/com/oneeats/README.md](src/test/java/com/oneeats/README.md)** - Guide tests Java
+
+#### 📖 Guides Techniques
+
+- **[guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md)** - Setup et démarrage
+- **[guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)** - Déploiement production
+- **[guides/SECURITY_GUIDE.md](docs/guides/SECURITY_GUIDE.md)** - Bonnes pratiques sécurité
+- **[guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md)** - Résolution de problèmes
+
+#### 📱 Mobile & UX
+
+- **[mobile/TECHNICAL_GUIDE.md](docs/mobile/TECHNICAL_GUIDE.md)** - Guide technique app mobile
+- **[mobile/THEMING_GUIDE.md](docs/mobile/THEMING_GUIDE.md)** - Système de thèmes
+- **[mobile/NAVIGATION_SETUP.md](docs/mobile/NAVIGATION_SETUP.md)** - Configuration navigation
+
+#### 📋 Spécifications Métier
+
+- **[business/REQUIREMENTS_SPECIFICATION.md](docs/business/REQUIREMENTS_SPECIFICATION.md)** - Cahier des charges
+- **[business/MOBILE_UI_SPECIFICATIONS.md](docs/business/MOBILE_UI_SPECIFICATIONS.md)** - Specs UX/UI mobile
+- **[business/WEB_UI_SPECIFICATIONS.md](docs/business/WEB_UI_SPECIFICATIONS.md)** - Specs UX/UI web
+
+---
+
+## 🏗️ Architecture du Projet
 
 ```
-oneeats-backend/
-├── src/main/java/com/oneeats/    # Backend Java Quarkus
-├── apps/web/                     # Frontend React restaurant
-├── apps/mobile/                  # App React Native client
-└── docs/                         # Documentation projet
+OneEats (Monolithe Modulaire)
+├── Backend          → Java Quarkus 3.24.2 + PostgreSQL
+│                      Architecture Hexagonale + DDD
+├── Dashboard Web    → React + TypeScript + Vite
+│                      (servi via Quinoa depuis backend)
+└── App Mobile       → React Native + Expo
 ```
 
-## 📚 Documentation
+**Domaines implémentés** : User, Restaurant, Menu, Order
+**Architecture détaillée** : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-- **[Architecture Guide](docs/ARCHITECTURE_GUIDE.md)** - Guide architectural complet
-- **[Getting Started](docs/GETTING_STARTED.md)** - Configuration et démarrage rapide
-- **[API Reference](docs/API_REFERENCE.md)** - Documentation APIs complète
-- **[Mobile Roadmap](docs/MOBILE_ROADMAP.md)** - Roadmap et plan mobile
-- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Guide déploiement production
-- **[Security Guide](docs/SECURITY_GUIDE.md)** - Guide sécurité complet
-- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Guide dépannage et résolution problèmes
-- **[MVP Backlog](docs/MVP_BACKLOG.md)** - 🎯 **Roadmap complète avec tâches prioritaires MVP**
-- **[Mobile Documentation](docs/mobile/)** - Guides techniques mobile
-- **[Business Documents](docs/business/)** - Spécifications et cahiers des charges
+---
 
-## 🎯 MVP Fonctionnalités
+## 📍 Status Projet
 
-### Pour les Clients (Mobile)
-- 📱 Recherche restaurants par proximité/cuisine
-- 🛒 Ajout articles au panier
-- 📋 Passage commandes avec suivi temps réel
-- ⭐ Système de favoris
+| Composant | Progression | Status |
+|-----------|-------------|--------|
+| **Backend APIs** | ✅ 95% | User, Restaurant, Menu, Order complets |
+| **Web Dashboard** | ⚠️ 90% | Interface complète, intégration API en cours |
+| **Mobile App** | ⚠️ 95% | Fonctionnalités avancées, intégration API en cours |
+| **Auth JWT** | ❌ 30% | Documenté, pas implémenté |
+| **Tests** | ⚠️ 70% | Unit tests OK, intégration partielle |
 
-### Pour les Restaurants (Web)
-- 🏪 Gestion profil restaurant
-- 🍽️ Création/modification menus
-- 📦 Traitement commandes
-- 📊 Statistiques et analytics
+**Détails** : [docs/ROADMAP.md](docs/ROADMAP.md) - Section "Status Projet"
 
-### Pour les Admins (Web)
-- 👥 Gestion restaurants
-- 📋 Supervision commandes
-- 📈 Tableau de bord global
+---
+
+## 🐛 Bugs Critiques Connus
+
+| ID | Description | Priorité | Docs |
+|----|-------------|----------|------|
+| BUG-001 | Frontends utilisent mock data (pas connectés aux APIs) | 🔴 Critique | [BUGS.md](docs/BUGS.md) |
+| BUG-002 | Authentification JWT non implémentée | 🔴 Critique | [BUGS.md](docs/BUGS.md) |
+
+**Liste complète** : [docs/BUGS.md](docs/BUGS.md)
+
+---
 
 ## 🛠️ Stack Technique
 
 ### Backend
-- **Quarkus 3.24.2** + Java 21
-- **PostgreSQL** + Hibernate ORM
-- **Architecture hexagonale** + DDD
-- **Event-driven** avec CDI Events
+- **Framework** : Quarkus 3.24.2 (Java 21)
+- **Architecture** : Hexagonale + DDD + CQRS + Event Sourcing
+- **Base de données** : PostgreSQL 15
+- **ORM** : Hibernate + PanacheRepository
+- **API** : REST avec Jackson
+- **Sécurité** : Keycloak OIDC (configuré, pas implémenté)
+- **Tests** : JUnit 5 + RestAssured
 
 ### Frontend Web
-- **React 18** + TypeScript + Vite
-- **Tailwind CSS** + Recharts
-- **React Router DOM**
+- **Framework** : React 18 + TypeScript
+- **Build** : Vite 5.4
+- **Styling** : Tailwind CSS
+- **Routing** : React Router 7
+- **Charts** : Recharts
 
-### Mobile
-- **React Native** + Expo 53
-- **Expo Router** + React Query
-- **React Native Paper**
-- **Push notifications** intégrées
+### Frontend Mobile
+- **Framework** : React Native + Expo 53
+- **Navigation** : Expo Router 5
+- **State** : TanStack Query + AsyncStorage
+- **UI** : React Native Paper
+- **Animations** : Reanimated
 
-## 📦 Domaines Implémentés
+### DevOps
+- **Containerisation** : Docker + Docker Compose
+- **Base de données dev** : PostgreSQL + PgAdmin (Docker)
+- **Tests E2E** : Playwright
+- **CI/CD** : À configurer
 
-- ✅ **Order** - Gestion commandes complète
-- ✅ **User** - Utilisateurs et authentification
-- ✅ **Restaurant** - Gestion restaurants
-- ✅ **Menu** - Items et catégories
-- ✅ **Admin** - Administration
-- ✅ **Notification** - Push notifications
+---
 
-## 🔧 Commandes Utiles
+## ⚙️ Contraintes Environnement (Important ⚠️)
 
-```bash
-# Backend
-./mvnw quarkus:dev              # Mode développement
-./mvnw test                     # Tests
-./mvnw clean package           # Build production
+Ce projet a des contraintes spécifiques de développement :
 
-# Frontend web
-cd apps/web && npm run dev     # Développement
-cd apps/web && npm run build   # Production
+- ✅ **Backend** : Doit être lancé depuis **IntelliJ IDEA** (Quarkus dev mode)
+- ❌ **Pas de ./mvnw** en ligne de commande (pas de JDK dans le terminal)
+- ✅ **Frontend Web** : Servi automatiquement via Quinoa depuis le backend (port 8080)
+- ✅ **Mobile** : Expo CLI disponible normalement
+- ✅ **Database** : Docker Compose disponible
 
-# Mobile
-cd apps/mobile && npm start    # Expo dev server
-cd apps/mobile && npm run android  # Android
-```
+**Détails complets** : [CONTEXT.md](CONTEXT.md) - Section "Architecture de Développement"
 
-## 📊 État MVP
+---
 
-- 🏗️ **Architecture** : ✅ Complète
-- 🔌 **APIs Backend** : ✅ Toutes les APIs nécessaires
-- 💾 **Base données** : ✅ Schéma complet + données test
-- 🎨 **Frontend Web** : ✅ Dashboard restaurant fonctionnel
-- 📱 **App Mobile** : ✅ Fonctionnalités client complètes
-- 🔐 **Authentification** : 🔨 À finaliser
-- 📊 **Analytics** : 🔨 Stats de base implémentées
+## 📞 Support & Contribution
 
-## 📝 Licence
+### Pour rapporter un bug
+1. Vérifier [docs/BUGS.md](docs/BUGS.md) si c'est un bug connu
+2. Consulter [docs/guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md)
+3. Ajouter le bug dans [docs/BUGS.md](docs/BUGS.md) avec le template fourni
 
-Projet privé - OneEats 2024
+### Pour contribuer
+1. Lire [CONTEXT.md](CONTEXT.md) pour comprendre l'architecture
+2. Suivre les patterns du domaine `Order` (implémentation de référence)
+3. Consulter [docs/ROADMAP.md](docs/ROADMAP.md) pour les tâches en cours
+4. Mettre à jour la documentation après chaque changement majeur
+
+---
+
+## 📅 Dernière Mise à Jour
+
+**Date** : 2025-12-12
+**Version** : MVP 0.7
+**Status** : Documentation restructurée, prêt pour Sprint 1 (Intégration APIs)
+**Prochaine étape** : Connecter frontends aux APIs backend (voir [ROADMAP.md](docs/ROADMAP.md))
+
+---
+
+## 🔗 Liens Rapides
+
+| Type | Lien | Description |
+|------|------|-------------|
+| 🤖 Claude Code | [CLAUDE.md](CLAUDE.md) | Configuration et workflow Claude Code |
+| 📖 Contexte | [CONTEXT.md](CONTEXT.md) | Contexte complet du projet |
+| 📚 Docs | [docs/README.md](docs/README.md) | Guide navigation documentation |
+| 📍 Roadmap | [docs/ROADMAP.md](docs/ROADMAP.md) | Progression et tâches |
+| 🏗️ Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique |
+| 🐛 Bugs | [docs/BUGS.md](docs/BUGS.md) | Problèmes connus |
+
+---
+
+**💡 Astuce** : Si tu es perdu, commence toujours par **[docs/README.md](docs/README.md)** qui te guidera vers la bonne documentation ! 🚀

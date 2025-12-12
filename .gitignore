@@ -58,6 +58,10 @@ reports/
 playwright-report/
 .last-run.json
 
+# Generated test reports (markdown files in test results)
+tests/playwright-report/**/*.md
+tests/test-results/**/*.md
+
 # Playwright specific artifacts
 *.png
 *.webm
