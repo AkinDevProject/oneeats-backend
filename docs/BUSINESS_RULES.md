@@ -15,6 +15,8 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 👥 Acteurs et Permissions
 
+> **📖 Use Cases associés** : [UC-001 (Inscription)](USE_CASES.md#uc-001--créer-un-compte-client), [UC-002 (Connexion)](USE_CASES.md#uc-002--se-connecter-à-lapplication), [UC-008 (Profil)](USE_CASES.md#uc-008--gérer-son-profil-utilisateur)
+
 ### Client (Mobile)
 **Rôle** : Utilisateur final qui passe des commandes
 
@@ -73,6 +75,10 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 🛒 Gestion des Commandes
 
+> **📖 Use Cases associés** :
+> - **Client** : [UC-004 (Commander)](USE_CASES.md#uc-004--commander-un-repas), [UC-005 (Suivre)](USE_CASES.md#uc-005--suivre-une-commande-en-temps-réel), [UC-006 (Annuler)](USE_CASES.md#uc-006--annuler-une-commande), [UC-007 (Historique)](USE_CASES.md#uc-007--consulter-lhistorique-des-commandes)
+> - **Restaurateur** : [UC-101 (Recevoir)](USE_CASES.md#uc-101--recevoir-et-consulter-les-commandes), [UC-102 (Accepter/Refuser)](USE_CASES.md#uc-102--accepter-ou-refuser-une-commande), [UC-103 (Gérer cycle de vie)](USE_CASES.md#uc-103--gérer-le-cycle-de-vie-dune-commande)
+
 ### Cycle de vie d'une commande
 
 ```
@@ -119,6 +125,8 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 🍽️ Gestion des Menus
 
+> **📖 Use Cases associés** : [UC-104 (Gérer le menu)](USE_CASES.md#uc-104--gérer-le-menu-du-restaurant)
+
 ### Articles de Menu (MenuItem)
 
 **Règles de validation** :
@@ -156,6 +164,10 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 ---
 
 ## 🏪 Gestion des Restaurants
+
+> **📖 Use Cases associés** :
+> - **Restaurateur** : [UC-105 (Modifier statut)](USE_CASES.md#uc-105--modifier-le-statut-du-restaurant)
+> - **Admin** : [UC-201 (Valider restaurant)](USE_CASES.md#uc-201--valider-un-nouveau-restaurant), [UC-202 (Gérer restaurants)](USE_CASES.md#uc-202--gérer-les-restaurants-bloqueractiver)
 
 ### Profil Restaurant
 
@@ -201,6 +213,10 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 👤 Gestion des Utilisateurs
 
+> **📖 Use Cases associés** :
+> - **Client** : [UC-001 (Inscription)](USE_CASES.md#uc-001--créer-un-compte-client), [UC-002 (Connexion)](USE_CASES.md#uc-002--se-connecter-à-lapplication), [UC-008 (Gérer profil)](USE_CASES.md#uc-008--gérer-son-profil-utilisateur)
+> - **Admin** : [UC-203 (Gérer utilisateurs)](USE_CASES.md#uc-203--gérer-les-utilisateurs)
+
 ### Inscription
 
 **Client** :
@@ -243,6 +259,8 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 🔍 Recherche et Filtrage
 
+> **📖 Use Cases associés** : [UC-003 (Rechercher un restaurant)](USE_CASES.md#uc-003--rechercher-un-restaurant)
+
 ### Recherche de Restaurants
 
 **Critères de recherche** :
@@ -277,6 +295,10 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ## 📊 Statistiques et Métriques
 
+> **📖 Use Cases associés** :
+> - **Restaurateur** : [UC-106 (Stats restaurant)](USE_CASES.md#uc-106--consulter-les-statistiques-du-restaurant)
+> - **Admin** : [UC-204 (Tableau de bord global)](USE_CASES.md#uc-204--consulter-le-tableau-de-bord-global), [UC-205 (Exporter statistiques)](USE_CASES.md#uc-205--exporter-les-statistiques)
+
 ### Statistiques Restaurant
 
 **Métriques calculées** :
@@ -307,6 +329,8 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 ---
 
 ## 🔔 Notifications
+
+> **📖 Use Cases associés** : [UC-005 (Suivre commande en temps réel)](USE_CASES.md#uc-005--suivre-une-commande-en-temps-réel)
 
 ### Notifications Clients
 

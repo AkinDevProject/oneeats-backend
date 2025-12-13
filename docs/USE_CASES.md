@@ -57,6 +57,8 @@ Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois
 | **Priorité** | Haute |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Gestion des Utilisateurs](BUSINESS_RULES.md#-gestion-des-utilisateurs) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 Le client crée un compte sur l'application mobile pour pouvoir passer des commandes.
 
@@ -148,6 +150,8 @@ Le client crée un compte sur l'application mobile pour pouvoir passer des comma
 | **Priorité** | Haute |
 | **Complexité** | Faible |
 
+> **📋 Règles Métier** : [Gestion des Utilisateurs](BUSINESS_RULES.md#-gestion-des-utilisateurs) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 Le client se connecte à l'application mobile avec son email et mot de passe.
 
@@ -223,6 +227,8 @@ Le client se connecte à l'application mobile avec son email et mot de passe.
 | **Type** | Primaire |
 | **Priorité** | Haute |
 | **Complexité** | Moyenne |
+
+> **📋 Règles Métier** : [Recherche et Filtrage](BUSINESS_RULES.md#-recherche-et-filtrage) · [Gestion des Restaurants](BUSINESS_RULES.md#-gestion-des-restaurants)
 
 ### Description
 Le client recherche et filtre les restaurants disponibles selon différents critères.
@@ -308,6 +314,8 @@ Le client recherche et filtre les restaurants disponibles selon différents crit
 | **Type** | Primaire |
 | **Priorité** | Critique |
 | **Complexité** | Haute |
+
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Gestion des Menus](BUSINESS_RULES.md#-gestion-des-menus) · [Gestion des Restaurants](BUSINESS_RULES.md#-gestion-des-restaurants)
 
 ### Description
 Le client sélectionne des plats dans un restaurant, les ajoute au panier et passe une commande.
@@ -459,6 +467,8 @@ Le client sélectionne des plats dans un restaurant, les ajoute au panier et pas
 | **Priorité** | Haute |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Notifications](BUSINESS_RULES.md#-notifications)
+
 ### Description
 Le client suit l'évolution de sa commande en temps réel et reçoit des notifications à chaque changement de statut.
 
@@ -550,6 +560,8 @@ Le client suit l'évolution de sa commande en temps réel et reçoit des notific
 | **Priorité** | Moyenne |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes)
+
 ### Description
 Le client annule sa commande si elle n'a pas encore commencé à être préparée.
 
@@ -625,6 +637,8 @@ Le client annule sa commande si elle n'a pas encore commencé à être préparé
 | **Type** | Secondaire |
 | **Priorité** | Moyenne |
 | **Complexité** | Faible |
+
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Statistiques et Métriques](BUSINESS_RULES.md#-statistiques-et-métriques)
 
 ### Description
 Le client consulte la liste de toutes ses commandes passées avec leurs détails.
@@ -717,6 +731,8 @@ Le client consulte la liste de toutes ses commandes passées avec leurs détails
 | **Type** | Secondaire |
 | **Priorité** | Basse |
 | **Complexité** | Faible |
+
+> **📋 Règles Métier** : [Gestion des Utilisateurs](BUSINESS_RULES.md#-gestion-des-utilisateurs) · [Règles de Sécurité et Confidentialité](BUSINESS_RULES.md#%EF%B8%8F-règles-de-sécurité-et-confidentialité)
 
 ### Description
 Le client consulte et modifie les informations de son profil personnel.
@@ -824,6 +840,8 @@ Le client consulte et modifie les informations de son profil personnel.
 | **Priorité** | Critique |
 | **Complexité** | Haute |
 
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions) · [Notifications](BUSINESS_RULES.md#-notifications)
+
 ### Description
 Le restaurateur reçoit les commandes en temps réel et consulte leur détail sur le dashboard web.
 
@@ -930,6 +948,8 @@ Le restaurateur reçoit les commandes en temps réel et consulte leur détail su
 | **Type** | Primaire |
 | **Priorité** | Critique |
 | **Complexité** | Moyenne |
+
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
 
 ### Description
 Le restaurateur décide d'accepter ou de refuser une commande en statut EN_ATTENTE.
@@ -1061,6 +1081,8 @@ Le restaurateur décide d'accepter ou de refuser une commande en statut EN_ATTEN
 | **Priorité** | Critique |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Gestion des Commandes](BUSINESS_RULES.md#-gestion-des-commandes) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 Le restaurateur fait progresser la commande à travers les différents statuts jusqu'à sa récupération par le client.
 
@@ -1170,6 +1192,8 @@ Le restaurateur fait progresser la commande à travers les différents statuts j
 | **Type** | Primaire |
 | **Priorité** | Haute |
 | **Complexité** | Haute |
+
+> **📋 Règles Métier** : [Gestion des Menus](BUSINESS_RULES.md#-gestion-des-menus) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
 
 ### Description
 Le restaurateur crée, modifie, supprime et gère la disponibilité des articles de menu et des catégories.
@@ -1335,6 +1359,8 @@ Le restaurateur crée, modifie, supprime et gère la disponibilité des articles
 | **Priorité** | Haute |
 | **Complexité** | Faible |
 
+> **📋 Règles Métier** : [Gestion des Restaurants](BUSINESS_RULES.md#-gestion-des-restaurants) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 Le restaurateur ouvre ou ferme son restaurant manuellement pour arrêter temporairement de recevoir des commandes.
 
@@ -1433,6 +1459,8 @@ Le restaurateur ouvre ou ferme son restaurant manuellement pour arrêter tempora
 | **Priorité** | Moyenne |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Statistiques et Métriques](BUSINESS_RULES.md#-statistiques-et-métriques) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 Le restaurateur consulte les statistiques et performances de son restaurant.
 
@@ -1530,6 +1558,8 @@ Le restaurateur consulte les statistiques et performances de son restaurant.
 | **Type** | Primaire |
 | **Priorité** | Haute |
 | **Complexité** | Moyenne |
+
+> **📋 Règles Métier** : [Gestion des Restaurants](BUSINESS_RULES.md#-gestion-des-restaurants) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
 
 ### Description
 L'administrateur examine et valide (ou rejette) les demandes d'inscription de nouveaux restaurants.
@@ -1667,6 +1697,8 @@ L'administrateur examine et valide (ou rejette) les demandes d'inscription de no
 | **Priorité** | Haute |
 | **Complexité** | Moyenne |
 
+> **📋 Règles Métier** : [Gestion des Restaurants](BUSINESS_RULES.md#-gestion-des-restaurants) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 L'administrateur peut bloquer ou réactiver un restaurant déjà validé en cas de problème ou résolution.
 
@@ -1795,6 +1827,8 @@ L'administrateur peut bloquer ou réactiver un restaurant déjà validé en cas 
 | **Type** | Secondaire |
 | **Priorité** | Moyenne |
 | **Complexité** | Moyenne |
+
+> **📋 Règles Métier** : [Gestion des Utilisateurs](BUSINESS_RULES.md#-gestion-des-utilisateurs) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions) · [Règles de Sécurité et Confidentialité](BUSINESS_RULES.md#%EF%B8%8F-règles-de-sécurité-et-confidentialité)
 
 ### Description
 L'administrateur consulte, filtre et gère les comptes utilisateurs (clients et restaurateurs).
@@ -1960,6 +1994,8 @@ L'administrateur consulte, filtre et gère les comptes utilisateurs (clients et 
 | **Priorité** | Haute |
 | **Complexité** | Haute |
 
+> **📋 Règles Métier** : [Statistiques et Métriques](BUSINESS_RULES.md#-statistiques-et-métriques) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
+
 ### Description
 L'administrateur consulte une vue d'ensemble des activités de la plateforme avec métriques clés et alertes.
 
@@ -2062,6 +2098,8 @@ L'administrateur consulte une vue d'ensemble des activités de la plateforme ave
 | **Type** | Secondaire |
 | **Priorité** | Basse |
 | **Complexité** | Moyenne |
+
+> **📋 Règles Métier** : [Statistiques et Métriques](BUSINESS_RULES.md#-statistiques-et-métriques) · [Acteurs et Permissions](BUSINESS_RULES.md#-acteurs-et-permissions)
 
 ### Description
 L'administrateur exporte les données statistiques de la plateforme pour analyse externe ou reporting.

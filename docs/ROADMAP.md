@@ -2,10 +2,12 @@
 
 ## 📍 Tâche en cours
 
-> **Sprint 1 — Restructuration Documentation**
+> **Sprint 1 — Restructuration Documentation** ✅ **TERMINÉ**
 >
-> Actuellement : Réorganisation de la documentation selon les bonnes pratiques Claude Code
-> Fichiers concernés : `/docs/` (tous les fichiers de documentation)
+> Dernière amélioration : Ajout de liens croisés entre BUSINESS_RULES.md et USE_CASES.md
+> - ✅ Tous les use cases (UC-001 à UC-205) renvoient vers les règles métier associées
+> - ✅ Toutes les sections de règles métier renvoient vers les use cases pertinents
+> - ✅ Navigation bidirectionnelle facilitée pour Claude Code
 >
 > **Prochaine étape** : Intégration frontend web et mobile avec les APIs backend
 
@@ -406,9 +408,30 @@
 
 ---
 
+## 📝 Notes de Session
+
+### Session 2025-12-13 : Amélioration Navigation Documentation
+
+**Travail effectué** :
+- ✅ Ajout de liens croisés bidirectionnels entre BUSINESS_RULES.md et USE_CASES.md
+- ✅ Chaque use case (UC-001 à UC-205) contient maintenant un lien vers les règles métier associées
+- ✅ Chaque section de règles métier renvoie vers les use cases pertinents
+- ✅ Format blockquote avec émojis pour meilleure visibilité
+
+**Impact** :
+- Navigation facilitée entre documentation conceptuelle et procédurale
+- Claude Code peut rapidement accéder aux informations contextuelles
+- Amélioration de la cohérence entre règles métier et implémentation
+
+**Ce qui suit** :
+- Prêt pour Sprint 2 : Intégration frontend-backend
+- Documentation bien structurée pour supporter le développement
+
+---
+
 ## 📅 Dernière mise à jour
 
-**Date** : 2025-12-12
+**Date** : 2025-12-13
 **Version** : MVP 0.7
 **Responsable** : Équipe OneEats
 **Prochaine revue** : 2025-12-19
