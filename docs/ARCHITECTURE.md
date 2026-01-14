@@ -4,7 +4,7 @@ Guide principal pour comprendre et développer sur la plateforme OneEats.
 
 ## 🎯 Objectif du Projet
 
-OneEats est une **plateforme de commande de plats à récupérer sur place** (MVP).  
+OneEats est une **plateforme de commande de plats à récupérer sur place** (MVP).
 Les objectifs principaux sont :
 - Permettre aux **clients** de commander facilement via une application mobile
 - Permettre aux **restaurants** de gérer leurs menus et commandes via une interface web
@@ -17,7 +17,7 @@ Les objectifs principaux sont :
 ## 🏗️ Architecture Technique
 
 ### Architecture Générale
-**Monorepo** avec architecture **hexagonale/clean** suivant les principes **Domain-Driven Design**.  
+**Monorepo** avec architecture **hexagonale/clean** suivant les principes **Domain-Driven Design**.
 **Architecture monolithique** avec structure modulaire dans le code source.
 
 ```
@@ -68,12 +68,12 @@ oneeats-backend/
 #### Frontend Web (Restaurant)
 - **Framework** : React 18 + TypeScript
 - **Build** : Vite 5.4
-- **Styling** : Tailwind CSS + PostCSS  
+- **Styling** : Tailwind CSS + PostCSS
 - **Navigation** : React Router DOM 7.6
 - **Charts** : Recharts
 - **Icons** : Lucide React
 
-#### Frontend Mobile (Client) 
+#### Frontend Mobile (Client)
 - **Framework** : React Native + Expo 53
 - **Navigation** : Expo Router 5.1
 - **State** : TanStack React Query + AsyncStorage
@@ -93,7 +93,7 @@ oneeats-backend/
 
 ### Acteurs Principaux
 - **Client** : Consulte les restaurants, passe des commandes, récupère sur place
-- **Restaurant** : Gère son menu, ses commandes et son profil  
+- **Restaurant** : Gère son menu, ses commandes et son profil
 - **Administrateur** : Supervise la plateforme, gère les comptes restaurants, accède aux statistiques
 
 ### Fonctionnalités
@@ -201,7 +201,7 @@ src/main/java/com/oneeats/
 ├── OneEatsApplication.java           # Point d'entrée unique
 ├── common/                           # Utilitaires partagés
 │   ├── domain/BaseEntity.java        # Entité de base
-│   ├── events/DomainEvent.java       # Interface événements  
+│   ├── events/DomainEvent.java       # Interface événements
 │   └── exception/BusinessException.java
 ├── configuration/                    # Configuration globale
 │   └── ApplicationConfiguration.java
@@ -224,7 +224,7 @@ src/main/java/com/oneeats/
 order/
 ├── api/
 │   ├── CreateOrderRequest.java       # DTO requête création
-│   ├── OrderDto.java                 # DTO réponse  
+│   ├── OrderDto.java                 # DTO réponse
 │   └── UpdateOrderStatusRequest.java # DTO changement statut
 ├── domain/
 │   ├── Order.java                    # Entité aggregate root
@@ -288,7 +288,7 @@ order/
 - **Entité** : `Admin` avec permissions
 - **Use Cases** : Gestion restaurants, supervision commandes
 
-### Notification (com.oneeats.notification) 🔨 À CRÉER  
+### Notification (com.oneeats.notification) 🔨 À CRÉER
 - **Entité** : `Notification` pour messages push
 - **Use Cases** : Notifications commandes, push mobile Expo
 
@@ -304,7 +304,7 @@ order/
 
 ### Applications et Services
 - **Backend principal** : http://localhost:8080
-- **Frontend Web** : Intégré via Quinoa depuis le backend  
+- **Frontend Web** : Intégré via Quinoa depuis le backend
 - **Mobile** : Expo Development Server
 - **API Documentation** : http://localhost:8080/q/swagger-ui
 - **Health Check** : http://localhost:8080/q/health
@@ -333,7 +333,7 @@ order/
 
 ### Tests
 - **Backend** : Tests unitaires (Use Cases) + intégration (REST)
-- **Coverage** : Jacoco pour métriques de couverture  
+- **Coverage** : Jacoco pour métriques de couverture
 - **Frontend** : Tests composants (à implémenter)
 
 ---
@@ -346,7 +346,7 @@ order/
 docker-compose -f docker-compose.dev.yml up -d
 
 # Backend monolithique (avec frontend web intégré via Quinoa)
-./mvnw quarkus:dev                    # Linux/Mac  
+./mvnw quarkus:dev                    # Linux/Mac
 mvnw.cmd quarkus:dev                  # Windows
 
 # Mobile (séparément)
@@ -404,7 +404,7 @@ cd apps/mobile && npm start
 
 ### 🚀 Prochaines Étapes Prioritaires
 1. **Compléter Restaurant** : API REST + Repository + Mapper
-2. **Compléter Menu** : API REST + Repository + Mapper  
+2. **Compléter Menu** : API REST + Repository + Mapper
 3. **Créer Admin** : Domaine complet pour administration
 4. **Créer Notification** : Push notifications + gestion événements
 5. **Tests complets** : Coverage pour tous les domaines
