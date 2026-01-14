@@ -48,10 +48,13 @@ workflow_status:
     name: "Planning"
     workflows:
       - id: "prd"
-        status: "required"
+        status: "docs/product/PRD-oneeats-backend.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:prd"
         purpose: "Create Product Requirements Document with FRs and NFRs"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/product/PRD-oneeats-backend.md"
       - id: "create-ux-design"
         status: "conditional:if_has_ui"
         agent: "ux-designer"
@@ -63,10 +66,17 @@ workflow_status:
     name: "Solutioning"
     workflows:
       - id: "create-architecture"
-        status: "required"
+        status: "docs/architecture/ARCHITECTURE-TARGET.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:create-architecture"
         purpose: "Design system architecture aligned with existing codebase"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/architecture/ARCHITECTURE-TARGET.md"
+          - "docs/adr/ADR-001-auth.md"
+          - "docs/adr/ADR-002-order-statuses.md"
+          - "docs/adr/ADR-003-notifications.md"
+          - "docs/adr/ADR-004-uploads.md"
       - id: "create-epics-and-stories"
         status: "required"
         agent: "pm"
@@ -94,6 +104,6 @@ workflow_status:
         purpose: "Create sprint plan and begin implementation tracking"
 
 # Next action
-next_workflow: "prd"
+next_workflow: "create-epics-and-stories"
 next_agent: "pm"
-next_command: "/bmad:bmm:workflows:prd"
+next_command: "/bmad:bmm:workflows:create-epics-and-stories"
