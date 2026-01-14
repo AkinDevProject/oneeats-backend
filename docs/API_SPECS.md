@@ -87,6 +87,8 @@ Le dashboard restaurant dans `apps/web` contient des fonctionnalités complètem
 - **Description** : Upload logo restaurant
 - **Content-Type** : `multipart/form-data`
 - **Body** : `{ logo: File }`
+- **Contraintes** : max 5 Mo, formats jpg/png/webp, validation MIME/extension, nommage sécurisé
+- **Stockage** : FS local en dev; cible storage objet (S3/GCS) derrière une abstraction
 - **Response** : `{ logoUrl: string }`
 
 ### DTOs nécessaires
@@ -174,6 +176,8 @@ interface OpeningHoursDto {
 - **Description** : Upload image item de menu
 - **Content-Type** : `multipart/form-data`
 - **Body** : `{ image: File }`
+- **Contraintes** : max 5 Mo, formats jpg/png/webp, validation MIME/extension, nommage sécurisé
+- **Stockage** : FS local en dev; cible storage objet (S3/GCS) derrière une abstraction
 - **Response** : `{ imageUrl: string }`
 
 ### DTOs nécessaires

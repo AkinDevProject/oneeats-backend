@@ -78,15 +78,21 @@ workflow_status:
           - "docs/adr/ADR-003-notifications.md"
           - "docs/adr/ADR-004-uploads.md"
       - id: "create-epics-and-stories"
-        status: "required"
+        status: "docs/product/EPICS-USER-STORIES.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:create-epics-and-stories"
         purpose: "Break down PRD into implementable epics and user stories"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/product/EPICS-USER-STORIES.md"
       - id: "test-design"
-        status: "optional"
+        status: "docs/tests/TEST-DESIGN.md"
         agent: "tea"
         command: "/bmad:bmm:workflows:testarch-test-design"
         purpose: "System-level testability review"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/tests/TEST-DESIGN.md"
       - id: "implementation-readiness"
         status: "required"
         agent: "architect"
@@ -104,6 +110,6 @@ workflow_status:
         purpose: "Create sprint plan and begin implementation tracking"
 
 # Next action
-next_workflow: "create-epics-and-stories"
-next_agent: "pm"
-next_command: "/bmad:bmm:workflows:create-epics-and-stories"
+next_workflow: "implementation-readiness"
+next_agent: "architect"
+next_command: "/bmad:bmm:workflows:check-implementation-readiness"
