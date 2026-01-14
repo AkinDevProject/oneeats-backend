@@ -4,7 +4,7 @@ Guide complet pour déployer OneEats en environnement de production.
 
 ---
 
-## 🎯 Vue d'Ensemble Déploiement
+## Vue d'Ensemble Déploiement
 
 ### Architecture de Production
 ```
@@ -26,7 +26,7 @@ Guide complet pour déployer OneEats en environnement de production.
 
 ---
 
-## 🐳 Déploiement avec Docker
+## Déploiement avec Docker
 
 ### 1. Dockerfile Production
 ```dockerfile
@@ -159,7 +159,7 @@ http {
 
 ---
 
-## 🏗️ Build et Déploiement
+## Build et Déploiement
 
 ### 1. Build Natif Production
 ```bash
@@ -203,7 +203,7 @@ curl -f https://yourdomain.com/q/health
 
 ---
 
-## ☸️ Déploiement Kubernetes
+## Déploiement Kubernetes
 
 ### 1. Configuration ConfigMap
 ```yaml
@@ -324,7 +324,7 @@ spec:
 
 ---
 
-## 🗄️ Configuration Base de Données Production
+## Configuration Base de Données Production
 
 ### 1. Configuration PostgreSQL
 ```yaml
@@ -394,7 +394,7 @@ ALTER TABLE "order" SET (fillfactor = 80);
 
 ---
 
-## 📊 Monitoring et Logs
+## Monitoring et Logs
 
 ### 1. Configuration Prometheus
 ```yaml
@@ -441,7 +441,7 @@ quarkus:
 
 ---
 
-## 🔄 Processus de Mise à Jour
+## Processus de Mise à Jour
 
 ### 1. Déploiement Blue-Green
 ```bash
@@ -474,7 +474,7 @@ pg_dump -h postgres -U oneeats_user oneeats_prod > backup-$(date +%Y%m%d-%H%M%S)
 
 ---
 
-## 🔐 Sécurité Production
+## Sécurité Production
 
 ### 1. Checklist Sécurité
 - [ ] **HTTPS** activé avec certificats valides
@@ -497,7 +497,7 @@ API_RATE_LIMIT=          # Ex: 100 req/min par IP
 
 ---
 
-## ✅ Checklist Post-Déploiement
+## Checklist Post-Déploiement
 
 ### Tests de Validation
 - [ ] **Health checks** : `/q/health` répond 200

@@ -1,8 +1,8 @@
-# 🎨 Système de Thème Global OneEats
+# Système de Thème Global OneEats
 
 Le système de thème global de OneEats permet d'appliquer des thèmes cohérents sur toute l'application mobile avec un sélecteur de couleurs dynamique.
 
-## 📁 Structure du Système
+## Structure du Système
 
 ```
 src/
@@ -16,7 +16,7 @@ src/
     └── useThemedStyles.ts        # Hooks pour styles dynamiques
 ```
 
-## 🚀 Utilisation
+## Utilisation
 
 ### 1. Hook Principal
 ```tsx
@@ -128,7 +128,7 @@ const MyComponent = () => {
 10. **🔥 brightOrange** - Orange Vif
 11. **🍿 mcdonaldsFrance** - Vert McDonald's
 
-## 🛠️ Personnalisation
+## Personnalisation
 
 ### Ajouter un Nouveau Thème
 
@@ -176,7 +176,7 @@ Chaque thème inclut toutes les couleurs Material Design 3 :
 
 Les thèmes sélectionnés sont automatiquement sauvegardés dans `AsyncStorage` et restaurés au démarrage de l'application.
 
-## 🧪 Exemples d'Intégration
+## Exemples d'Intégration
 
 ### React Native Paper
 ```tsx
@@ -221,7 +221,7 @@ const { currentTheme } = useAppTheme();
 - ✅ **Synchronisation globale** - un seul sélecteur met à jour toute l'app
 - ✅ **TypeScript complet** avec types stricts
 
-## 🔧 Configuration Avancée
+## Configuration Avancée
 
 Pour forcer un re-render complet lors du changement de thème (recommandé pour React Native Paper), utilisez une `key` sur le PaperProvider :
 

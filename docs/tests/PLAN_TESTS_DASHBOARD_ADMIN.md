@@ -1,38 +1,38 @@
-# Plan de Tests Utilisateur - Dashboard Administrateur 👨‍💼
+# Plan de Tests Utilisateur - Dashboard Administrateur
 
-## 📋 Objectif des Tests
+## Objectif des Tests
 
 Ce document guide les testeurs pour valider le fonctionnement complet du dashboard administrateur OneEats, permettant aux administrateurs de superviser la plateforme, gérer les restaurants, utilisateurs et consulter les statistiques globales.
 
 ---
 
-## 🎯 Périmètre de Test - Dashboard Administrateur
+## Périmètre de Test - Dashboard Administrateur
 
-### **📊 Tableau de Bord Principal**
+### Tableau de Bord Principal
 - ✅ Vue d'ensemble avec KPIs temps réel
 - ✅ Métriques globales (restaurants, utilisateurs, commandes)
 - ✅ Graphiques et visualisations données
 - ✅ Alertes et notifications système
 
-### **🏪 Gestion des Restaurants**  
+### Gestion des Restaurants  
 - ✅ Liste complète des restaurants partenaires
 - ✅ Validation et approbation nouveaux restaurants
 - ✅ Suspension/activation des comptes restaurants
 - ✅ Modération des profils et menus
 
-### **👥 Gestion des Utilisateurs**
+### Gestion des Utilisateurs
 - ✅ Liste des utilisateurs clients
 - ✅ Consultation des profils utilisateurs
 - ✅ Gestion des comptes (activation/désactivation)
 - ✅ Support et modération
 
-### **📋 Supervision des Commandes**
+### Supervision des Commandes
 - ✅ Vue globale de toutes les commandes
 - ✅ Monitoring temps réel des statuts
 - ✅ Intervention en cas de problème
 - ✅ Analytics avancées des commandes
 
-### **📈 Analytics et Statistiques**
+### Analytics et Statistiques
 - ✅ Rapports détaillés de performance
 - ✅ Tendances et insights business
 - ✅ Métriques financières
@@ -40,15 +40,15 @@ Ce document guide les testeurs pour valider le fonctionnement complet du dashboa
 
 ---
 
-## ⚡ Prérequis Techniques
+## Prérequis Techniques
 
-### **🖥️ Architecture Admin Spécifique**
+### Architecture Admin Spécifique
 - **Backend** : Quarkus lancé depuis IntelliJ IDEA
 - **Frontend** : React intégré via Quinoa dans Quarkus
 - **URL Admin** : `http://localhost:8080/admin`
 - **Base de données** : PostgreSQL Docker avec données complètes
 
-### **✅ Services à vérifier avant tests**
+### Services à vérifier avant tests
 ```bash
 # 1. Base de données avec données complètes
 docker-compose -f docker-compose.dev.yml up -d
@@ -60,7 +60,7 @@ http://localhost:8080/q/health
 http://localhost:8080/admin
 ```
 
-### **🗄️ Données de test**
+### Données de test
 - **Administrateur** : `admin@oneeats.com` / `adminpass123`
 - **Restaurants** : Plusieurs restaurants avec statuts variés
 - **Utilisateurs** : Base d'utilisateurs clients diversifiée
@@ -68,9 +68,9 @@ http://localhost:8080/admin
 
 ---
 
-## 🧪 Plan de Tests Détaillé
+## Plan de Tests Détaillé
 
-### **🔐 Test 0 : Connexion Dashboard Admin**
+### Test 0 : Connexion Dashboard Admin**
 
 **Objectif** : Vérifier l'accès au dashboard administrateur
 
@@ -88,7 +88,7 @@ http://localhost:8080/admin
 
 ---
 
-### **📊 Test 1 : Tableau de Bord Principal**
+### Test 1 : Tableau de Bord Principal**
 
 #### **Test 1.1 : Vue d'Ensemble et KPIs**
 **Objectif** : Vérifier l'affichage des métriques principales
@@ -140,7 +140,7 @@ http://localhost:8080/admin
 
 ---
 
-### **🏪 Test 2 : Gestion des Restaurants**
+### Test 2 : Gestion des Restaurants**
 
 #### **Test 2.1 : Liste des Restaurants**
 **Objectif** : Consultation de tous les restaurants partenaires
@@ -192,7 +192,7 @@ http://localhost:8080/admin
 
 ---
 
-### **👥 Test 3 : Gestion des Utilisateurs**
+### Test 3 : Gestion des Utilisateurs**
 
 #### **Test 3.1 : Liste des Utilisateurs**
 **Objectif** : Consultation de la base utilisateurs
@@ -244,7 +244,7 @@ http://localhost:8080/admin
 
 ---
 
-### **📋 Test 4 : Supervision des Commandes**
+### Test 4 : Supervision des Commandes**
 
 #### **Test 4.1 : Vue Globale des Commandes**
 **Objectif** : Monitoring de toutes les commandes
@@ -296,7 +296,7 @@ http://localhost:8080/admin
 
 ---
 
-### **📈 Test 5 : Analytics et Statistiques**
+### Test 5 : Analytics et Statistiques**
 
 #### **Test 5.1 : Page Analytics Détaillée**
 **Objectif** : Consultation des statistiques avancées
@@ -348,7 +348,7 @@ http://localhost:8080/admin
 
 ---
 
-### **🔧 Test 6 : Fonctionnalités Système**
+### Test 6 : Fonctionnalités Système**
 
 #### **Test 6.1 : Monitoring Technique**
 **Objectif** : Supervision technique de la plateforme
@@ -384,9 +384,9 @@ http://localhost:8080/admin
 
 ---
 
-## 🚨 Tests de Régression Admin
+## Tests de Régression Admin
 
-### **🔍 Test R1 : Performance Dashboard**
+### Test R1 : Performance Dashboard**
 - ✅ Chargement rapide avec grandes quantités de données
 - ✅ Graphiques fluides même avec historique important
 - ✅ Recherches et filtres performants
@@ -403,7 +403,7 @@ http://localhost:8080/admin
 
 ---
 
-## 📝 Critères de Validation Admin
+## Critères de Validation Admin
 
 ### **✅ Critères de Succès**
 - Tous les KPIs et métriques s'affichent correctement
@@ -423,7 +423,7 @@ http://localhost:8080/admin
 
 ---
 
-## 🔧 Environnement de Test Admin
+## Environnement de Test Admin
 
 ### **Configuration Requise**
 - ✅ Quarkus en mode dev depuis IntelliJ IDEA

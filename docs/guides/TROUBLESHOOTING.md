@@ -4,7 +4,7 @@ Guide complet pour diagnostiquer et résoudre les problèmes courants de OneEats
 
 ---
 
-## 🎯 Diagnostic Rapide
+## Diagnostic Rapide
 
 ### Vérifications Initiales
 ```bash
@@ -32,7 +32,7 @@ curl http://localhost:8080/q/metrics
 
 ---
 
-## 🚀 Problèmes de Démarrage
+## Problèmes de Démarrage
 
 ### 1. Application ne démarre pas
 
@@ -313,7 +313,7 @@ curl -H "Origin: http://localhost:3000" \
 
 ---
 
-## 🔐 Problèmes d'Authentification
+## Problèmes d'Authentification
 
 ### 1. JWT Token invalide
 
@@ -374,7 +374,7 @@ quarkus.oidc.tenant-enabled=false
 
 ---
 
-## 📱 Problèmes Frontend Mobile
+## Problèmes Frontend Mobile
 
 ### 1. App mobile ne se connecte pas au backend
 
@@ -462,7 +462,7 @@ const getExpoPushToken = async () => {
 
 ---
 
-## 🏗️ Problèmes de Build et Déploiement
+## Problèmes de Build et Déploiement
 
 ### 1. Build natif échoue
 
@@ -524,7 +524,7 @@ docker exec -it oneeats-container ps aux
 
 ---
 
-## 📊 Problèmes de Performance
+## Problèmes de Performance
 
 ### 1. Réponses lentes
 

@@ -4,7 +4,7 @@ Guide complet de sécurisation de la plateforme OneEats pour l'environnement de 
 
 ---
 
-## 🎯 Vue d'Ensemble Sécurité
+## Vue d'Ensemble Sécurité
 
 ### Architecture Sécurisée
 ```
@@ -25,7 +25,7 @@ Guide complet de sécurisation de la plateforme OneEats pour l'environnement de 
 
 ---
 
-## 🔐 Authentification et Autorisation
+## Authentification et Autorisation
 
 ### 1. Configuration Keycloak
 
@@ -207,7 +207,7 @@ public class SecurityService {
 
 ---
 
-## 🛡️ Protection des Données
+## Protection des Données
 
 ### 1. Chiffrement des Mots de Passe
 ```java
@@ -489,7 +489,7 @@ quarkus:
 
 ---
 
-## 📊 Monitoring Sécurité
+## Monitoring Sécurité
 
 ### 1. Logs de Sécurité
 ```java
@@ -563,7 +563,7 @@ public class SecurityMetrics {
 
 ---
 
-## 🔐 Gestion des Secrets
+## Gestion des Secrets
 
 ### 1. Variables d'Environnement Sécurisées
 ```bash
@@ -608,9 +608,9 @@ fi
 
 ---
 
-## ✅ Checklist Sécurité
+## Checklist Sécurité
 
-### 🔐 Authentification et Autorisation
+### Authentification et Autorisation
 - [ ] **Keycloak** configuré avec realm OneEats
 - [ ] **OIDC** configuré sur Quarkus avec vérification token
 - [ ] **Rôles** définis (admin, restaurant_owner, customer)
@@ -618,7 +618,7 @@ fi
 - [ ] **Ownership checks** implémentés au niveau métier
 - [ ] **Session management** configuré (timeout, renouvellement)
 
-### 🛡️ Protection des Données  
+### Protection des Données  
 - [ ] **Mots de passe** hashés avec BCrypt (force 12+)
 - [ ] **Données sensibles** chiffrées en base (téléphone, adresse)
 - [ ] **Clés de chiffrement** stockées séparément et sécurisées
@@ -640,14 +640,14 @@ fi
 - [ ] **Security headers** configurés (CSP, X-Frame-Options, etc.)
 - [ ] **Redirection HTTP → HTTPS** automatique
 
-### 📊 Monitoring et Alertes
+### Monitoring et Alertes
 - [ ] **Logs sécurité** centralisés et monitored
 - [ ] **Métriques sécurité** (failed logins, unauthorized access)
 - [ ] **Alertes** configurées sur activités suspectes
 - [ ] **SIEM** intégration pour détection avancée
 - [ ] **Backup logs** sécurisés et rétention définie
 
-### 🔐 Gestion Secrets et Configurations
+### Gestion Secrets et Configurations
 - [ ] **Variables sensibles** dans secrets non committés
 - [ ] **Rotation automatique** des secrets critiques
 - [ ] **Accès secrets** restreint (RBAC, least privilege)

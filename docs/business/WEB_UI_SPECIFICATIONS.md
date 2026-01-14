@@ -1,4 +1,4 @@
-# 📘 Spécifications UX/UI – Interfaces Administrateur et Restaurateur
+# Spécifications UX/UI - Interfaces Administrateur et Restaurateur
 
 **Projet :** OneEats
 **Date :** 9 juillet 2025
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎨 Charte visuelle & intentions
+## Charte visuelle et intentions
 
 - **Style visuel souhaité :** sobre, moderne, professionnel (inspiration : Stripe, Notion, Uber Eats Dashboard)
 - **Typographie :** lisible, sans-serif (Inter, Roboto…)
@@ -158,7 +158,7 @@
 
 ---
 
-### ⚙️ Comportements dynamiques
+### Comportements dynamiques
 - Les commandes sont en **temps réel** (WebSocket / polling)
 - **Notification sonore** sur nouvelle commande (active si page visible)
 - Le statut d’un plat change immédiatement dans l’UI
@@ -176,7 +176,7 @@
 
 ---
 
-## 📋 Maquettes à livrer
+## Maquettes à livrer
 
 ### Interface Admin
 - Connexion

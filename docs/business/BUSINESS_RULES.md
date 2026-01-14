@@ -1,6 +1,22 @@
-# 📋 Règles Métier - OneEats
+# Règles Métier - OneEats
 
-## 🎯 Vision du Projet
+## Table des matières
+
+- [Vision du Projet](#vision-du-projet)
+- [Acteurs et Permissions](#acteurs-et-permissions)
+- [Gestion des Commandes](#gestion-des-commandes)
+- [Gestion des Menus](#gestion-des-menus)
+- [Gestion des Restaurants](#gestion-des-restaurants)
+- [Gestion des Utilisateurs](#gestion-des-utilisateurs)
+- [Recherche et Filtrage](#recherche-et-filtrage)
+- [Statistiques et Métriques](#statistiques-et-métriques)
+- [Notifications](#notifications)
+- [Règles de Sécurité et Confidentialité](#règles-de-sécurité-et-confidentialité)
+- [Évolutions Futures](#évolutions-futures-hors-mvp)
+
+---
+
+## Vision du Projet
 
 OneEats est une **plateforme de commande de plats à récupérer sur place** (MVP).
 
@@ -13,7 +29,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 👥 Acteurs et Permissions
+## Acteurs et Permissions
 
 > **📖 Use Cases associés** : [UC-001 (Inscription)](USE_CASES.md#uc-001--créer-un-compte-client), [UC-002 (Connexion)](USE_CASES.md#uc-002--se-connecter-à-lapplication), [UC-008 (Profil)](USE_CASES.md#uc-008--gérer-son-profil-utilisateur)
 
@@ -73,7 +89,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🛒 Gestion des Commandes
+## Gestion des Commandes
 
 > **📖 Use Cases associés** :
 > - **Client** : [UC-004 (Commander)](USE_CASES.md#uc-004--commander-un-repas), [UC-005 (Suivre)](USE_CASES.md#uc-005--suivre-une-commande-en-temps-réel), [UC-006 (Annuler)](USE_CASES.md#uc-006--annuler-une-commande), [UC-007 (Historique)](USE_CASES.md#uc-007--consulter-lhistorique-des-commandes)
@@ -123,7 +139,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🍽️ Gestion des Menus
+## Gestion des Menus
 
 > **📖 Use Cases associés** : [UC-104 (Gérer le menu)](USE_CASES.md#uc-104--gérer-le-menu-du-restaurant)
 
@@ -163,7 +179,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🏪 Gestion des Restaurants
+## Gestion des Restaurants
 
 > **📖 Use Cases associés** :
 > - **Restaurateur** : [UC-105 (Modifier statut)](USE_CASES.md#uc-105--modifier-le-statut-du-restaurant)
@@ -211,7 +227,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 👤 Gestion des Utilisateurs
+## Gestion des Utilisateurs
 
 > **📖 Use Cases associés** :
 > - **Client** : [UC-001 (Inscription)](USE_CASES.md#uc-001--créer-un-compte-client), [UC-002 (Connexion)](USE_CASES.md#uc-002--se-connecter-à-lapplication), [UC-008 (Gérer profil)](USE_CASES.md#uc-008--gérer-son-profil-utilisateur)
@@ -257,7 +273,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🔍 Recherche et Filtrage
+## Recherche et Filtrage
 
 > **📖 Use Cases associés** : [UC-003 (Rechercher un restaurant)](USE_CASES.md#uc-003--rechercher-un-restaurant)
 
@@ -293,7 +309,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 📊 Statistiques et Métriques
+## Statistiques et Métriques
 
 > **📖 Use Cases associés** :
 > - **Restaurateur** : [UC-106 (Stats restaurant)](USE_CASES.md#uc-106--consulter-les-statistiques-du-restaurant)
@@ -328,7 +344,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🔔 Notifications
+## Notifications
 
 > **📖 Use Cases associés** : [UC-005 (Suivre commande en temps réel)](USE_CASES.md#uc-005--suivre-une-commande-en-temps-réel)
 
@@ -349,7 +365,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## ⚠️ Règles de Sécurité et Confidentialité
+## Règles de Sécurité et Confidentialité
 
 ### RGPD
 
@@ -373,7 +389,7 @@ OneEats est une **plateforme de commande de plats à récupérer sur place** (MV
 
 ---
 
-## 🚀 Évolutions Futures (Hors MVP)
+## Évolutions Futures (Hors MVP)
 
 Les fonctionnalités suivantes sont prévues mais **hors scope du MVP** :
 
@@ -388,7 +404,7 @@ Les fonctionnalités suivantes sont prévues mais **hors scope du MVP** :
 
 ---
 
-## 📅 Dernière mise à jour
+## Dernière mise à jour
 
 **Date** : 2025-12-12
 **Version** : MVP 1.0

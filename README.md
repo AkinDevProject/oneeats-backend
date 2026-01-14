@@ -1,12 +1,26 @@
-# 🍽️ OneEats - Plateforme de Commande Alimentaire
+# OneEats - Plateforme de Commande Alimentaire
 
 **OneEats** est une plateforme moderne de commande de plats à récupérer sur place (pas de livraison dans le MVP), construite avec une architecture monolithique modulaire suivant les principes du Domain-Driven Design.
 
 ---
 
-## 🚀 Démarrage Rapide
+## Table des matières
 
-### Pour Claude Code 🤖
+- [Démarrage Rapide](#démarrage-rapide)
+- [Documentation Complète](#documentation-complète)
+- [Architecture du Projet](#architecture-du-projet)
+- [Status Projet](#status-projet)
+- [Bugs Critiques Connus](#bugs-critiques-connus)
+- [Stack Technique](#stack-technique)
+- [Contraintes Environnement](#contraintes-environnement-important)
+- [Support et Contribution](#support--contribution)
+- [Liens Rapides](#liens-rapides)
+
+---
+
+## Démarrage Rapide
+
+### Pour Claude Code
 
 **Commence TOUJOURS par lire ces fichiers dans cet ordre :**
 
@@ -15,7 +29,7 @@
 3. **[CONTEXT.md](CONTEXT.md)** 📋 - Contexte complet du projet
 4. **[docs/README.md](docs/README.md)** 📚 - Guide de navigation dans toute la documentation
 
-### Pour les Développeurs 👨‍💻
+### Pour les Développeurs
 
 ```bash
 # 1. Démarrer la base de données PostgreSQL
@@ -34,13 +48,13 @@ cd apps/mobile && npm start
 
 ---
 
-## 📚 Documentation Complète
+## Documentation Complète
 
-### 📂 Point d'Entrée Documentation
+### Point d'Entrée Documentation
 
 **➡️ [docs/README.md](docs/README.md)** - **COMMENCER ICI** pour naviguer dans toute la documentation
 
-### 🎯 Documents Essentiels (les 7 piliers)
+### Documents Essentiels (les 7 piliers)
 
 | Document | Description | Audience |
 |----------|-------------|----------|
@@ -52,42 +66,42 @@ cd apps/mobile && npm start
 | **[DATA_MODEL.md](docs/DATA_MODEL.md)** | Schéma base de données, relations | Dev Backend + Data |
 | **[BUGS.md](docs/BUGS.md)** | Bugs connus, solutions, workarounds | Tous |
 
-### 📖 Documentation par Catégorie
+### Documentation par Catégorie
 
-#### 🏗️ Architecture & Design
+#### Architecture et Design
 
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Vue d'ensemble de l'architecture
 - **[ARCHITECTURE_HEXAGONALE.md](docs/ARCHITECTURE_HEXAGONALE.md)** - Guide détaillé DDD/Architecture Hexagonale
 - **[BUSINESS_RULES.md](docs/BUSINESS_RULES.md)** - Règles métier et workflows
 - **[DATA_MODEL.md](docs/DATA_MODEL.md)** - Modèle de données complet
 
-#### 📡 APIs & Intégration
+#### APIs et Intégration
 
 - **[API_SPECS.md](docs/API_SPECS.md)** - Documentation complète des endpoints
 - **[apps/web/src/README.md](apps/web/src/README.md)** - Structure code frontend web
 - **[apps/web/src/pages/restaurant/designs/README.md](apps/web/src/pages/restaurant/designs/README.md)** - Variantes design UI
 
-#### 🧪 Tests & Qualité
+#### Tests et Qualité
 
 - **[tests/README.md](tests/README.md)** - Guide tests E2E (Playwright)
 - **[tests/COVERAGE_ANALYSIS.md](tests/COVERAGE_ANALYSIS.md)** - Analyse couverture de code
 - **[tests/WEB-TESTS.md](tests/WEB-TESTS.md)** - Tests spécifiques web
 - **[src/test/java/com/oneeats/README.md](src/test/java/com/oneeats/README.md)** - Guide tests Java
 
-#### 📖 Guides Techniques
+#### Guides Techniques
 
 - **[guides/GETTING_STARTED.md](docs/guides/GETTING_STARTED.md)** - Setup et démarrage
 - **[guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)** - Déploiement production
 - **[guides/SECURITY_GUIDE.md](docs/guides/SECURITY_GUIDE.md)** - Bonnes pratiques sécurité
 - **[guides/TROUBLESHOOTING.md](docs/guides/TROUBLESHOOTING.md)** - Résolution de problèmes
 
-#### 📱 Mobile & UX
+#### Mobile et UX
 
 - **[mobile/TECHNICAL_GUIDE.md](docs/mobile/TECHNICAL_GUIDE.md)** - Guide technique app mobile
 - **[mobile/THEMING_GUIDE.md](docs/mobile/THEMING_GUIDE.md)** - Système de thèmes
 - **[mobile/NAVIGATION_SETUP.md](docs/mobile/NAVIGATION_SETUP.md)** - Configuration navigation
 
-#### 📋 Spécifications Métier
+#### Spécifications Métier
 
 - **[business/REQUIREMENTS_SPECIFICATION.md](docs/business/REQUIREMENTS_SPECIFICATION.md)** - Cahier des charges
 - **[business/MOBILE_UI_SPECIFICATIONS.md](docs/business/MOBILE_UI_SPECIFICATIONS.md)** - Specs UX/UI mobile
@@ -95,7 +109,7 @@ cd apps/mobile && npm start
 
 ---
 
-## 🏗️ Architecture du Projet
+## Architecture du Projet
 
 ```
 OneEats (Monolithe Modulaire)
@@ -111,7 +125,7 @@ OneEats (Monolithe Modulaire)
 
 ---
 
-## 📍 Status Projet
+## Status Projet
 
 | Composant | Progression | Status |
 |-----------|-------------|--------|
@@ -125,7 +139,7 @@ OneEats (Monolithe Modulaire)
 
 ---
 
-## 🐛 Bugs Critiques Connus
+## Bugs Critiques Connus
 
 | ID | Description | Priorité | Docs |
 |----|-------------|----------|------|
@@ -136,7 +150,7 @@ OneEats (Monolithe Modulaire)
 
 ---
 
-## 🛠️ Stack Technique
+## Stack Technique
 
 ### Backend
 - **Framework** : Quarkus 3.24.2 (Java 21)
@@ -147,21 +161,21 @@ OneEats (Monolithe Modulaire)
 - **Sécurité** : Keycloak OIDC (configuré, pas implémenté)
 - **Tests** : JUnit 5 + RestAssured
 
-### Frontend Web
+### Web
 - **Framework** : React 18 + TypeScript
 - **Build** : Vite 5.4
 - **Styling** : Tailwind CSS
 - **Routing** : React Router 7
 - **Charts** : Recharts
 
-### Frontend Mobile
+### Mobile
 - **Framework** : React Native + Expo 53
 - **Navigation** : Expo Router 5
 - **State** : TanStack Query + AsyncStorage
 - **UI** : React Native Paper
 - **Animations** : Reanimated
 
-### DevOps
+### Infrastructure
 - **Containerisation** : Docker + Docker Compose
 - **Base de données dev** : PostgreSQL + PgAdmin (Docker)
 - **Tests E2E** : Playwright
@@ -169,7 +183,7 @@ OneEats (Monolithe Modulaire)
 
 ---
 
-## ⚙️ Contraintes Environnement (Important ⚠️)
+## Contraintes Environnement (Important)
 
 Ce projet a des contraintes spécifiques de développement :
 
@@ -183,7 +197,7 @@ Ce projet a des contraintes spécifiques de développement :
 
 ---
 
-## 📞 Support & Contribution
+## Support et Contribution
 
 ### Pour rapporter un bug
 1. Vérifier [docs/BUGS.md](docs/BUGS.md) si c'est un bug connu
@@ -198,7 +212,7 @@ Ce projet a des contraintes spécifiques de développement :
 
 ---
 
-## 📅 Dernière Mise à Jour
+## Dernière Mise à Jour
 
 **Date** : 2025-12-12
 **Version** : MVP 0.7
@@ -207,7 +221,7 @@ Ce projet a des contraintes spécifiques de développement :
 
 ---
 
-## 🔗 Liens Rapides
+## Liens Rapides
 
 | Type | Lien | Description |
 |------|------|-------------|
@@ -220,4 +234,4 @@ Ce projet a des contraintes spécifiques de développement :
 
 ---
 
-**💡 Astuce** : Si tu es perdu, commence toujours par **[docs/README.md](docs/README.md)** qui te guidera vers la bonne documentation ! 🚀
+**Astuce** : Si tu es perdu, commence toujours par **[docs/README.md](docs/README.md)** qui te guidera vers la bonne documentation.

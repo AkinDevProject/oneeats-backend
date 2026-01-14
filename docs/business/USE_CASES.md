@@ -1,6 +1,6 @@
-# 📖 Use Cases - OneEats
+# Use Cases - OneEats
 
-## 🎯 Vue d'Ensemble
+## Vue d'Ensemble
 
 Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois types d'acteurs :
 - **Client** : Application mobile (React Native + Expo)
@@ -12,9 +12,9 @@ Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois
 
 ---
 
-## 📚 Table des Matières
+## Table des Matières
 
-### 📱 Application Mobile Client
+### Application Mobile Client
 - [UC-001 : Créer un compte client](#uc-001--créer-un-compte-client)
 - [UC-002 : Se connecter à l'application](#uc-002--se-connecter-à-lapplication)
 - [UC-003 : Rechercher un restaurant](#uc-003--rechercher-un-restaurant)
@@ -24,7 +24,7 @@ Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois
 - [UC-007 : Consulter l'historique des commandes](#uc-007--consulter-lhistorique-des-commandes)
 - [UC-008 : Gérer son profil utilisateur](#uc-008--gérer-son-profil-utilisateur)
 
-### 🍽️ Dashboard Restaurateur
+### Dashboard Restaurateur
 - [UC-101 : Recevoir et consulter les commandes](#uc-101--recevoir-et-consulter-les-commandes)
 - [UC-102 : Accepter ou refuser une commande](#uc-102--accepter-ou-refuser-une-commande)
 - [UC-103 : Gérer le cycle de vie d'une commande](#uc-103--gérer-le-cycle-de-vie-dune-commande)
@@ -32,7 +32,7 @@ Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois
 - [UC-105 : Modifier le statut du restaurant](#uc-105--modifier-le-statut-du-restaurant)
 - [UC-106 : Consulter les statistiques du restaurant](#uc-106--consulter-les-statistiques-du-restaurant)
 
-### 🛡️ Dashboard Administrateur
+### Dashboard Administrateur
 - [UC-201 : Valider un nouveau restaurant](#uc-201--valider-un-nouveau-restaurant)
 - [UC-202 : Gérer les restaurants (bloquer/activer)](#uc-202--gérer-les-restaurants-bloqueractiver)
 - [UC-203 : Gérer les utilisateurs](#uc-203--gérer-les-utilisateurs)
@@ -41,7 +41,7 @@ Ce document décrit tous les cas d'usage de la plateforme OneEats pour les trois
 
 ---
 
-# 📱 Application Mobile Client
+# Application Mobile Client
 
 ---
 
@@ -824,7 +824,7 @@ Le client consulte et modifie les informations de son profil personnel.
 
 ---
 
-# 🍽️ Dashboard Restaurateur
+# Dashboard Restaurateur
 
 ---
 
@@ -1543,7 +1543,7 @@ Le restaurateur consulte les statistiques et performances de son restaurant.
 
 ---
 
-# 🛡️ Dashboard Administrateur
+# Dashboard Administrateur
 
 ---
 
@@ -2212,7 +2212,7 @@ L'administrateur exporte les données statistiques de la plateforme pour analyse
 
 ---
 
-# 📊 Matrice de Traçabilité
+# Matrice de Traçabilité
 
 ## Use Cases par Priorité
 

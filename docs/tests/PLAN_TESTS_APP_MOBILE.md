@@ -1,38 +1,38 @@
-# Plan de Tests Utilisateur - Application Mobile OneEats 📱
+# Plan de Tests Utilisateur - Application Mobile OneEats
 
-## 📋 Objectif des Tests
+## Objectif des Tests
 
 Ce document guide les testeurs pour valider le fonctionnement complet de l'application mobile OneEats (React Native + Expo), permettant aux clients de découvrir les restaurants, consulter les menus, passer des commandes et suivre leur statut en temps réel.
 
 ---
 
-## 🎯 Périmètre de Test - Application Mobile
+## Périmètre de Test - Application Mobile
 
-### **🏠 Découverte Restaurants**
+### Découverte Restaurants
 - ✅ Liste des restaurants disponibles
 - ✅ Recherche et filtres (distance, cuisine, ouvert/fermé)
 - ✅ Détails restaurant (profil, horaires, avis)
 - ✅ Navigation fluide et performance
 
-### **🍽️ Consultation Menus**  
+### Consultation Menus  
 - ✅ Affichage des menus par restaurant
 - ✅ Organisation par catégories (entrées, plats, desserts)
 - ✅ Détails des plats (prix, description, options diététiques)
 - ✅ Images et informations complètes
 
-### **🛒 Système de Panier et Commandes**
+### Système de Panier et Commandes
 - ✅ Ajout/suppression d'articles au panier
 - ✅ Gestion des quantités
 - ✅ Passage de commande avec instructions spéciales
 - ✅ Suivi des commandes en temps réel
 
-### **👤 Profil Utilisateur et Paramètres**
+### Profil Utilisateur et Paramètres
 - ✅ Authentification et gestion de compte
 - ✅ Paramètres avancés (notifications, préférences alimentaires)
 - ✅ Historique des commandes
 - ✅ Système de notifications push
 
-### **📱 Fonctionnalités Spécifiques Mobile**
+### Fonctionnalités Spécifiques Mobile
 - ✅ Navigation Expo Router
 - ✅ Thème sombre/clair
 - ✅ Notifications push Expo
@@ -41,15 +41,15 @@ Ce document guide les testeurs pour valider le fonctionnement complet de l'appli
 
 ---
 
-## ⚡ Prérequis Techniques
+## Prérequis Techniques
 
-### **🖥️ Architecture Mobile Spécifique**
+### Architecture Mobile Spécifique
 - **Backend** : API OneEats sur `http://192.168.1.36:8080/api`
 - **Frontend** : React Native + Expo 53 + Expo Router
 - **Platform** : iOS Simulator / Android Emulator / Device physique
 - **Node** : Version 20+ avec Expo CLI
 
-### **✅ Services à vérifier avant tests**
+### Services à vérifier avant tests
 ```bash
 # 1. Backend API accessible depuis mobile
 curl http://192.168.1.36:8080/api/restaurants
@@ -61,16 +61,16 @@ cd apps/mobile && npm start
 ping 192.168.1.36
 ```
 
-### **🗄️ Données de test**
+### Données de test
 - **API Backend** : Restaurants et menus chargés via `import-dev.sql`
 - **Restaurant Test** : Pizza Palace avec menus complets
 - **Utilisateur Test** : `user@test.com` / `password123`
 
 ---
 
-## 🧪 Plan de Tests Détaillé
+## Plan de Tests Détaillé
 
-### **📱 Test 0 : Lancement et Navigation**
+### Test 0 : Lancement et Navigation
 
 **Objectif** : Vérifier le démarrage et la navigation de base
 
@@ -88,7 +88,7 @@ ping 192.168.1.36
 
 ---
 
-### **🏠 Test 1 : Découverte des Restaurants**
+### Test 1 : Découverte des Restaurants
 
 #### **Test 1.1 : Liste des Restaurants**
 **Objectif** : Affichage et interaction avec la liste des restaurants
@@ -138,7 +138,7 @@ ping 192.168.1.36
 
 ---
 
-### **🍽️ Test 2 : Consultation des Menus**
+### Test 2 : Consultation des Menus
 
 #### **Test 2.1 : Affichage du Menu**
 **Objectif** : Consultation du menu d'un restaurant
@@ -174,7 +174,7 @@ ping 192.168.1.36
 
 ---
 
-### **🛒 Test 3 : Système de Panier et Commandes**
+### Test 3 : Système de Panier et Commandes
 
 #### **Test 3.1 : Ajout au Panier**
 **Objectif** : Ajouter des articles au panier
@@ -243,7 +243,7 @@ ping 192.168.1.36
 
 ---
 
-### **👤 Test 4 : Profil Utilisateur et Paramètres**
+### Test 4 : Profil Utilisateur et Paramètres
 
 #### **Test 4.1 : Connexion et Authentification**
 **Objectif** : Système d'authentification utilisateur
@@ -299,7 +299,7 @@ ping 192.168.1.36
 
 ---
 
-### **📱 Test 5 : Fonctionnalités Spécifiques Mobile**
+### Test 5 : Fonctionnalités Spécifiques Mobile
 
 #### **Test 5.1 : Thème et Interface**
 **Objectif** : Système de thème et interface adaptative
@@ -338,7 +338,7 @@ ping 192.168.1.36
 
 ---
 
-### **🔄 Test 6 : Intégration et Synchronisation**
+### Test 6 : Intégration et Synchronisation
 
 #### **Test 6.1 : Synchronisation avec Backend**
 **Objectif** : Vérifier la communication avec l'API
@@ -375,28 +375,28 @@ ping 192.168.1.36
 
 ---
 
-## 🚨 Tests de Régression Mobile
+## Tests de Régression Mobile
 
-### **🔍 Test R1 : Persistance et Mémoire**
+### Test R1 : Persistance et Mémoire**
 - ✅ Fermer/rouvrir l'application
 - ✅ Vérifier conservation panier et paramètres
 - ✅ Test de fuite mémoire avec monitoring
 
-### **🔍 Test R2 : Performance Multi-Plateforme**
+### Test R2 : Performance Multi-Plateforme**
 - ✅ Test sur iOS et Android
 - ✅ Performance sur appareils anciens
 - ✅ Adaptabilité écrans différents
 
-### **🔍 Test R3 : Gestion d'Erreurs**
+### Test R3 : Gestion d'Erreurs**
 - ✅ API indisponible
 - ✅ Données corrompues
 - ✅ Permissions refusées
 
 ---
 
-## 📝 Critères de Validation Mobile
+## Critères de Validation Mobile
 
-### **✅ Critères de Succès**
+### Critères de Succès
 - Navigation fluide avec Expo Router
 - Panier et commandes fonctionnent correctement
 - Notifications push délivrées et interactives
@@ -404,7 +404,7 @@ ping 192.168.1.36
 - Performance optimale (métriques respectées)
 - Interface responsive et accessible
 
-### **❌ Critères d'Échec**
+### Critères d'Échec
 - Crashes fréquents ou erreurs JS
 - Lenteurs importantes (>500ms navigation)
 - Notifications ne fonctionnent pas
@@ -414,7 +414,7 @@ ping 192.168.1.36
 
 ---
 
-## 🔧 Environnement de Test Mobile
+## Environnement de Test Mobile
 
 ### **Configuration Requise**
 - ✅ Node.js 20+ avec Expo CLI installé

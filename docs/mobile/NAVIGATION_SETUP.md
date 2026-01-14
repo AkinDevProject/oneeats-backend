@@ -1,17 +1,17 @@
-# 🧭 Configuration Navigation - OneEats Mobile
+# Configuration Navigation - OneEats Mobile
 
-## 🎯 **Stratégie recommandée implémentée**
+## Stratégie recommandée implémentée
 
-### ❌ **SANS barre de navigation :**
+### SANS barre de navigation
 - **Pages principales (tabs)** → Navigation par onglets
 - **Pages fullscreen** → Expérience immersive
 - **Pages d'auth** → Focus sur l'action
 
-### ✅ **AVEC barre de navigation :**
+### AVEC barre de navigation
 - **Pages de détail** → Retour facile + contexte
 - **Pages modales** → Action claire
 
-## 📱 **Configuration actuelle**
+## Configuration actuelle
 
 ### **Pages SANS barre (`headerShown: false`)**
 
@@ -85,24 +85,24 @@ headerShown: false,
 └─────────────────────┘
 ```
 
-## 🔧 **Avantages de cette approche**
+## Avantages de cette approche
 
-### **✅ UX optimale :**
+### UX optimale
 - **Navigation intuitive** : Tabs pour navigation principale
 - **Retour facile** : Barre sur pages de détail
 - **Immersion** : Pas de barre sur pages principales
 
-### **✅ Cohérence thème :**
+### Cohérence thème
 - **Couleurs OneEats** : Turquoise cohérent
 - **Typographie** : Font-weight 600 professionnel
 - **Espacement** : Padding harmonieux
 
-### **✅ Titres professionnels :**
+### Titres professionnels
 - **Dynamiques** : "Pizza Margherita" au lieu de "menu/[id]"
 - **Contextuels** : Breadcrumb intelligent
 - **Cohérents** : Style uniforme
 
-## 📋 **Checklist validation**
+## Checklist validation
 
 - ✅ Pages tabs SANS barre (navigation onglets)
 - ✅ Pages auth SANS barre (focus connexion) 
@@ -111,7 +111,7 @@ headerShown: false,
 - ✅ Thème OneEats cohérent
 - ✅ Breadcrumb intelligent
 
-## 🚀 **Résultat final**
+## Résultat final
 
 **Navigation moderne et intuitive :**
 - **Accueil** → Onglets fluides

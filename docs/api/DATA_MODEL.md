@@ -1,6 +1,6 @@
-# 🗃️ Modèle de Données - OneEats
+# Modèle de Données - OneEats
 
-## 📊 Diagramme ERD (Entity Relationship Diagram)
+## Diagramme ERD (Entity Relationship Diagram)
 
 ```
 ┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐

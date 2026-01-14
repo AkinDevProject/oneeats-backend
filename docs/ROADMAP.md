@@ -1,6 +1,21 @@
-# 🗺️ Roadmap du Projet OneEats
+# Roadmap du Projet OneEats
 
-## 📍 Tâche en cours
+## Table des matières
+
+- [Tâche en cours](#tâche-en-cours)
+- [Phase 1 - Architecture Backend](#phase-1--architecture-backend-terminé)
+- [Phase 2 - Intégration Frontend-Backend](#phase-2--intégration-frontend-backend-en-cours-40)
+- [Phase 3 - Authentification et Sécurité](#phase-3--authentification-et-sécurité-à-venir-30)
+- [Phase 4 - Fonctionnalités Temps Réel](#phase-4--fonctionnalités-temps-réel-à-venir)
+- [Phase 5 - Fonctionnalités Avancées](#phase-5--fonctionnalités-avancées-à-venir)
+- [Phase 6 - Administration et Analytics](#phase-6--administration-et-analytics-à-venir)
+- [Phase 7 - Optimisations et Production](#phase-7--optimisations-et-production-à-venir)
+- [Bugs Connus](#bugs-connus)
+- [Métriques de Progression](#métriques-de-progression)
+
+---
+
+## Tâche en cours
 
 > **Sprint 1 — Restructuration Documentation** ✅ **TERMINÉ**
 >
@@ -13,9 +28,9 @@
 
 ---
 
-## ✅ Phase 1 — Architecture Backend (Terminé)
+## Phase 1 - Architecture Backend (Terminé)
 
-### 🏗️ Architecture Monolithique Modulaire
+### Architecture Monolithique Modulaire
 - [x] Structure de packages par domaines métier (DDD)
 - [x] Configuration Quarkus multi-profils (dev/prod/test)
 - [x] Intégration Quinoa pour servir le frontend web
@@ -25,7 +40,7 @@
 - [x] Monitoring avec Micrometer + Prometheus
 - [x] Health checks et métriques
 
-### 📦 Domaine User (100% Complet)
+### Domaine User (100% Complet)
 - [x] Entité `User` avec authentification
 - [x] Repository avec requêtes métier (email, recherche, comptage)
 - [x] API REST `/api/users` CRUD complète
@@ -35,7 +50,7 @@
 - [x] Update et delete user commands
 - [x] Analytics utilisateurs dans admin dashboard
 
-### 🏪 Domaine Restaurant (100% Complet)
+### Domaine Restaurant (100% Complet)
 - [x] Entité `Restaurant` avec logique ouverture/fermeture
 - [x] API REST `/api/restaurants` CRUD complète
 - [x] Upload et gestion d'images
@@ -46,7 +61,7 @@
 - [x] Gestion du rating et des statistiques
 - [x] Tests d'intégration pour création, récupération, update et status management
 
-### 🍽️ Domaine Menu (100% Complet)
+### Domaine Menu (100% Complet)
 - [x] Entité `MenuItem` avec options diététiques
 - [x] API REST `/api/menu-items` CRUD complète
 - [x] Upload et suppression d'images
@@ -57,7 +72,7 @@
 - [x] Gestion des allergènes et préférences alimentaires
 - [x] Gestion disponibilité temps réel
 
-### 📦 Domaine Order (100% Complet - Référence)
+### Domaine Order (100% Complet - Référence)
 - [x] Entités `Order` + `OrderItem` avec logique métier riche
 - [x] State Machine `OrderStatus` avec transitions validées
 - [x] Service `OrderService` pour use cases complexes
@@ -70,9 +85,9 @@
 
 ---
 
-## 🔄 Phase 2 — Intégration Frontend-Backend (En cours 40%)
+## Phase 2 - Intégration Frontend-Backend (En cours 40%)
 
-### 🌐 Dashboard Restaurant Web
+### Dashboard Restaurant Web
 - [x] Interface complète avec React + TypeScript + Vite
 - [x] Tailwind CSS pour le styling
 - [x] Pages : Dashboard, Menu, Commandes, Paramètres
@@ -83,7 +98,7 @@
 - [ ] Configuration environnement (.env.local)
 - [ ] Tests E2E des flux principaux
 
-### 📱 Application Mobile Client
+### Application Mobile Client
 - [x] Architecture Expo + React Native
 - [x] Navigation avec Expo Router
 - [x] Gestion des thèmes (light/dark)
@@ -104,9 +119,9 @@
 
 ---
 
-## 🚧 Phase 3 — Authentification et Sécurité (À venir 30%)
+## Phase 3 - Authentification et Sécurité (À venir 30%)
 
-### 🔐 Authentification JWT
+### Authentification JWT
 - [x] Configuration Keycloak documentée
 - [ ] **Implémentation JWT dans backend**
 - [ ] Endpoints `/auth/login` et `/auth/register`
@@ -115,7 +130,7 @@
 - [ ] Middleware d'authentification sur routes protégées
 - [ ] Gestion des rôles (CLIENT, RESTAURANT, ADMIN)
 
-### 🌐 Frontend Web Authentication
+### Frontend Web Authentication
 - [ ] Page login/register restaurant
 - [ ] Stockage sécurisé tokens (localStorage/cookies)
 - [ ] Intercepteur Axios pour JWT headers
@@ -123,7 +138,7 @@
 - [ ] Redirection automatique si non authentifié
 - [ ] Logout et nettoyage session
 
-### 📱 Mobile Authentication
+### Mobile Authentication
 - [ ] Écran login/register client
 - [ ] Stockage sécurisé tokens (SecureStore)
 - [ ] Service API avec gestion tokens
@@ -133,9 +148,9 @@
 
 ---
 
-## 📅 Phase 4 — Fonctionnalités Temps Réel (À venir)
+## Phase 4 - Fonctionnalités Temps Réel (À venir)
 
-### 🔔 Système de Notifications
+### Système de Notifications
 - [x] Configuration Expo Push Notifications (mobile)
 - [x] Contexte PushNotificationContext avec templates
 - [x] Page de test notifications
@@ -147,7 +162,7 @@
 - [ ] Historique des notifications
 - [ ] Préférences notifications utilisateur
 
-### 📡 WebSocket et Synchronisation
+### WebSocket et Synchronisation
 - [ ] Configuration WebSocket backend (Quarkus)
 - [ ] Channels par restaurant pour commandes
 - [ ] Broadcast changements statuts en temps réel
@@ -157,9 +172,9 @@
 
 ---
 
-## 📅 Phase 5 — Fonctionnalités Avancées (À venir)
+## Phase 5 - Fonctionnalités Avancées (À venir)
 
-### 🔍 Recherche et Filtres
+### Recherche et Filtres
 - [x] Recherche basique restaurants (mobile)
 - [ ] **Écran de recherche avancée mobile**
 - [ ] Filtres détaillés (prix, cuisine, note, distance)
@@ -168,7 +183,7 @@
 - [ ] Recherche full-text backend (ElasticSearch/Meilisearch)
 - [ ] Autocomplete intelligent
 
-### ⭐ Système de Reviews et Notes
+### Système de Reviews et Notes
 - [ ] Domaine backend `Review`
 - [ ] API REST `/api/reviews`
 - [ ] Page review mobile (noter restaurant et plats)
@@ -177,7 +192,7 @@
 - [ ] Modération reviews (admin)
 - [ ] Réponses restaurants aux avis
 
-### 🗺️ Géolocalisation et Carte
+### Géolocalisation et Carte
 - [ ] Intégration Expo Location (permissions GPS)
 - [ ] Écran carte interactive (MapView)
 - [ ] Markers restaurants sur la carte
@@ -186,7 +201,7 @@
 - [ ] Filtrage par rayon de distance
 - [ ] Backend : calcul distances avec PostGIS
 
-### ❤️ Système de Favoris Complet
+### Système de Favoris Complet
 - [x] UI favoris dans profil mobile
 - [ ] **FavoritesContext avec persistance**
 - [ ] Synchronisation favoris avec backend
@@ -194,7 +209,7 @@
 - [ ] Notifications pour favoris (promotions)
 - [ ] Tri restaurants par favoris
 
-### 📤 Partage Social et Deep Linking
+### Partage Social et Deep Linking
 - [ ] Intégration Expo Sharing
 - [ ] Boutons partage restaurants et plats
 - [ ] Génération images partage dynamiques
@@ -202,7 +217,7 @@
 - [ ] URL schemes OneEats custom
 - [ ] Tracking partages (analytics)
 
-### 🌐 Mode Offline et Cache
+### Mode Offline et Cache
 - [x] Optimisations performance mobile avancées
 - [ ] **CacheService avec stratégies intelligentes**
 - [ ] Détection connectivité (NetInfo)
@@ -213,9 +228,9 @@
 
 ---
 
-## 📅 Phase 6 — Administration et Analytics (À venir)
+## Phase 6 - Administration et Analytics (À venir)
 
-### 🔐 Domaine Admin
+### Domaine Admin
 - [ ] Entité `Admin` avec permissions avancées
 - [ ] API REST `/api/admin`
 - [ ] Page dashboard admin web
@@ -224,7 +239,7 @@
 - [ ] Statistiques globales plateforme
 - [ ] Logs et audit trail
 
-### 📊 Analytics et Métriques
+### Analytics et Métriques
 - [ ] Dashboard analytics restaurant
 - [ ] Métriques commandes (volume, CA, temps moyen)
 - [ ] Analytics clients (fidélité, panier moyen)
@@ -235,9 +250,9 @@
 
 ---
 
-## 📅 Phase 7 — Optimisations et Production (À venir)
+## Phase 7 - Optimisations et Production (À venir)
 
-### ⚡ Optimisations Backend
+### Optimisations Backend
 - [ ] Cache Hibernate niveau 2
 - [ ] Query optimization avec indexes
 - [ ] Connection pooling avancé
@@ -245,7 +260,7 @@
 - [ ] Rate limiting API
 - [ ] CDN pour images statiques
 
-### 📱 Optimisations Mobile
+### Optimisations Mobile
 - [x] React.memo sur composants coûteux
 - [x] Lazy loading images avec cache
 - [x] FlatList virtualisées
@@ -255,7 +270,7 @@
 - [ ] Compression images automatique
 - [ ] Analyse bundle size
 
-### 🔧 Configuration Production
+### Configuration Production
 - [ ] Variables d'environnement production
 - [ ] Configuration CI/CD (GitHub Actions)
 - [ ] Docker images optimisées
@@ -267,7 +282,7 @@
 
 ---
 
-## 🐛 Bugs Connus
+## Bugs Connus
 
 | ID  | Description                              | Priorité | Status       | Assigné à |
 |-----|------------------------------------------|----------|--------------|-----------|
@@ -279,7 +294,7 @@
 
 ---
 
-## 📝 Notes de Session
+## Notes de Session
 
 ### Session du 2025-12-12
 **Objectif** : Restructurer la documentation du projet selon les bonnes pratiques Claude Code
@@ -333,7 +348,7 @@
 
 ---
 
-## 🎯 Objectifs à Court Terme (2 semaines)
+## Objectifs à Court Terme
 
 1. **Finir restructuration documentation** (1 jour)
    - Créer `DATA_MODEL.md` et `BUGS.md`
@@ -359,7 +374,7 @@
 
 ---
 
-## 🎯 Objectifs à Moyen Terme (1-2 mois)
+## Objectifs à Moyen Terme
 
 - Système de notifications temps réel (WebSocket)
 - Recherche avancée et filtres
@@ -371,7 +386,7 @@
 
 ---
 
-## 🚀 Vision Long Terme (3-6 mois)
+## Vision Long Terme
 
 - **Paiement en ligne** : Intégration Stripe/PayPal
 - **Livraison à domicile** : Partenariat livreurs ou système interne
@@ -384,7 +399,7 @@
 
 ---
 
-## 📊 Métriques de Progression
+## Métriques de Progression
 
 ### Backend
 - **Architecture** : ✅ 100% (Complet)
@@ -408,8 +423,6 @@
 
 ---
 
-## 📝 Notes de Session
-
 ### Session 2025-12-13 : Amélioration Navigation Documentation
 
 **Travail effectué** :
@@ -429,7 +442,7 @@
 
 ---
 
-## 📅 Dernière mise à jour
+## Dernière mise à jour
 
 **Date** : 2025-12-13
 **Version** : MVP 0.7

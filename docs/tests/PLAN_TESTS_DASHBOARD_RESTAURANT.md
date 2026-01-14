@@ -1,12 +1,12 @@
-# Plan de Tests Utilisateur - Dashboard Restaurant 🏪
+# Plan de Tests Utilisateur - Dashboard Restaurant
 
-## 📋 Objectif des Tests
+## Objectif des Tests
 
 Ce document guide les testeurs pour valider le fonctionnement complet du dashboard restaurant OneEats, permettant aux restaurateurs de gérer leurs menus, commandes et paramètres via l'interface web intégrée.
 
 ---
 
-## 🎯 Périmètre de Test - Dashboard Restaurant
+## Périmètre de Test - Dashboard Restaurant
 
 ### **🍽️ Gestion des Menus**
 - ✅ Création, modification, suppression des plats

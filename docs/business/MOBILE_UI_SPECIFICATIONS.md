@@ -1,4 +1,4 @@
-# 📱 Spécifications UX/UI – Application Mobile Client (OneEats)
+# Spécifications UX/UI - Application Mobile Client (OneEats)
 
 **Projet :** OneEats
 **Date :** 9 juillet 2025
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎯 Objectifs UX
+## Objectifs UX
 
 - Simplicité : navigation fluide et intuitive dès la première ouverture
 - Rapidité : accès rapide aux restaurants et plats
@@ -151,7 +151,7 @@
 
 ---
 
-## 🗣️ Multilingue
+## Multilingue
 
 - L'application doit être **prête pour une traduction multilingue** (i18n)
   - **Langues prioritaires :** Français (FR), Anglais (EN), Turc (TR)
@@ -160,7 +160,7 @@
 
 ---
 
-## 📋 Liste des maquettes à produire
+## Liste des maquettes à produire
 
 | Écran                            | Format             |
 |----------------------------------|---------------------|

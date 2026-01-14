@@ -4,7 +4,7 @@ Documentation technique consolidée pour l'application mobile React Native/Expo.
 
 ---
 
-## 📱 Configuration et Structure
+## Configuration et Structure
 
 ### Navigation (Expo Router)
 Configuration complete avec navigation drawer, tabs et stack navigation.
@@ -35,7 +35,7 @@ Interface complète pour toutes les interactions utilisateur :
 
 ---
 
-## 🔧 Corrections et Améliorations
+## Corrections et Améliorations
 
 ### Corrections de Titres
 Uniformisation des titres de navigation pour cohérence UX :
@@ -115,7 +115,7 @@ useImageLoadTime()          // Temps chargement images
 
 ---
 
-## 📱 Système de Notifications
+## Système de Notifications
 
 ### Configuration Push
 ```json
@@ -167,7 +167,7 @@ useResetSettings()               // Réinitialisation
 
 ---
 
-## 📊 Métriques et Performance
+## Métriques et Performance
 
 ### Store Global Performance
 ```typescript
@@ -192,9 +192,9 @@ interface PerformanceMetric {
 
 ---
 
-## 🎯 État Actuel
+## État Actuel
 
-### ✅ Fonctionnalités Complètes
+### Fonctionnalités Complètes
 - Navigation Expo Router complète
 - Système de thèmes adaptatif
 - Paramètres utilisateur avancés
@@ -202,13 +202,13 @@ interface PerformanceMetric {
 - Optimisations performance
 - Monitoring métriques temps réel
 
-### 🔧 À Compléter
+### À Compléter
 - Intégration APIs backend réelles
 - Authentification utilisateur
 - Tests automatisés
 - Optimisations supplémentaires selon usage
 
-### 📱 Technologies Utilisées
+### Technologies Utilisées
 - **Framework** : React Native + Expo 53
 - **Navigation** : Expo Router 5.1
 - **State** : TanStack React Query + AsyncStorage

@@ -4,7 +4,7 @@ Guide complet pour configurer et démarrer l'environnement de développement One
 
 ---
 
-## 🚀 Démarrage Rapide
+## Démarrage Rapide
 
 ### 1. Prérequis
 ```bash
@@ -38,7 +38,7 @@ curl http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111
 
 ---
 
-## 🏗️ Architecture et Intégration Backend
+## Architecture et Intégration Backend
 
 ### Architecture DDD + PanacheRepository
 - ✅ **BaseRepository** : Classe abstraite commune avec méthodes CRUD
@@ -122,7 +122,7 @@ console.log('Stats:', stats);
 
 ---
 
-## 📊 Données de Test Disponibles
+## Données de Test Disponibles
 
 ### Restaurants
 1. **Pizza Palace** (ID: `11111111-1111-1111-1111-111111111111`)
@@ -150,7 +150,7 @@ console.log('Stats:', stats);
 
 ---
 
-## 🛠️ Configuration et Services
+## Configuration et Services
 
 ### URLs Importantes
 - **Backend API** : http://localhost:8080
@@ -173,7 +173,7 @@ console.log('Stats:', stats);
 
 ---
 
-## 🔧 Debugging et Dépannage
+## Debugging et Dépannage
 
 ### Vérifier les Données
 ```bash
@@ -224,7 +224,7 @@ curl http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-1111111
 
 ---
 
-## 📝 DTOs et Validation
+## DTOs et Validation
 
 ### DTOs Disponibles
 - ✅ **RestaurantDto** : DTO complet avec validation Bean Validation
@@ -249,7 +249,7 @@ curl http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-1111111
 
 ---
 
-## ⚠️ Limitations Actuelles
+## Limitations Actuelles
 
 1. **Pas d'authentification** (sera ajoutée plus tard)
 2. **Stats mockées** (revenus calculés avec prix moyen fictif)  
@@ -258,7 +258,7 @@ curl http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-1111111
 
 ---
 
-## 🎯 Prochaines Étapes
+## Prochaines Étapes
 
 1. **Tester l'intégration** avec le frontend web
 2. **Ajouter l'authentification** JWT + Keycloak
