@@ -94,22 +94,28 @@ workflow_status:
         outputs:
           - "docs/tests/TEST-DESIGN.md"
       - id: "implementation-readiness"
-        status: "required"
+        status: "docs/architecture/IMPLEMENTATION-READINESS.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:check-implementation-readiness"
         purpose: "Validate all artifacts before implementation"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/architecture/IMPLEMENTATION-READINESS.md"
 
   # Phase 4: Implementation
   - phase: 4
     name: "Implementation"
     workflows:
       - id: "sprint-planning"
-        status: "required"
+        status: "docs/product/sprint-plan.md"
         agent: "sm"
         command: "/bmad:bmm:workflows:sprint-planning"
         purpose: "Create sprint plan and begin implementation tracking"
+        completed_at: "2026-01-14"
+        outputs:
+          - "docs/product/sprint-plan.md"
 
 # Next action
-next_workflow: "implementation-readiness"
-next_agent: "architect"
-next_command: "/bmad:bmm:workflows:check-implementation-readiness"
+next_workflow: null
+next_agent: null
+next_command: null
