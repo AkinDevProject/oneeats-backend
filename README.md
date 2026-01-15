@@ -33,7 +33,7 @@
 
 ```bash
 # 1. Démarrer la base de données PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
 # 2. Démarrer le backend (depuis IntelliJ IDEA)
 # ⚠️ Important : Lancer Quarkus dev depuis IntelliJ (pas de ./mvnw en CLI)

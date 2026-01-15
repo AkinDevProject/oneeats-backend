@@ -423,7 +423,7 @@ class ComponentTest {
 #### **⚠️ Setup spécifique à cet environnement**
 ```bash
 # ✅ Démarrage base de données
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
 # ✅ Mobile (séparément) 
 cd apps/mobile && npm start
@@ -439,7 +439,7 @@ cd tests && npm test
 ```
 
 #### **Workflow de développement adapté**
-1. **Base de données** : `docker-compose -f docker-compose.dev.yml up -d`
+1. **Base de données** : `docker-compose up -d`
 2. **Backend + Dashboard** : Lancer Quarkus dev depuis IntelliJ IDEA
 3. **Mobile** : `cd apps/mobile && npm start` (si nécessaire)
 4. **Tests** : `cd tests && npm test`
@@ -480,8 +480,8 @@ http://192.168.1.36:8080/api
 #### **⚠️ Commandes adaptées à cet environnement**
 ```bash
 # ✅ Base de données
-docker-compose -f docker-compose.dev.yml up -d
-docker-compose -f docker-compose.dev.yml down -v
+docker-compose up -d
+docker-compose down -v
 
 # ✅ Tests E2E
 cd tests && npm test

@@ -43,7 +43,7 @@ Point d'entrée principal pour la documentation du projet OneEats.
 
 ```bash
 # 1. Demarrer PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 
 # 2. Lancer le backend via IntelliJ IDEA (Quarkus dev mode)
 # URL: http://localhost:8080

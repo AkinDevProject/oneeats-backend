@@ -62,13 +62,13 @@ This file provides guidance to Claude Code when working with the OneEats project
 - NOT available: `./mvnw` commands in terminal (no JDK in CLI)
 - Frontend Web: Served automatically via Quinoa from backend
 - Mobile: Expo CLI available (`cd apps/mobile && npm start`)
-- Database: Docker Compose (`docker-compose -f docker-compose.dev.yml up -d`)
+- Database: Docker Compose (`docker-compose -f docker-compose.yml up -d`)
 
 ### Quick Start Commands
 
 ```bash
 # 1. Start database
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose.yml up -d
 
 # 2. Start backend (IntelliJ IDEA Quarkus dev mode)
 # Backend: http://localhost:8080/api

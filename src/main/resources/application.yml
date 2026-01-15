@@ -3,9 +3,6 @@ quarkus:
     name: OneEats Backend
     version: 1.0.0-SNAPSHOT
 
-  telemetry:
-    enabled: false
-
   # Serveur HTTP
   http:
     port: 8080
@@ -21,108 +18,8 @@ quarkus:
       methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
       headers: accept,authorization,content-type,x-requested-with
       access-control-max-age: 86400
-
-  # Base de données
-  datasource:
-    db-kind: postgresql
-    username: ${DB_USER:oneeats_user}
-    password: ${DB_PASSWORD:oneeats_password}
-    jdbc:
-      url: ${DB_URL:jdbc:postgresql://localhost:5432/oneeats_dev}
-      max-size: 20
-      min-size: 2
-
-  hibernate-orm:
-    database:
-      generation: update
-    log:
-      sql: false
-    metrics:
-      enabled: true
-
-  # Configuration Panache
-  hibernate-orm-panache:
-    enable-implicit-dirty-checking: true
-
-  # Sérialisation Jackson
-  jackson:
-    serialization-inclusion: non_null
-    serialization:
-      write-dates-as-timestamps: false
-      write-durations-as-timestamps: false
-    deserialization:
-      fail-on-unknown-properties: false
-
-  # Logs
-  log:
-    level: INFO
-    category:
-      "com.oneeats": DEBUG
-      "org.hibernate.SQL": DEBUG
-    console:
-      enable: true
-      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
-
-  # Santé et métriques
-  smallrye-health:
-    ui:
-      enable: true
-
-  micrometer:
-    export:
-      prometheus:
-        enabled: true
-        path: /metrics
-
-  # Documentation OpenAPI
-  smallrye-openapi:
-    info-title: OneEats API
-    info-version: 1.0.0
-    info-description: API pour la plateforme OneEats - Commandes de restauration
-    servers:
-      - url: http://localhost:8080
-        description: Serveur de développement
-
-  # DevUI Configuration (fix startup issue)
-  dev-ui:
-    cors:
-      enabled: true
-
-  # Sécurité OIDC/Keycloak
-  oidc:
-    # URL du serveur Keycloak (port 8480 en dev - 8180 bloque par Hyper-V)
-    auth-server-url: ${KEYCLOAK_URL:http://localhost:8480}/realms/oneeats
-    client-id: ${KEYCLOAK_CLIENT_ID:oneeats-web}
-    credentials:
-      secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-web-secret-dev}
-    # Mode web-app: Quarkus gère les sessions avec cookies sécurisés
-    application-type: web-app
-    # Configuration TLS
-    tls:
-      verification: none  # Uniquement pour le développement
-    # Mapping des rôles depuis Keycloak
-    roles:
-      source: realm
-      role-claim-path: realm_access/roles
-    # Configuration des tokens et session
-    token:
-      issuer: any  # Accepter l'issuer du token (dev)
-    authentication:
-      # Redirection après login réussi
-      redirect-path: /restaurant
-      # Redirection après logout
-      logout:
-        path: /logout
-        post-logout-path: /login
-    # Logout configuration
-    logout:
-      path: /api/auth/logout
-      post-logout-path: /login
-
-  # Configuration sécurité HTTP - Routes protégées
-  http:
+    # Routes protégées (auth)
     auth:
-      # Routes qui nécessitent une authentification
       permission:
         # Pages web protégées
         restaurant-pages:
@@ -143,6 +40,84 @@ quarkus:
         system-endpoints:
           paths: /q/*,/health*,/metrics*,/openapi*
           policy: permit
+
+  # Base de données
+  datasource:
+    db-kind: postgresql
+    username: ${DB_USER:oneeats_user}
+    password: ${DB_PASSWORD:oneeats_password}
+    jdbc:
+      url: ${DB_URL:jdbc:postgresql://localhost:5432/oneeats_dev}
+      max-size: 20
+      min-size: 2
+
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: false
+    metrics:
+      enabled: true
+
+  # Sérialisation Jackson
+  jackson:
+    serialization-inclusion: non-null
+    fail-on-unknown-properties: false
+    write-dates-as-timestamps: false
+    write-durations-as-timestamps: false
+
+  # Logs
+  log:
+    level: INFO
+    category:
+      com.oneeats:
+        level: DEBUG
+    console:
+      enable: true
+      format: "%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{3.}] (%t) %s%e%n"
+
+  # Santé et métriques
+  smallrye-health:
+    ui:
+      enable: true
+
+  micrometer:
+    export:
+      prometheus:
+        enabled: true
+        path: /metrics
+
+  # DevUI Configuration (fix startup issue)
+  dev-ui:
+    cors:
+      enabled: true
+
+  # Sécurité OIDC/Keycloak
+  oidc:
+    # URL du serveur Keycloak (port 8480 en dev - 8180 bloque par Hyper-V)
+    auth-server-url: ${KEYCLOAK_URL:http://localhost:8480}/realms/oneeats
+    client-id: ${KEYCLOAK_CLIENT_ID:oneeats-web}
+    credentials:
+      secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-web-secret-dev}
+    # Mode web-app: Quarkus gère les sessions avec cookies sécurisés
+    application-type: web-app
+    # Configuration TLS
+    tls:
+      verification: none  # Uniquement pour le développement
+    # Mapping des rôles depuis Keycloak (dans l'access token)
+    roles:
+      source: accesstoken
+      role-claim-path: realm_access/roles
+    # Configuration des tokens et session
+    token:
+      issuer: any  # Accepter l'issuer du token (dev)
+    authentication:
+      # Redirection après login réussi
+      redirect-path: /restaurant
+    # Logout configuration
+    logout:
+      path: /api/auth/logout
+      post-logout-path: /login
 
   # Frontend intégration (Quinoa) - Production
   quinoa:

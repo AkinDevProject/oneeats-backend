@@ -3,10 +3,6 @@ quarkus:
   live-reload:
     enabled: true
 
-  # Hot reload pour les changements
-  dev:
-    instrumentation: true
-
   # Base de données développement
   datasource:
     jdbc:
@@ -19,18 +15,18 @@ quarkus:
       generation: drop-and-create
     sql-load-script: import-dev.sql
     log:
-      sql: true
+      sql: false
       format-sql: true
     statistics: true
 
   # Logs détaillés
   log:
-    level: DEBUG
+    level: INFO
     category:
-      "com.oneeats": DEBUG
-      "org.hibernate": DEBUG
-      "io.quarkus.hibernate.orm": DEBUG
-      "jakarta.transaction": DEBUG
+      com.oneeats:
+        level: INFO
+      org.hibernate.SQL:
+        level: INFO
 
   # Désactiver l'authentification OIDC en développement
   oidc:

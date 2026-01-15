@@ -12,7 +12,7 @@ Guide complet pour configurer et démarrer l'environnement de développement One
 java -version
 
 # Démarrer PostgreSQL
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose up -d
 ```
 
 ### 2. Lancer l'Application
@@ -208,8 +208,8 @@ curl http://localhost:8080/api/orders/restaurant/11111111-1111-1111-1111-1111111
 
 2. **Base de données** :
    ```bash
-   docker-compose -f docker-compose.dev.yml down
-   docker-compose -f docker-compose.dev.yml up -d
+   docker-compose down
+   docker-compose up -d
    ```
 
 3. **Clean build** :
