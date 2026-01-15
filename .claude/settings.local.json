@@ -61,7 +61,8 @@
       "Bash(ls:*)",
       "Skill(bmad:core:agents:bmad-master)",
       "Bash(for f in docs/**/*.md)",
-      "Bash(do ls -lh \"$f\")"
+      "Bash(do ls -lh \"$f\")",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []

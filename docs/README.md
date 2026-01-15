@@ -124,13 +124,13 @@ cd apps/mobile && npm start
 | **[PLAN_TESTS_DASHBOARD_ADMIN.md](tests/PLAN_TESTS_DASHBOARD_ADMIN.md)** | Plan tests admin |
 | **[PLAN_TESTS_DASHBOARD_RESTAURANT.md](tests/PLAN_TESTS_DASHBOARD_RESTAURANT.md)** | Plan tests restaurant |
 
-### /product/ - Planification Produit
+### /product/ - Planification Produit (BMAD)
 
 | Document | Description |
 |----------|-------------|
-| **[PRD-oneeats-backend.md](product/PRD-oneeats-backend.md)** | Product Requirements Document |
-| **[EPICS-USER-STORIES.md](product/EPICS-USER-STORIES.md)** | Epics et User Stories |
-| **[sprint-plan.md](product/sprint-plan.md)** | Plan de sprint |
+| **[prd.md](product/prd.md)** | Product Requirements Document |
+| **[epics-and-stories.md](product/epics-and-stories.md)** | Epics et User Stories |
+| **[sprint-status.yaml](product/sprint-status.yaml)** | Suivi de sprint BMAD (statut courant) |
 
 ### /adr/ - Architecture Decision Records
 
@@ -149,7 +149,7 @@ cd apps/mobile && npm start
 
 ### /archive/ - Archives
 
-Anciens fichiers et documentation historique.
+Anciens fichiers et documentation historique. Voir [archive/README.md](archive/README.md) pour le contenu.
 
 ---
 
@@ -207,4 +207,4 @@ Anciens fichiers et documentation historique.
 
 ---
 
-**Derniere mise a jour** : 2026-01-14
+**Derniere mise a jour** : 2026-01-15

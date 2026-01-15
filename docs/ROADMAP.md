@@ -423,6 +423,39 @@
 
 ---
 
+### Session 2026-01-15 : Restructuration Documentation BMAD
+
+**Travail effectué** :
+- ✅ Analyse complète de la documentation (52 fichiers actifs + 11 archives)
+- ✅ Suppression de 8 fichiers obsolètes/doublons dans /archive/
+  - DEV_PLAN.md, MVP_BACKLOG.md, MOBILE_ROADMAP.md (fusionnés dans ROADMAP.md)
+  - PROJECT_CHECKLIST.md, TECHNICAL_PROPOSAL.md (obsolètes - projet "DelishGo")
+  - TESTS_*.md, WEB_REFACTORING_SUMMARY.md (synthèses anciennes)
+- ✅ Restructuration docs/product/ selon standard BMAD :
+  - PRD-oneeats-backend.md → prd.md
+  - EPICS-USER-STORIES.md → epics-and-stories.md
+  - Création sprint-status.yaml pour suivi de sprint
+- ✅ Mise à jour de docs/README.md et docs/archive/README.md
+
+**Structure finale docs/product/** :
+```
+docs/product/
+├── prd.md                    # Product Requirements Document
+├── epics-and-stories.md      # Epics & User Stories
+└── sprint-status.yaml        # Suivi de sprint BMAD
+```
+
+**Impact** :
+- Documentation nettoyée et sans doublons
+- Structure alignée avec le standard BMAD
+- Suivi de sprint via sprint-status.yaml
+
+**Ce qui suit** :
+- Continuer l'harmonisation BMAD si nécessaire
+- Intégration frontend-backend (Sprint 2)
+
+---
+
 ### Session 2025-12-13 : Amélioration Navigation Documentation
 
 **Travail effectué** :
@@ -444,7 +477,7 @@
 
 ## Dernière mise à jour
 
-**Date** : 2025-12-13
+**Date** : 2026-01-15
 **Version** : MVP 0.7
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2025-12-19
+**Prochaine revue** : 2026-01-22
