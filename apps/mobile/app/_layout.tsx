@@ -61,10 +61,8 @@ function AppContent() {
                     <Stack.Screen name="orders" options={{ headerShown: false }} />
                     <Stack.Screen name="settings" options={{ headerShown: false }} />
                     <Stack.Screen name="aide-support" options={{ headerShown: false }} />
+                    <Stack.Screen name="order" options={{ headerShown: false }} />
                     <Stack.Screen name="+not-found" />
-                    {/* Pages de détail AVEC barre de navigation */}
-                    {/* restaurant/[id] et menu/[id] ont leur propre configuration Stack.Screen */}
-                    {/* order/[id] sera configuré individuellement si besoin */}
                   </Stack>
                   <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
                 </ThemeProvider>

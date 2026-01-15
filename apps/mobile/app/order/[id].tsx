@@ -7,20 +7,18 @@ import {
   RefreshControl,
   Alert,
   Linking,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
-  Surface,
   Button,
   Card,
-  Avatar,
-  IconButton,
-  Chip,
   Divider,
   ProgressBar,
+  TouchableRipple,
 } from 'react-native-paper';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -35,47 +33,59 @@ import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { Order } from '../../src/types';
 
 const STATUS_CONFIG = {
-  pending: { 
-    icon: 'schedule', 
-    label: 'En attente', 
-    color: '#FF9800', 
+  pending: {
+    emoji: '⏳',
+    icon: 'schedule',
+    label: 'En attente',
+    color: '#FF9800',
+    bgColor: '#FFF3E0',
     progress: 0.2,
     description: 'Votre commande est en cours de validation'
   },
-  confirmed: { 
-    icon: 'check-circle', 
-    label: 'Confirmée', 
-    color: '#4CAF50', 
+  confirmed: {
+    emoji: '✅',
+    icon: 'check-circle',
+    label: 'Confirmée',
+    color: '#4CAF50',
+    bgColor: '#E8F5E9',
     progress: 0.4,
     description: 'Commande acceptée, préparation bientôt'
   },
-  preparing: { 
-    icon: 'restaurant', 
-    label: 'En préparation', 
-    color: '#2196F3', 
+  preparing: {
+    emoji: '👨‍🍳',
+    icon: 'restaurant',
+    label: 'En préparation',
+    color: '#2196F3',
+    bgColor: '#E3F2FD',
     progress: 0.7,
     description: 'Nos chefs préparent votre commande'
   },
-  ready: { 
-    icon: 'done-all', 
-    label: 'Prête', 
-    color: '#8BC34A', 
+  ready: {
+    emoji: '🔔',
+    icon: 'done-all',
+    label: 'Prête',
+    color: '#8BC34A',
+    bgColor: '#F1F8E9',
     progress: 0.9,
-    description: 'Votre commande est prête à récupérer'
+    description: 'Votre commande est prête à récupérer !'
   },
-  completed: { 
-    icon: 'celebration', 
-    label: 'Récupérée', 
-    color: '#4CAF50', 
+  completed: {
+    emoji: '🎉',
+    icon: 'celebration',
+    label: 'Récupérée',
+    color: '#4CAF50',
+    bgColor: '#E8F5E9',
     progress: 1.0,
     description: 'Bon appétit ! Merci de votre confiance'
   },
-  cancelled: { 
-    icon: 'cancel', 
-    label: 'Annulée', 
-    color: '#F44336', 
+  cancelled: {
+    emoji: '❌',
+    icon: 'cancel',
+    label: 'Annulée',
+    color: '#F44336',
+    bgColor: '#FFEBEE',
     progress: 0,
-    description: 'Commande annulée, remboursement en cours'
+    description: 'Commande annulée'
   },
 };
 
@@ -190,63 +200,58 @@ export default function OrderDetailScreen() {
 
   const statusConfig = STATUS_CONFIG[order.status];
 
-  const renderHeader = () => (
-    <Surface style={[styles.header, { backgroundColor: currentTheme.colors.surface }]} elevation={2}>
-      <View style={styles.headerContent}>
-        {/* Bouton retour supprimé - remplacé par la barre native */}
-        <View style={styles.headerInfo}>
-          <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
-            Commande #{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)}
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            {order.restaurant?.name || 'Restaurant'}
-          </Text>
-        </View>
-        <IconButton
-          icon="phone"
-          size={24}
-          iconColor={currentTheme.colors.primary}
-          onPress={handleCallRestaurant}
-        />
-      </View>
-    </Surface>
-  );
+  const handleOpenMaps = () => {
+    if (!order?.restaurant) return;
+
+    const address = order.restaurant.address || order.restaurant.name;
+    const encodedAddress = encodeURIComponent(address);
+
+    // Ouvrir dans Google Maps ou Apple Maps selon la plateforme
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    Linking.openURL(url);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
   const renderStatus = () => (
     <Animated.View entering={FadeIn.duration(600)}>
       <Card style={[styles.statusCard, { backgroundColor: currentTheme.colors.surface }]}>
         <Card.Content style={styles.statusContent}>
           <View style={styles.statusHeader}>
-            <Avatar.Icon
-              size={60}
-              icon={statusConfig.icon}
-              style={[styles.statusIcon, { backgroundColor: statusConfig.color }]}
-            />
+            <View style={[styles.statusEmojiContainer, { backgroundColor: statusConfig.bgColor }]}>
+              <Text style={styles.statusEmoji}>{statusConfig.emoji}</Text>
+            </View>
             <View style={styles.statusInfo}>
-              <Text style={[styles.statusLabel, { color: currentTheme.colors.onSurface }]}>
+              <Text style={[styles.statusLabel, { color: statusConfig.color }]}>
                 {statusConfig.label}
               </Text>
               <Text style={[styles.statusDescription, { color: currentTheme.colors.onSurfaceVariant }]}>
                 {statusConfig.description}
               </Text>
               {estimatedTime && order.status !== 'completed' && order.status !== 'cancelled' && (
-                <Chip
-                  icon="access-time"
-                  style={[styles.timeChip, { backgroundColor: currentTheme.colors.primaryContainer }]}
-                  textStyle={{ color: currentTheme.colors.onPrimaryContainer }}
-                >
-                  Prêt dans {estimatedTime}
-                </Chip>
+                <View style={[styles.timeChipCustom, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+                  <Text style={{ fontSize: 14 }}>⏱️</Text>
+                  <Text style={[styles.timeChipText, { color: currentTheme.colors.onPrimaryContainer }]}>
+                    Prêt dans {estimatedTime}
+                  </Text>
+                </View>
               )}
             </View>
           </View>
-          
+
           <View style={styles.progressContainer}>
             <ProgressBar
               progress={statusConfig.progress}
               color={statusConfig.color}
               style={styles.progressBar}
             />
+            <View style={styles.progressLabels}>
+              <Text style={[styles.progressLabelText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Commandé
+              </Text>
+              <Text style={[styles.progressLabelText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Prêt
+              </Text>
+            </View>
           </View>
         </Card.Content>
       </Card>
@@ -258,7 +263,7 @@ export default function OrderDetailScreen() {
       <Card style={[styles.itemsCard, { backgroundColor: currentTheme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            Votre commande ({order.items.length} articles)
+            🛒 Votre commande ({order.items.length} article{order.items.length > 1 ? 's' : ''})
           </Text>
           
           {order.items.map((item, index) => (
@@ -306,44 +311,76 @@ export default function OrderDetailScreen() {
       <Card style={[styles.pickupCard, { backgroundColor: currentTheme.colors.surface }]}>
         <Card.Content>
           <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-            Informations de retrait
+            📍 Informations de retrait
           </Text>
-          
+
+          {/* Heure de retrait */}
           <View style={styles.pickupInfo}>
-            <MaterialIcons name="access-time" size={20} color={currentTheme.colors.primary} />
-            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
-              Retrait prévu: {order.pickupTime.toLocaleTimeString('fr-FR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
-            </Text>
-          </View>
-          
-          <View style={styles.pickupInfo}>
-            <MaterialIcons name="location-on" size={20} color={currentTheme.colors.primary} />
-            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
-              {order.restaurant?.name || 'Restaurant'}
-            </Text>
-          </View>
-          
-          <View style={styles.pickupInfo}>
-            <MaterialIcons name="person" size={20} color={currentTheme.colors.primary} />
-            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
-              Client: {order.customerName || 'Utilisateur'}
-            </Text>
+            <View style={[styles.pickupIconContainer, { backgroundColor: '#E3F2FD' }]}>
+              <Text style={styles.pickupIcon}>🕐</Text>
+            </View>
+            <View style={styles.pickupTextContainer}>
+              <Text style={[styles.pickupLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Heure de retrait
+              </Text>
+              <Text style={[styles.pickupValue, { color: currentTheme.colors.onSurface }]}>
+                {order.pickupTime.toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </Text>
+            </View>
           </View>
 
+          {/* Restaurant */}
           <View style={styles.pickupInfo}>
-            <MaterialIcons name="phone" size={20} color={currentTheme.colors.primary} />
-            <Text style={[styles.pickupText, { color: currentTheme.colors.onSurface }]}>
-              Téléphone: {order.customerPhone || 'Non renseigné'}
-            </Text>
+            <View style={[styles.pickupIconContainer, { backgroundColor: '#E8F5E9' }]}>
+              <Text style={styles.pickupIcon}>🍽️</Text>
+            </View>
+            <View style={styles.pickupTextContainer}>
+              <Text style={[styles.pickupLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Restaurant
+              </Text>
+              <Text style={[styles.pickupValue, { color: currentTheme.colors.onSurface }]}>
+                {order.restaurant?.name || 'Restaurant'}
+              </Text>
+            </View>
           </View>
+
+          {/* Adresse */}
+          <View style={styles.pickupInfo}>
+            <View style={[styles.pickupIconContainer, { backgroundColor: '#FFF3E0' }]}>
+              <Text style={styles.pickupIcon}>📍</Text>
+            </View>
+            <View style={styles.pickupTextContainer}>
+              <Text style={[styles.pickupLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Adresse
+              </Text>
+              <Text style={[styles.pickupValue, { color: currentTheme.colors.onSurface }]}>
+                {order.restaurant?.address || '123 Rue Example, Paris'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Bouton Itinéraire */}
+          <TouchableRipple
+            onPress={handleOpenMaps}
+            borderless
+            style={[styles.directionsButton, { backgroundColor: currentTheme.colors.primaryContainer }]}
+          >
+            <View style={styles.directionsContent}>
+              <Text style={{ fontSize: 20 }}>🗺️</Text>
+              <Text style={[styles.directionsText, { color: currentTheme.colors.onPrimaryContainer }]}>
+                Voir l'itinéraire
+              </Text>
+              <MaterialIcons name="chevron-right" size={24} color={currentTheme.colors.onPrimaryContainer} />
+            </View>
+          </TouchableRipple>
 
           {order.customerNotes && (
             <View style={styles.notesSection}>
               <Text style={[styles.notesLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Instructions spéciales:
+                📝 Instructions spéciales
               </Text>
               <Text style={[styles.notesText, { color: currentTheme.colors.onSurface }]}>
                 {order.customerNotes}
@@ -401,25 +438,35 @@ export default function OrderDetailScreen() {
     );
   };
 
+  // Numéro de commande pour le header
+  const orderNumber = order.orderNumber
+    ? order.orderNumber.split('-').pop()
+    : order.id.slice(-4);
+
   return (
-    <>
-      <Stack.Screen 
-        options={{
-          title: order ? `Commande #${order.orderNumber ? order.orderNumber.split('-').pop() : order.id.slice(-4)}` : 'Commande',
-          headerStyle: { backgroundColor: currentTheme.colors.surface },
-          headerTitleStyle: { 
-            color: currentTheme.colors.onSurface,
-            fontWeight: '600'
-          },
-          headerBackTitle: 'Mes commandes',
-          headerTintColor: currentTheme.colors.onSurface,
-        }} 
-      />
-      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-        <StatusBar style="auto" />
-      
-{/* renderHeader() supprimé - remplacé par la barre de navigation native */}
-      
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+      <StatusBar style="auto" />
+
+      {/* Header cohérent avec les autres pages */}
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        style={[styles.header, { backgroundColor: currentTheme.colors.surface }]}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          style={styles.backButton}
+        >
+          <MaterialIcons name="arrow-back" size={24} color={currentTheme.colors.onSurface} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
+          Commande #{orderNumber}
+        </Text>
+        <View style={styles.headerSpacer} />
+      </Animated.View>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -438,7 +485,6 @@ export default function OrderDetailScreen() {
         {renderActions()}
       </ScrollView>
     </SafeAreaView>
-    </>
   );
 }
 
@@ -446,6 +492,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  // Header cohérent
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginRight: 32,
+  },
+  headerSpacer: {
+    width: 32,
+  },
+  // ScrollView
   scrollView: {
     flex: 1,
   },
@@ -465,31 +535,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  
-  // Header
-  header: {
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-  },
-  headerInfo: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    marginTop: 2,
-  },
-  
-  // Status
+
+  // Status Card
   statusCard: {
     borderRadius: 16,
   },
@@ -501,8 +548,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  statusIcon: {
-    borderRadius: 30,
+  statusEmojiContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusEmoji: {
+    fontSize: 32,
   },
   statusInfo: {
     flex: 1,
@@ -516,9 +570,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  timeChip: {
+  timeChipCustom: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
     marginTop: 8,
+  },
+  timeChipText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   progressContainer: {
     marginTop: 8,
@@ -527,8 +591,16 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
-  
-  // Order Items
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  progressLabelText: {
+    fontSize: 11,
+  },
+
+  // Order Items Card
   itemsCard: {
     borderRadius: 16,
   },
@@ -582,8 +654,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
   },
-  
-  // Pickup Info
+
+  // Pickup Info Card
   pickupCard: {
     borderRadius: 16,
   },
@@ -591,27 +663,64 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  pickupText: {
-    fontSize: 16,
+  pickupIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickupIcon: {
+    fontSize: 20,
+  },
+  pickupTextContainer: {
+    flex: 1,
+  },
+  pickupLabel: {
+    fontSize: 12,
     fontWeight: '500',
+    marginBottom: 2,
+  },
+  pickupValue: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  directionsButton: {
+    marginTop: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  directionsContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  directionsText: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
   },
   notesSection: {
     marginTop: 16,
     padding: 12,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.02)',
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.03)',
   },
   notesLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   notesText: {
     fontSize: 14,
+    lineHeight: 20,
   },
-  
+
   // Actions
   actionsContainer: {
     gap: 12,
