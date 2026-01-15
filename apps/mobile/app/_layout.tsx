@@ -58,7 +58,9 @@ function AppContent() {
                     <Stack.Screen name="auth/login" options={{ headerShown: false }} />
                     <Stack.Screen name="designs" options={{ headerShown: false }} />
                     <Stack.Screen name="account" options={{ headerShown: false }} />
-                    <Stack.Screen name="aide-support" options={{ title: "Aide & Support" }} />
+                    <Stack.Screen name="orders" options={{ headerShown: false }} />
+                    <Stack.Screen name="settings" options={{ headerShown: false }} />
+                    <Stack.Screen name="aide-support" options={{ headerShown: false }} />
                     <Stack.Screen name="+not-found" />
                     {/* Pages de détail AVEC barre de navigation */}
                     {/* restaurant/[id] et menu/[id] ont leur propre configuration Stack.Screen */}
