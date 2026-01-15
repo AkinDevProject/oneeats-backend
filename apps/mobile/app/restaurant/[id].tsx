@@ -190,8 +190,8 @@ export default function RestaurantScreen() {
             <Text style={styles.infoText}>{restaurant.deliveryTime}</Text>
           </View>
           <View style={styles.infoItem}>
-            <MaterialIcons name="local-shipping" size={16} color="rgba(255,255,255,0.8)" />
-            <Text style={styles.infoText}>{restaurant.deliveryFee}€</Text>
+            <MaterialIcons name="store" size={16} color="rgba(255,255,255,0.8)" />
+            <Text style={styles.infoText}>Retrait sur place</Text>
           </View>
         </View>
       </View>

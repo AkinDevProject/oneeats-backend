@@ -272,15 +272,6 @@ export default function ProfilePage() {
             onPress={() => router.push('/settings')}
             delay={400}
           />
-          <View style={styles.menuDivider} />
-          <MenuItem
-            icon="📍"
-            label="Adresses"
-            subtitle="Gérer mes adresses de retrait"
-            iconBg="#FFF3E0"
-            onPress={() => router.push('/account')}
-            delay={450}
-          />
         </View>
 
         {/* Section Autres */}
