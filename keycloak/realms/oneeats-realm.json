@@ -1,0 +1,212 @@
+{
+  "realm": "oneeats",
+  "enabled": true,
+  "displayName": "OneEats",
+  "displayNameHtml": "<strong>OneEats</strong>",
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "defaultSignatureAlgorithm": "RS256",
+  "accessTokenLifespan": 900,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 604800,
+  "ssoSessionMaxLifespan": 2592000,
+  "ssoSessionIdleTimeoutRememberMe": 2592000,
+  "ssoSessionMaxLifespanRememberMe": 2592000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": true,
+  "offlineSessionMaxLifespan": 2592000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "oauth2DeviceCodeLifespan": 600,
+  "oauth2DevicePollingInterval": 5,
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Client mobile - peut passer des commandes",
+        "composite": false
+      },
+      {
+        "name": "restaurant",
+        "description": "Gestionnaire restaurant - acces au dashboard",
+        "composite": false
+      },
+      {
+        "name": "admin",
+        "description": "Administrateur plateforme - acces complet",
+        "composite": false
+      }
+    ]
+  },
+  "defaultRoles": ["user"],
+  "clients": [
+    {
+      "clientId": "oneeats-web",
+      "name": "OneEats Web Dashboard",
+      "description": "Dashboard restaurant et admin (React/Vite)",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "oneeats-web-secret-dev",
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080",
+        "http://localhost:5173"
+      ],
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "oneeats-mobile",
+      "name": "OneEats Mobile App",
+      "description": "Application mobile client (React Native/Expo)",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "exp://localhost:8081/*",
+        "exp://192.168.*.*:8081/*",
+        "oneeats://callback/*",
+        "http://localhost:8081/*"
+      ],
+      "webOrigins": ["*"],
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access"
+      ]
+    },
+    {
+      "clientId": "oneeats-backend",
+      "name": "OneEats Backend Service",
+      "description": "Backend Quarkus - resource server",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "oneeats-backend-secret-dev",
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@oneeats.com",
+      "email": "admin@oneeats.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "OneEats",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "restaurant", "user"]
+    },
+    {
+      "username": "restaurant@oneeats.com",
+      "email": "restaurant@oneeats.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Restaurant",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "restaurant123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["restaurant", "user"]
+    },
+    {
+      "username": "client@oneeats.com",
+      "email": "client@oneeats.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Client",
+      "lastName": "Mobile",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "client123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["user"]
+    }
+  ],
+  "browserSecurityHeaders": {
+    "contentSecurityPolicyReportOnly": "",
+    "xContentTypeOptions": "nosniff",
+    "xRobotsTag": "none",
+    "xFrameOptions": "SAMEORIGIN",
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "xXSSProtection": "1; mode=block",
+    "strictTransportSecurity": "max-age=31536000; includeSubDomains"
+  },
+  "smtpServer": {},
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "fr"],
+  "defaultLocale": "fr"
+}

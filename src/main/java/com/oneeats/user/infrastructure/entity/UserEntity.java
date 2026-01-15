@@ -33,6 +33,9 @@ public class UserEntity extends PanacheEntityBase {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "keycloak_id", unique = true)
+    private String keycloakId;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -141,8 +144,15 @@ public class UserEntity extends PanacheEntityBase {
     public void setAddress(String address) {
         this.address = address;
     }
-    
-    
+
+    public String getKeycloakId() {
+        return keycloakId;
+    }
+
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
+    }
+
     public Integer getVersion() {
         return version;
     }

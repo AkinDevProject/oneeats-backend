@@ -90,49 +90,32 @@ quarkus:
 
   # Sécurité OIDC/Keycloak
   oidc:
-    auth-server-url: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
+    # URL du serveur Keycloak (port 8180 en dev)
+    auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}/realms/oneeats
     client-id: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
     credentials:
-      secret: ${KEYCLOAK_CLIENT_SECRET:}
+      secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-backend-secret-dev}
+    # Mode hybrid: supporte cookies (web) ET Bearer tokens (mobile/API)
+    application-type: hybrid
+    # Configuration TLS
     tls:
       verification: none  # Uniquement pour le développement
+    # Mapping des rôles depuis Keycloak
+    roles:
+      source: realm
+      role-claim-path: realm_access/roles
+    # Validation des tokens
     token:
-      issuer: ${KEYCLOAK_URL:http://localhost:8081/realms/oneeats}
+      issuer: any  # Accepter l'issuer du token (dev)
       audience: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
+    # Chemins publics (pas d'auth requise)
+    authentication:
+      enabled: true
 
-  # Autorisation basée sur les rôles
-  keycloak:
-    policy-enforcer:
-      enable: true
-      lazy-load-paths: true
-      paths:
-        - name: Admin API
-          path: /api/admin/*
-          methods:
-            - method: GET
-              scopes: ['admin:read']
-            - method: POST
-              scopes: ['admin:write']
-            - method: PUT
-              scopes: ['admin:write']
-            - method: DELETE
-              scopes: ['admin:delete']
-        - name: Restaurant API
-          path: /api/restaurants/*
-          methods:
-            - method: GET
-              scopes: ['restaurant:read']
-            - method: PUT
-              scopes: ['restaurant:write']
-        - name: Orders API
-          path: /api/orders/*
-          methods:
-            - method: GET
-              scopes: ['order:read']
-            - method: POST
-              scopes: ['order:create']
-            - method: PUT
-              scopes: ['order:write']
+  # Configuration sécurité HTTP
+  security:
+    auth:
+      enabled-in-dev-mode: true
 
   # Frontend intégration (Quinoa) - Production
   quinoa:

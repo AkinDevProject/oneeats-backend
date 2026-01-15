@@ -82,4 +82,19 @@ public class JpaUserRepository implements IUserRepository {
     public boolean existsByEmail(Email email) {
         return UserEntity.count("email", email.getValue()) > 0;
     }
+
+    /**
+     * Trouve un utilisateur par son ID Keycloak.
+     * Retourne l'entite JPA directement pour l'AuthService.
+     */
+    public Optional<UserEntity> findByKeycloakId(String keycloakId) {
+        return UserEntity.find("keycloakId", keycloakId).firstResultOptional();
+    }
+
+    /**
+     * Persiste une nouvelle entite utilisateur (pour creation depuis Keycloak)
+     */
+    public void persist(UserEntity entity) {
+        entity.persistAndFlush();
+    }
 }

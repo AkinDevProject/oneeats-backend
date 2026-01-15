@@ -128,16 +128,21 @@
 
 ---
 
-## Phase 3 - Authentification et Sécurité (À venir 30%)
+## Phase 3 - Authentification et Sécurité (En cours 60%)
 
-### Authentification JWT
+### Authentification Keycloak + OIDC
 - [x] Configuration Keycloak documentée
-- [ ] **Implémentation JWT dans backend**
-- [ ] Endpoints `/auth/login` et `/auth/register`
-- [ ] Génération et validation tokens JWT
-- [ ] Refresh token automatique
-- [ ] Middleware d'authentification sur routes protégées
-- [ ] Gestion des rôles (CLIENT, RESTAURANT, ADMIN)
+- [x] **ADR-005 - Stratégie d'authentification détaillée**
+- [x] Docker Compose avec Keycloak + PostgreSQL dédié
+- [x] Configuration realm oneeats (import automatique)
+- [x] Clients configurés : oneeats-web, oneeats-mobile, oneeats-backend
+- [x] Configuration quarkus-oidc mode hybrid
+- [x] AuthService avec mapping Keycloak → DB
+- [x] Endpoint `/api/auth/me` (infos utilisateur + permissions)
+- [x] Entité RestaurantStaffEntity (rôles par restaurant)
+- [ ] Intégration frontend web (login page)
+- [ ] Intégration mobile (expo-auth-session + PKCE)
+- [ ] Tests d'authentification
 
 ### Frontend Web Authentication
 - [ ] Page login/register restaurant
@@ -296,7 +301,7 @@
 | ID  | Description                              | Priorité | Status       | Assigné à |
 |-----|------------------------------------------|----------|--------------|-----------|
 | #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu       | Sprint 2  |
-| #02 | Auth JWT non implémentée                 | Haute    | 📋 Backlog   | Sprint 3  |
+| #02 | Auth Keycloak backend implémentée        | Haute    | 🔄 En cours  | Sprint 3  |
 | #03 | WebSocket temps réel manquant            | Moyenne  | 📋 Backlog   | Sprint 4  |
 | #04 | Mode offline non implémenté (mobile)     | Moyenne  | 📋 Backlog   | Sprint 5  |
 | #05 | Tests E2E incomplets                     | Basse    | 📋 Backlog   | Sprint 7  |
@@ -414,7 +419,7 @@
 - **Architecture** : ✅ 100% (Complet)
 - **APIs Domaines** : ✅ 95% (Order, User, Restaurant, Menu complets)
 - **Tests** : ⚠️ 70% (Unit tests OK, intégration à compléter)
-- **Sécurité** : ❌ 30% (Documenté mais non implémenté)
+- **Sécurité** : ⚠️ 60% (Keycloak backend implémenté, frontend en attente)
 
 ### Frontend Web
 - **UI/UX** : ✅ 90% (Interface complète)
@@ -428,7 +433,48 @@
 - **Tests** : ❌ 10% (À implémenter)
 
 ### Global MVP
-**Progression globale** : ✅ **80%**
+**Progression globale** : ✅ **85%**
+
+---
+
+### Session 2026-01-15 : Implémentation Authentification Keycloak (Phase 3)
+
+**Travail effectué** :
+- ✅ Discussion architecture avec agent BMAD Architect
+- ✅ Création ADR-005 : Stratégie d'authentification détaillée
+  - Identity Providers : Google (MVP), Email/Password, Facebook, Apple
+  - Flows OIDC : Authorization Code (web) + PKCE (mobile)
+  - Tokens : Access 15min, Refresh 7j, Remember Me 30j
+  - Architecture hybride Keycloak + DB pour rôles métier
+- ✅ Docker Compose : Keycloak 24.0 + PostgreSQL dédié (port 8180)
+- ✅ Realm oneeats configuré avec import automatique
+  - 3 clients : oneeats-web, oneeats-mobile, oneeats-backend
+  - 3 rôles realm : user, restaurant, admin
+  - 3 utilisateurs de test (admin, restaurant, client)
+- ✅ Configuration quarkus-oidc mode hybrid
+- ✅ Backend Java :
+  - UserEntity + keycloak_id
+  - RestaurantStaffEntity (rôles OWNER/MANAGER/STAFF par restaurant)
+  - JpaRestaurantStaffRepository
+  - AuthService (mapping Keycloak → contexte métier)
+  - AuthController (/api/auth/me, /api/auth/status, /api/auth/restaurants)
+
+**Fichiers créés/modifiés** :
+- `docs/adr/ADR-005-authentication-strategy.md` (nouveau)
+- `docker-compose.dev.yml` (Keycloak ajouté)
+- `keycloak/realms/oneeats-realm.json` (nouveau)
+- `application.yml` (config OIDC)
+- `UserEntity.java` (keycloak_id ajouté)
+- `RestaurantStaffEntity.java` (nouveau)
+- `JpaRestaurantStaffRepository.java` (nouveau)
+- `AuthService.java` (nouveau)
+- `AuthController.java` (nouveau)
+- `JpaUserRepository.java` (findByKeycloakId ajouté)
+
+**Prochaines étapes** :
+- Intégration frontend web (login page + interceptor)
+- Intégration mobile (expo-auth-session + PKCE)
+- Tests d'authentification
 
 ---
 

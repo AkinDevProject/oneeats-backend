@@ -71,9 +71,24 @@ _This document defines the target architecture for the OneEats Backend MVP, cove
 ## Key Flows
 
 ### Authentication Flow
+
+> Voir [ADR-005](../adr/ADR-005-authentication-strategy.md) pour les details complets.
+
 ```
-Frontend --> /api/auth/login (Keycloak) --> JWT Token --> Subsequent API calls with Bearer token
-Refresh via /api/auth/refresh if adopted
+WEB DASHBOARD (Authorization Code Flow):
+  Browser --> Keycloak Login Page --> Authorization Code --> Backend exchanges for tokens
+  Tokens stored in HttpOnly Secure Cookies --> Subsequent requests authenticated via cookies
+
+MOBILE APP (Authorization Code + PKCE):
+  App --> Keycloak Login (in-app browser) --> Auth Code + Code Verifier
+  App exchanges code for tokens --> Stored in expo-secure-store
+  Bearer token in Authorization header --> API calls
+
+IDENTITY PROVIDERS:
+  Google (MVP) | Email/Password (MVP) | Facebook (Post-MVP) | Apple (Pre-App Store)
+
+TOKEN STRATEGY:
+  Access Token: 15 min | Refresh Token: 7 days | Remember Me: 30 days
 ```
 
 ### Order Flow
@@ -135,6 +150,7 @@ Documentation mapping (French):
 | [ADR-002](../adr/ADR-002-order-statuses.md) | Unified status naming: PENDING/PREPARING/READY/PICKED_UP/CANCELLED | Accepted |
 | [ADR-003](../adr/ADR-003-notifications.md) | WebSocket + Expo push with polling fallback | Accepted |
 | [ADR-004](../adr/ADR-004-uploads.md) | Local FS (dev), S3/GCS (prod) for file storage | Accepted |
+| [ADR-005](../adr/ADR-005-authentication-strategy.md) | Social Login (Google/Apple/Facebook) + PKCE mobile + Hybrid roles | Accepted |
 
 ## Technical Delivery Plan
 

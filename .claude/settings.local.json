@@ -69,7 +69,10 @@
       "Skill(bmad:bmm:workflows:code-review)",
       "Skill(bmad:bmm:workflows:quick-dev)",
       "Bash(git rev-parse:*)",
-      "Skill(bmad:bmm:workflows:quick-spec)"
+      "Skill(bmad:bmm:workflows:quick-spec)",
+      "WebSearch",
+      "WebFetch(domain:quarkus.io)",
+      "Skill(bmad:bmm:agents:architect)"
     ],
     "deny": [],
     "ask": []
