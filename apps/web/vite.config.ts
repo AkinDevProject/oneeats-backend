@@ -6,8 +6,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true
+    host: true,
+    // SPA fallback - toutes les routes non-fichiers servent index.html
+    middlewareMode: false,
   },
+  // Fallback SPA pour le build et le dev
+  appType: 'spa',
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

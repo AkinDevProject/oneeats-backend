@@ -1,11 +1,6 @@
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { User } from '../types';
 
-// Environment configuration for auth
-const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
-const MOCK_AUTH = import.meta.env.VITE_MOCK_AUTH === 'true';
-const DEFAULT_USER_ID = import.meta.env.VITE_DEFAULT_USER_ID || '11111111-1111-1111-1111-111111111111';
-const DEFAULT_RESTAURANT_ID = import.meta.env.VITE_DEFAULT_RESTAURANT_ID || '11111111-1111-1111-1111-111111111111';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 interface AuthContextType {
@@ -63,32 +58,16 @@ export const useAuthProvider = () => {
     }
   }, []);
 
-  // Initialisation au chargement
+  // Initialisation au chargement - vérifier session Keycloak
   useEffect(() => {
     const initAuth = async () => {
-      // Mode mock pour developpement sans Keycloak
-      if (!AUTH_ENABLED || MOCK_AUTH) {
-        const defaultUser: User = {
-          id: DEFAULT_USER_ID,
-          email: 'test@oneeats.com',
-          name: 'Test User - Restaurant Owner',
-          role: 'restaurant',
-          createdAt: new Date(),
-          restaurantId: DEFAULT_RESTAURANT_ID
-        };
-        setUser(defaultUser);
-        localStorage.setItem('oneeats-user', JSON.stringify(defaultUser));
-        setIsLoading(false);
-        return;
-      }
-
-      // Mode Keycloak - verifier si deja connecte via cookie de session
       const currentUser = await fetchCurrentUser();
       if (currentUser) {
         setUser(currentUser);
         localStorage.setItem('oneeats-user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('oneeats-user');
       }
-
       setIsLoading(false);
     };
 
@@ -96,88 +75,33 @@ export const useAuthProvider = () => {
   }, [fetchCurrentUser]);
 
   /**
-   * Login avec email/password (mode mock uniquement).
-   * En mode Keycloak, utiliser loginWithSSO() qui redirige vers Keycloak.
+   * Login avec email/password - non supporté avec Keycloak.
+   * Utiliser loginWithSSO() qui redirige vers Keycloak.
    */
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-
-    // Mode mock
-    if (!AUTH_ENABLED || MOCK_AUTH) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Credentials de test
-      if (email === 'jean.dupont@oneats.dev' && password === 'dev123') {
-        const adminUser: User = {
-          id: '4ffe5398-4599-4c33-98ec-18a96fd9e200',
-          email: 'jean.dupont@oneats.dev',
-          name: 'Jean Dupont (Dev)',
-          role: 'admin',
-          createdAt: new Date()
-        };
-        setUser(adminUser);
-        localStorage.setItem('oneeats-user', JSON.stringify(adminUser));
-        setIsLoading(false);
-        return true;
-      }
-
-      if (email === 'luigi@restaurant.com' && password === 'resto123') {
-        const restaurantUser: User = {
-          id: DEFAULT_USER_ID,
-          email: 'luigi@restaurant.com',
-          name: 'Luigi - Pizza Palace',
-          role: 'restaurant',
-          createdAt: new Date(),
-          restaurantId: DEFAULT_RESTAURANT_ID
-        };
-        setUser(restaurantUser);
-        localStorage.setItem('oneeats-user', JSON.stringify(restaurantUser));
-        setIsLoading(false);
-        return true;
-      }
-
-      setIsLoading(false);
-      return false;
-    }
-
-    // En mode Keycloak, on ne peut pas faire de login direct ici
-    // L'utilisateur doit utiliser loginWithSSO() qui redirige vers Keycloak
-    setIsLoading(false);
+  const login = async (_email: string, _password: string): Promise<boolean> => {
+    // Avec Keycloak, le login direct n'est pas supporté
+    // L'utilisateur doit utiliser loginWithSSO()
+    console.warn('Direct login not supported. Use loginWithSSO() instead.');
     return false;
   };
 
   /**
    * Redirige vers Keycloak pour l'authentification SSO.
-   * Quarkus gere le flow OIDC et les cookies de session.
+   * Quarkus gère le flow OIDC et les cookies de session.
    */
   const loginWithSSO = () => {
-    if (!AUTH_ENABLED || MOCK_AUTH) {
-      console.warn('SSO login not available in mock mode');
-      return;
-    }
-    // Rediriger vers une page protegee - Quarkus redirigera automatiquement vers Keycloak
+    // Rediriger vers une page protégée - Quarkus redirigera automatiquement vers Keycloak
     window.location.href = '/restaurant';
   };
 
   /**
-   * Deconnexion - appelle l'endpoint logout de Quarkus qui invalide la session
+   * Déconnexion - appelle l'endpoint logout de Quarkus qui invalide la session Keycloak
    */
-  const logout = async () => {
-    if (!AUTH_ENABLED || MOCK_AUTH) {
-      setUser(null);
-      localStorage.removeItem('oneeats-user');
-      return;
-    }
-
-    try {
-      // Appeler l'endpoint logout de Quarkus
-      window.location.href = `${API_URL}/api/auth/logout`;
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-
+  const logout = () => {
     setUser(null);
     localStorage.removeItem('oneeats-user');
+    // Rediriger vers l'endpoint logout de Quarkus
+    window.location.href = `${API_URL}/api/auth/logout`;
   };
 
   return {

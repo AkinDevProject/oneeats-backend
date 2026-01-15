@@ -28,12 +28,18 @@ quarkus:
       org.hibernate.SQL:
         level: INFO
 
-  # Désactiver l'authentification OIDC en développement
+  # Activer l'authentification OIDC pour tester le login
   oidc:
-    tenant-enabled: false
+    tenant-enabled: true
 
-
-
+  # Routes publiques - pas d'interception OIDC
+  http:
+    auth:
+      permission:
+        public-spa:
+          paths: /login,/callback,/,/index.html,/assets/*
+          policy: permit
+          methods: GET
 
   quinoa:
     # Configuration professionnelle Quinoa + Vite
@@ -65,7 +71,7 @@ quarkus:
 
   keycloak:
     policy-enforcer:
-      enable: false  # Désactive l'autorisation en dev
+      enable: false  # Désactivé - pas de Service Account configuré
 
 # Configuration développement OneEats
 oneeats:
