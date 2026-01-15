@@ -31,7 +31,7 @@ public class OrderStatusChangedEventHandler {
                    " - Restaurant: " + event.getRestaurantId() +
                    " - Status change: " + event.getPreviousStatus() + " → " + event.getNewStatus());
 
-        // Créer une notification pour l'utilisateur
+        // Creer une notification pour l'utilisateur (client mobile)
         String title = getNotificationTitle(event.getNewStatus());
         String message = getNotificationMessage(event.getNewStatus());
 
@@ -48,8 +48,8 @@ public class OrderStatusChangedEventHandler {
                 createNotificationCommandHandler.handle(notificationCommand);
                 LOGGER.info("✅ Database notification created successfully for order: " + event.getOrderId());
 
-                // Send real-time notification via WebSocket
-                LOGGER.info("📡 Attempting to send WebSocket notification for user: " + event.getUserId());
+                // Send real-time notification via WebSocket to USER (client mobile)
+                LOGGER.info("📡 Sending WebSocket notification to user: " + event.getUserId());
                 webSocketNotificationService.sendOrderStatusNotification(
                     event.getUserId(),
                     event.getOrderId(),
@@ -57,7 +57,18 @@ public class OrderStatusChangedEventHandler {
                     title,
                     message
                 );
-                LOGGER.info("🚀 WebSocket notification sent successfully for order: " + event.getOrderId());
+
+                // Send real-time notification via WebSocket to RESTAURANT (dashboard)
+                LOGGER.info("🍽️ Sending WebSocket notification to restaurant: " + event.getRestaurantId());
+                webSocketNotificationService.sendOrderStatusToRestaurant(
+                    event.getRestaurantId(),
+                    event.getOrderId(),
+                    getOrderNumber(event.getOrderId()),
+                    event.getPreviousStatus().toString(),
+                    event.getNewStatus().toString()
+                );
+
+                LOGGER.info("🚀 WebSocket notifications sent for order: " + event.getOrderId());
             } catch (Exception e) {
                 LOGGER.severe("❌ Failed to process notification for order: " + event.getOrderId() +
                              " - Error: " + e.getMessage());
@@ -66,6 +77,12 @@ public class OrderStatusChangedEventHandler {
         } else {
             LOGGER.warning("⚠️ No notification generated for status: " + event.getNewStatus());
         }
+    }
+
+    private String getOrderNumber(java.util.UUID orderId) {
+        // Pour simplifier, on retourne l'ID comme numero de commande
+        // Dans une implementation complete, on irait chercher le orderNumber en BDD
+        return orderId.toString().substring(0, 8).toUpperCase();
     }
 
     private String getNotificationTitle(OrderStatus status) {

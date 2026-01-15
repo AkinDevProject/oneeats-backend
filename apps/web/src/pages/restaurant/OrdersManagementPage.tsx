@@ -1,28 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { format, formatDistance } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { 
-  Bell, Volume2, RefreshCw, Search, Filter, 
+import {
+  Bell, Volume2, RefreshCw, Search, Filter,
   Download, Check, X,
   Clock, User, MapPin, Phone, Truck, AlertTriangle,
-  Zap, Flame, Sparkles, ChefHat, AlertCircle, CheckCircle, MoreVertical, MessageCircle, Timer
+  Zap, Flame, Sparkles, ChefHat, AlertCircle, CheckCircle, MoreVertical, MessageCircle, Timer,
+  Wifi, WifiOff
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Order } from '../../types';
 import { useRestaurantData } from '../../hooks/useRestaurantData';
+import { useRestaurantWebSocket, WebSocketMessage } from '../../hooks/useWebSocket';
+import { useAuth } from '../../hooks/useAuth';
 
 // Import des composants réutilisables
 import OrderDetailModal from './components/OrderDetailModal';
 
 const OrdersManagementPage: React.FC = () => {
+  const { user } = useAuth();
   const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [filter, setFilter] = useState<'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED'>('PENDING');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newOrderSound, setNewOrderSound] = useState(false);
+  const [realtimeNotification, setRealtimeNotification] = useState<string | null>(null);
+
+  // Gestionnaire de messages WebSocket
+  const handleWebSocketMessage = useCallback((message: WebSocketMessage) => {
+    console.log('📨 WebSocket message received:', message);
+
+    if (message.type === 'new_order') {
+      // Nouvelle commande recue - rafraichir la liste et afficher notification
+      console.log('🆕 New order received:', message);
+      setRealtimeNotification(`Nouvelle commande #${message.orderNumber || 'N/A'}`);
+      refetch();
+
+      // Jouer un son si active
+      if (newOrderSound) {
+        playNotificationSound();
+      }
+
+      // Masquer la notification apres 5 secondes
+      setTimeout(() => setRealtimeNotification(null), 5000);
+    } else if (message.type === 'order_status_changed') {
+      // Statut de commande change - rafraichir la liste
+      console.log('🔄 Order status changed:', message);
+      refetch();
+    }
+  }, [refetch, newOrderSound]);
+
+  // Connexion WebSocket
+  const { status: wsStatus, isConnected } = useRestaurantWebSocket(
+    user?.restaurantId,
+    {
+      onMessage: handleWebSocketMessage,
+      onConnect: () => console.log('✅ WebSocket connected for real-time updates'),
+      onDisconnect: () => console.log('❌ WebSocket disconnected'),
+    }
+  );
+
+  // Fonction pour jouer un son de notification
+  const playNotificationSound = () => {
+    try {
+      const audio = new Audio('/notification-sound.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Could not play sound:', e));
+    } catch (e) {
+      console.log('Sound not available');
+    }
+  };
 
   const tabs = [
     { key: 'PENDING', label: 'En attente' },
@@ -216,6 +266,19 @@ const OrdersManagementPage: React.FC = () => {
 
   return (
     <div className="bg-gray-50">
+      {/* Real-time Notification Banner */}
+      {realtimeNotification && (
+        <div className="fixed top-4 right-4 z-50 animate-pulse">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-3">
+            <Bell className="h-5 w-5" />
+            <span className="font-medium">{realtimeNotification}</span>
+            <button onClick={() => setRealtimeNotification(null)} className="ml-2 hover:bg-white/20 rounded-full p-1">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Mobile & Tablet Optimized Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         {/* Mobile Header */}
@@ -223,8 +286,18 @@ const OrdersManagementPage: React.FC = () => {
           {/* Mobile Top Row */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-green-700">LIVE</span>
+              {isConnected ? (
+                <>
+                  <Wifi className="h-4 w-4 text-green-500" />
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-medium text-green-700">LIVE</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-4 w-4 text-gray-400" />
+                  <span className="text-xs font-medium text-gray-500">OFFLINE</span>
+                </>
+              )}
               <span className="text-xs text-gray-500">{filteredOrders.length}</span>
             </div>
             

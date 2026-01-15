@@ -70,6 +70,124 @@ public class WebSocketNotificationService {
         }
     }
 
+    // ==================== RESTAURANT NOTIFICATIONS ====================
+
+    /**
+     * Envoyer une notification de nouvelle commande au restaurant
+     */
+    public void sendNewOrderToRestaurant(UUID restaurantId, UUID orderId, String orderNumber, String customerName, double totalAmount) {
+        if (!RestaurantWebSocket.isRestaurantConnected(restaurantId)) {
+            LOGGER.info("Restaurant " + restaurantId + " is not connected via WebSocket");
+            return;
+        }
+
+        try {
+            NewOrderNotification notification = new NewOrderNotification(
+                "new_order",
+                orderId,
+                orderNumber,
+                customerName,
+                totalAmount,
+                System.currentTimeMillis()
+            );
+
+            String jsonNotification = objectMapper.writeValueAsString(notification);
+            RestaurantWebSocket.sendNotificationToRestaurant(restaurantId, jsonNotification);
+
+            LOGGER.info("🍽️ New order notification sent to restaurant: " + restaurantId);
+        } catch (JsonProcessingException e) {
+            LOGGER.severe("Error serializing new order notification: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Envoyer une notification de changement de statut au restaurant
+     */
+    public void sendOrderStatusToRestaurant(UUID restaurantId, UUID orderId, String orderNumber, String previousStatus, String newStatus) {
+        if (!RestaurantWebSocket.isRestaurantConnected(restaurantId)) {
+            LOGGER.info("Restaurant " + restaurantId + " is not connected via WebSocket");
+            return;
+        }
+
+        try {
+            RestaurantOrderStatusNotification notification = new RestaurantOrderStatusNotification(
+                "order_status_changed",
+                orderId,
+                orderNumber,
+                previousStatus,
+                newStatus,
+                System.currentTimeMillis()
+            );
+
+            String jsonNotification = objectMapper.writeValueAsString(notification);
+            RestaurantWebSocket.sendNotificationToRestaurant(restaurantId, jsonNotification);
+
+            LOGGER.info("🍽️ Order status notification sent to restaurant: " + restaurantId);
+        } catch (JsonProcessingException e) {
+            LOGGER.severe("Error serializing order status notification: " + e.getMessage());
+        }
+    }
+
+    // ==================== NOTIFICATION CLASSES ====================
+
+    /**
+     * Notification de nouvelle commande pour les restaurants
+     */
+    public static class NewOrderNotification {
+        public String type;
+        public UUID orderId;
+        public String orderNumber;
+        public String customerName;
+        public double totalAmount;
+        public long timestamp;
+
+        public NewOrderNotification(String type, UUID orderId, String orderNumber, String customerName, double totalAmount, long timestamp) {
+            this.type = type;
+            this.orderId = orderId;
+            this.orderNumber = orderNumber;
+            this.customerName = customerName;
+            this.totalAmount = totalAmount;
+            this.timestamp = timestamp;
+        }
+
+        // Getters
+        public String getType() { return type; }
+        public UUID getOrderId() { return orderId; }
+        public String getOrderNumber() { return orderNumber; }
+        public String getCustomerName() { return customerName; }
+        public double getTotalAmount() { return totalAmount; }
+        public long getTimestamp() { return timestamp; }
+    }
+
+    /**
+     * Notification de changement de statut pour les restaurants
+     */
+    public static class RestaurantOrderStatusNotification {
+        public String type;
+        public UUID orderId;
+        public String orderNumber;
+        public String previousStatus;
+        public String newStatus;
+        public long timestamp;
+
+        public RestaurantOrderStatusNotification(String type, UUID orderId, String orderNumber, String previousStatus, String newStatus, long timestamp) {
+            this.type = type;
+            this.orderId = orderId;
+            this.orderNumber = orderNumber;
+            this.previousStatus = previousStatus;
+            this.newStatus = newStatus;
+            this.timestamp = timestamp;
+        }
+
+        // Getters
+        public String getType() { return type; }
+        public UUID getOrderId() { return orderId; }
+        public String getOrderNumber() { return orderNumber; }
+        public String getPreviousStatus() { return previousStatus; }
+        public String getNewStatus() { return newStatus; }
+        public long getTimestamp() { return timestamp; }
+    }
+
     // Inner classes for different notification types
     public static class OrderStatusNotification {
         public String type;
