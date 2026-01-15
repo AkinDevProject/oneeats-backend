@@ -1,0 +1,104 @@
+# Sprint Status - OneEats Backend
+# Format BMAD standard pour le suivi de sprint
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+generated: 2026-01-15 09:30
+project: OneEats Backend
+project_key: ONEEATS
+tracking_system: file-system
+story_location: docs/product/epics-and-stories.md
+
+# Current Sprint: Integration Frontend-Backend
+# Sprint 2 - Focus on connecting frontends to real APIs
+
+development_status:
+  # Epic 1: Auth & Securite (P0) - NOT STARTED
+  epic-1: backlog
+  1-1-login-jwt-keycloak: backlog
+  1-2-protection-routes-role: backlog
+  1-3-refresh-logout: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Restaurants (P0) - IN PROGRESS (API done, integration in progress)
+  epic-2: in-progress
+  2-1-crud-restaurant: done
+  2-2-statut-approbation: done
+  2-3-stats-jour-restaurant: done
+  2-4-upload-logo: done
+  epic-2-retrospective: optional
+
+  # Epic 3: Menu (P0) - IN PROGRESS (API done, integration in progress)
+  epic-3: in-progress
+  3-1-crud-menu-items: done
+  3-2-disponibilite-options-dietetiques: done
+  3-3-upload-image-item: done
+  epic-3-retrospective: optional
+
+  # Epic 4: Commandes (P0) - IN PROGRESS (API done, frontend integration needed)
+  epic-4: in-progress
+  4-1-passage-commande: done
+  4-2-cycle-vie-commande: done
+  4-3-historique-listing: done
+  4-4-regles-annulation: done
+  epic-4-retrospective: optional
+
+  # Epic 5: Notifications (P1) - NOT STARTED
+  epic-5: backlog
+  5-1-websocket-notifications: backlog
+  5-2-rest-notifications-unread: backlog
+  5-3-push-mobile: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Analytics & Dashboard (P1) - PARTIAL
+  epic-6: in-progress
+  6-1-stats-restaurant: done
+  6-2-stats-plateforme: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Admin Users (P1) - NOT STARTED
+  epic-7: backlog
+  7-1-crud-utilisateurs: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Observabilite & Qualite (P1) - PARTIAL
+  epic-8: in-progress
+  8-1-logs-metriques: done
+  8-2-tests-integration: in-progress
+  epic-8-retrospective: optional
+
+# Progress Summary
+# ================
+# P0 Epics: 3/4 in-progress, 1/4 backlog (Auth)
+# P1 Epics: 2/4 in-progress, 2/4 backlog
+# Backend APIs: 95% complete
+# Frontend Integration: 40% complete
+# Overall MVP: 65%
+
+# Current Focus
+# =============
+# - Integrate frontend web dashboard with real APIs
+# - Integrate mobile app with real APIs
+# - Next: Implement Epic 1 (Auth JWT)
+
+# Risks
+# =====
+# - R1: Auth JWT not implemented (HIGH) - blocks secure deployment
+# - R2: Frontend using mock data (HIGH) - integration needed
+# - R3: WebSocket not delivered (MEDIUM) - fallback polling planned

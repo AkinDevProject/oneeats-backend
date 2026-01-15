@@ -62,7 +62,8 @@
       "Skill(bmad:core:agents:bmad-master)",
       "Bash(for f in docs/**/*.md)",
       "Bash(do ls -lh \"$f\")",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Skill(bmad:bmm:workflows:workflow-status)"
     ],
     "deny": [],
     "ask": []

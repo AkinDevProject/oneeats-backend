@@ -1,8 +1,34 @@
-# 📄 PRD — OneEats Backend
+---
+stepsCompleted:
+  - problem-objectives
+  - scope
+  - actors-personas
+  - user-journeys
+  - functional-requirements
+  - nonfunctional-requirements
+  - data-contracts
+  - dependencies
+  - risks
+  - metrics
+  - hypotheses
+  - deliverables
+  - execution-plan
+inputDocuments:
+  - docs/ROADMAP.md
+  - docs/business/BUSINESS_RULES.md
+  - docs/business/USE_CASES.md
+  - docs/api/DATA_MODEL.md
+  - docs/business/REQUIREMENTS_SPECIFICATION.md
+  - docs/tests/TEST_STRATEGY.md
+  - docs/api/API_SPECS.md
+workflowType: 'prd'
+---
 
-**Date** : 2026-01-14
-**Portée** : Backend OneEats (APIs, données, auth, notifications, intégration front web/mobile)
-**Sources principales** : `docs/ROADMAP.md`, `docs/BUSINESS_RULES.md`, `docs/USE_CASES.md`, `docs/DATA_MODEL.md`, `docs/business/REQUIREMENTS_SPECIFICATION.md`, `docs/TEST_STRATEGY.md`, `docs/API_SPECS.md` (à compléter si manquants)
+# Product Requirements Document - OneEats Backend
+
+**Author:** Equipe OneEats
+**Date:** 2026-01-14
+**Scope:** Backend OneEats (APIs, donnees, auth, notifications, integration front web/mobile)
 
 ## 1. Problème et objectifs
 - Problème : Les restaurants veulent recevoir/traiter des commandes à emporter/sur place sans livraison ni paiement en ligne; les clients veulent commander et suivre le statut en temps réel; l’admin veut gouverner la plateforme.

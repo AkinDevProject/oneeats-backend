@@ -76,8 +76,8 @@ cd apps/mobile && npm start
 | Document | Description |
 |----------|-------------|
 | **[README.md](architecture/README.md)** | Vue d'ensemble architecture |
+| **[architecture.md](architecture/architecture.md)** | Document d'architecture BMAD (C4) |
 | **[hexagonal-guide.md](architecture/hexagonal-guide.md)** | Guide DDD/Architecture Hexagonale |
-| **[target-architecture.md](architecture/target-architecture.md)** | Architecture cible (C4) |
 | **[implementation-status.md](architecture/implementation-status.md)** | Statut d'implementation |
 
 ### /api/ - Specifications API

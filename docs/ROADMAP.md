@@ -423,36 +423,55 @@
 
 ---
 
-### Session 2026-01-15 : Restructuration Documentation BMAD
+### Session 2026-01-15 : Harmonisation Complete BMAD
 
-**Travail effectué** :
-- ✅ Analyse complète de la documentation (52 fichiers actifs + 11 archives)
-- ✅ Suppression de 8 fichiers obsolètes/doublons dans /archive/
-  - DEV_PLAN.md, MVP_BACKLOG.md, MOBILE_ROADMAP.md (fusionnés dans ROADMAP.md)
-  - PROJECT_CHECKLIST.md, TECHNICAL_PROPOSAL.md (obsolètes - projet "DelishGo")
-  - TESTS_*.md, WEB_REFACTORING_SUMMARY.md (synthèses anciennes)
-- ✅ Restructuration docs/product/ selon standard BMAD :
-  - PRD-oneeats-backend.md → prd.md
-  - EPICS-USER-STORIES.md → epics-and-stories.md
-  - Création sprint-status.yaml pour suivi de sprint
-- ✅ Mise à jour de docs/README.md et docs/archive/README.md
+**Travail effectue (Phase 1 - Nettoyage)** :
+- ✅ Analyse complete de la documentation (52 fichiers actifs + 11 archives)
+- ✅ Suppression de 8 fichiers obsoletes/doublons dans /archive/
+  - DEV_PLAN.md, MVP_BACKLOG.md, MOBILE_ROADMAP.md (fusionnes dans ROADMAP.md)
+  - PROJECT_CHECKLIST.md, TECHNICAL_PROPOSAL.md (obsoletes - projet "DelishGo")
+  - TESTS_*.md, WEB_REFACTORING_SUMMARY.md (syntheses anciennes)
+
+**Travail effectue (Phase 2 - Harmonisation BMAD)** :
+- ✅ Ajout frontmatter YAML BMAD a prd.md avec stepsCompleted et inputDocuments
+- ✅ Restructuration complete epics-and-stories.md selon template BMAD :
+  - Requirements Inventory (17 FR + 6 NFR)
+  - FR Coverage Map
+  - 8 Epics avec 22 User Stories au format "As a X, I want Y, So that Z"
+  - Acceptance Criteria au format Given/When/Then
+- ✅ Migration sprint-status.yaml vers format BMAD standard :
+  - Structure development_status avec statuts (backlog, in-progress, done)
+  - Tracking par epic et story
+- ✅ Creation docs/architecture/architecture.md conforme BMAD (remplace target-architecture.md)
+- ✅ Mise a jour bmm-workflow-status.yaml avec nouveaux chemins
 
 **Structure finale docs/product/** :
 ```
 docs/product/
-├── prd.md                    # Product Requirements Document
-├── epics-and-stories.md      # Epics & User Stories
-└── sprint-status.yaml        # Suivi de sprint BMAD
+├── prd.md                    # PRD avec frontmatter BMAD
+├── epics-and-stories.md      # Epics restructurees format BMAD
+└── sprint-status.yaml        # Suivi sprint format BMAD
+```
+
+**Structure finale docs/architecture/** :
+```
+docs/architecture/
+├── README.md                 # Index architecture
+├── architecture.md           # Document BMAD (nouveau)
+├── hexagonal-guide.md        # Guide DDD
+└── implementation-status.md  # Statut implementation
 ```
 
 **Impact** :
-- Documentation nettoyée et sans doublons
-- Structure alignée avec le standard BMAD
-- Suivi de sprint via sprint-status.yaml
+- Tous les documents de planification sont conformes aux templates BMAD
+- Workflows BMAD peuvent maintenant tracker correctement l'etat des artefacts
+- Navigation et liens croises mis a jour dans docs/README.md
+- bmm-workflow-status.yaml synchronise avec les nouveaux chemins
 
 **Ce qui suit** :
-- Continuer l'harmonisation BMAD si nécessaire
-- Intégration frontend-backend (Sprint 2)
+- Utiliser `/bmad:bmm:workflows:workflow-status` pour verifier l'etat
+- Creer les fichiers story individuels avec `/bmad:bmm:workflows:create-story`
+- Continuer Sprint 2 : Integration frontend-backend
 
 ---
 

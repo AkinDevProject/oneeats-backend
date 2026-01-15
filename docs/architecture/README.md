@@ -130,8 +130,8 @@ order/
 
 | Document | Description |
 |----------|-------------|
+| **[architecture.md](architecture.md)** | Document d'architecture BMAD avec diagrammes C4 |
 | **[hexagonal-guide.md](hexagonal-guide.md)** | Guide complet DDD/Architecture Hexagonale |
-| **[target-architecture.md](target-architecture.md)** | Architecture cible avec diagrammes C4 |
 | **[implementation-status.md](implementation-status.md)** | Statut d'implementation |
 
 ---
@@ -189,4 +189,4 @@ Password: oneeats_password
 
 ---
 
-**Derniere mise a jour** : 2026-01-14
+**Derniere mise a jour** : 2026-01-15
