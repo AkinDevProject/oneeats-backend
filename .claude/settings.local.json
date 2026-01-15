@@ -75,7 +75,8 @@
       "Skill(bmad:bmm:agents:architect)",
       "Bash(npx expo install expo-auth-session expo-secure-store expo-crypto)",
       "Bash(netsh interface ipv4 show excludedportrange:*)",
-      "Skill(bmad:bmm:workflows:create-ux-design)"
+      "Skill(bmad:bmm:workflows:create-ux-design)",
+      "Skill(bmad:bmm:agents:ux-designer)"
     ],
     "deny": [],
     "ask": []

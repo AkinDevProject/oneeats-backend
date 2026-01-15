@@ -22,18 +22,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 
-// React Native Paper components (simplified for compatibility)
+// React Native Paper components
 import {
   Searchbar,
-  Card,
   Button,
   Chip,
-  Badge,
   Surface,
   TouchableRipple,
-  FAB,
   IconButton,
-  Avatar,
   Provider as PaperProvider,
   MD3LightTheme,
 } from 'react-native-paper';
@@ -74,111 +70,254 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
 }) => {
   const handlePress = useCallback(() => onPress(restaurant), [restaurant, onPress]);
   const { toggleFavorite, checkFavoriteStatus, isLoading } = useFavorites();
-
-  // Utiliser directement l'état global du contexte
   const isFavorite = checkFavoriteStatus(restaurant.id);
+  const isQuickPickup = parseInt(restaurant.deliveryTime.split('-')[0]) <= 15;
+  const isFreePickup = restaurant.deliveryFee === 0;
 
   const handleFavoriteToggle = useCallback(async (e: any) => {
-    e.stopPropagation(); // Empêcher la navigation vers le restaurant
+    e.stopPropagation();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
     await toggleFavorite(restaurant.id);
   }, [restaurant.id, toggleFavorite]);
 
   return (
-    <Card style={[baseStyles.card, { backgroundColor: theme.colors.surface }]} elevation={2}>
-      <TouchableRipple onPress={handlePress} borderless>
-        <View>
+    <TouchableRipple
+      onPress={handlePress}
+      borderless
+      style={[cardStyles.card, { backgroundColor: theme.colors.surface }]}
+    >
+      <View>
+        {/* Grande image en haut */}
+        <View style={cardStyles.imageContainer}>
           <Image
             source={{ uri: restaurant.image }}
-            style={baseStyles.cardCover}
+            style={cardStyles.image}
             resizeMode="cover"
           />
 
+          {/* Overlay fermé */}
           {!restaurant.isOpen && (
-            <View style={baseStyles.closedOverlay}>
-              <Surface style={[baseStyles.closedSurface, { backgroundColor: theme.colors.errorContainer }]} elevation={2}>
-                <Text style={[baseStyles.closedText, { color: theme.colors.onErrorContainer }]}>Fermé</Text>
-              </Surface>
+            <View style={cardStyles.closedOverlay}>
+              <Text style={cardStyles.closedText}>Fermé</Text>
             </View>
           )}
 
-          <View style={baseStyles.cardBadges}>
-            <Badge style={[baseStyles.ratingBadge, { backgroundColor: theme.colors.surface }]}>
-              <Text style={{ color: theme.colors.onSurface, fontSize: 12, fontWeight: '600' }}>
-                ⭐ {restaurant.rating}
-              </Text>
-            </Badge>
-            {restaurant.featured && (
-              <Badge style={[baseStyles.featuredBadge, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                <Text style={{ color: theme.colors.onTertiaryContainer, fontSize: 12, fontWeight: '600' }}>
-                  ⚡ Populaire
-                </Text>
-              </Badge>
-            )}
+          {/* Badge note en haut à gauche */}
+          <View style={cardStyles.ratingBadge}>
+            <Text style={cardStyles.ratingText}>⭐ {restaurant.rating}</Text>
           </View>
 
-          {/* Icône cœur pour les favoris */}
-          <View style={baseStyles.favoriteButton}>
-            <IconButton
-              icon={isFavorite ? "heart" : "heart-outline"}
-              size={24}
-              iconColor={isFavorite ? "#FF4444" : "#FFFFFF"}
-              style={[
-                baseStyles.favoriteIcon,
-                {
-                  backgroundColor: isFavorite ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.5)',
-                }
-              ]}
-              onPress={handleFavoriteToggle}
-              disabled={isLoading}
-            />
-          </View>
-          
-          <Card.Content style={baseStyles.cardContent}>
-            <Text style={[baseStyles.restaurantName, { color: theme.colors.onSurface }]} numberOfLines={1}>
-              {restaurant.name}
-            </Text>
-            <Text style={[baseStyles.restaurantCuisine, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-              {restaurant.cuisine}
-            </Text>
-            
-            <View style={baseStyles.restaurantDetails}>
-              <View style={baseStyles.detailItem}>
-                <Text style={baseStyles.detailIcon}>🕐</Text>
-                <Text style={[baseStyles.detailText, { color: theme.colors.onSurfaceVariant }]}>{restaurant.deliveryTime}</Text>
-              </View>
-              <View style={baseStyles.detailItem}>
-                <Text style={baseStyles.detailIcon}>📍</Text>
-                <Text style={[baseStyles.detailText, { color: theme.colors.onSurfaceVariant }]}>{restaurant.distance}</Text>
-              </View>
+          {/* Badge populaire */}
+          {restaurant.featured && (
+            <View style={cardStyles.popularBadge}>
+              <Text style={cardStyles.popularText}>🔥 Populaire</Text>
             </View>
-          </Card.Content>
-          
-          <Card.Actions style={baseStyles.cardActions}>
-            <Chip 
-              icon="walk" 
-              compact 
-              style={baseStyles.pickupChip}
-              backgroundColor={theme.colors.secondaryContainer}
-              textStyle={{ color: theme.colors.onSecondaryContainer }}
-            >
-              À emporter
-            </Chip>
-            <Button
-              mode="contained"
-              onPress={handlePress}
-              style={baseStyles.viewButton}
-              buttonColor={theme.colors.primaryContainer}
-              textColor={theme.colors.onPrimaryContainer}
-            >
-              Voir le menu
-            </Button>
-          </Card.Actions>
+          )}
+
+          {/* Bouton favori en haut à droite */}
+          <TouchableRipple
+            onPress={handleFavoriteToggle}
+            disabled={isLoading}
+            borderless
+            style={cardStyles.favoriteButton}
+          >
+            <View style={[
+              cardStyles.favoriteCircle,
+              { backgroundColor: isFavorite ? '#FFF' : 'rgba(0,0,0,0.5)' }
+            ]}>
+              <Text style={{ fontSize: 18 }}>
+                {isFavorite ? '❤️' : '🤍'}
+              </Text>
+            </View>
+          </TouchableRipple>
         </View>
-      </TouchableRipple>
-    </Card>
+
+        {/* Contenu sous l'image */}
+        <View style={cardStyles.content}>
+          {/* Nom */}
+          <Text
+            style={[cardStyles.name, { color: theme.colors.onSurface }]}
+            numberOfLines={1}
+          >
+            {restaurant.name}
+          </Text>
+
+          {/* Cuisine */}
+          <Text
+            style={[cardStyles.cuisine, { color: theme.colors.onSurfaceVariant }]}
+            numberOfLines={1}
+          >
+            {restaurant.cuisine}
+          </Text>
+
+          {/* Stats */}
+          <View style={cardStyles.statsRow}>
+            <Text style={[cardStyles.stat, { color: theme.colors.onSurfaceVariant }]}>
+              ⏱️ {restaurant.deliveryTime}
+            </Text>
+            <Text style={[cardStyles.statDot, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+            <Text style={[cardStyles.stat, { color: theme.colors.onSurfaceVariant }]}>
+              📍 {restaurant.distance}
+            </Text>
+          </View>
+
+          {/* Badges contextuels */}
+          {(isFreePickup || isQuickPickup) && (
+            <View style={cardStyles.badgesRow}>
+              {isFreePickup && (
+                <View style={cardStyles.badgeGreen}>
+                  <Text style={cardStyles.badgeGreenText}>✓ Retrait gratuit</Text>
+                </View>
+              )}
+              {isQuickPickup && (
+                <View style={cardStyles.badgeOrange}>
+                  <Text style={cardStyles.badgeOrangeText}>⚡ Rapide</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      </View>
+    </TouchableRipple>
   );
+});
+
+// Styles pour la carte restaurant verticale
+const cardStyles = StyleSheet.create({
+  card: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: 180,
+  },
+  closedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closedText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  ratingBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: '#FFF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ratingText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#333',
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 80,
+    backgroundColor: '#FF6B00',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  popularText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFF',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    borderRadius: 20,
+  },
+  favoriteCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  content: {
+    padding: 14,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  cuisine: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  stat: {
+    fontSize: 13,
+  },
+  statDot: {
+    marginHorizontal: 8,
+    fontSize: 8,
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  badgeGreen: {
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  badgeGreenText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2E7D32',
+  },
+  badgeOrange: {
+    backgroundColor: '#FFF3E0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  badgeOrangeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#E65100',
+  },
 });
 
 RestaurantCard.displayName = 'RestaurantCard';
@@ -202,7 +341,7 @@ function HomeIndex() {
   const customTheme = useMemo(() => createCustomTheme(globalTheme), [globalTheme]);
 
   // Auth et favoris pour la section favoris sur l'accueil
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { favorites } = useFavorites();
 
   // Récupérer les restaurants favoris
@@ -258,13 +397,13 @@ function HomeIndex() {
 
   const applyFilters = useCallback(() => {
     let filtered = [...restaurants];
-    
+
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(r => r.cuisine.toLowerCase() === selectedCategory.toLowerCase());
     }
-    
+
     if (searchQuery.trim()) {
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.cuisine.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -273,11 +412,24 @@ function HomeIndex() {
     if (selectedFilters.includes('open_now')) {
       filtered = filtered.filter(r => r.isOpen);
     }
-    
+
     if (selectedFilters.includes('high_rated')) {
       filtered = filtered.filter(r => r.rating >= 4.5);
     }
-    
+
+    // Filtre "Rapide" - temps de préparation < 20 min
+    if (selectedFilters.includes('quick_pickup')) {
+      filtered = filtered.filter(r => {
+        const time = parseInt(r.deliveryTime.split('-')[0]);
+        return time <= 15;
+      });
+    }
+
+    // Filtre "Promos" - restaurants avec retrait gratuit (deliveryFee === 0)
+    if (selectedFilters.includes('free_pickup')) {
+      filtered = filtered.filter(r => r.deliveryFee === 0);
+    }
+
     setFilteredRestaurants(filtered);
   }, [restaurants, selectedCategory, searchQuery, selectedFilters]);
 
@@ -310,89 +462,75 @@ function HomeIndex() {
     opacity: headerOpacity.value,
   }));
 
+  // Fonction pour obtenir la salutation contextuelle
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bonjour';
+    if (hour < 18) return 'Bon après-midi';
+    return 'Bonsoir';
+  };
+
   const renderHeader = () => (
     <Animated.View style={[baseStyles.header, headerAnimatedStyle]}>
-      <Surface style={[baseStyles.headerSurface, { backgroundColor: globalTheme.colors.surface }]} elevation={2}>
+      <Surface style={[baseStyles.headerSurface, { backgroundColor: globalTheme.colors.primary }]} elevation={0}>
         <View style={baseStyles.headerContent}>
-          <Avatar.Icon 
-            size={48} 
-            icon="silverware-fork-knife" 
-            style={[baseStyles.headerIcon, dynamicStyles.headerIcon]}
-          />
           <View style={baseStyles.headerText}>
-            <Text style={[baseStyles.headerTitle, dynamicStyles.headerTitle]}>OneEats</Text>
-            <Text style={[baseStyles.headerSubtitle, dynamicStyles.headerSubtitle]}>
-              Découvrez {filteredRestaurants.length} restaurants
+            <Text style={[baseStyles.headerGreeting, { color: '#ffffff' }]}>
+              {getGreeting()}{user?.name ? `, ${user.name.split(' ')[0]}` : ''} 👋
             </Text>
+            <View style={baseStyles.locationRow}>
+              <Text style={[baseStyles.headerLocation, { color: 'rgba(255,255,255,0.85)' }]}>
+                📍 Paris 11ème
+              </Text>
+            </View>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={[
-              baseStyles.headerSubtitle,
-              dynamicStyles.headerSubtitle,
-              {
-                fontSize: 10,
-                marginRight: 4,
-              }
-            ]}>
-              {themeMetadata[selectedTheme]?.emoji} {themeMetadata[selectedTheme]?.name.split(' ')[0]}
-            </Text>
-            <IconButton
-              icon="palette"
-              size={24}
-              iconColor={customTheme.colors.primary}
-              onPress={() => router.push('/designs/design-selector')}
-            />
-          </View>
+          <IconButton
+            icon="bell-outline"
+            size={24}
+            iconColor="#ffffff"
+            style={baseStyles.notificationButton}
+            onPress={() => router.push('/notifications')}
+          />
+        </View>
+
+        {/* Barre de recherche intégrée dans le header */}
+        <View style={baseStyles.headerSearchContainer}>
+          <Searchbar
+            placeholder="Rechercher un restaurant..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            icon="magnify"
+            clearIcon="close"
+            style={[baseStyles.headerSearchBar, { backgroundColor: '#ffffff' }]}
+            inputStyle={[baseStyles.searchInput, { color: globalTheme.colors.onSurface }]}
+            iconColor={globalTheme.colors.onSurfaceVariant}
+            placeholderTextColor={globalTheme.colors.onSurfaceVariant}
+          />
         </View>
       </Surface>
     </Animated.View>
   );
 
-  const renderSearch = () => (
-    <View style={baseStyles.searchSection}>
-      <Searchbar
-        placeholder="Rechercher restaurants, plats..."
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        icon="magnify"
-        clearIcon="close"
-        style={[baseStyles.searchBar, { backgroundColor: customTheme.colors.surface }]}
-        inputStyle={[baseStyles.searchInput, { color: customTheme.colors.onSurface }]}
-        iconColor={customTheme.colors.primary}
-        rippleColor={customTheme.colors.primaryContainer}
-        placeholderTextColor={customTheme.colors.onSurfaceVariant}
-      />
-    </View>
-  );
+  // Recherche maintenant intégrée dans le header
+  const renderSearch = () => null;
 
   const renderFilters = () => (
     <View style={baseStyles.filtersSection}>
-      <View style={baseStyles.filtersHeader}>
-        <Text style={[baseStyles.filtersTitle, dynamicStyles.filtersTitle]}>Filtres rapides</Text>
-        <Button
-          mode="text"
-          onPress={() => setFilterVisible(true)}
-          textColor={customTheme.colors.primary}
-        >
-          Tous les filtres
-        </Button>
-      </View>
-      
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={baseStyles.filtersContainer}>
           <Chip
-            selected={selectedFilters.includes('open_now')}
-            onPress={() => toggleFilter('open_now')}
-            icon="clock-outline"
+            selected={selectedFilters.includes('quick_pickup')}
+            onPress={() => toggleFilter('quick_pickup')}
+            icon="lightning-bolt"
             style={baseStyles.filterChip}
             selectedColor={customTheme.colors.onPrimaryContainer}
-            backgroundColor={selectedFilters.includes('open_now') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-            textStyle={{ color: selectedFilters.includes('open_now') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            backgroundColor={selectedFilters.includes('quick_pickup') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('quick_pickup') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
-            Ouvert maintenant
+            ⚡ Rapide
           </Chip>
-          
+
           <Chip
             selected={selectedFilters.includes('high_rated')}
             onPress={() => toggleFilter('high_rated')}
@@ -403,92 +541,153 @@ function HomeIndex() {
             textStyle={{ color: selectedFilters.includes('high_rated') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
-            Très bien noté
+            ⭐ Top noté
           </Chip>
-          
+
           <Chip
-            selected={selectedFilters.includes('fast_delivery')}
-            onPress={() => toggleFilter('fast_delivery')}
-            icon="lightning-bolt"
+            selected={selectedFilters.includes('open_now')}
+            onPress={() => toggleFilter('open_now')}
+            icon="clock-outline"
             style={baseStyles.filterChip}
             selectedColor={customTheme.colors.onPrimaryContainer}
-            backgroundColor={selectedFilters.includes('fast_delivery') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
-            textStyle={{ color: selectedFilters.includes('fast_delivery') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            backgroundColor={selectedFilters.includes('open_now') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('open_now') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
             showSelectedOverlay={false}
           >
-            Livraison rapide
+            Ouvert
+          </Chip>
+
+          <Chip
+            selected={selectedFilters.includes('free_pickup')}
+            onPress={() => toggleFilter('free_pickup')}
+            icon="tag-outline"
+            style={baseStyles.filterChip}
+            selectedColor={customTheme.colors.onPrimaryContainer}
+            backgroundColor={selectedFilters.includes('free_pickup') ? customTheme.colors.primaryContainer : customTheme.colors.surface}
+            textStyle={{ color: selectedFilters.includes('free_pickup') ? customTheme.colors.onPrimaryContainer : customTheme.colors.onSurface }}
+            showSelectedOverlay={false}
+          >
+            💰 Promos
           </Chip>
         </View>
       </ScrollView>
     </View>
   );
 
+  // Couleurs de fond pour chaque catégorie
+  const categoryColors: { [key: string]: string } = {
+    all: '#E8F5E9',
+    pizza: '#FFF3E0',
+    kebab: '#FFEBEE',
+    burger: '#FFF8E1',
+    brochette: '#FCE4EC',
+    tacos: '#FFF3E0',
+    sushi: '#E3F2FD',
+    healthy: '#E8F5E9',
+    dessert: '#F3E5F5',
+  };
+
+  // Compteur de restaurants par catégorie
+  const getCategoryCount = useCallback((categoryId: string) => {
+    if (categoryId === 'all') return restaurants.length;
+    return restaurants.filter(r =>
+      r.cuisine.toLowerCase() === categoryId.toLowerCase()
+    ).length;
+  }, [restaurants]);
+
   const renderCategories = () => (
     <View style={baseStyles.categoriesSection}>
       <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>Catégories</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={baseStyles.categoriesContainer}>
-          <Surface
-            style={[
-              baseStyles.categoryCard,
-              selectedCategory === 'all' && [baseStyles.activeCategoryCard, dynamicStyles.activeCategoryCard]
-            ]}
-            elevation={selectedCategory === 'all' ? 3 : 1}
-          >
-            <TouchableRipple
-              onPress={() => setSelectedCategory('all')}
-              style={baseStyles.categoryTouchable}
-              borderless
-            >
-              <View style={baseStyles.categoryContent}>
-                <Avatar.Icon 
-                  size={40} 
-                  icon="silverware-variant" 
-                  style={[
-                    baseStyles.categoryIcon,
-                    dynamicStyles.categoryIcon,
-                    selectedCategory === 'all' && [baseStyles.activeCategoryIcon, dynamicStyles.activeCategoryIcon]
-                  ]}
-                />
-                <Text style={[
-                  baseStyles.categoryName,
-                  dynamicStyles.categoryName,
-                  selectedCategory === 'all' && [baseStyles.activeCategoryName, dynamicStyles.activeCategoryName]
-                ]}>
-                  Tous
-                </Text>
-              </View>
-            </TouchableRipple>
-          </Surface>
-          
-          {cuisineCategories.map((category) => (
-            <Surface
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={baseStyles.categoriesScrollContent}
+      >
+        {cuisineCategories.map((category, index) => {
+          const isSelected = selectedCategory === category.id;
+          const count = getCategoryCount(category.id);
+          const bgColor = categoryColors[category.id] || '#F5F5F5';
+
+          return (
+            <Animated.View
               key={category.id}
-              style={[
-                baseStyles.categoryCard,
-                selectedCategory === category.id && [baseStyles.activeCategoryCard, dynamicStyles.activeCategoryCard]
-              ]}
-              elevation={selectedCategory === category.id ? 3 : 1}
+              entering={FadeIn.delay(index * 50).duration(400)}
             >
               <TouchableRipple
-                onPress={() => setSelectedCategory(category.id)}
-                style={baseStyles.categoryTouchable}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedCategory(category.id);
+                }}
                 borderless
+                style={baseStyles.categoryTouchable}
               >
-                <View style={baseStyles.categoryContent}>
-                  <Text style={baseStyles.categoryEmoji}>{category.icon}</Text>
-                  <Text style={[
-                    baseStyles.categoryName,
-                    dynamicStyles.categoryName,
-                    selectedCategory === category.id && [baseStyles.activeCategoryName, dynamicStyles.activeCategoryName]
-                  ]}>
+                <View style={baseStyles.categoryItemContainer}>
+                  {/* Cercle avec emoji */}
+                  <View
+                    style={[
+                      baseStyles.categoryCircle,
+                      {
+                        backgroundColor: isSelected ? globalTheme.colors.primary : bgColor,
+                        borderWidth: isSelected ? 0 : 1,
+                        borderColor: isSelected ? 'transparent' : '#E0E0E0',
+                        transform: [{ scale: isSelected ? 1.1 : 1 }],
+                      },
+                    ]}
+                  >
+                    <Text style={[
+                      baseStyles.categoryEmojiNew,
+                      { opacity: isSelected ? 1 : 0.9 }
+                    ]}>
+                      {category.icon}
+                    </Text>
+                  </View>
+
+                  {/* Nom de la catégorie */}
+                  <Text
+                    style={[
+                      baseStyles.categoryNameNew,
+                      {
+                        color: isSelected
+                          ? globalTheme.colors.primary
+                          : globalTheme.colors.onSurface,
+                        fontWeight: isSelected ? '700' : '500',
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
                     {category.name}
                   </Text>
+
+                  {/* Compteur (optionnel) */}
+                  {count > 0 && (
+                    <Text
+                      style={[
+                        baseStyles.categoryCount,
+                        {
+                          color: isSelected
+                            ? globalTheme.colors.primary
+                            : globalTheme.colors.onSurfaceVariant,
+                        },
+                      ]}
+                    >
+                      {count}
+                    </Text>
+                  )}
+
+                  {/* Indicateur de sélection */}
+                  {isSelected && (
+                    <View
+                      style={[
+                        baseStyles.categorySelectedIndicator,
+                        { backgroundColor: globalTheme.colors.primary }
+                      ]}
+                    />
+                  )}
                 </View>
               </TouchableRipple>
-            </Surface>
-          ))}
-        </View>
+            </Animated.View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -502,7 +701,7 @@ function HomeIndex() {
         <View style={baseStyles.favoritesSectionHeader}>
           <View>
             <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle, { marginBottom: 0, paddingHorizontal: 0 }]}>
-              Vos Favoris
+              ❤️ Vos Favoris
             </Text>
             <Text style={[baseStyles.favoritesSubtitle, { color: globalTheme.colors.onSurfaceVariant }]}>
               {favoriteRestaurants.length} restaurant{favoriteRestaurants.length > 1 ? 's' : ''}
@@ -514,7 +713,7 @@ function HomeIndex() {
             textColor={customTheme.colors.primary}
             compact
           >
-            Voir tous
+            Voir tous →
           </Button>
         </View>
 
@@ -663,9 +862,21 @@ function HomeIndex() {
                   {renderFavorites()}
 
                   <View style={baseStyles.restaurantsSection}>
-                    <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
-                      Restaurants recommandés ({filteredRestaurants.length})
-                    </Text>
+                    <View style={baseStyles.sectionHeader}>
+                      <View style={baseStyles.sectionTitleRow}>
+                        <View style={[baseStyles.sectionIcon, { backgroundColor: globalTheme.colors.primaryContainer }]}>
+                          <Text style={{ fontSize: 16 }}>🍽️</Text>
+                        </View>
+                        <View>
+                          <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle, { paddingHorizontal: 0, marginBottom: 0 }]}>
+                            Restaurants à proximité
+                          </Text>
+                          <Text style={[baseStyles.restaurantsCount, { color: globalTheme.colors.onSurfaceVariant }]}>
+                            {filteredRestaurants.length} résultat{filteredRestaurants.length > 1 ? 's' : ''}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
                 </View>
               }
@@ -673,13 +884,6 @@ function HomeIndex() {
             />
 
             {renderFilterModal()}
-
-            <FAB
-              icon="tune"
-              style={[baseStyles.fab, dynamicStyles.fab]}
-              onPress={() => setFilterVisible(true)}
-              color={customTheme.colors.onPrimary}
-            />
           </>
         )}
       </SafeAreaView>
@@ -696,32 +900,54 @@ const baseStyles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   headerSurface: {
-    margin: 16,
-    borderRadius: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-  },
-  headerIcon: {
-    // backgroundColor sera appliqué dynamiquement
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   headerText: {
     flex: 1,
-    marginLeft: 12,
+  },
+  headerGreeting: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  headerLocation: {
+    fontSize: 14,
+  },
+  notificationButton: {
+    margin: 0,
+  },
+  headerSearchContainer: {
+    paddingHorizontal: 16,
+    marginTop: 12,
+  },
+  headerSearchBar: {
+    borderRadius: 24,
+    elevation: 0,
+    height: 44,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    // color sera appliqué dynamiquement
   },
   headerSubtitle: {
     fontSize: 14,
-    // color sera appliqué dynamiquement
     marginTop: 2,
   },
   searchSection: {
@@ -736,18 +962,7 @@ const baseStyles = StyleSheet.create({
   },
   filtersSection: {
     marginBottom: 16,
-  },
-  filtersHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  filtersTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    // color sera appliqué dynamiquement
+    marginTop: 8,
   },
   filtersContainer: {
     flexDirection: 'row',
@@ -758,53 +973,58 @@ const baseStyles = StyleSheet.create({
     marginRight: 8,
   },
   categoriesSection: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    // color sera appliqué dynamiquement
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  categoriesContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  categoryCard: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  activeCategoryCard: {
-    // backgroundColor sera appliqué dynamiquement
+  categoriesScrollContent: {
+    paddingHorizontal: 12,
+    gap: 4,
   },
   categoryTouchable: {
-    padding: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  categoryContent: {
+  categoryItemContainer: {
     alignItems: 'center',
-    minWidth: 80,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 72,
   },
-  categoryIcon: {
-    // backgroundColor sera appliqué dynamiquement
-  },
-  activeCategoryIcon: {
-    // backgroundColor sera appliqué dynamiquement
-  },
-  categoryEmoji: {
-    fontSize: 24,
+  categoryCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  categoryName: {
+  categoryEmojiNew: {
+    fontSize: 28,
+  },
+  categoryNameNew: {
     fontSize: 12,
-    fontWeight: '600',
-    // color sera appliqué dynamiquement
     textAlign: 'center',
+    maxWidth: 64,
   },
-  activeCategoryName: {
-    // color sera appliqué dynamiquement
+  categoryCount: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  categorySelectedIndicator: {
+    width: 20,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 6,
   },
   // Styles pour la section favoris
   favoritesSection: {
@@ -873,112 +1093,30 @@ const baseStyles = StyleSheet.create({
   },
   restaurantsSection: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom: 12,
+    marginTop: 8,
   },
-  restaurantsList: {
-    gap: 16,
+  sectionHeader: {
+    marginBottom: 4,
   },
-  restaurantCard: {
-    marginBottom: 8,
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  card: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  cardCover: {
-    height: 200,
-  },
-  closedOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 160,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+  sectionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closedSurface: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    // backgroundColor sera appliqué dynamiquement
+  restaurantsCount: {
+    fontSize: 12,
+    marginTop: 2,
   },
-  closedText: {
-    // color sera appliqué dynamiquement
-    fontWeight: '600',
-  },
-  cardBadges: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  ratingBadge: {
-    // backgroundColor sera appliqué dynamiquement
-  },
-  featuredBadge: {
-    // backgroundColor sera appliqué dynamiquement
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    zIndex: 10,
-  },
-  favoriteIcon: {
-    margin: 0,
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  cardContent: {
-    paddingTop: 16,
-  },
-  restaurantName: {
-    fontSize: 18,
-    fontWeight: '700',
-    // color sera appliqué dynamiquement
-    marginBottom: 4,
-  },
-  restaurantCuisine: {
-    fontSize: 14,
-    // color sera appliqué dynamiquement
-    marginBottom: 12,
-  },
-  restaurantDetails: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  detailIcon: {
-    fontSize: 14,
-  },
-  detailText: {
-    fontSize: 13,
-    // color sera appliqué dynamiquement
-  },
-  cardActions: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  pickupChip: {
-    // backgroundColor sera appliqué dynamiquement
-  },
-  viewButton: {
-    borderRadius: 20,
+  restaurantsList: {
+    gap: 8,
   },
   modalOverlay: {
     position: 'absolute',
@@ -1020,12 +1158,6 @@ const baseStyles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 16,
   },
-  fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1050,68 +1182,14 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background,
   },
-  headerIcon: {
-    backgroundColor: theme.colors.primaryContainer,
-  },
-  headerTitle: {
-    color: theme.colors.onSurface,
-  },
-  headerSubtitle: {
-    color: theme.colors.onSurfaceVariant,
-  },
-  filtersTitle: {
-    color: theme.colors.onSurface,
-  },
   sectionTitle: {
     color: theme.colors.onSurface,
-  },
-  activeCategoryCard: {
-    backgroundColor: theme.colors.primaryContainer,
-  },
-  categoryIcon: {
-    backgroundColor: theme.colors.surface,
-  },
-  activeCategoryIcon: {
-    backgroundColor: theme.colors.primary,
-  },
-  categoryName: {
-    color: theme.colors.onSurface,
-  },
-  activeCategoryName: {
-    color: theme.colors.onPrimaryContainer,
-  },
-  closedSurface: {
-    backgroundColor: theme.colors.errorContainer,
-  },
-  closedText: {
-    color: theme.colors.onErrorContainer,
-  },
-  ratingBadge: {
-    backgroundColor: theme.colors.surface,
-  },
-  featuredBadge: {
-    backgroundColor: theme.colors.tertiaryContainer,
-  },
-  restaurantName: {
-    color: theme.colors.onSurface,
-  },
-  restaurantCuisine: {
-    color: theme.colors.onSurfaceVariant,
-  },
-  detailText: {
-    color: theme.colors.onSurfaceVariant,
-  },
-  pickupChip: {
-    backgroundColor: theme.colors.secondaryContainer,
   },
   modalContent: {
     backgroundColor: theme.colors.surface,
   },
   modalTitle: {
     color: theme.colors.onSurface,
-  },
-  fab: {
-    backgroundColor: theme.colors.primary,
   },
 });
 

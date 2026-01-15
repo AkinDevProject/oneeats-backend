@@ -6,31 +6,22 @@ import {
   ScrollView,
   Alert,
   Share,
-  Linking,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
-  Surface,
   Button,
-  Card,
-  Switch,
-  List,
-  Divider,
   Dialog,
   Portal,
-  RadioButton,
-  Chip,
-  IconButton,
-  TextInput,
+  TouchableRipple,
 } from 'react-native-paper';
 import { router } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeIn,
   FadeInDown,
-  SlideInRight,
 } from 'react-native-reanimated';
 
 import { useAuth } from '../../src/contexts/AuthContext';
@@ -38,48 +29,20 @@ import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useFavorites } from '../../src/hooks/useFavorites';
 
-type AccountSection = 'profile' | 'orders' | 'favorites' | 'settings' | 'support';
-
-export default function ProfileMVP() {
-  console.log('📋 Profile page rendering');
-
-  const [activeSection, setActiveSection] = useState<AccountSection | null>(null);
+export default function ProfilePage() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { user, logout } = useAuth();
-  const { currentTheme, selectedTheme, themeMetadata } = useAppTheme();
+  const { currentTheme } = useAppTheme();
   const { orders } = useOrder();
   const { favorites } = useFavorites();
 
   // Compteurs
+  const totalOrders = orders.length;
   const activeOrdersCount = orders.filter(o =>
     ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)
   ).length;
   const favoritesCount = favorites.length;
-
-  // Handlers pour les sections
-  const handleSectionPress = (section: AccountSection) => {
-    setActiveSection(section);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    switch (section) {
-      case 'profile':
-        router.push('/account');
-        break;
-      case 'orders':
-        router.push('/orders');
-        break;
-      case 'favorites':
-        router.push('/(tabs)/favorites');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'support':
-        router.push('/aide-support');
-        break;
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -93,217 +56,298 @@ export default function ProfileMVP() {
   };
 
   const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await Share.share({
-        message: 'Découvrez OneEats, votre app de livraison de repas préférée !',
-        title: 'OneEats - Livraison de repas',
+        message: 'Découvre OneEats ! Commande tes plats préférés et récupère-les rapidement. 🍔🍕',
       });
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de partager');
+      // Ignore
     }
   };
 
-  // Handler pour la connexion SSO
   const handleLogin = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push('/auth/login');
   };
 
-  // Render du menu principal
-  const renderMainMenu = () => (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Section connexion si pas authentifié */}
-      {!user && (
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content style={styles.loginCardContent}>
-              <View style={styles.userAvatar}>
-                <MaterialIcons name="account-circle" size={60} color={currentTheme.colors.outline} />
-              </View>
-              <Text style={[styles.loginTitle, { color: currentTheme.colors.onSurface }]}>
-                Bienvenue sur OneEats
+  // Menu item component
+  const MenuItem = ({
+    icon,
+    label,
+    subtitle,
+    onPress,
+    badge,
+    iconBg = '#F5F5F5',
+    delay = 0
+  }: {
+    icon: string;
+    label: string;
+    subtitle?: string;
+    onPress: () => void;
+    badge?: number;
+    iconBg?: string;
+    delay?: number;
+  }) => (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
+      <TouchableRipple
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+        borderless
+        style={styles.menuItem}
+      >
+        <View style={styles.menuItemContent}>
+          <View style={[styles.menuIconContainer, { backgroundColor: iconBg }]}>
+            <Text style={styles.menuIcon}>{icon}</Text>
+          </View>
+          <View style={styles.menuTextContainer}>
+            <Text style={[styles.menuLabel, { color: currentTheme.colors.onSurface }]}>
+              {label}
+            </Text>
+            {subtitle && (
+              <Text style={[styles.menuSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                {subtitle}
               </Text>
-              <Text style={[styles.loginSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Connectez-vous pour accéder à votre compte
-              </Text>
-              <Button
-                mode="contained"
-                icon="login"
-                onPress={handleLogin}
-                style={styles.loginButton}
-                buttonColor={currentTheme.colors.primary}
-              >
-                Se connecter
-              </Button>
-            </Card.Content>
-          </Card>
-        </Animated.View>
-      )}
-
-      {/* Profil utilisateur */}
-      {user && (
-        <Animated.View entering={FadeInDown.delay(100).springify()}>
-          <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content style={styles.userCardContent}>
-              <View style={styles.userAvatar}>
-                <MaterialIcons name="account-circle" size={60} color={currentTheme.colors.primary} />
-              </View>
-              <View style={styles.userInfo}>
-                <Text style={[styles.userName, { color: currentTheme.colors.onSurface }]}>
-                  {user.name || 'Utilisateur OneEats'}
-                </Text>
-                <Text style={[styles.userEmail, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  {user.email}
-                </Text>
-                <View style={styles.userStats}>
-                  <Chip mode="outlined" compact style={styles.statChip}>
-                    12 commandes
-                  </Chip>
-                  <Chip mode="outlined" compact style={styles.statChip}>
-                    ⭐ 4.8
-                  </Chip>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-        </Animated.View>
-      )}
-
-      {/* Profil Personnel */}
-      <Animated.View entering={FadeInDown.delay(200).springify()}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Item
-            title="Profil Personnel"
-            description="Informations et préférences de compte"
-            left={(props) => <List.Icon {...props} icon="account-circle" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('profile')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Mes Commandes */}
-      <Animated.View entering={FadeInDown.delay(250).springify()}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Item
-            title="Mes Commandes"
-            description={activeOrdersCount > 0 ? `${activeOrdersCount} commande${activeOrdersCount > 1 ? 's' : ''} en cours` : 'Historique et suivi'}
-            left={(props) => <List.Icon {...props} icon="receipt-long" color={currentTheme.colors.primary} />}
-            right={(props) => (
-              <View style={styles.listItemRight}>
-                {activeOrdersCount > 0 && (
-                  <Chip
-                    compact
-                    style={[styles.badge, { backgroundColor: currentTheme.colors.primaryContainer }]}
-                    textStyle={{ color: currentTheme.colors.onPrimaryContainer, fontSize: 12 }}
-                  >
-                    {activeOrdersCount}
-                  </Chip>
-                )}
-                <List.Icon {...props} icon="chevron-right" />
+            )}
+          </View>
+          <View style={styles.menuRight}>
+            {badge !== undefined && badge > 0 && (
+              <View style={[styles.badge, { backgroundColor: currentTheme.colors.primary }]}>
+                <Text style={styles.badgeText}>{badge}</Text>
               </View>
             )}
-            onPress={() => handleSectionPress('orders')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Mes Favoris */}
-      <Animated.View entering={FadeInDown.delay(300).springify()}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Item
-            title="Mes Favoris"
-            description={favoritesCount > 0 ? `${favoritesCount} restaurant${favoritesCount > 1 ? 's' : ''} favori${favoritesCount > 1 ? 's' : ''}` : 'Vos restaurants préférés'}
-            left={(props) => <List.Icon {...props} icon="heart" color={currentTheme.colors.error} />}
-            right={(props) => (
-              <View style={styles.listItemRight}>
-                {favoritesCount > 0 && (
-                  <Chip
-                    compact
-                    style={[styles.badge, { backgroundColor: currentTheme.colors.errorContainer }]}
-                    textStyle={{ color: currentTheme.colors.onErrorContainer, fontSize: 12 }}
-                  >
-                    {favoritesCount}
-                  </Chip>
-                )}
-                <List.Icon {...props} icon="chevron-right" />
-              </View>
-            )}
-            onPress={() => handleSectionPress('favorites')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Paramètres Avancés */}
-      <Animated.View entering={FadeInDown.delay(350).springify()}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Item
-            title="Paramètres Avancés"
-            description={`${themeMetadata?.[selectedTheme]?.emoji || '🎨'} ${themeMetadata?.[selectedTheme]?.name || 'Configuration'}`}
-            left={(props) => <List.Icon {...props} icon="settings" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('settings')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Aide & Support */}
-      <Animated.View entering={FadeInDown.delay(400).springify()}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Item
-            title="Aide & Support"
-            description="FAQ, contact et assistance"
-            left={(props) => <List.Icon {...props} icon="help-outline" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('support')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Déconnexion */}
-      {user && (
-        <Animated.View entering={FadeInDown.delay(450).springify()}>
-          <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content>
-              <Button
-                mode="outlined"
-                icon="logout"
-                onPress={() => setShowLogoutDialog(true)}
-                style={[styles.logoutButton, { borderColor: currentTheme.colors.error }]}
-                textColor={currentTheme.colors.error}
-              >
-                Se déconnecter
-              </Button>
-            </Card.Content>
-          </Card>
-        </Animated.View>
-      )}
-
-      {/* Version */}
-      <Animated.View entering={FadeIn.delay(500)}>
-        <View style={styles.versionContainer}>
-          <Text style={[styles.versionText, { color: currentTheme.colors.onSurfaceVariant }]}>
-            OneEats v1.0.0 (Build 1)
-          </Text>
-          <Text style={[styles.versionText, { color: currentTheme.colors.onSurfaceVariant }]}>
-            © 2024 OneEats. Tous droits réservés.
-          </Text>
+            <Text style={[styles.chevron, { color: currentTheme.colors.onSurfaceVariant }]}>›</Text>
+          </View>
         </View>
-      </Animated.View>
-    </ScrollView>
+      </TouchableRipple>
+    </Animated.View>
+  );
+
+  // Section header
+  const SectionHeader = ({ title, delay = 0 }: { title: string; delay?: number }) => (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
+      <Text style={[styles.sectionHeader, { color: currentTheme.colors.onSurfaceVariant }]}>
+        {title}
+      </Text>
+    </Animated.View>
   );
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.colors.background }]}>
       <StatusBar style="auto" />
 
-      <Animated.View entering={SlideInRight} style={styles.content}>
-        {renderMainMenu()}
-      </Animated.View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header avec profil */}
+        <Animated.View
+          entering={FadeIn.duration(500)}
+          style={[styles.header, { backgroundColor: currentTheme.colors.primary }]}
+        >
+          {user ? (
+            <>
+              {/* Avatar */}
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.editAvatarButton}
+                  onPress={() => router.push('/account')}
+                >
+                  <Text style={{ fontSize: 12 }}>✏️</Text>
+                </TouchableOpacity>
+              </View>
 
-      {/* Dialogs */}
+              {/* Nom et email */}
+              <Text style={styles.userName}>{user.name || 'Utilisateur'}</Text>
+              <Text style={styles.userEmail}>{user.email}</Text>
+
+              {/* Stats rapides */}
+              <View style={styles.statsContainer}>
+                <TouchableOpacity
+                  style={styles.statItem}
+                  onPress={() => router.push('/orders')}
+                >
+                  <Text style={styles.statNumber}>{totalOrders}</Text>
+                  <Text style={styles.statLabel}>Commandes</Text>
+                </TouchableOpacity>
+                <View style={styles.statDivider} />
+                <TouchableOpacity
+                  style={styles.statItem}
+                  onPress={() => router.push('/(tabs)/favorites')}
+                >
+                  <Text style={styles.statNumber}>{favoritesCount}</Text>
+                  <Text style={styles.statLabel}>Favoris</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              {/* Non connecté */}
+              <View style={styles.avatarContainer}>
+                <View style={[styles.avatar, { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
+                  <Text style={styles.avatarText}>👤</Text>
+                </View>
+              </View>
+              <Text style={styles.userName}>Bienvenue !</Text>
+              <Text style={styles.userEmail}>Connectez-vous pour profiter de toutes les fonctionnalités</Text>
+              <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                <Text style={styles.loginButtonText}>Se connecter</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </Animated.View>
+
+        {/* Commande en cours */}
+        {activeOrdersCount > 0 && (
+          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+            <TouchableRipple
+              onPress={() => router.push('/orders')}
+              borderless
+              style={[styles.activeOrderBanner, { backgroundColor: '#FFF3E0' }]}
+            >
+              <View style={styles.activeOrderContent}>
+                <Text style={{ fontSize: 24 }}>🍳</Text>
+                <View style={styles.activeOrderText}>
+                  <Text style={styles.activeOrderTitle}>Commande en cours</Text>
+                  <Text style={styles.activeOrderSubtitle}>
+                    {activeOrdersCount} commande{activeOrdersCount > 1 ? 's' : ''} en préparation
+                  </Text>
+                </View>
+                <Text style={{ color: '#E65100', fontSize: 18 }}>›</Text>
+              </View>
+            </TouchableRipple>
+          </Animated.View>
+        )}
+
+        {/* Section Mon Compte */}
+        <SectionHeader title="MON COMPTE" delay={150} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="👤"
+            label="Profil personnel"
+            subtitle="Informations et préférences"
+            iconBg="#E3F2FD"
+            onPress={() => router.push('/account')}
+            delay={200}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="📋"
+            label="Mes commandes"
+            subtitle="Historique et suivi"
+            iconBg="#E8F5E9"
+            badge={activeOrdersCount}
+            onPress={() => router.push('/orders')}
+            delay={250}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="❤️"
+            label="Mes favoris"
+            subtitle={`${favoritesCount} restaurant${favoritesCount > 1 ? 's' : ''}`}
+            iconBg="#FCE4EC"
+            onPress={() => router.push('/(tabs)/favorites')}
+            delay={300}
+          />
+        </View>
+
+        {/* Section Préférences */}
+        <SectionHeader title="PRÉFÉRENCES" delay={350} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="⚙️"
+            label="Paramètres"
+            subtitle="Notifications, thème, langue"
+            iconBg="#F3E5F5"
+            onPress={() => router.push('/settings')}
+            delay={400}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="📍"
+            label="Adresses"
+            subtitle="Gérer mes adresses de retrait"
+            iconBg="#FFF3E0"
+            onPress={() => router.push('/account')}
+            delay={450}
+          />
+        </View>
+
+        {/* Section Autres */}
+        <SectionHeader title="AUTRES" delay={500} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="🎁"
+            label="Inviter des amis"
+            subtitle="Partagez l'app et gagnez des réductions"
+            iconBg="#E8F5E9"
+            onPress={handleShare}
+            delay={550}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="❓"
+            label="Aide & Support"
+            subtitle="FAQ, contact, signaler un problème"
+            iconBg="#E3F2FD"
+            onPress={() => router.push('/aide-support')}
+            delay={600}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="⭐"
+            label="Noter l'application"
+            subtitle="Donnez-nous votre avis"
+            iconBg="#FFF8E1"
+            onPress={() => Alert.alert('Merci !', 'Redirection vers le store...')}
+            delay={650}
+          />
+        </View>
+
+        {/* Déconnexion */}
+        {user && (
+          <Animated.View entering={FadeInDown.delay(700).duration(400)}>
+            <TouchableRipple
+              onPress={() => setShowLogoutDialog(true)}
+              borderless
+              style={[styles.logoutButton, { backgroundColor: currentTheme.colors.surface }]}
+            >
+              <View style={styles.logoutContent}>
+                <Text style={{ fontSize: 18 }}>🚪</Text>
+                <Text style={[styles.logoutText, { color: '#D32F2F' }]}>
+                  Se déconnecter
+                </Text>
+              </View>
+            </TouchableRipple>
+          </Animated.View>
+        )}
+
+        {/* Version */}
+        <Animated.View entering={FadeIn.delay(750)}>
+          <View style={styles.versionContainer}>
+            <Text style={[styles.versionText, { color: currentTheme.colors.onSurfaceVariant }]}>
+              OneEats v1.0.0
+            </Text>
+            <Text style={[styles.versionSubtext, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Fait avec ❤️ à Paris
+            </Text>
+          </View>
+        </Animated.View>
+      </ScrollView>
+
+      {/* Dialog déconnexion */}
       <Portal>
-        {/* Dialog déconnexion */}
         <Dialog visible={showLogoutDialog} onDismiss={() => setShowLogoutDialog(false)}>
           <Dialog.Title>Se déconnecter</Dialog.Title>
           <Dialog.Content>
@@ -311,7 +355,9 @@ export default function ProfileMVP() {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setShowLogoutDialog(false)}>Annuler</Button>
-            <Button mode="contained" onPress={handleLogout}>Se déconnecter</Button>
+            <Button mode="contained" onPress={handleLogout} buttonColor="#D32F2F">
+              Déconnexion
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -323,112 +369,235 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  // Header
   header: {
+    paddingTop: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    alignItems: 'center',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 2,
+  avatarText: {
+    fontSize: 32,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  content: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  userCard: {
-    marginBottom: 16,
-    borderRadius: 12,
-  },
-  userCardContent: {
-    flexDirection: 'row',
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: -4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
     alignItems: 'center',
-  },
-  loginCardContent: {
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  loginTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  loginSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  loginButton: {
-    marginTop: 8,
-    paddingHorizontal: 24,
-  },
-  userAvatar: {
-    marginRight: 16,
-  },
-  userInfo: {
-    flex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '700',
+    color: '#FFF',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
-    marginBottom: 8,
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
-  userStats: {
+  // Stats
+  statsContainer: {
     flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+  },
+  statItem: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  statNumber: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  // Login button
+  loginButton: {
+    backgroundColor: '#FFF',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginTop: 8,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#00CCBC',
+  },
+  // Active order banner
+  activeOrderBanner: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  activeOrderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  activeOrderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  activeOrderTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#E65100',
+  },
+  activeOrderSubtitle: {
+    fontSize: 13,
+    color: '#F57C00',
+    marginTop: 2,
+  },
+  // Sections
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginTop: 24,
+    marginBottom: 8,
+    marginHorizontal: 20,
+  },
+  menuSection: {
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuIcon: {
+    fontSize: 22,
+  },
+  menuTextContainer: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  menuLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  menuSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  menuRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
-  statChip: {
-    height: 28,
+  badge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
   },
-  menuCard: {
-    marginBottom: 12,
-    borderRadius: 12,
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFF',
   },
-  sectionCard: {
-    marginBottom: 12,
-    borderRadius: 12,
+  chevron: {
+    fontSize: 22,
+    fontWeight: '300',
   },
-  listItemRight: {
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginLeft: 74,
+  },
+  // Logout
+  logoutButton: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  logoutContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 10,
   },
-  badge: {
-    height: 24,
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  logoutButton: {
-    borderRadius: 8,
-  },
+  // Version
   versionContainer: {
     alignItems: 'center',
-    paddingVertical: 20,
+    marginTop: 30,
     paddingHorizontal: 16,
   },
   versionText: {
+    fontSize: 13,
+  },
+  versionSubtext: {
     fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 4,
+    marginTop: 4,
   },
 });
