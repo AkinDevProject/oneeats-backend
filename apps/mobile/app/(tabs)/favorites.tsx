@@ -15,6 +15,8 @@ import { StatusBar } from 'expo-status-bar';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useFavorites } from '../../src/hooks/useFavorites';
+import { useAppTheme } from '../../src/contexts/ThemeContext';
+import EmptyState from '../../src/components/ui/EmptyState';
 
 // Interface pour un restaurant
 interface Restaurant {
@@ -41,6 +43,7 @@ interface UserFavorite {
 
 export default function Favorites() {
   const { favorites, isLoading, toggleFavorite, refreshFavorites } = useFavorites();
+  const { currentTheme } = useAppTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -84,7 +87,7 @@ export default function Favorites() {
     const { restaurant } = favorite;
 
     return (
-      <View style={styles.restaurantCard}>
+      <View style={[styles.restaurantCard, { backgroundColor: currentTheme.colors.surface }]}>
         <TouchableOpacity
           style={styles.cardContent}
           onPress={() => navigateToRestaurant(restaurant)}
@@ -95,8 +98,8 @@ export default function Favorites() {
             {restaurant.imageUrl ? (
               <Image source={{ uri: restaurant.imageUrl }} style={styles.restaurantImage} />
             ) : (
-              <View style={styles.placeholderImage}>
-                <MaterialIcons name="restaurant" size={40} color="#ccc" />
+              <View style={[styles.placeholderImage, { backgroundColor: currentTheme.colors.surfaceVariant }]}>
+                <MaterialIcons name="restaurant" size={40} color={currentTheme.colors.onSurfaceVariant} />
               </View>
             )}
             {!restaurant.isOpen && (
@@ -108,28 +111,28 @@ export default function Favorites() {
 
           {/* Informations du restaurant */}
           <View style={styles.restaurantInfo}>
-            <Text style={styles.restaurantName}>{restaurant.name}</Text>
-            <Text style={styles.cuisine}>{restaurant.cuisine}</Text>
+            <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>{restaurant.name}</Text>
+            <Text style={[styles.cuisine, { color: currentTheme.colors.onSurfaceVariant }]}>{restaurant.cuisine}</Text>
 
             <View style={styles.statsRow}>
               <View style={styles.rating}>
                 <MaterialIcons name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>
+                <Text style={[styles.ratingText, { color: currentTheme.colors.onSurface }]}>
                   {restaurant.rating} ({restaurant.reviewCount})
                 </Text>
               </View>
               {restaurant.distance && (
-                <Text style={styles.distance}>{restaurant.distance}</Text>
+                <Text style={[styles.distance, { color: currentTheme.colors.onSurfaceVariant }]}>{restaurant.distance}</Text>
               )}
             </View>
 
             <View style={styles.deliveryInfo}>
               <View style={styles.deliveryTime}>
-                <MaterialIcons name="access-time" size={14} color="#666" />
-                <Text style={styles.deliveryText}>{restaurant.deliveryTime}</Text>
+                <MaterialIcons name="access-time" size={14} color={currentTheme.colors.onSurfaceVariant} />
+                <Text style={[styles.deliveryText, { color: currentTheme.colors.onSurfaceVariant }]}>{restaurant.deliveryTime}</Text>
               </View>
-              <Text style={styles.deliveryFee}>
-                Livraison {restaurant.deliveryFee === 0 ? 'gratuite' : `${restaurant.deliveryFee.toFixed(2)}€`}
+              <Text style={[styles.deliveryFee, { color: currentTheme.colors.primary }]}>
+                Retrait {restaurant.deliveryFee === 0 ? 'gratuit' : `${restaurant.deliveryFee.toFixed(2)}€`}
               </Text>
             </View>
           </View>
@@ -140,11 +143,11 @@ export default function Favorites() {
           style={styles.removeButton}
           onPress={() => removeFavorite(restaurant.id, restaurant.name)}
         >
-          <MaterialIcons name="favorite" size={24} color="#FF3B30" />
+          <MaterialIcons name="favorite" size={24} color={currentTheme.colors.error} />
         </TouchableOpacity>
       </View>
     );
-  }, [removeFavorite]);
+  }, [removeFavorite, currentTheme]);
 
   // Transformer les données du contexte en format UserFavorite pour compatibilité
   const transformedFavorites: UserFavorite[] = favorites.map((fav) => ({
@@ -169,58 +172,52 @@ export default function Favorites() {
   // Affichage du loading
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="dark" backgroundColor="#ffffff" />
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Mes Favoris</Text>
-          <View style={styles.headerSpacer} />
+      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+        <StatusBar style="auto" />
+        <View style={[styles.header, { backgroundColor: currentTheme.colors.surface }]}>
+          <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>Mes Favoris</Text>
         </View>
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>Chargement de vos favoris...</Text>
+          <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+          <Text style={[styles.loadingText, { color: currentTheme.colors.onSurfaceVariant }]}>
+            Chargement de vos favoris...
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+      <StatusBar style="auto" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mes Favoris</Text>
+      <View style={[styles.header, { backgroundColor: currentTheme.colors.surface }]}>
+        <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>Mes Favoris</Text>
       </View>
 
       {/* Contenu */}
       {transformedFavorites.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <MaterialIcons name="favorite-border" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>Aucun favori</Text>
-          <Text style={styles.emptyText}>
-            Vous n'avez pas encore ajouté de restaurants à vos favoris.{'\n'}
-            Explorez les restaurants et ajoutez vos préférés !
-          </Text>
-          <TouchableOpacity style={styles.exploreButton} onPress={() => router.push('/')}>
-            <Text style={styles.exploreText}>Explorer les restaurants</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyState
+          variant="favorites"
+          actionLabel="Découvrir les restaurants"
+          onAction={() => router.push('/(tabs)/')}
+        />
       ) : (
         <ScrollView
           style={styles.content}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={currentTheme.colors.primary}
+              colors={[currentTheme.colors.primary]}
+            />
           }
         >
-          <Text style={styles.favoritesCount}>
+          <Text style={[styles.favoritesCount, { color: currentTheme.colors.onSurfaceVariant }]}>
             {transformedFavorites.length} restaurant{transformedFavorites.length > 1 ? 's' : ''} favori{transformedFavorites.length > 1 ? 's' : ''}
           </Text>
 

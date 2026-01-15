@@ -8,11 +8,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCart } from '../../src/contexts/CartContext';
-import { useOrder } from '../../src/contexts/OrderContext';
 import { useNotification } from '../../src/contexts/NotificationContext';
 import { Badge } from 'react-native-paper';
+import AnimatedBadge from '../../src/components/ui/AnimatedBadge';
 
-// Custom badge component for tab bar
+// Custom badge component for tab bar (using AnimatedBadge)
 const TabBadge = ({ count, color }: { count: number; color: string }) => {
   if (count === 0) return null;
 
@@ -21,25 +21,9 @@ const TabBadge = ({ count, color }: { count: number; color: string }) => {
       position: 'absolute',
       right: -6,
       top: -3,
-      backgroundColor: color,
-      borderRadius: 10,
-      minWidth: 20,
-      height: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
       zIndex: 1,
     }}>
-      <Badge
-        size={16}
-        style={{
-          backgroundColor: color,
-          color: 'white',
-          fontSize: 10,
-          fontWeight: 'bold'
-        }}
-      >
-        {count > 99 ? '99+' : count.toString()}
-      </Badge>
+      <AnimatedBadge count={count} color={color} size="small" />
     </View>
   );
 };
@@ -74,13 +58,7 @@ const TabIcon = ({ name, focused, color, size = 26 }: {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { totalItems } = useCart();
-  const { currentOrder } = useOrder();
   const { unreadCount } = useNotification();
-
-  console.log('🔍 TabLayout rendering on platform:', Platform.OS);
-  console.log('🔍 Cart totalItems:', totalItems);
-  console.log('🔍 CurrentOrder:', currentOrder ? 'exists' : 'null');
-  console.log('🔍 UnreadCount:', unreadCount);
 
   return (
     <Tabs
@@ -97,86 +75,66 @@ export default function TabLayout() {
         }),
       }}>
 
-      {/* 🏠 ACCUEIL - Découverte restaurants */}
+      {/* 🏠 ACCUEIL - Découverte restaurants + Favoris intégrés */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Restaurants',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('🏠 Home tab icon rendering:', { color, focused, platform: Platform.OS });
-            return (
-              <View>
-                <TabIcon
-                  name={focused ? 'house.fill' : 'house'}
-                  focused={focused}
-                  color={color}
-                />
-              </View>
-            );
-          },
+          title: 'Accueil',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              name={focused ? 'house.fill' : 'house'}
+              focused={focused}
+              color={color}
+            />
+          ),
         }}
       />
 
-      {/* 🛒 PANIER & COMMANDES - Unifié pour MVP */}
+      {/* 🛒 PANIER - Focus conversion (pas de sous-onglets) */}
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Mes Commandes',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('🛒 Cart tab icon rendering:', { color, focused, platform: Platform.OS });
-            return (
-              <View style={{ position: 'relative' }}>
-                <TabIcon
-                  name={focused ? 'bag.fill' : 'bag'}
-                  focused={focused}
-                  color={color}
-                />
-                {(totalItems > 0 || currentOrder) && (
-                  <TabBadge count={totalItems + (currentOrder ? 1 : 0)} color="#00CCBC" />
-                )}
-              </View>
-            );
-          },
-        }}
-      />
-
-      {/* ❤️ FAVORIS - Restaurants favoris */}
-      <Tabs.Screen
-        name="favorites"
-        options={{
-          title: 'Favoris',
-          tabBarIcon: ({ color, focused }) => {
-            return (
+          title: 'Panier',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ position: 'relative' }}>
               <MaterialIcons
-                name={focused ? 'favorite' : 'favorite-border'}
+                name={focused ? 'shopping-cart' : 'shopping-cart'}
                 size={26}
                 color={color}
               />
-            );
-          },
+              {totalItems > 0 && (
+                <TabBadge count={totalItems} color="#00CCBC" />
+              )}
+            </View>
+          ),
         }}
       />
 
-      {/* 👤 PROFIL - Personnel & Paramètres */}
+      {/* 🚫 FAVORIS - Masqué de la tab bar (accessible depuis Accueil et Compte) */}
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          href: null, // Masque l'onglet de la tab bar
+        }}
+      />
+
+      {/* 👤 COMPTE - Profil + Commandes + Favoris + Paramètres */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Mon Compte',
-          tabBarIcon: ({ color, focused }) => {
-            console.log('👤 Profile tab icon rendering:', { color, focused, platform: Platform.OS });
-            return (
-              <View style={{ position: 'relative' }}>
-                <TabIcon
-                  name={focused ? 'person.crop.circle.fill' : 'person.crop.circle'}
-                  focused={focused}
-                  color={color}
-                />
-                {unreadCount > 0 && (
-                  <TabBadge count={unreadCount} color="#FF6D00" />
-                )}
-              </View>
-            );
-          },
+          title: 'Compte',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ position: 'relative' }}>
+              <TabIcon
+                name={focused ? 'person.crop.circle.fill' : 'person.crop.circle'}
+                focused={focused}
+                color={color}
+              />
+              {unreadCount > 0 && (
+                <TabBadge count={unreadCount} color="#FF6D00" />
+              )}
+            </View>
+          ),
         }}
       />
 

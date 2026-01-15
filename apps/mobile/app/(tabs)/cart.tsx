@@ -4,12 +4,10 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -17,15 +15,17 @@ import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
+  withSpring,
   FadeIn,
+  FadeInDown,
+  SlideInRight,
+  Layout,
 } from 'react-native-reanimated';
 import {
   Card,
   Button,
   TextInput,
-  Divider,
   Surface,
   Chip,
   Avatar,
@@ -34,15 +34,14 @@ import {
 import { router } from 'expo-router';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useRestaurant } from '../../src/hooks/useRestaurant';
-
-// Types pour les onglets MVP
-type MVPTabType = 'cart' | 'current' | 'history';
+import EmptyState from '../../src/components/ui/EmptyState';
 
 // Schéma de validation pour la commande
 const orderSchema = yup.object({
@@ -56,7 +55,7 @@ const orderSchema = yup.object({
 const getAvailableTimeSlots = () => {
   const now = new Date();
   const slots = [];
-  
+
   for (let i = 1; i <= 8; i++) {
     const time = new Date(now.getTime() + (i * 15 * 60000));
     const hours = time.getHours().toString().padStart(2, '0');
@@ -67,28 +66,30 @@ const getAvailableTimeSlots = () => {
       available: true,
     });
   }
-  
+
   return slots;
 };
 
-export default function CartMVP() {
-  const [activeTab, setActiveTab] = useState<MVPTabType>('cart');
+export default function CartScreen() {
   const [availableSlots] = useState(getAvailableTimeSlots());
   const [selectedPickupTime, setSelectedPickupTime] = useState(availableSlots[2]?.value);
   const [isLoading, setIsLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  
-  // Référence au ScrollView
+
   const scrollViewRef = React.useRef<ScrollView>(null);
 
-  const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart, createOrder } = useCart();
+  const { items, totalItems, totalPrice, updateQuantity, removeItem, createOrder } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const { addOrder, orders, currentOrder, refreshOrders } = useOrder();
+  const { addOrder, orders } = useOrder();
   const { currentTheme } = useAppTheme();
 
-  // Récupérer le restaurant du panier (si des items sont présents)
+  // Récupérer le restaurant du panier
   const cartRestaurantId = items.length > 0 ? items[0].menuItem.restaurantId : undefined;
   const { restaurant: cartRestaurant } = useRestaurant(cartRestaurantId);
+
+  // Nombre de commandes actives
+  const activeOrdersCount = orders.filter(o =>
+    ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)
+  ).length;
 
   const headerOpacity = useSharedValue(0);
 
@@ -96,7 +97,6 @@ export default function CartMVP() {
     headerOpacity.value = withTiming(1, { duration: 600 });
   }, []);
 
-  // Fonction pour faire défiler vers un champ
   const scrollToInput = (yOffset: number) => {
     scrollViewRef.current?.scrollTo({
       x: 0,
@@ -149,23 +149,18 @@ export default function CartMVP() {
       const restaurantId = items[0]?.menuItem.restaurantId;
       if (!restaurantId) throw new Error('Restaurant non trouvé');
 
-      // Passer les données client correctement structurées
       const customerData = {
         customerName: values.customerName,
         customerPhone: values.phoneNumber,
         pickupTime: selectedPickupTime,
       };
-      
+
       const order = await createOrder(restaurantId, values.specialInstructions || undefined, customerData);
       if (!order) throw new Error('Erreur création commande');
 
-      // addOrder créé la commande via l'API et retourne la commande avec l'ID réel
       const createdOrder = await addOrder(order);
-
-      // Navigation directe vers la page de suivi de commande avec l'ID réel
-      console.log('✅ Commande créée avec succès, navigation vers order/', createdOrder.id);
       router.push(`/order/${createdOrder.id}`);
-      
+
     } catch (error) {
       console.error('Erreur commande:', error);
       Alert.alert('Erreur', 'Impossible de créer la commande.');
@@ -174,136 +169,68 @@ export default function CartMVP() {
     }
   };
 
-  // Fonction de refresh pour pull-to-refresh
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await refreshOrders();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (error) {
-      console.error('Erreur refresh:', error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // Rendu des onglets
-  const renderTabs = () => (
-    <Surface style={styles.tabsContainer} elevation={1}>
-      <View style={styles.tabs}>
-        {[
-          { key: 'cart' as MVPTabType, title: 'Panier', count: totalItems },
-          { key: 'current' as MVPTabType, title: 'En cours', count: currentOrder ? 1 : 0 },
-          { key: 'history' as MVPTabType, title: 'Historique', count: orders.length },
-        ].map(({ key, title, count }) => (
-          <TouchableOpacity
-            key={key}
-            style={[
-              styles.tab,
-              activeTab === key && { backgroundColor: currentTheme.colors.primaryContainer }
-            ]}
-            onPress={() => {
-              setActiveTab(key);
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          >
-            <Text style={[
-              styles.tabText,
-              activeTab === key && { color: currentTheme.colors.onPrimaryContainer }
-            ]}>
-              {title}
-            </Text>
-            {count > 0 && (
-              <View style={[styles.tabBadge, { backgroundColor: currentTheme.colors.primary }]}>
-                <Text style={[styles.tabBadgeText, { color: currentTheme.colors.onPrimary }]}>
-                  {count > 99 ? '99+' : count}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ))}
-      </View>
-    </Surface>
+  // État vide - Panier vide
+  const renderEmptyCart = () => (
+    <EmptyState
+      variant="cart"
+      actionLabel="Découvrir les restaurants"
+      onAction={() => router.push('/(tabs)/' as any)}
+      secondaryActionLabel={activeOrdersCount > 0 ? `Voir mes commandes (${activeOrdersCount})` : undefined}
+      onSecondaryAction={activeOrdersCount > 0 ? () => router.push('/orders' as any) : undefined}
+    />
   );
 
-  // Rendu du panier
-  const renderCart = () => {
-    if (!items.length) {
-      return (
-        <View style={styles.emptyState}>
-          <Avatar.Icon size={80} icon="cart-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
-            Panier vide
-          </Text>
-          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Ajoutez des plats depuis un restaurant
-          </Text>
-          <Button
-            mode="contained"
-            onPress={() => router.push('/(tabs)/' as any)}
-            style={styles.emptyButton}
-            buttonColor={currentTheme.colors.primary}
+  // Contenu du panier avec articles
+  const renderCartContent = () => (
+    <Formik
+      initialValues={{
+        customerName: user?.name || '',
+        phoneNumber: user?.phone || '',
+        pickupTime: selectedPickupTime,
+        specialInstructions: '',
+      }}
+      validationSchema={orderSchema}
+      onSubmit={handleCreateOrder}
+    >
+      {({ handleChange, handleSubmit, values, errors, touched }) => (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        >
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.cartContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentInsetAdjustmentBehavior="automatic"
           >
-            Découvrir les restaurants
-          </Button>
-        </View>
-      );
-    }
-
-    return (
-      <Formik
-        initialValues={{
-          customerName: user?.name || '',
-          phoneNumber: user?.phone || '',
-          pickupTime: selectedPickupTime,
-          specialInstructions: '',
-        }}
-        validationSchema={orderSchema}
-        onSubmit={handleCreateOrder}
-      >
-        {({ handleChange, handleSubmit, values, errors, touched }) => (
-          <KeyboardAvoidingView 
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-          >
-            <ScrollView 
-              ref={scrollViewRef}
-              style={styles.cartContent} 
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentInsetAdjustmentBehavior="automatic"
-            >
-            {/* Bouton retour restaurant */}
-            {items.length > 0 && (
-              <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-                <Card.Content>
-                  <View style={styles.restaurantInfo}>
-                    <View style={styles.restaurantDetails}>
-                      <Text style={[styles.restaurantLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
-                        Commande chez
-                      </Text>
-                      <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>
-                        {cartRestaurant?.name || 'Restaurant'}
-                      </Text>
-                    </View>
-                    <Button
-                      mode="contained"
-                      onPress={() => {
-                        const restaurantId = items[0].menuItem.restaurantId;
-                        router.push(`/restaurant/${restaurantId}` as any);
-                      }}
-                      style={styles.continueShoppingButton}
-                      buttonColor={currentTheme.colors.primary}
-                      icon="plus"
-                    >
-                      Ajouter des plats
-                    </Button>
+            {/* Restaurant source */}
+            <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
+              <Card.Content>
+                <View style={styles.restaurantInfo}>
+                  <View style={styles.restaurantDetails}>
+                    <Text style={[styles.restaurantLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                      Commande chez
+                    </Text>
+                    <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>
+                      {cartRestaurant?.name || 'Restaurant'}
+                    </Text>
                   </View>
-                </Card.Content>
-              </Card>
-            )}
+                  <Button
+                    mode="outlined"
+                    onPress={() => {
+                      const restaurantId = items[0].menuItem.restaurantId;
+                      router.push(`/restaurant/${restaurantId}` as any);
+                    }}
+                    style={styles.addMoreButton}
+                    icon="plus"
+                  >
+                    Ajouter
+                  </Button>
+                </View>
+              </Card.Content>
+            </Card>
 
             {/* Articles du panier */}
             <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
@@ -311,13 +238,18 @@ export default function CartMVP() {
                 <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
                   Vos articles ({totalItems})
                 </Text>
-                {items.map((item) => (
-                  <View key={item.id} style={styles.cartItem}>
+                {items.map((item, index) => (
+                  <Animated.View
+                    key={item.id}
+                    entering={FadeInDown.delay(index * 50).springify()}
+                    layout={Layout.springify()}
+                    style={styles.cartItem}
+                  >
                     <View style={styles.itemInfo}>
                       <Text style={[styles.itemName, { color: currentTheme.colors.onSurface }]}>
                         {item.menuItem.name}
                       </Text>
-                      {/* Affichage des options choisies */}
+                      {/* Options choisies */}
                       {item.options && item.options.length > 0 && (
                         <View style={styles.optionsContainer}>
                           {item.options.map((option) => (
@@ -353,23 +285,14 @@ export default function CartMVP() {
                         onPress={() => handleQuantityChange(item.id, item.quantity + 1)}
                         style={styles.quantityButton}
                       />
-                      {/* Bouton modifier pour les items avec options disponibles */}
-                      {item.menuItem.options && item.menuItem.options.length > 0 && (
-                        <IconButton
-                          icon="pencil"
-                          size={20}
-                          onPress={() => router.push(`/menu/${item.menuItem.id}?editItemId=${item.id}` as any)}
-                          iconColor={currentTheme.colors.primary}
-                        />
-                      )}
                       <IconButton
-                        icon="delete"
+                        icon="delete-outline"
                         size={20}
                         onPress={() => handleRemoveItem(item.id)}
                         iconColor={currentTheme.colors.error}
                       />
                     </View>
-                  </View>
+                  </Animated.View>
                 ))}
               </Card.Content>
             </Card>
@@ -378,7 +301,7 @@ export default function CartMVP() {
             <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
               <Card.Content>
                 <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-                  ⏰ Heure de récupération
+                  Heure de retrait
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <View style={styles.timeSlotsContainer}>
@@ -387,8 +310,11 @@ export default function CartMVP() {
                         key={slot.value}
                         selected={selectedPickupTime === slot.value}
                         onPress={() => setSelectedPickupTime(slot.value)}
-                        style={styles.timeSlot}
-                        selectedColor={currentTheme.colors.onPrimaryContainer}
+                        style={[
+                          styles.timeSlot,
+                          selectedPickupTime === slot.value && { backgroundColor: currentTheme.colors.primaryContainer }
+                        ]}
+                        textStyle={selectedPickupTime === slot.value ? { color: currentTheme.colors.onPrimaryContainer } : undefined}
                         showSelectedOverlay={false}
                       >
                         {slot.label}
@@ -403,49 +329,57 @@ export default function CartMVP() {
             <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
               <Card.Content>
                 <Text style={[styles.sectionTitle, { color: currentTheme.colors.onSurface }]}>
-                  📞 Vos informations
+                  Vos informations
                 </Text>
                 <TextInput
                   label="Nom complet"
                   value={values.customerName}
                   onChangeText={handleChange('customerName')}
-                  onFocus={() => scrollToInput(250)}
+                  onFocus={() => scrollToInput(400)}
                   returnKeyType="next"
-                  returnKeyLabel="Suivant"
                   style={styles.input}
+                  mode="outlined"
                   error={touched.customerName && !!errors.customerName}
                 />
                 <TextInput
                   label="Numéro de téléphone"
                   value={values.phoneNumber}
                   onChangeText={handleChange('phoneNumber')}
-                  onFocus={() => scrollToInput(320)}
+                  onFocus={() => scrollToInput(480)}
                   keyboardType="phone-pad"
                   returnKeyType="next"
-                  returnKeyLabel="Suivant"
                   style={styles.input}
+                  mode="outlined"
                   error={touched.phoneNumber && !!errors.phoneNumber}
                 />
                 <TextInput
                   label="Instructions spéciales (optionnel)"
                   value={values.specialInstructions}
                   onChangeText={handleChange('specialInstructions')}
-                  onFocus={() => scrollToInput(400)}
+                  onFocus={() => scrollToInput(560)}
                   multiline
-                  numberOfLines={3}
+                  numberOfLines={2}
                   returnKeyType="done"
-                  returnKeyLabel="Terminé"
                   blurOnSubmit={true}
                   onSubmitEditing={() => Keyboard.dismiss()}
                   style={styles.input}
+                  mode="outlined"
                 />
               </Card.Content>
             </Card>
 
-            {/* Total et validation */}
+            {/* Récapitulatif et validation */}
             <Card style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
               <Card.Content>
-                <View style={styles.totalRow}>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    Sous-total
+                  </Text>
+                  <Text style={[styles.summaryValue, { color: currentTheme.colors.onSurface }]}>
+                    {totalPrice.toFixed(2)}€
+                  </Text>
+                </View>
+                <View style={[styles.totalRow, { borderTopColor: currentTheme.colors.outlineVariant }]}>
                   <Text style={[styles.totalLabel, { color: currentTheme.colors.onSurface }]}>
                     Total
                   </Text>
@@ -461,217 +395,66 @@ export default function CartMVP() {
                   style={styles.checkoutButton}
                   buttonColor={currentTheme.colors.primary}
                   contentStyle={styles.checkoutButtonContent}
+                  icon="check"
                 >
-                  Confirmer la commande - {selectedPickupTime}
+                  Commander • Retrait {selectedPickupTime}
                 </Button>
               </Card.Content>
             </Card>
-            
-            {/* Espace en bas */}
-            <View style={{ height: 50 }} />
-            </ScrollView>
-          </KeyboardAvoidingView>
-        )}
-      </Formik>
-    );
-  };
 
-  // Rendu commandes en cours
-  const renderCurrentOrders = () => {
-    if (!currentOrder && orders.filter(o => ['pending', 'preparing', 'ready'].includes(o.status)).length === 0) {
-      return (
-        <View style={styles.emptyState}>
-          <Avatar.Icon size={80} icon="clock-outline" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
-            Aucune commande en cours
-          </Text>
-          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Vos commandes actives apparaîtront ici
-          </Text>
-        </View>
-      );
-    }
-
-    const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status));
-
-    return (
-      <ScrollView
-        style={styles.ordersContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={currentTheme.colors.primary}
-            colors={[currentTheme.colors.primary]}
-          />
-        }
-      >
-        {activeOrders.map((order) => (
-          <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content>
-              <View style={styles.orderHeader}>
-                <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
-                  {order.restaurant?.name || 'Restaurant'}
-                </Text>
-                <Chip
-                  icon={
-                    order.status === 'ready' ? 'check' :
-                    order.status === 'confirmed' ? 'check-circle' :
-                    order.status === 'preparing' ? 'chef-hat' :
-                    'clock'
-                  }
-                  style={{
-                    backgroundColor:
-                      order.status === 'pending' ? '#FED7AA' :      // Orange clair comme dashboard
-                      order.status === 'confirmed' ? '#A7F3D0' :    // Vert émeraude clair comme dashboard
-                      order.status === 'preparing' ? '#FDE68A' :    // Jaune clair comme dashboard
-                      order.status === 'ready' ? '#BBF7D0' :        // Vert clair comme dashboard
-                      currentTheme.colors.secondary
-                  }}
-                  textStyle={{
-                    color:
-                      order.status === 'pending' ? '#9A3412' :       // Orange foncé comme dashboard
-                      order.status === 'confirmed' ? '#047857' :     // Vert émeraude foncé comme dashboard
-                      order.status === 'preparing' ? '#92400E' :     // Jaune foncé comme dashboard
-                      order.status === 'ready' ? '#166534' :         // Vert foncé comme dashboard
-                      currentTheme.colors.onSurface
-                  }}
-                >
-                  {order.status === 'pending' ? '⏳ En attente' :
-                   order.status === 'confirmed' ? '✅ Confirmée' :
-                   order.status === 'preparing' ? '👨‍🍳 En préparation' :
-                   order.status === 'ready' ? '✅ Prête !' :
-                   'Statut inconnu'}
-                </Chip>
-              </View>
-              <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Commande #{order.orderNumber ? order.orderNumber.split('-').pop() : order.id.substring(0, 8)} • {(order.total || 0).toFixed(2)}€
-              </Text>
+            {/* Lien vers les commandes */}
+            <View style={styles.ordersLinkContainer}>
               <Button
-                mode="outlined"
-                onPress={() => router.push(`/order/${order.id}`)}
-                style={styles.orderButton}
+                mode="text"
+                onPress={() => router.push('/orders' as any)}
+                textColor={currentTheme.colors.primary}
+                icon="clipboard-list"
               >
-                Voir les détails
+                Voir mes commandes
               </Button>
-            </Card.Content>
-          </Card>
-        ))}
-      </ScrollView>
-    );
-  };
+            </View>
 
-  // Rendu historique
-  const renderHistory = () => {
-    const completedOrders = orders.filter(o => ['completed', 'cancelled'].includes(o.status));
-
-    if (completedOrders.length === 0) {
-      return (
-        <View style={styles.emptyState}>
-          <Avatar.Icon size={80} icon="history" style={{ backgroundColor: currentTheme.colors.surfaceVariant }} />
-          <Text style={[styles.emptyTitle, { color: currentTheme.colors.onSurface }]}>
-            Pas d'historique
-          </Text>
-          <Text style={[styles.emptySubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Vos commandes terminées s'afficheront ici
-          </Text>
-        </View>
-      );
-    }
-
-    return (
-      <ScrollView
-        style={styles.ordersContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={currentTheme.colors.primary}
-            colors={[currentTheme.colors.primary]}
-          />
-        }
-      >
-        {completedOrders.map((order) => (
-          <Card key={order.id} style={[styles.card, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content>
-              <View style={styles.orderHeader}>
-                <Text style={[styles.orderTitle, { color: currentTheme.colors.onSurface }]}>
-                  {order.restaurant?.name || 'Restaurant'}
-                </Text>
-                <View style={styles.historyStatusContainer}>
-                  <Chip
-                    icon={order.status === 'completed' ? 'check' : 'close'}
-                    style={{
-                      backgroundColor: order.status === 'completed' ? '#BBF7D0' : '#FECACA',
-                      marginBottom: 4
-                    }}
-                    textStyle={{
-                      color: order.status === 'completed' ? '#166534' : '#DC2626',
-                      fontSize: 12
-                    }}
-                  >
-                    {order.status === 'completed' ? '✅ Récupérée' : '❌ Annulée'}
-                  </Chip>
-                  <Text style={[styles.orderDate, { color: currentTheme.colors.onSurfaceVariant }]}>
-                    {new Date(order.orderTime).toLocaleDateString()}
-                  </Text>
-                </View>
-              </View>
-              <Text style={[styles.orderSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-                {(order.total || 0).toFixed(2)}€ • {order.items?.length || 0} articles
-              </Text>
-              <View style={styles.historyActions}>
-                <Button
-                  mode="outlined"
-                  onPress={() => router.push(`/order/${order.id}`)}
-                  style={styles.historyButton}
-                >
-                  Voir détails
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={() => {
-                    // TODO: Ajouter reorder functionality
-                    Alert.alert('Recommander', 'Fonctionnalité bientôt disponible');
-                  }}
-                  style={styles.historyButton}
-                  buttonColor={currentTheme.colors.primary}
-                >
-                  Recommander
-                </Button>
-              </View>
-            </Card.Content>
-          </Card>
-        ))}
-      </ScrollView>
-    );
-  };
+            <View style={{ height: 100 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      )}
+    </Formik>
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
-      <StatusBar style="dark" backgroundColor={currentTheme.colors.background} />
-      
-        {/* Header */}
-        <Animated.View style={[styles.header, headerAnimatedStyle]}>
-          <Surface style={[styles.headerSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
-            <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
-              Mes Commandes
-            </Text>
-            <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Panier, suivi et historique
-            </Text>
-          </Surface>
-        </Animated.View>
+      <StatusBar style="auto" />
 
-        {/* Tabs */}
-        {renderTabs()}
+      {/* Header */}
+      <Animated.View style={[styles.header, headerAnimatedStyle]}>
+        <Surface style={[styles.headerSurface, { backgroundColor: currentTheme.colors.surface }]} elevation={1}>
+          <View style={styles.headerContent}>
+            <View>
+              <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
+                Votre Panier
+              </Text>
+              {totalItems > 0 && (
+                <Text style={[styles.headerSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  {totalItems} article{totalItems > 1 ? 's' : ''} • {totalPrice.toFixed(2)}€
+                </Text>
+              )}
+            </View>
+            {totalItems > 0 && (
+              <Avatar.Text
+                size={40}
+                label={totalItems.toString()}
+                style={{ backgroundColor: currentTheme.colors.primaryContainer }}
+                labelStyle={{ color: currentTheme.colors.onPrimaryContainer }}
+              />
+            )}
+          </View>
+        </Surface>
+      </Animated.View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          {activeTab === 'cart' && renderCart()}
-          {activeTab === 'current' && renderCurrentOrders()}
-          {activeTab === 'history' && renderHistory()}
-        </View>
+      {/* Content */}
+      <View style={styles.content}>
+        {items.length === 0 ? renderEmptyCart() : renderCartContent()}
+      </View>
     </SafeAreaView>
   );
 }
@@ -688,6 +471,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
@@ -696,41 +484,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
-  tabsContainer: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  tabs: {
-    flexDirection: 'row',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  tabBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 8,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
   content: {
     flex: 1,
     paddingHorizontal: 16,
@@ -738,153 +491,16 @@ const styles = StyleSheet.create({
   cartContent: {
     flex: 1,
   },
-  ordersContent: {
-    flex: 1,
-  },
   card: {
     marginBottom: 12,
     borderRadius: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  cartItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  itemInfo: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    margin: 0,
-  },
-  quantity: {
     fontSize: 16,
     fontWeight: '600',
-    marginHorizontal: 8,
-  },
-  timeSlotsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingVertical: 8,
-  },
-  timeSlot: {
-    marginRight: 8,
-  },
-  input: {
     marginBottom: 12,
   },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  totalPrice: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  checkoutButton: {
-    borderRadius: 12,
-  },
-  checkoutButtonContent: {
-    height: 50,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  emptyButton: {
-    marginTop: 24,
-    borderRadius: 12,
-  },
-  orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  orderTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    flex: 1,
-  },
-  orderSubtitle: {
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  orderDate: {
-    fontSize: 12,
-  },
-  orderButton: {
-    borderRadius: 8,
-  },
-  historyActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  historyButton: {
-    flex: 1,
-    borderRadius: 8,
-  },
-  historyStatusContainer: {
-    alignItems: 'flex-end',
-  },
-  // Nouveaux styles pour les options
-  optionsContainer: {
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  optionText: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    lineHeight: 16,
-  },
-  instructionsText: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  // Styles pour la section restaurant
+  // Restaurant info
   restaurantInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -903,7 +519,134 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  continueShoppingButton: {
+  addMoreButton: {
     borderRadius: 8,
+  },
+  // Cart items
+  cartItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  itemInfo: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  optionsContainer: {
+    marginTop: 4,
+  },
+  optionText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
+  instructionsText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  quantityButton: {
+    margin: 0,
+  },
+  quantity: {
+    fontSize: 16,
+    fontWeight: '600',
+    minWidth: 24,
+    textAlign: 'center',
+  },
+  // Time slots
+  timeSlotsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  timeSlot: {
+    marginRight: 4,
+  },
+  // Form inputs
+  input: {
+    marginBottom: 12,
+    backgroundColor: 'transparent',
+  },
+  // Summary
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 14,
+  },
+  summaryValue: {
+    fontSize: 14,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    marginTop: 8,
+    marginBottom: 16,
+    borderTopWidth: 1,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  totalPrice: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  checkoutButton: {
+    borderRadius: 12,
+  },
+  checkoutButtonContent: {
+    height: 52,
+  },
+  // Orders link
+  ordersLinkContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  ordersLink: {
+    marginTop: 16,
+  },
+  // Empty state
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  emptyButton: {
+    marginTop: 24,
+    borderRadius: 12,
   },
 });

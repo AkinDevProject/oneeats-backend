@@ -29,13 +29,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeIn,
+  FadeInDown,
   SlideInRight,
 } from 'react-native-reanimated';
 
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useOrder } from '../../src/contexts/OrderContext';
+import { useFavorites } from '../../src/hooks/useFavorites';
 
-type AccountSection = 'profile' | 'orders' | 'addresses' | 'payments' | 'settings' | 'support';
+type AccountSection = 'profile' | 'orders' | 'favorites' | 'settings' | 'support';
 
 export default function ProfileMVP() {
   console.log('📋 Profile page rendering');
@@ -45,16 +48,29 @@ export default function ProfileMVP() {
 
   const { user, logout } = useAuth();
   const { currentTheme, selectedTheme, themeMetadata } = useAppTheme();
+  const { orders } = useOrder();
+  const { favorites } = useFavorites();
+
+  // Compteurs
+  const activeOrdersCount = orders.filter(o =>
+    ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)
+  ).length;
+  const favoritesCount = favorites.length;
 
   // Handlers pour les sections
   const handleSectionPress = (section: AccountSection) => {
     setActiveSection(section);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    // Navigation directe pour certaines sections
     switch (section) {
       case 'profile':
         router.push('/account');
+        break;
+      case 'orders':
+        router.push('/orders');
+        break;
+      case 'favorites':
+        router.push('/(tabs)/favorites');
         break;
       case 'settings':
         router.push('/settings');
@@ -98,7 +114,7 @@ export default function ProfileMVP() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Section connexion si pas authentifié */}
       {!user && (
-        <Animated.View entering={FadeIn.delay(100)}>
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
           <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content style={styles.loginCardContent}>
               <View style={styles.userAvatar}>
@@ -126,7 +142,7 @@ export default function ProfileMVP() {
 
       {/* Profil utilisateur */}
       {user && (
-        <Animated.View entering={FadeIn.delay(100)}>
+        <Animated.View entering={FadeInDown.delay(100).springify()}>
           <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content style={styles.userCardContent}>
               <View style={styles.userAvatar}>
@@ -154,7 +170,7 @@ export default function ProfileMVP() {
       )}
 
       {/* Profil Personnel */}
-      <Animated.View entering={FadeIn.delay(200)}>
+      <Animated.View entering={FadeInDown.delay(200).springify()}>
         <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
           <List.Item
             title="Profil Personnel"
@@ -166,8 +182,60 @@ export default function ProfileMVP() {
         </Card>
       </Animated.View>
 
+      {/* Mes Commandes */}
+      <Animated.View entering={FadeInDown.delay(250).springify()}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="Mes Commandes"
+            description={activeOrdersCount > 0 ? `${activeOrdersCount} commande${activeOrdersCount > 1 ? 's' : ''} en cours` : 'Historique et suivi'}
+            left={(props) => <List.Icon {...props} icon="receipt-long" color={currentTheme.colors.primary} />}
+            right={(props) => (
+              <View style={styles.listItemRight}>
+                {activeOrdersCount > 0 && (
+                  <Chip
+                    compact
+                    style={[styles.badge, { backgroundColor: currentTheme.colors.primaryContainer }]}
+                    textStyle={{ color: currentTheme.colors.onPrimaryContainer, fontSize: 12 }}
+                  >
+                    {activeOrdersCount}
+                  </Chip>
+                )}
+                <List.Icon {...props} icon="chevron-right" />
+              </View>
+            )}
+            onPress={() => handleSectionPress('orders')}
+          />
+        </Card>
+      </Animated.View>
+
+      {/* Mes Favoris */}
+      <Animated.View entering={FadeInDown.delay(300).springify()}>
+        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
+          <List.Item
+            title="Mes Favoris"
+            description={favoritesCount > 0 ? `${favoritesCount} restaurant${favoritesCount > 1 ? 's' : ''} favori${favoritesCount > 1 ? 's' : ''}` : 'Vos restaurants préférés'}
+            left={(props) => <List.Icon {...props} icon="heart" color={currentTheme.colors.error} />}
+            right={(props) => (
+              <View style={styles.listItemRight}>
+                {favoritesCount > 0 && (
+                  <Chip
+                    compact
+                    style={[styles.badge, { backgroundColor: currentTheme.colors.errorContainer }]}
+                    textStyle={{ color: currentTheme.colors.onErrorContainer, fontSize: 12 }}
+                  >
+                    {favoritesCount}
+                  </Chip>
+                )}
+                <List.Icon {...props} icon="chevron-right" />
+              </View>
+            )}
+            onPress={() => handleSectionPress('favorites')}
+          />
+        </Card>
+      </Animated.View>
+
       {/* Paramètres Avancés */}
-      <Animated.View entering={FadeIn.delay(600)}>
+      <Animated.View entering={FadeInDown.delay(350).springify()}>
         <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
           <List.Item
             title="Paramètres Avancés"
@@ -180,7 +248,7 @@ export default function ProfileMVP() {
       </Animated.View>
 
       {/* Aide & Support */}
-      <Animated.View entering={FadeIn.delay(700)}>
+      <Animated.View entering={FadeInDown.delay(400).springify()}>
         <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
           <List.Item
             title="Aide & Support"
@@ -194,7 +262,7 @@ export default function ProfileMVP() {
 
       {/* Déconnexion */}
       {user && (
-        <Animated.View entering={FadeIn.delay(900)}>
+        <Animated.View entering={FadeInDown.delay(450).springify()}>
           <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface }]}>
             <Card.Content>
               <Button
@@ -212,7 +280,7 @@ export default function ProfileMVP() {
       )}
 
       {/* Version */}
-      <Animated.View entering={FadeIn.delay(1000)}>
+      <Animated.View entering={FadeIn.delay(500)}>
         <View style={styles.versionContainer}>
           <Text style={[styles.versionText, { color: currentTheme.colors.onSurfaceVariant }]}>
             OneEats v1.0.0 (Build 1)
@@ -336,6 +404,14 @@ const styles = StyleSheet.create({
   sectionCard: {
     marginBottom: 12,
     borderRadius: 12,
+  },
+  listItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  badge: {
+    height: 24,
   },
   sectionTitle: {
     fontSize: 18,

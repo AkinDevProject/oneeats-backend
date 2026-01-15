@@ -43,6 +43,7 @@ import { cuisineCategories } from '../../src/config/categories';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { useFavorites } from '../../src/hooks/useFavorites';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 import OptimizedImage from '../../src/components/OptimizedImage';
 import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
 import { useRenderTime, useOptimizedCallback } from '../../src/hooks/usePerformanceMonitor';
@@ -199,6 +200,18 @@ function HomeIndex() {
   // Utiliser le thème global
   const { currentTheme: globalTheme, setSelectedTheme: setGlobalTheme, selectedTheme, themeMetadata } = useAppTheme();
   const customTheme = useMemo(() => createCustomTheme(globalTheme), [globalTheme]);
+
+  // Auth et favoris pour la section favoris sur l'accueil
+  const { isAuthenticated } = useAuth();
+  const { favorites } = useFavorites();
+
+  // Récupérer les restaurants favoris
+  const favoriteRestaurants = useMemo(() => {
+    if (!isAuthenticated || favorites.length === 0) return [];
+    return restaurants.filter(r =>
+      favorites.some(f => f.restaurantId === r.id)
+    ).slice(0, 5); // Limiter à 5 pour le carousel
+  }, [restaurants, favorites, isAuthenticated]);
   
   // Synchroniser avec le thème global quand on change
   const handleThemeChange = useCallback(async (themeKey: string) => {
@@ -480,6 +493,78 @@ function HomeIndex() {
     </View>
   );
 
+  // Section favoris (carousel horizontal)
+  const renderFavorites = () => {
+    if (!isAuthenticated || favoriteRestaurants.length === 0) return null;
+
+    return (
+      <View style={baseStyles.favoritesSection}>
+        <View style={baseStyles.favoritesSectionHeader}>
+          <View>
+            <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle, { marginBottom: 0, paddingHorizontal: 0 }]}>
+              Vos Favoris
+            </Text>
+            <Text style={[baseStyles.favoritesSubtitle, { color: globalTheme.colors.onSurfaceVariant }]}>
+              {favoriteRestaurants.length} restaurant{favoriteRestaurants.length > 1 ? 's' : ''}
+            </Text>
+          </View>
+          <Button
+            mode="text"
+            onPress={() => router.push('/(tabs)/favorites')}
+            textColor={customTheme.colors.primary}
+            compact
+          >
+            Voir tous
+          </Button>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={baseStyles.favoritesCarousel}
+        >
+          {favoriteRestaurants.map((restaurant) => (
+            <TouchableRipple
+              key={restaurant.id}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push(`/restaurant/${restaurant.id}` as any);
+              }}
+              borderless
+              style={baseStyles.favoriteCardWrapper}
+            >
+              <Surface style={[baseStyles.favoriteCard, { backgroundColor: globalTheme.colors.surface }]} elevation={2}>
+                <Image
+                  source={{ uri: restaurant.image }}
+                  style={baseStyles.favoriteCardImage}
+                  resizeMode="cover"
+                />
+                {!restaurant.isOpen && (
+                  <View style={baseStyles.favoriteClosedOverlay}>
+                    <Text style={baseStyles.favoriteClosedText}>Fermé</Text>
+                  </View>
+                )}
+                <View style={baseStyles.favoriteCardContent}>
+                  <Text style={[baseStyles.favoriteCardName, { color: globalTheme.colors.onSurface }]} numberOfLines={1}>
+                    {restaurant.name}
+                  </Text>
+                  <View style={baseStyles.favoriteCardDetails}>
+                    <Text style={[baseStyles.favoriteCardRating, { color: globalTheme.colors.onSurfaceVariant }]}>
+                      ⭐ {restaurant.rating}
+                    </Text>
+                    <Text style={[baseStyles.favoriteCardTime, { color: globalTheme.colors.onSurfaceVariant }]}>
+                      {restaurant.deliveryTime}
+                    </Text>
+                  </View>
+                </View>
+              </Surface>
+            </TouchableRipple>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
   const renderRestaurant = useCallback((restaurant: Restaurant, index: number) => (
     <Animated.View 
       key={restaurant.id}
@@ -575,6 +660,7 @@ function HomeIndex() {
                   {renderSearch()}
                   {renderFilters()}
                   {renderCategories()}
+                  {renderFavorites()}
 
                   <View style={baseStyles.restaurantsSection}>
                     <Text style={[baseStyles.sectionTitle, dynamicStyles.sectionTitle]}>
@@ -719,6 +805,71 @@ const baseStyles = StyleSheet.create({
   },
   activeCategoryName: {
     // color sera appliqué dynamiquement
+  },
+  // Styles pour la section favoris
+  favoritesSection: {
+    marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  favoritesSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  favoritesSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  favoritesCarousel: {
+    gap: 12,
+  },
+  favoriteCardWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  favoriteCard: {
+    width: 140,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  favoriteCardImage: {
+    width: 140,
+    height: 90,
+  },
+  favoriteClosedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 90,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  favoriteClosedText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  favoriteCardContent: {
+    padding: 8,
+  },
+  favoriteCardName: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  favoriteCardDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  favoriteCardRating: {
+    fontSize: 11,
+  },
+  favoriteCardTime: {
+    fontSize: 11,
   },
   restaurantsSection: {
     paddingHorizontal: 16,
