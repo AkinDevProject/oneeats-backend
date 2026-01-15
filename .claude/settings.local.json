@@ -64,7 +64,8 @@
       "Bash(do ls -lh \"$f\")",
       "Bash(wc:*)",
       "Skill(bmad:bmm:workflows:workflow-status)",
-      "Skill(bmad:bmm:workflows:create-story)"
+      "Skill(bmad:bmm:workflows:create-story)",
+      "Skill(bmad:bmm:workflows:dev-story)"
     ],
     "deny": [],
     "ask": []

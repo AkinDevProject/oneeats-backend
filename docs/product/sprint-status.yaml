@@ -74,7 +74,7 @@ development_status:
 
   # Epic 7: Admin Users (P1) - IN PROGRESS
   epic-7: in-progress
-  7-1-crud-utilisateurs: ready-for-dev
+  7-1-crud-utilisateurs: review
   epic-7-retrospective: optional
 
   # Epic 8: Observabilite & Qualite (P1) - PARTIAL
