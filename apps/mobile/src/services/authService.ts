@@ -83,7 +83,7 @@ class AuthService {
       // Creer la requete d'autorisation avec PKCE
       const request = new AuthSession.AuthRequest({
         clientId: ENV.KEYCLOAK_CLIENT_ID,
-        scopes: ['openid', 'profile', 'email', 'offline_access'],
+        scopes: ['openid', 'profile', 'email'],
         redirectUri: this.redirectUri,
         usePKCE: true,
         responseType: AuthSession.ResponseType.Code,

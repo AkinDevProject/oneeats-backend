@@ -99,6 +99,7 @@ quarkus:
 
   # Sécurité OIDC/Keycloak
   oidc:
+    # Tenant par défaut: Web (cookies/session)
     # URL du serveur Keycloak (port 8480 en dev - 8180 bloque par Hyper-V)
     # Utiliser l'IP réseau pour permettre l'accès depuis mobile
     auth-server-url: ${KEYCLOAK_URL:http://192.168.1.111:8480}/realms/oneeats
@@ -124,6 +125,21 @@ quarkus:
     logout:
       path: /api/auth/logout
       post-logout-path: /login
+
+    # Tenant mobile: Bearer token (JWT)
+    mobile:
+      auth-server-url: ${KEYCLOAK_URL:http://192.168.1.111:8480}/realms/oneeats
+      client-id: oneeats-mobile
+      # Mode service: validation Bearer token uniquement (pas de session)
+      application-type: service
+      tls:
+        verification: none
+      # Mapping des rôles depuis l'access token
+      roles:
+        source: accesstoken
+        role-claim-path: realm_access/roles
+      token:
+        issuer: any
 
   # Frontend intégration (Quinoa) - Production
   quinoa:

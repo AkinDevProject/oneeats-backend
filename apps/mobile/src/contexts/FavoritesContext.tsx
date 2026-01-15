@@ -1,8 +1,25 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { ENV } from '../config/env';
+import authService from '../services/authService';
 
 const API_BASE_URL = ENV.API_URL;
+
+// Helper pour obtenir les headers d'auth
+const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+    return {};
+  }
+  try {
+    const token = await authService.getAccessToken();
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+  } catch (error) {
+    console.warn('⚠️ Could not get access token for favorites:', error);
+  }
+  return {};
+};
 
 export interface FavoriteToggleResponse {
   isFavorite: boolean;
@@ -51,12 +68,15 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setIsLoading(true);
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(
         `${API_BASE_URL}/users/${user.id}/favorites`,
         {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders,
           },
         }
       );
@@ -85,12 +105,15 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setIsLoading(true);
     try {
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(
         `${API_BASE_URL}/users/${user.id}/favorites/${restaurantId}/toggle`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...authHeaders,
           },
         }
       );

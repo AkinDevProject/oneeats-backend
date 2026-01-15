@@ -18,10 +18,31 @@ const defaultHeaders = {
   'Accept': 'application/json',
 };
 
-// User ID fixe pour les tests sans auth
+// User ID fixe pour les tests sans auth (fallback)
 const DEV_USER_ID = ENV.DEV_USER_ID;
 
 class ApiService {
+  /**
+   * Recupere l'ID utilisateur (depuis le token ou fallback vers DEV_USER_ID)
+   */
+  private async getUserId(): Promise<string> {
+    if (ENV.AUTH_ENABLED && !ENV.MOCK_AUTH) {
+      try {
+        const userInfo = await authService.getCachedUserInfo();
+        if (userInfo?.sub) {
+          return userInfo.sub;
+        }
+        // Tenter de recuperer depuis Keycloak
+        const freshUserInfo = await authService.getUserInfo();
+        if (freshUserInfo?.sub) {
+          return freshUserInfo.sub;
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not get user ID from token:', error);
+      }
+    }
+    return DEV_USER_ID;
+  }
   /**
    * Recupere le header d'autorisation si disponible
    */
@@ -139,18 +160,20 @@ class ApiService {
 
   // Orders
   orders = {
-    create: (orderData: any) => 
-      this.request<any>('/orders', {
+    create: async (orderData: any) => {
+      const userId = await this.getUserId();
+      return this.request<any>('/orders', {
         method: 'POST',
         headers: {
-          'User-Id': DEV_USER_ID, // Header requis par le backend
+          'User-Id': userId,
         },
         body: JSON.stringify(orderData),
-      }),
-    
-    getByUserId: (userId?: string) => {
-      const finalUserId = userId || DEV_USER_ID;
-      console.log('🔍 getByUserId called with:', { userId, finalUserId, DEV_USER_ID });
+      });
+    },
+
+    getByUserId: async (userId?: string) => {
+      const finalUserId = userId || await this.getUserId();
+      console.log('🔍 getByUserId called with:', { userId, finalUserId });
       return this.request<any[]>(`/orders?userId=${finalUserId}`);
     },
     

@@ -87,9 +87,43 @@ export default function ProfileMVP() {
     }
   };
 
+  // Handler pour la connexion SSO
+  const handleLogin = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/auth/login');
+  };
+
   // Render du menu principal
   const renderMainMenu = () => (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Section connexion si pas authentifié */}
+      {!user && (
+        <Animated.View entering={FadeIn.delay(100)}>
+          <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
+            <Card.Content style={styles.loginCardContent}>
+              <View style={styles.userAvatar}>
+                <MaterialIcons name="account-circle" size={60} color={currentTheme.colors.outline} />
+              </View>
+              <Text style={[styles.loginTitle, { color: currentTheme.colors.onSurface }]}>
+                Bienvenue sur OneEats
+              </Text>
+              <Text style={[styles.loginSubtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Connectez-vous pour accéder à votre compte
+              </Text>
+              <Button
+                mode="contained"
+                icon="login"
+                onPress={handleLogin}
+                style={styles.loginButton}
+                buttonColor={currentTheme.colors.primary}
+              >
+                Se connecter
+              </Button>
+            </Card.Content>
+          </Card>
+        </Animated.View>
+      )}
+
       {/* Profil utilisateur */}
       {user && (
         <Animated.View entering={FadeIn.delay(100)}>
@@ -253,6 +287,25 @@ const styles = StyleSheet.create({
   userCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  loginCardContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  loginTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  loginSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  loginButton: {
+    marginTop: 8,
+    paddingHorizontal: 24,
   },
   userAvatar: {
     marginRight: 16,

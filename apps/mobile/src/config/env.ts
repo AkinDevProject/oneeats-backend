@@ -35,9 +35,9 @@ export const ENV = {
   API_TIMEOUT: 10000,
 
   // Configuration de l'authentification
-  // TODO: Configurer Bearer token pour mobile (actuellement le backend utilise web-app mode avec cookies)
-  AUTH_ENABLED: false,  // Désactivé pour mobile (nécessite configuration Bearer)
-  MOCK_AUTH: true,      // Mode mock activé pour mobile
+  // Backend supporte maintenant dual-mode: web-app (cookies) + service (Bearer JWT)
+  AUTH_ENABLED: true,   // Authentification Keycloak activée
+  MOCK_AUTH: false,     // Mode mock désactivé - utilise vraie auth
 
   // Configuration Keycloak OIDC
   KEYCLOAK_URL: getKeycloakUrl(),
