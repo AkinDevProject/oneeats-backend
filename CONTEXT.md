@@ -24,7 +24,8 @@ Les objectifs principaux sont :
 - **API Backend** : `http://localhost:8080/api`
 - **Dashboard Restaurant** : `http://localhost:8080/restaurant`
 - **Base de données** : PostgreSQL Docker `localhost:5432`
-- **App mobile** : `http://192.168.1.36:8080/api` (IP réseau local)
+- **Keycloak** : `http://192.168.1.111:8480` (port 8480 pour éviter conflit Hyper-V)
+- **App mobile** : `http://192.168.1.111:8080/api` (IP réseau local)
 
 ### **Outils de développement**
 - **IDE Principal** : IntelliJ IDEA (avec Quarkus + Quinoa)
@@ -121,7 +122,7 @@ oneeats-backend/
 - **Build** : Maven avec un seul POM (simplicité de développement)
 - **Base de données** : PostgreSQL 15 avec Hibernate ORM + PanacheRepository
 - **API** : REST avec Jackson (quarkus-rest-jackson)
-- **Sécurité** : Keycloak OIDC + Policy Enforcer (autorisation basée sur les rôles)
+- **Sécurité** : Keycloak OIDC dual-mode (web-app + service) avec PKCE pour mobile
 - **Événements** : Architecture event-driven avec CDI Events
 - **Validation** : Hibernate Validator + Bean Validation
 - **Tests** : JUnit 5 + RestAssured + Jacoco
@@ -292,14 +293,49 @@ order/
 
 ### 5.3 Applications et services
 - **Backend principal** : http://localhost:8080 (oneeats-application)
-- **Frontend Web** : Intégré via Quinoa depuis le backend  
+- **Frontend Web** : Intégré via Quinoa depuis le backend
 - **Mobile** : Expo Development Server
 - **API Documentation** : http://localhost:8080/q/swagger-ui
 - **Health Check** : http://localhost:8080/q/health
 - **Métriques** : http://localhost:8080/q/metrics (Prometheus)
-- **Keycloak** : http://localhost:8081 (si configuré)
+- **Keycloak** : http://192.168.1.111:8480 (port 8480 pour éviter conflit Hyper-V)
 
-### 5.4 Profils de configuration
+### 5.4 Architecture d'Authentification Keycloak
+
+#### Dual-Mode OIDC (Web + Mobile)
+Le backend Quarkus supporte deux modes d'authentification simultanés :
+
+**Mode Web-App (Dashboard)**
+- **Type** : `application-type: web-app`
+- **Mécanisme** : Sessions avec cookies sécurisés gérés par Quarkus
+- **Client Keycloak** : `oneeats-web` (confidential client)
+- **Flux** : Redirect vers Keycloak → callback → session créée
+
+**Mode Service (Mobile)**
+- **Type** : `application-type: service`
+- **Mécanisme** : Bearer JWT dans header Authorization
+- **Client Keycloak** : `oneeats-mobile` (public client avec PKCE)
+- **Flux** : OAuth PKCE via expo-auth-session → token stocké SecureStore
+
+#### Composants Clés
+```
+OidcTenantResolver.java          # Route les requêtes vers le bon tenant OIDC
+├── Bearer token → tenant "mobile" (validation JWT)
+└── Cookies/session → tenant par défaut (web-app)
+
+application.yml
+├── quarkus.oidc.*              # Tenant par défaut (web)
+└── quarkus.oidc.mobile.*       # Tenant mobile (service)
+```
+
+#### Credentials de Test Keycloak
+| Utilisateur | Email | Mot de passe | Rôle |
+|-------------|-------|--------------|------|
+| Admin | admin@oneeats.com | admin123 | admin, restaurant, user |
+| Restaurant | restaurant@oneeats.com | restaurant123 | restaurant, user |
+| Client | client@oneeats.com | client123 | user |
+
+### 5.5 Profils de configuration
 #### Développement (application-dev.yml)
 - Hot reload et live reload activés
 - Logs détaillés (DEBUG niveau)
@@ -586,8 +622,8 @@ cd apps/mobile && npm run android
 ### 9.4 🚀 PROCHAINES ÉTAPES PRIORITAIRES
 1. ~~**Compléter Restaurant** : API REST + Repository + Mapper~~ ✅ **COMPLÉTÉ**
 2. ~~**Compléter Menu** : API REST + Repository + Mapper~~ ✅ **COMPLÉTÉ**
-3. **Authentification JWT** : Système d'auth complet pour sécuriser toutes les APIs
-4. **Frontend Authentication** : Login restaurants/admins avec gestion rôles
+3. ~~**Authentification JWT**~~ : ✅ Keycloak OIDC dual-mode (web + mobile) opérationnel
+4. ~~**Frontend Authentication**~~ : ✅ Login SSO Keycloak web + mobile avec PKCE
 5. **Mobile App Core Screens** : Écrans principaux navigation mobile
 6. **API Services Mobile** : Service API complet avec cache et mode offline
 7. **Tests complets** : Coverage pour tous les domaines

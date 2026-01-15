@@ -128,7 +128,7 @@
 
 ---
 
-## Phase 3 - Authentification et Sécurité (En cours 60%)
+## Phase 3 - Authentification et Sécurité (En cours 90%)
 
 ### Authentification Keycloak + OIDC
 - [x] Configuration Keycloak documentée
@@ -140,25 +140,30 @@
 - [x] AuthService avec mapping Keycloak → DB
 - [x] Endpoint `/api/auth/me` (infos utilisateur + permissions)
 - [x] Entité RestaurantStaffEntity (rôles par restaurant)
-- [ ] Intégration frontend web (login page)
-- [ ] Intégration mobile (expo-auth-session + PKCE)
+- [x] **Intégration frontend web (login page avec SSO)**
+- [x] **Intégration mobile (expo-auth-session + PKCE)**
 - [ ] Tests d'authentification
 
-### Frontend Web Authentication
-- [ ] Page login/register restaurant
-- [ ] Stockage sécurisé tokens (localStorage/cookies)
-- [ ] Intercepteur Axios pour JWT headers
-- [ ] Gestion expiration token
-- [ ] Redirection automatique si non authentifié
-- [ ] Logout et nettoyage session
+### Frontend Web Authentication ✅ COMPLET
+- [x] Page login avec SSO Keycloak
+- [x] Stockage sécurisé tokens (cookies gérés par Quarkus)
+- [x] Mode web-app avec sessions Quarkus OIDC
+- [x] Gestion expiration token (automatique)
+- [x] Redirection automatique vers callback après login
+- [x] Logout et nettoyage session (/api/auth/logout)
+- [x] Redirection par rôle (admin → /admin, restaurant → /restaurant)
+- [x] Thème Keycloak personnalisé (oneeats)
 
-### Mobile Authentication
-- [ ] Écran login/register client
-- [ ] Stockage sécurisé tokens (SecureStore)
-- [ ] Service API avec gestion tokens
-- [ ] Mode invité (navigation limitée)
+### Mobile Authentication ✅ COMPLET
+- [x] **Dual-mode OIDC : web-app (cookies) + service (Bearer JWT)**
+- [x] **OidcTenantResolver pour routing automatique des requêtes**
+- [x] Écran login/register client avec bouton SSO Keycloak
+- [x] Stockage sécurisé tokens (expo-secure-store)
+- [x] Service authService.ts avec OAuth PKCE flow
+- [x] Service API avec Bearer token automatique
+- [x] Mode invité disponible (navigation restaurants publiques)
+- [x] Gestion refresh token automatique
 - [ ] Biométrie pour reconnexion (Face ID, Touch ID)
-- [ ] Gestion refresh token en arrière-plan
 
 ---
 
