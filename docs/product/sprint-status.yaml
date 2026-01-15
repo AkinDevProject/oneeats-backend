@@ -72,9 +72,9 @@ development_status:
   6-2-stats-plateforme: backlog
   epic-6-retrospective: optional
 
-  # Epic 7: Admin Users (P1) - NOT STARTED
-  epic-7: backlog
-  7-1-crud-utilisateurs: backlog
+  # Epic 7: Admin Users (P1) - IN PROGRESS
+  epic-7: in-progress
+  7-1-crud-utilisateurs: ready-for-dev
   epic-7-retrospective: optional
 
   # Epic 8: Observabilite & Qualite (P1) - PARTIAL

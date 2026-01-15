@@ -63,7 +63,8 @@
       "Bash(for f in docs/**/*.md)",
       "Bash(do ls -lh \"$f\")",
       "Bash(wc:*)",
-      "Skill(bmad:bmm:workflows:workflow-status)"
+      "Skill(bmad:bmm:workflows:workflow-status)",
+      "Skill(bmad:bmm:workflows:create-story)"
     ],
     "deny": [],
     "ask": []
