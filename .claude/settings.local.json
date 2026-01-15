@@ -74,7 +74,8 @@
       "WebFetch(domain:quarkus.io)",
       "Skill(bmad:bmm:agents:architect)",
       "Bash(npx expo install expo-auth-session expo-secure-store expo-crypto)",
-      "Bash(netsh interface ipv4 show excludedportrange:*)"
+      "Bash(netsh interface ipv4 show excludedportrange:*)",
+      "Skill(bmad:bmm:workflows:create-ux-design)"
     ],
     "deny": [],
     "ask": []
