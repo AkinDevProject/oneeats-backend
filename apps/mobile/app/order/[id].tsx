@@ -32,7 +32,7 @@ import Animated, {
 
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { Order } from '../../src/data/mockData';
+import { Order } from '../../src/types';
 
 const STATUS_CONFIG = {
   pending: { 

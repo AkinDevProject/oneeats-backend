@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
-import { Restaurant } from '../data/mockData';
+import { Restaurant } from '../types';
 
 interface UseRestaurantResult {
   restaurant: Restaurant | null;

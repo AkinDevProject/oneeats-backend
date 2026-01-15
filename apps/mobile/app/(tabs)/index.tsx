@@ -38,7 +38,8 @@ import {
   MD3LightTheme,
 } from 'react-native-paper';
 
-import { cuisineCategories, Restaurant } from '../../src/data/mockData';
+import { Restaurant } from '../../src/types';
+import { cuisineCategories } from '../../src/config/categories';
 import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { useFavorites } from '../../src/hooks/useFavorites';
 import { useAppTheme } from '../../src/contexts/ThemeContext';

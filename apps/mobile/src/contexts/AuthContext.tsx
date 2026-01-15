@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, mockUser } from '../data/mockData';
+import { User } from '../types';
 import { ENV } from '../config/env';
 import apiService from '../services/api';
 
@@ -104,12 +104,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await new Promise(resolve => setTimeout(resolve, 500)); // Simule délai réseau
         return true; // Login toujours réussi en mode test
       }
-      
-      // Mock authentication - in real app, call your API
-      if (email === mockUser.email && password === 'password123') {
-        await saveUser({ ...mockUser, isGuest: false });
-        return true;
-      }
+
+      // TODO: Implémenter l'authentification réelle via l'API
+      // Pour l'instant, rejeter les logins quand l'auth n'est pas en mode mock
+      console.warn('Real authentication not implemented yet');
       return false;
     } catch (error) {
       console.error('Login error:', error);

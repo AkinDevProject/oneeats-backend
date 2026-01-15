@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Order } from '../data/mockData';
+import { Order, Restaurant } from '../types';
 import { useAuth } from './AuthContext';
 import apiService from '../services/api';
 import { ENV } from '../config/env';
@@ -25,13 +25,54 @@ const mapApiStatusToMobileStatus = (apiStatus: string): Order['status'] => {
   }
 };
 
-// Fonction pour obtenir le nom du restaurant par ID
-const getRestaurantName = (restaurantId: string): string => {
-  switch (restaurantId) {
-    case '11111111-1111-1111-1111-111111111111': return 'Pizza Palace';
-    case '22222222-2222-2222-2222-222222222222': return 'Burger House';
-    case '33333333-3333-3333-3333-333333333333': return 'Sushi Express';
-    default: return 'Restaurant';
+// Cache global des restaurants pour éviter les requêtes répétées
+const restaurantCache = new Map<string, Restaurant>();
+
+// Fonction pour créer un objet Restaurant par défaut
+const createDefaultRestaurant = (restaurantId: string, name?: string): Restaurant => ({
+  id: restaurantId,
+  name: name || 'Restaurant',
+  image: 'https://via.placeholder.com/400x300',
+  cuisine: 'Restaurant',
+  rating: 4.5,
+  deliveryTime: '20-30 min',
+  deliveryFee: 2.99,
+  distance: '1.2 km',
+  featured: false,
+  isOpen: true,
+  description: 'Restaurant',
+});
+
+// Fonction async pour récupérer les infos d'un restaurant (avec cache)
+const fetchRestaurantDetails = async (restaurantId: string): Promise<Restaurant> => {
+  // Vérifier le cache d'abord
+  if (restaurantCache.has(restaurantId)) {
+    return restaurantCache.get(restaurantId)!;
+  }
+
+  try {
+    const data = await apiService.restaurants.getById(restaurantId);
+    const restaurant: Restaurant = {
+      id: data.id,
+      name: data.name,
+      image: data.imageUrl || data.logo || 'https://via.placeholder.com/400x300',
+      cuisine: data.cuisineType || data.category || 'Restaurant',
+      rating: data.rating || 4.5,
+      deliveryTime: '20-30 min',
+      deliveryFee: 2.99,
+      distance: '1.2 km',
+      featured: false,
+      isOpen: data.isOpen ?? true,
+      description: data.description || 'Restaurant',
+    };
+
+    // Mettre en cache
+    restaurantCache.set(restaurantId, restaurant);
+    return restaurant;
+  } catch (error) {
+    console.warn(`Failed to fetch restaurant ${restaurantId}:`, error);
+    // Retourner un restaurant par défaut en cas d'erreur
+    return createDefaultRestaurant(restaurantId);
   }
 };
 
@@ -79,6 +120,10 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
             const userId = user.id || ENV.DEV_USER_ID;
             const apiOrders = await apiService.orders.getByUserId(userId);
 
+            // Pré-charger les restaurants en parallèle
+            const restaurantIds = [...new Set(apiOrders.map((o: any) => o.restaurantId))];
+            await Promise.all(restaurantIds.map(id => fetchRestaurantDetails(id)));
+
             const processedOrders = apiOrders.map((order: any) => ({
               ...order,
               orderTime: new Date(order.createdAt || order.orderTime),
@@ -96,19 +141,8 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
                 totalPrice: item.subtotal || item.totalPrice,
                 specialInstructions: item.specialNotes || item.specialInstructions,
               })) || [],
-              restaurant: {
-                id: order.restaurantId,
-                name: getRestaurantName(order.restaurantId),
-                image: 'https://via.placeholder.com/400x300',
-                cuisine: 'Restaurant',
-                rating: 4.5,
-                deliveryTime: '20-30 min',
-                deliveryFee: 2.99,
-                distance: '1.2 km',
-                featured: false,
-                isOpen: true,
-                description: 'Restaurant',
-              }
+              // Utiliser le cache de restaurants
+              restaurant: restaurantCache.get(order.restaurantId) || createDefaultRestaurant(order.restaurantId),
             }));
 
             // Check for status changes to trigger notifications
@@ -157,14 +191,14 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         console.log('🔄 Loading orders for user:', user.id);
         const userId = user.id || ENV.DEV_USER_ID;
         console.log('🎯 Using userId for orders request:', userId);
-        console.log('🎯 ENV.DEV_USER_ID:', ENV.DEV_USER_ID);
-        console.log('🎯 ENV.MOCK_USER_ID:', ENV.MOCK_USER_ID);
         const apiOrders = await apiService.orders.getByUserId(userId);
         console.log('🎯 API returned orders:', apiOrders);
-        
-        // Créer une map des restaurants pour éviter de multiples requêtes
-        const restaurantMap = new Map();
-        
+
+        // Pré-charger les restaurants en parallèle pour remplir le cache
+        const restaurantIds = [...new Set(apiOrders.map((o: any) => o.restaurantId))];
+        console.log('🏪 Pre-loading restaurants:', restaurantIds);
+        await Promise.all(restaurantIds.map(id => fetchRestaurantDetails(id)));
+
         const processedOrders = apiOrders.map((order: any) => ({
           ...order,
           orderTime: new Date(order.createdAt || order.orderTime),
@@ -183,20 +217,8 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
             totalPrice: item.subtotal || item.totalPrice,
             specialInstructions: item.specialNotes || item.specialInstructions,
           })) || [],
-          // Créer un objet restaurant minimal pour la compatibilité
-          restaurant: {
-            id: order.restaurantId,
-            name: getRestaurantName(order.restaurantId),
-            image: 'https://via.placeholder.com/400x300',
-            cuisine: 'Restaurant',
-            rating: 4.5,
-            deliveryTime: '20-30 min',
-            deliveryFee: 2.99,
-            distance: '1.2 km',
-            featured: false,
-            isOpen: true,
-            description: 'Restaurant',
-          }
+          // Utiliser le cache de restaurants (pré-chargé ci-dessus)
+          restaurant: restaurantCache.get(order.restaurantId) || createDefaultRestaurant(order.restaurantId),
         }));
         console.log('✅ Processed orders:', processedOrders);
         console.log('🔍 Orders count:', processedOrders.length);
@@ -285,6 +307,9 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         }))
       });
       
+      // Charger les détails du restaurant pour la nouvelle commande
+      const restaurant = await fetchRestaurantDetails(createdOrder.restaurantId);
+
       // Ajouter la commande créée à la liste locale
       const processedOrder = {
         ...createdOrder,
@@ -303,20 +328,8 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
           totalPrice: item.subtotal || item.totalPrice,
           specialInstructions: item.specialNotes || item.specialInstructions,
         })) || [],
-        // Créer un objet restaurant minimal pour la compatibilité
-        restaurant: {
-          id: createdOrder.restaurantId,
-          name: getRestaurantName(createdOrder.restaurantId),
-          image: 'https://via.placeholder.com/400x300',
-          cuisine: 'Restaurant',
-          rating: 4.5,
-          deliveryTime: '20-30 min',
-          deliveryFee: 2.99,
-          distance: '1.2 km',
-          featured: false,
-          isOpen: true,
-          description: 'Restaurant',
-        }
+        // Utiliser les vraies données du restaurant
+        restaurant,
       };
 
       console.log('✅ Adding new order to list:', processedOrder.id);
@@ -361,23 +374,12 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
     const order = orders.find(order => order.id === orderId);
     if (!order) return undefined;
 
-    // S'assurer que l'order a une propriété restaurant
+    // S'assurer que l'order a une propriété restaurant (utiliser le cache)
     if (!order.restaurant) {
+      const restaurantId = order.restaurantId || 'unknown';
       return {
         ...order,
-        restaurant: {
-          id: order.restaurantId || 'unknown',
-          name: getRestaurantName(order.restaurantId || 'unknown'),
-          image: 'https://via.placeholder.com/400x300',
-          cuisine: 'Restaurant',
-          rating: 4.5,
-          deliveryTime: '20-30 min',
-          deliveryFee: 2.99,
-          distance: '1.2 km',
-          featured: false,
-          isOpen: true,
-          description: 'Restaurant',
-        }
+        restaurant: restaurantCache.get(restaurantId) || createDefaultRestaurant(restaurantId),
       };
     }
 

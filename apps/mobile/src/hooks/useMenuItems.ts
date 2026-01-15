@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
-import { MenuItem } from '../data/mockData';
+import { MenuItem } from '../types';
 
 interface UseMenuItemsResult {
   menuItems: MenuItem[];

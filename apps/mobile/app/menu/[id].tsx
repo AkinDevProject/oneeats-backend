@@ -37,7 +37,7 @@ import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { MenuItemOption, MenuItemChoice } from '../../src/data/mockData';
+import { MenuItemOption, MenuItemChoice } from '../../src/types';
 import apiService from '../../src/services/api';
 import { buildMenuItemImageUrl } from '../../src/utils/imageUtils';
 

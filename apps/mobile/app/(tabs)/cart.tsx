@@ -39,7 +39,7 @@ import { useCart } from '../../src/contexts/CartContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { mockRestaurants } from '../../src/data/mockData';
+import { useRestaurant } from '../../src/hooks/useRestaurant';
 
 // Types pour les onglets MVP
 type MVPTabType = 'cart' | 'current' | 'history';
@@ -85,6 +85,10 @@ export default function CartMVP() {
   const { user, isAuthenticated } = useAuth();
   const { addOrder, orders, currentOrder, refreshOrders } = useOrder();
   const { currentTheme } = useAppTheme();
+
+  // Récupérer le restaurant du panier (si des items sont présents)
+  const cartRestaurantId = items.length > 0 ? items[0].menuItem.restaurantId : undefined;
+  const { restaurant: cartRestaurant } = useRestaurant(cartRestaurantId);
 
   const headerOpacity = useSharedValue(0);
 
@@ -281,7 +285,7 @@ export default function CartMVP() {
                         Commande chez
                       </Text>
                       <Text style={[styles.restaurantName, { color: currentTheme.colors.onSurface }]}>
-                        {mockRestaurants.find(r => r.id === items[0].menuItem.restaurantId)?.name || 'Restaurant'}
+                        {cartRestaurant?.name || 'Restaurant'}
                       </Text>
                     </View>
                     <Button

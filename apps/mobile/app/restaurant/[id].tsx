@@ -31,7 +31,7 @@ import Animated, {
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { MenuItem, Restaurant } from '../../src/data/mockData';
+import { MenuItem, Restaurant } from '../../src/types';
 import apiService from '../../src/services/api';
 import { buildRestaurantImageUrl, buildMenuItemImageUrl } from '../../src/utils/imageUtils';
 

@@ -13,7 +13,7 @@ import {
   Chip,
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MenuItem, MenuItemOption, MenuItemChoice, CartItemOption } from '../src/data/mockData';
+import { MenuItem, MenuItemOption, MenuItemChoice, CartItemOption } from '../src/types';
 
 interface MenuItemOptionsProps {
   item: MenuItem;

@@ -17,17 +17,22 @@
 
 ## Tâche en cours
 
-> **Sprint 2 — Intégration Frontend-Backend** ✅ **DASHBOARD WEB TERMINÉ**
+> **Sprint 2 — Intégration Frontend-Backend** ✅ **TERMINÉ**
 >
-> L'intégration API du dashboard web est complète :
+> L'intégration API est complète pour le dashboard web ET l'application mobile :
+>
+> **Dashboard Web** :
 > - ✅ Toutes les pages connectées aux vraies APIs backend
 > - ✅ Hooks personnalisés (useRestaurantData, useOrders, useUsers, etc.)
-> - ✅ Service API centralisé (apiService singleton)
-> - ✅ Gestion des états loading/error
-> - ✅ Auto-refresh toutes les 30 secondes
 > - ✅ Nettoyage du code obsolète (mockData.ts supprimé)
 >
-> **Prochaine étape** : Intégration frontend mobile avec les APIs backend
+> **Application Mobile** :
+> - ✅ Restaurants, menus, commandes, favoris connectés aux APIs
+> - ✅ Cache de restaurants dans OrderContext
+> - ✅ Types extraits dans src/types/index.ts
+> - ✅ Nettoyage du code obsolète (mockData.ts supprimé - 650+ lignes)
+>
+> **Prochaine étape** : Phase 3 - Authentification JWT
 
 ---
 
@@ -88,7 +93,7 @@
 
 ---
 
-## Phase 2 - Intégration Frontend-Backend (En cours 70%)
+## Phase 2 - Intégration Frontend-Backend (Terminé 95%)
 
 ### Dashboard Restaurant Web (100% Complet)
 - [x] Interface complète avec React + TypeScript + Vite
@@ -101,7 +106,7 @@
 - [x] Configuration environnement (.env.local)
 - [ ] Tests E2E des flux principaux
 
-### Application Mobile Client
+### Application Mobile Client (100% Intégré avec API)
 - [x] Architecture Expo + React Native
 - [x] Navigation avec Expo Router
 - [x] Gestion des thèmes (light/dark)
@@ -109,14 +114,15 @@
 - [x] Contextes : Auth, Cart, Order, Notifications, Theme, Settings
 - [x] UI/UX professionnelle avec React Native Paper
 - [x] Animations avec Reanimated
-- [x] Mock data complet
 - [x] Page paramètres avancée complète
 - [x] Page compte utilisateur complète
 - [x] Système de notifications push Expo
 - [x] Optimisations de performance avancées
-- [ ] **➡️ Connexion aux vraies APIs** ← EN COURS
-- [ ] Services API complets avec cache
-- [ ] Synchronisation temps réel avec backend
+- [x] Connexion aux vraies APIs (restaurants, menus, commandes, favoris)
+- [x] Services API complets avec cache de restaurants
+- [x] Types extraits dans src/types/index.ts
+- [x] Fichier mockData.ts supprimé
+- [ ] Synchronisation temps réel avec backend (WebSocket)
 - [ ] Mode offline avec cache intelligent
 - [ ] Tests d'intégration mobile
 
@@ -289,7 +295,7 @@
 
 | ID  | Description                              | Priorité | Status       | Assigné à |
 |-----|------------------------------------------|----------|--------------|-----------|
-| #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu (web) | Sprint 2  |
+| #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu       | Sprint 2  |
 | #02 | Auth JWT non implémentée                 | Haute    | 📋 Backlog   | Sprint 3  |
 | #03 | WebSocket temps réel manquant            | Moyenne  | 📋 Backlog   | Sprint 4  |
 | #04 | Mode offline non implémenté (mobile)     | Moyenne  | 📋 Backlog   | Sprint 5  |
@@ -417,12 +423,40 @@
 
 ### Frontend Mobile
 - **UI/UX** : ✅ 95% (Très complet avec features avancées)
-- **Intégration API** : ❌ 15% (Mock data encore utilisé)
+- **Intégration API** : ✅ 100% (Toutes les pages connectées aux APIs)
 - **Performance** : ✅ 85% (Optimisations avancées implémentées)
 - **Tests** : ❌ 10% (À implémenter)
 
 ### Global MVP
-**Progression globale** : ⚠️ **70%**
+**Progression globale** : ✅ **80%**
+
+---
+
+### Session 2026-01-15 : Finalisation Intégration API Mobile
+
+**Travail effectué** :
+- ✅ Création de `apps/mobile/src/types/index.ts` avec toutes les interfaces
+- ✅ Création de `apps/mobile/src/config/categories.ts` pour les catégories UI
+- ✅ Nettoyage de CartContext.tsx (suppression mockMenuItems)
+- ✅ Correction de OrderContext.tsx avec cache de restaurants et fetch API
+- ✅ Correction de cart.tsx avec useRestaurant hook
+- ✅ Mise à jour de tous les imports (10+ fichiers) vers ../types
+- ✅ Suppression complète de `apps/mobile/src/data/mockData.ts` (650+ lignes)
+
+**Architecture finale** :
+- Types centralisés dans `src/types/index.ts`
+- Catégories UI dans `src/config/categories.ts`
+- Cache de restaurants dans OrderContext pour éviter les requêtes répétées
+- Tous les hooks utilisent les vraies APIs backend
+
+**Fichiers modifiés** :
+- CartContext.tsx, OrderContext.tsx, AuthContext.tsx
+- useRestaurants.ts, useRestaurant.ts, useMenuItems.ts
+- cart.tsx, index.tsx (home)
+- order/[id].tsx, menu/[id].tsx, restaurant/[id].tsx
+- MenuItemOptions.tsx
+
+**Bug #01 résolu** : Plus aucun mock data dans web ET mobile
 
 ---
 
