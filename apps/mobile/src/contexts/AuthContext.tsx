@@ -3,15 +3,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 import { ENV } from '../config/env';
 import apiService from '../services/api';
+import authService, { KeycloakUserInfo } from '../services/authService';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithSSO: () => Promise<boolean>;
   loginGuest: (email: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => void;
   convertGuestToFullUser: (name: string, password: string) => Promise<boolean>;
 }
@@ -21,6 +23,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+/**
+ * Convertit les infos Keycloak vers le format User mobile
+ */
+const mapKeycloakUserToMobileUser = (keycloakUser: KeycloakUserInfo): User => {
+  return {
+    id: keycloakUser.sub,
+    name: keycloakUser.name || `${keycloakUser.given_name || ''} ${keycloakUser.family_name || ''}`.trim() || keycloakUser.preferred_username,
+    email: keycloakUser.email,
+    phone: '',
+    favoriteRestaurants: [],
+    orders: [],
+    isGuest: false,
+  };
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -32,16 +49,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadUser = useCallback(async () => {
     try {
-      // Si auth désactivé, récupérer l'utilisateur fixe depuis l'API
+      // Mode mock pour developpement sans Keycloak
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
-        console.log('🔄 Loading fixed user from API:', ENV.DEV_USER_ID);
+        console.log('🔄 Loading fixed user from API (mock mode):', ENV.DEV_USER_ID);
 
         try {
-          // Essayer de récupérer l'utilisateur depuis l'API
+          // Essayer de recuperer l'utilisateur depuis l'API
           const apiUser = await apiService.users.getById(ENV.DEV_USER_ID);
           console.log('✅ User loaded from API:', apiUser);
 
-          // Convertir les données API au format mobile
+          // Convertir les donnees API au format mobile
           const mobileUser: User = {
             id: apiUser.id,
             name: `${apiUser.firstName} ${apiUser.lastName}`,
@@ -59,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (apiError) {
           console.warn('⚠️ Could not load user from API, using fallback:', apiError);
 
-          // Fallback vers un user par défaut si API échoue
+          // Fallback vers un user par defaut si API echoue
           const defaultUser: User = {
             id: ENV.DEV_USER_ID,
             name: 'Utilisateur Mobile',
@@ -76,13 +93,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
 
-      // Mode auth normal
-      const userData = await AsyncStorage.getItem('user');
-      if (userData) {
-        setUser(JSON.parse(userData));
+      // Mode Keycloak - verifier si deja authentifie
+      console.log('🔐 Checking existing authentication...');
+      const isAuth = await authService.isAuthenticated();
+
+      if (isAuth) {
+        // Recuperer les infos utilisateur depuis Keycloak
+        let keycloakUser = await authService.getCachedUserInfo();
+        if (!keycloakUser) {
+          keycloakUser = await authService.getUserInfo();
+        }
+
+        if (keycloakUser) {
+          const mobileUser = mapKeycloakUserToMobileUser(keycloakUser);
+          setUser(mobileUser);
+          await AsyncStorage.setItem('user', JSON.stringify(mobileUser));
+          console.log('✅ User restored from Keycloak session');
+        }
+      } else {
+        // Pas de session Keycloak, verifier AsyncStorage (guest users)
+        const userData = await AsyncStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          // Seulement restaurer les guest users
+          if (parsedUser.isGuest) {
+            setUser(parsedUser);
+            console.log('✅ Guest user restored from storage');
+          }
+        }
       }
     } catch (error) {
-      console.error('Error loading user:', error);
+      console.error('❌ Error loading user:', error);
     } finally {
       setIsLoading(false);
     }
@@ -97,20 +138,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  /**
+   * Login avec email/password (mode mock uniquement)
+   */
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      // Si auth désactivé, login automatique réussi
+      // Si auth desactivee, login automatique reussi
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simule délai réseau
-        return true; // Login toujours réussi en mode test
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simule delai reseau
+        return true; // Login toujours reussi en mode test
       }
 
-      // TODO: Implémenter l'authentification réelle via l'API
-      // Pour l'instant, rejeter les logins quand l'auth n'est pas en mode mock
-      console.warn('Real authentication not implemented yet');
+      // En mode Keycloak, on ne supporte pas le login direct
+      // L'utilisateur doit utiliser loginWithSSO()
+      console.warn('Direct login not supported in Keycloak mode, use loginWithSSO()');
       return false;
     } catch (error) {
       console.error('Login error:', error);
+      return false;
+    }
+  }, []);
+
+  /**
+   * Login via Keycloak SSO
+   */
+  const loginWithSSO = useCallback(async (): Promise<boolean> => {
+    try {
+      if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+        console.warn('SSO login not available in mock mode');
+        return false;
+      }
+
+      console.log('🔐 Starting SSO login...');
+      const tokens = await authService.login();
+
+      if (tokens) {
+        // Recuperer les infos utilisateur
+        const keycloakUser = await authService.getUserInfo();
+
+        if (keycloakUser) {
+          const mobileUser = mapKeycloakUserToMobileUser(keycloakUser);
+          await saveUser(mobileUser);
+          console.log('✅ SSO login successful');
+          return true;
+        }
+      }
+
+      console.log('❌ SSO login failed');
+      return false;
+    } catch (error) {
+      console.error('SSO login error:', error);
       return false;
     }
   }, [saveUser]);
@@ -119,7 +196,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const guestUser: User = {
         id: Math.random().toString(36).substring(7),
-        name: 'Utilisateur Invité',
+        name: 'Utilisateur Invite',
         email,
         favoriteRestaurants: [],
         orders: [],
@@ -135,17 +212,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      // Mock registration - in real app, call your API
-      const newUser: User = {
-        id: Math.random().toString(36).substring(7),
-        name,
-        email,
-        favoriteRestaurants: [],
-        orders: [],
-        isGuest: false,
-      };
-      await saveUser(newUser);
-      return true;
+      // En mode mock, creer un utilisateur local
+      if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+        const newUser: User = {
+          id: Math.random().toString(36).substring(7),
+          name,
+          email,
+          favoriteRestaurants: [],
+          orders: [],
+          isGuest: false,
+        };
+        await saveUser(newUser);
+        return true;
+      }
+
+      // En mode Keycloak, la registration se fait via le portail Keycloak
+      // ou via une API backend dediee
+      console.warn('Registration in Keycloak mode should be done via SSO portal');
+      return false;
     } catch (error) {
       console.error('Registration error:', error);
       return false;
@@ -154,8 +238,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = useCallback(async () => {
     try {
+      // Si Keycloak est actif, deconnecter du SSO
+      if (ENV.AUTH_ENABLED && !ENV.MOCK_AUTH) {
+        await authService.logout();
+      }
+
       await AsyncStorage.removeItem('user');
       setUser(null);
+      console.log('✅ Logout successful');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -163,7 +253,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateProfile = useCallback(async (updates: Partial<User>) => {
     if (!user) return;
-    
+
     try {
       const updatedUser = { ...user, ...updates };
       await saveUser(updatedUser);
@@ -176,6 +266,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user || !user.isGuest) return false;
 
     try {
+      // En mode Keycloak, rediriger vers SSO pour creer un vrai compte
+      if (ENV.AUTH_ENABLED && !ENV.MOCK_AUTH) {
+        console.log('Converting guest to full user via SSO...');
+        return await loginWithSSO();
+      }
+
+      // En mode mock, simplement mettre a jour le user local
       const updatedUser: User = {
         ...user,
         name,
@@ -187,19 +284,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Guest conversion error:', error);
       return false;
     }
-  }, [user, saveUser]);
+  }, [user, saveUser, loginWithSSO]);
 
   const value = useMemo<AuthContextType>(() => ({
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
+    loginWithSSO,
     loginGuest,
     register,
     logout,
     updateProfile,
     convertGuestToFullUser,
-  }), [user, isLoading, login, loginGuest, register, logout, updateProfile, convertGuestToFullUser]);
+  }), [user, isLoading, login, loginWithSSO, loginGuest, register, logout, updateProfile, convertGuestToFullUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

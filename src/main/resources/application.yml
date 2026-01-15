@@ -92,11 +92,11 @@ quarkus:
   oidc:
     # URL du serveur Keycloak (port 8180 en dev)
     auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}/realms/oneeats
-    client-id: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
+    client-id: ${KEYCLOAK_CLIENT_ID:oneeats-web}
     credentials:
-      secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-backend-secret-dev}
-    # Mode hybrid: supporte cookies (web) ET Bearer tokens (mobile/API)
-    application-type: hybrid
+      secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-web-secret-dev}
+    # Mode web-app: Quarkus gère les sessions avec cookies sécurisés
+    application-type: web-app
     # Configuration TLS
     tls:
       verification: none  # Uniquement pour le développement
@@ -104,18 +104,45 @@ quarkus:
     roles:
       source: realm
       role-claim-path: realm_access/roles
-    # Validation des tokens
+    # Configuration des tokens et session
     token:
       issuer: any  # Accepter l'issuer du token (dev)
-      audience: ${KEYCLOAK_CLIENT_ID:oneeats-backend}
-    # Chemins publics (pas d'auth requise)
     authentication:
-      enabled: true
+      # Redirection après login réussi
+      redirect-path: /restaurant
+      # Redirection après logout
+      logout:
+        path: /logout
+        post-logout-path: /login
+    # Logout configuration
+    logout:
+      path: /api/auth/logout
+      post-logout-path: /login
 
-  # Configuration sécurité HTTP
-  security:
+  # Configuration sécurité HTTP - Routes protégées
+  http:
     auth:
-      enabled-in-dev-mode: true
+      # Routes qui nécessitent une authentification
+      permission:
+        # Pages web protégées
+        restaurant-pages:
+          paths: /restaurant/*
+          policy: authenticated
+        admin-pages:
+          paths: /admin/*
+          policy: authenticated
+        # API protégées
+        api-protected:
+          paths: /api/*
+          policy: authenticated
+        # Routes publiques
+        public-pages:
+          paths: /login,/,/callback,/assets/*,/index.html
+          policy: permit
+        # Endpoints système publics
+        system-endpoints:
+          paths: /q/*,/health*,/metrics*,/openapi*
+          policy: permit
 
   # Frontend intégration (Quinoa) - Production
   quinoa:

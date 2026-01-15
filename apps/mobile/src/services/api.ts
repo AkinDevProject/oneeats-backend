@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { ENV } from '../config/env';
+import authService from './authService';
 
 const API_BASE_URL = ENV.API_URL;
 const API_TIMEOUT = ENV.API_TIMEOUT;
@@ -11,7 +12,7 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-// Configuration par défaut pour les requêtes
+// Configuration par defaut pour les requetes
 const defaultHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
@@ -21,24 +22,48 @@ const defaultHeaders = {
 const DEV_USER_ID = ENV.DEV_USER_ID;
 
 class ApiService {
+  /**
+   * Recupere le header d'autorisation si disponible
+   */
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    // Mode mock - pas d'auth header
+    if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
+      return {};
+    }
+
+    // Mode Keycloak - ajouter le Bearer token
+    try {
+      const token = await authService.getAccessToken();
+      if (token) {
+        return { Authorization: `Bearer ${token}` };
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not get access token:', error);
+    }
+
+    return {};
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    
-    // Debug logging
-    console.log(`🌐 API Request: ${url}`);
-    console.log(`📱 Platform: ${Platform.OS}`);
-    console.log(`🔧 API Base URL: ${API_BASE_URL}`);
-    
+
+    // Debug logging (reduit en prod)
+    if (ENV.DEBUG_MODE) {
+      console.log(`🌐 API Request: ${url}`);
+    }
+
+    // Recuperer les headers d'auth
+    const authHeaders = await this.getAuthHeaders();
+
     const config: RequestInit = {
       ...options,
       headers: {
         ...defaultHeaders,
+        ...authHeaders,
         ...options.headers,
-        // Pour l'instant, pas d'auth header
-        // Authorization sera ajouté plus tard
       },
     };
 
@@ -46,14 +71,42 @@ class ApiService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
-      console.log(`⏳ Making request to: ${url}`);
       const response = await fetch(url, {
         ...config,
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
-      console.log(`✅ Response status: ${response.status}`);
+
+      if (ENV.DEBUG_MODE) {
+        console.log(`✅ Response status: ${response.status}`);
+      }
+
+      // Gerer les erreurs d'authentification
+      if (response.status === 401) {
+        console.warn('⚠️ Unauthorized - token may be expired');
+        // Tenter un refresh du token
+        if (ENV.AUTH_ENABLED && !ENV.MOCK_AUTH) {
+          const refreshed = await authService.refreshTokens();
+          if (refreshed) {
+            // Retenter la requete avec le nouveau token
+            const newAuthHeaders = await this.getAuthHeaders();
+            const retryConfig: RequestInit = {
+              ...options,
+              headers: {
+                ...defaultHeaders,
+                ...newAuthHeaders,
+                ...options.headers,
+              },
+            };
+            const retryResponse = await fetch(url, retryConfig);
+            if (retryResponse.ok) {
+              return await retryResponse.json();
+            }
+          }
+        }
+        throw new Error('Unauthorized');
+      }
 
       if (!response.ok) {
         console.error(`❌ API Error: ${response.status} ${response.statusText}`);
@@ -61,7 +114,6 @@ class ApiService {
       }
 
       const data = await response.json();
-      console.log(`📦 Response data:`, data);
       return data;
     } catch (error) {
       console.error(`💥 Request failed:`, error);

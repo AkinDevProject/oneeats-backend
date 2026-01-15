@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "OneEats",
+    "slug": "oneeats",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "oneeats",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -31,7 +31,7 @@
         "android.permission.WAKE_LOCK",
         "com.google.android.c2dm.permission.RECEIVE"
       ],
-      "package": "com.anonymous.mobile"
+      "package": "com.oneeats.mobile"
     },
     "web": {
       "bundler": "metro",
@@ -56,7 +56,8 @@
           "color": "#ffffff",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

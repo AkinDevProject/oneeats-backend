@@ -72,7 +72,8 @@
       "Skill(bmad:bmm:workflows:quick-spec)",
       "WebSearch",
       "WebFetch(domain:quarkus.io)",
-      "Skill(bmad:bmm:agents:architect)"
+      "Skill(bmad:bmm:agents:architect)",
+      "Bash(npx expo install expo-auth-session expo-secure-store expo-crypto)"
     ],
     "deny": [],
     "ask": []

@@ -11,11 +11,13 @@ class ApiService {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Don't set Content-Type for FormData
     const isFormData = options.body instanceof FormData;
-    
+
     const config: RequestInit = {
+      // Quarkus gère l'auth avec des cookies HttpOnly de session
+      credentials: 'include',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...options.headers,

@@ -4,6 +4,7 @@ import { AuthContext, useAuthProvider } from './hooks/useAuth';
 import './styles/menu-images.css';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
+import CallbackPage from './pages/CallbackPage';
 import AdminLayout from './components/layouts/AdminLayout';
 import RestaurantLayout from './components/layouts/RestaurantLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -25,7 +26,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          
+          <Route path="/callback" element={<CallbackPage />} />
+
           {/* Admin Routes */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">

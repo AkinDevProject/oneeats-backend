@@ -25,6 +25,7 @@ import * as Haptics from 'expo-haptics';
 
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { ENV } from '../../src/config/env';
 
 // Schémas de validation
 const loginSchema = yup.object().shape({
@@ -50,7 +51,7 @@ type AuthMode = 'login' | 'register' | 'guest';
 export default function AuthScreen() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, register, loginGuest } = useAuth();
+  const { login, register, loginGuest, loginWithSSO } = useAuth();
   const { currentTheme } = useAppTheme();
 
   const handleModeChange = (newMode: AuthMode) => {
@@ -63,7 +64,7 @@ export default function AuthScreen() {
     try {
       const success = await login(values.email, values.password);
       if (success) {
-        router.replace('/(tabs)/');
+        router.replace('/(tabs)');
       } else {
         Alert.alert('Erreur', 'Email ou mot de passe incorrect');
       }
@@ -79,7 +80,7 @@ export default function AuthScreen() {
     try {
       const success = await register(values.name, values.email, values.password);
       if (success) {
-        router.replace('/(tabs)/');
+        router.replace('/(tabs)');
       } else {
         Alert.alert('Erreur', 'Impossible de créer le compte');
       }
@@ -95,16 +96,35 @@ export default function AuthScreen() {
     try {
       const success = await loginGuest(values.email);
       if (success) {
-        router.replace('/(tabs)/');
+        router.replace('/(tabs)');
       } else {
         Alert.alert('Erreur', 'Impossible de se connecter en invité');
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Problème de connexion');
+      Alert.alert('Erreur', 'Probleme de connexion');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleSSOLogin = async () => {
+    setIsLoading(true);
+    try {
+      const success = await loginWithSSO();
+      if (success) {
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Erreur', 'Connexion SSO echouee');
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Probleme de connexion SSO');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Verifie si le mode SSO est disponible
+  const isSSOAvailable = ENV.AUTH_ENABLED && !ENV.MOCK_AUTH;
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -197,6 +217,39 @@ export default function AuthScreen() {
             >
               Se connecter
             </Button>
+
+            {/* SSO Login Options */}
+            {isSSOAvailable && (
+              <>
+                <View style={styles.dividerContainer}>
+                  <Divider style={styles.divider} />
+                  <Text style={[styles.dividerText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    ou
+                  </Text>
+                  <Divider style={styles.divider} />
+                </View>
+
+                <Button
+                  mode="outlined"
+                  onPress={handleSSOLogin}
+                  loading={isLoading}
+                  disabled={isLoading}
+                  style={styles.ssoButton}
+                  icon="login"
+                >
+                  Connexion avec Keycloak SSO
+                </Button>
+              </>
+            )}
+
+            {/* Mode indicator in dev */}
+            {ENV.MOCK_AUTH && (
+              <View style={styles.devModeIndicator}>
+                <Text style={[styles.devModeText, { color: currentTheme.colors.tertiary }]}>
+                  Mode developpement - Auth mock active
+                </Text>
+              </View>
+            )}
           </Card.Content>
         </Card>
       )}
@@ -439,5 +492,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     marginBottom: 8,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  divider: {
+    flex: 1,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+  },
+  ssoButton: {
+    marginTop: 8,
+    paddingVertical: 4,
+  },
+  devModeIndicator: {
+    marginTop: 16,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+    alignItems: 'center',
+  },
+  devModeText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

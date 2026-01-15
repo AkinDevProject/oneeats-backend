@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { 
-  ChefHat, Eye, EyeOff, Shield, Smartphone, 
-  Sparkles, Apple, Settings, X
+import {
+  ChefHat, Eye, EyeOff, Shield, Smartphone,
+  Sparkles, Apple, Settings, X, LogIn
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+
+// Configuration
+const MOCK_AUTH = import.meta.env.VITE_MOCK_AUTH === 'true';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,8 +19,8 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickAccess, setShowQuickAccess] = useState(true);
-  
-  const { user, login } = useAuth();
+
+  const { user, login, loginWithSSO } = useAuth();
 
   if (user) {
     return <Navigate to={user.role === 'admin' ? '/admin' : '/restaurant'} replace />;
@@ -241,14 +244,30 @@ const LoginPage: React.FC = () => {
                     </Button>
                   </form>
 
-                  {/* Future OAuth Buttons Section */}
+                  {/* OAuth Buttons Section */}
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="text-center mb-4">
                       <p className="text-sm text-gray-500">Ou connectez-vous avec</p>
                     </div>
                     <div className="space-y-3">
-                      {/* Google Login Button */}
-                      <button className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                      {/* Keycloak SSO Button - Only shown when not in mock mode */}
+                      {!MOCK_AUTH && (
+                        <button
+                          onClick={loginWithSSO}
+                          className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-sm text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <LogIn className="w-5 h-5" />
+                            <span>Se connecter avec Keycloak SSO</span>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* Google Login Button - Redirect to Keycloak with Google IdP */}
+                      <button
+                        onClick={!MOCK_AUTH ? loginWithSSO : undefined}
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
                         <div className="flex items-center space-x-3">
                           <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -257,17 +276,31 @@ const LoginPage: React.FC = () => {
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                           </svg>
                           <span>Continuer avec Google</span>
+                          {MOCK_AUTH && <span className="text-xs text-gray-400 ml-2">(bientot)</span>}
                         </div>
                       </button>
-                      
+
                       {/* Apple Login Button */}
-                      <button className="w-full flex items-center justify-center px-4 py-3 bg-black text-white rounded-lg shadow-sm text-sm font-medium hover:bg-gray-900 transition-colors">
+                      <button
+                        onClick={!MOCK_AUTH ? loginWithSSO : undefined}
+                        className="w-full flex items-center justify-center px-4 py-3 bg-black text-white rounded-lg shadow-sm text-sm font-medium hover:bg-gray-900 transition-colors"
+                      >
                         <div className="flex items-center space-x-3">
                           <Apple className="w-5 h-5" />
                           <span>Continuer avec Apple</span>
+                          {MOCK_AUTH && <span className="text-xs text-gray-400 ml-2">(bientot)</span>}
                         </div>
                       </button>
                     </div>
+
+                    {/* Mode indicator */}
+                    {MOCK_AUTH && (
+                      <div className="mt-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Mode developpement - Auth mock active
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
