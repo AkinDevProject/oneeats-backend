@@ -4,16 +4,8 @@ export default function AccountLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // On gère le header nous-mêmes dans index.tsx
+        headerShown: false, // Header géré dans chaque page
       }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          title: "Compte",
-          headerShown: true,
-        }}
-      />
-    </Stack>
+    />
   );
 }

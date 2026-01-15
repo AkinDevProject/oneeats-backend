@@ -6,27 +6,24 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
+  KeyboardTypeOptions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
-  Surface,
   Button,
-  Card,
-  List,
-  Divider,
   Dialog,
   Portal,
   TextInput as PaperTextInput,
-  Chip,
-  IconButton,
+  TouchableRipple,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeIn,
-  SlideInRight,
+  FadeInDown,
 } from 'react-native-reanimated';
 
 import { useAppTheme } from '../../src/contexts/ThemeContext';
@@ -46,30 +43,28 @@ interface UserData {
   updatedAt: string;
 }
 
-// Interface pour les statistiques
-interface UserStats {
-  ordersCount: number;
-  favoriteRestaurantsCount: number;
-  totalSpent: number;
+// Interface pour le champ en édition
+interface EditField {
+  key: string;
+  value: string;
+  title: string;
+  keyboardType: KeyboardTypeOptions;
+  placeholder: string;
 }
 
-type AccountSection = 'profile' | 'orders' | 'addresses' | 'security' | 'privacy' | 'export' | 'password';
-
 export default function AccountPage() {
-  console.log('📋 Account page rendering');
-
-  const [activeSection, setActiveSection] = useState<AccountSection | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
-  const [stats, setStats] = useState<UserStats>({
-    ordersCount: 0,
-    favoriteRestaurantsCount: 0,
-    totalSpent: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [editField, setEditField] = useState({ key: '', value: '', title: '' });
+  const [editField, setEditField] = useState<EditField>({
+    key: '',
+    value: '',
+    title: '',
+    keyboardType: 'default',
+    placeholder: '',
+  });
 
   const { currentTheme } = useAppTheme();
 
@@ -82,27 +77,8 @@ export default function AccountPage() {
     try {
       setLoading(true);
       setError(null);
-
-      // Récupérer les données utilisateur
       const userData = await apiService.users.getById(ENV.DEV_USER_ID);
       setUser(userData);
-
-      // Récupérer les commandes pour calculer les stats
-      const orders = await apiService.orders.getByUserId(ENV.DEV_USER_ID);
-
-      // Calculer les statistiques
-      const totalSpent = orders.reduce((sum: number, order: any) => sum + order.totalAmount, 0);
-      const ordersCount = orders.length;
-
-      // TODO: Récupérer les vrais favoris depuis l'API
-      const favoriteRestaurantsCount = 3; // Valeur simulée pour correspondre aux favoris mock
-
-      setStats({
-        ordersCount,
-        favoriteRestaurantsCount,
-        totalSpent,
-      });
-
     } catch (err) {
       console.error('Erreur lors du chargement des données utilisateur:', err);
       setError('Impossible de charger les données utilisateur');
@@ -111,46 +87,37 @@ export default function AccountPage() {
     }
   };
 
-  // Handlers pour les sections
-  const handleSectionPress = (section: AccountSection) => {
-    setActiveSection(section);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    // Navigation ou actions directes pour certaines sections
-    switch (section) {
-      case 'orders':
-        Alert.alert('Historique', 'Navigation vers l\'historique des commandes');
-        break;
-      case 'addresses':
-        Alert.alert('Adresses', 'Navigation vers la gestion des adresses');
-        break;
-      case 'password':
-        Alert.alert('Mot de passe', 'Navigation vers le changement de mot de passe');
-        break;
-      case 'privacy':
-        Alert.alert('Confidentialité', 'Navigation vers les paramètres de confidentialité');
-        break;
-      case 'export':
-        Alert.alert('Export', 'Fonctionnalité d\'export des données');
-        break;
-    }
-  };
-
-  const handleEdit = (field: string, title: string, value: string) => {
-    setEditField({ key: field, value, title });
+  const handleEdit = (
+    field: string,
+    title: string,
+    value: string,
+    keyboardType: KeyboardTypeOptions = 'default',
+    placeholder: string = ''
+  ) => {
+    setEditField({ key: field, value, title, keyboardType, placeholder });
     setShowEditDialog(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (user && editField.value.trim()) {
+      // Validation basique
+      if (editField.key === 'email' && !editField.value.includes('@')) {
+        Alert.alert('Erreur', 'Veuillez entrer une adresse email valide');
+        return;
+      }
+      if (editField.key === 'phone' && editField.value.length < 10) {
+        Alert.alert('Erreur', 'Veuillez entrer un numéro de téléphone valide');
+        return;
+      }
+
       setUser(prev => prev ? ({
         ...prev,
         [editField.key]: editField.value.trim(),
       }) : null);
       setShowEditDialog(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Succès', 'Informations mises à jour avec succès');
+      Alert.alert('Succès', 'Informations mises à jour');
       // TODO: Sauvegarder via API
     }
   };
@@ -163,17 +130,69 @@ export default function AccountPage() {
   const confirmDeleteAccount = () => {
     setShowDeleteDialog(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert('Compte supprimé', 'Votre compte a été supprimé avec succès');
-    // TODO: Implémentation réelle de suppression + déconnexion
+    Alert.alert('Compte supprimé', 'Votre compte a été supprimé');
+    router.replace('/auth/login');
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  // Composant MenuItem harmonisé avec profile.tsx
+  const MenuItem = ({
+    icon,
+    label,
+    value,
+    onPress,
+    iconBg = '#F5F5F5',
+    showEdit = false,
+    delay = 0,
+  }: {
+    icon: string;
+    label: string;
+    value?: string;
+    onPress: () => void;
+    iconBg?: string;
+    showEdit?: boolean;
+    delay?: number;
+  }) => (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
+      <TouchableRipple
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+        borderless
+        style={styles.menuItem}
+      >
+        <View style={styles.menuItemContent}>
+          <View style={[styles.menuIconContainer, { backgroundColor: iconBg }]}>
+            <Text style={styles.menuIcon}>{icon}</Text>
+          </View>
+          <View style={styles.menuTextContainer}>
+            <Text style={[styles.menuLabel, { color: currentTheme.colors.onSurface }]}>
+              {label}
+            </Text>
+            {value && (
+              <Text style={[styles.menuValue, { color: currentTheme.colors.onSurfaceVariant }]}>
+                {value}
+              </Text>
+            )}
+          </View>
+          {showEdit ? (
+            <Text style={[styles.editIcon, { color: currentTheme.colors.primary }]}>✏️</Text>
+          ) : (
+            <Text style={[styles.chevron, { color: currentTheme.colors.onSurfaceVariant }]}>›</Text>
+          )}
+        </View>
+      </TouchableRipple>
+    </Animated.View>
+  );
+
+  // Section header
+  const SectionHeader = ({ title, delay = 0 }: { title: string; delay?: number }) => (
+    <Animated.View entering={FadeInDown.delay(delay).duration(400)}>
+      <Text style={[styles.sectionHeader, { color: currentTheme.colors.onSurfaceVariant }]}>
+        {title}
+      </Text>
+    </Animated.View>
+  );
 
   // Affichage du loading
   if (loading) {
@@ -196,195 +215,191 @@ export default function AccountPage() {
       <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.colors.background }]}>
         <StatusBar style="auto" />
         <View style={styles.errorContainer}>
-          <MaterialIcons name="error" size={48} color={currentTheme.colors.error} />
+          <Text style={{ fontSize: 48 }}>😕</Text>
           <Text style={[styles.errorText, { color: currentTheme.colors.error }]}>
             {error || 'Utilisateur non trouvé'}
           </Text>
-          <Button mode="contained" onPress={loadUserData} style={styles.retryButton}>
-            Réessayer
-          </Button>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: currentTheme.colors.primary }]}
+            onPress={loadUserData}
+          >
+            <Text style={styles.retryButtonText}>Réessayer</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Render du menu principal
-  const renderMainMenu = () => (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Profil utilisateur */}
-      {user && (
-        <Animated.View entering={FadeIn.delay(100)}>
-          <Card style={[styles.userCard, { backgroundColor: currentTheme.colors.surface }]}>
-            <Card.Content style={styles.userCardContent}>
-              <View style={styles.userAvatar}>
-                <MaterialIcons name="account-circle" size={60} color={currentTheme.colors.primary} />
-              </View>
-              <View style={styles.userInfo}>
-                <Text style={[styles.userName, { color: currentTheme.colors.onSurface }]}>
-                  {user.firstName} {user.lastName}
-                </Text>
-                <Text style={[styles.userEmail, { color: currentTheme.colors.onSurfaceVariant }]}>
-                  {user.email}
-                </Text>
-                <View style={styles.userStats}>
-                  <Chip mode="outlined" compact style={styles.statChip}>
-                    {stats.ordersCount} commandes
-                  </Chip>
-                  <Chip mode="outlined" compact style={styles.statChip}>
-                    {stats.totalSpent.toFixed(2)}€
-                  </Chip>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
-        </Animated.View>
-      )}
-
-      {/* Informations Personnelles */}
-      <Animated.View entering={FadeIn.delay(200)}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Subheader style={{ color: currentTheme.colors.onSurfaceVariant }}>
-            Informations Personnelles
-          </List.Subheader>
-
-          <List.Item
-            title="Prénom"
-            description={user?.firstName}
-            left={(props) => <List.Icon {...props} icon="badge" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="pencil" />}
-            onPress={() => handleEdit('firstName', 'Prénom', user?.firstName || '')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Nom"
-            description={user?.lastName}
-            left={(props) => <List.Icon {...props} icon="badge" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="pencil" />}
-            onPress={() => handleEdit('lastName', 'Nom', user?.lastName || '')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Email"
-            description={user?.email}
-            left={(props) => <List.Icon {...props} icon="email" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="pencil" />}
-            onPress={() => handleEdit('email', 'Email', user?.email || '')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Téléphone"
-            description={user?.phone || 'Non renseigné'}
-            left={(props) => <List.Icon {...props} icon="phone" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="pencil" />}
-            onPress={() => handleEdit('phone', 'Téléphone', user?.phone || '')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Adresse"
-            description={user?.address || 'Non renseignée'}
-            left={(props) => <List.Icon {...props} icon="map-marker" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="pencil" />}
-            onPress={() => handleEdit('address', 'Adresse', user?.address || '')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Actions Rapides */}
-      <Animated.View entering={FadeIn.delay(300)}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Subheader style={{ color: currentTheme.colors.onSurfaceVariant }}>
-            Actions Rapides
-          </List.Subheader>
-
-          <List.Item
-            title="Historique des commandes"
-            description={`${stats.ordersCount} commandes passées`}
-            left={(props) => <List.Icon {...props} icon="history" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('orders')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Mes adresses"
-            description="Gérer vos adresses de livraison"
-            left={(props) => <List.Icon {...props} icon="map-marker" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('addresses')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Sécurité */}
-      <Animated.View entering={FadeIn.delay(400)}>
-        <Card style={[styles.menuCard, { backgroundColor: currentTheme.colors.surface }]}>
-          <List.Subheader style={{ color: currentTheme.colors.onSurfaceVariant }}>
-            Sécurité & Confidentialité
-          </List.Subheader>
-
-          <List.Item
-            title="Changer le mot de passe"
-            description="Modifier votre mot de passe"
-            left={(props) => <List.Icon {...props} icon="lock" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('password')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Confidentialité"
-            description="Paramètres de confidentialité"
-            left={(props) => <List.Icon {...props} icon="shield-account" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('privacy')}
-          />
-          <Divider />
-
-          <List.Item
-            title="Exporter mes données"
-            description="Télécharger vos informations"
-            left={(props) => <List.Icon {...props} icon="download" color={currentTheme.colors.primary} />}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => handleSectionPress('export')}
-          />
-        </Card>
-      </Animated.View>
-
-      {/* Zone de danger */}
-      <Animated.View entering={FadeIn.delay(500)}>
-        <Card style={[styles.sectionCard, { backgroundColor: currentTheme.colors.surface, borderColor: currentTheme.colors.error }]}>
-          <Card.Content>
-            <Text style={[styles.sectionTitle, { color: currentTheme.colors.error }]}>
-              Zone de Danger
-            </Text>
-            <Button
-              mode="outlined"
-              icon="delete-forever"
-              onPress={handleDeleteAccount}
-              style={[styles.dangerButton, { borderColor: currentTheme.colors.error }]}
-              textColor={currentTheme.colors.error}
-            >
-              Supprimer mon compte
-            </Button>
-          </Card.Content>
-        </Card>
-      </Animated.View>
-
-      <View style={styles.bottomSpacer} />
-    </ScrollView>
-  );
-
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.colors.background }]}>
       <StatusBar style="auto" />
 
-      <Animated.View entering={SlideInRight} style={styles.content}>
-        {renderMainMenu()}
+      {/* Header avec navigation */}
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        style={[styles.header, { backgroundColor: currentTheme.colors.surface }]}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          style={styles.backButton}
+        >
+          <MaterialIcons name="arrow-back" size={24} color={currentTheme.colors.onSurface} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: currentTheme.colors.onSurface }]}>
+          Profil Personnel
+        </Text>
+        <View style={styles.headerSpacer} />
       </Animated.View>
+
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Section Informations Personnelles */}
+        <SectionHeader title="INFORMATIONS PERSONNELLES" delay={100} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="👤"
+            label="Prénom"
+            value={user.firstName}
+            iconBg="#E3F2FD"
+            showEdit
+            onPress={() => handleEdit('firstName', 'Prénom', user.firstName, 'default', 'Entrez votre prénom')}
+            delay={150}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="👤"
+            label="Nom"
+            value={user.lastName}
+            iconBg="#E3F2FD"
+            showEdit
+            onPress={() => handleEdit('lastName', 'Nom', user.lastName, 'default', 'Entrez votre nom')}
+            delay={200}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="📧"
+            label="Email"
+            value={user.email}
+            iconBg="#E8F5E9"
+            showEdit
+            onPress={() => handleEdit('email', 'Email', user.email, 'email-address', 'exemple@email.com')}
+            delay={250}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="📱"
+            label="Téléphone"
+            value={user.phone || 'Non renseigné'}
+            iconBg="#FFF3E0"
+            showEdit
+            onPress={() => handleEdit('phone', 'Téléphone', user.phone || '', 'phone-pad', '06 12 34 56 78')}
+            delay={300}
+          />
+        </View>
+
+        {/* Section Sécurité */}
+        <SectionHeader title="SÉCURITÉ" delay={350} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="🔒"
+            label="Changer le mot de passe"
+            iconBg="#F3E5F5"
+            onPress={() => {
+              // TODO: Implémenter la page de changement de mot de passe
+              Alert.alert('Mot de passe', 'Cette fonctionnalité sera disponible prochainement');
+            }}
+            delay={400}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="🛡️"
+            label="Confidentialité"
+            iconBg="#E0F7FA"
+            onPress={() => {
+              // TODO: Implémenter la page de confidentialité
+              Alert.alert('Confidentialité', 'Cette fonctionnalité sera disponible prochainement');
+            }}
+            delay={450}
+          />
+        </View>
+
+        {/* Section Données */}
+        <SectionHeader title="MES DONNÉES" delay={500} />
+
+        <View style={[styles.menuSection, { backgroundColor: currentTheme.colors.surface }]}>
+          <MenuItem
+            icon="📋"
+            label="Historique des commandes"
+            iconBg="#E8F5E9"
+            onPress={() => router.push('/orders')}
+            delay={550}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="📦"
+            label="Exporter mes données"
+            iconBg="#FFF8E1"
+            onPress={() => {
+              Alert.alert(
+                'Export des données',
+                'Vous recevrez un email avec toutes vos données dans les 24h.',
+                [
+                  { text: 'Annuler', style: 'cancel' },
+                  {
+                    text: 'Exporter',
+                    onPress: () => {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      Alert.alert('Succès', 'Demande d\'export envoyée');
+                    }
+                  }
+                ]
+              );
+            }}
+            delay={600}
+          />
+        </View>
+
+        {/* Zone de Danger */}
+        <SectionHeader title="ZONE DE DANGER" delay={650} />
+
+        <Animated.View entering={FadeInDown.delay(700).duration(400)}>
+          <TouchableRipple
+            onPress={handleDeleteAccount}
+            borderless
+            style={[styles.dangerButton, { backgroundColor: '#FFEBEE' }]}
+          >
+            <View style={styles.dangerContent}>
+              <Text style={{ fontSize: 20 }}>🗑️</Text>
+              <View style={styles.dangerTextContainer}>
+                <Text style={styles.dangerTitle}>Supprimer mon compte</Text>
+                <Text style={styles.dangerSubtitle}>Cette action est irréversible</Text>
+              </View>
+            </View>
+          </TouchableRipple>
+        </Animated.View>
+
+        {/* Info membre */}
+        <Animated.View entering={FadeIn.delay(750)}>
+          <View style={styles.memberInfo}>
+            <Text style={[styles.memberText, { color: currentTheme.colors.onSurfaceVariant }]}>
+              Membre depuis {new Date(user.createdAt).toLocaleDateString('fr-FR', {
+                month: 'long',
+                year: 'numeric'
+              })}
+            </Text>
+          </View>
+        </Animated.View>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
 
       {/* Dialogs */}
       <Portal>
@@ -393,9 +408,13 @@ export default function AccountPage() {
           <Dialog.Title>Modifier {editField.title}</Dialog.Title>
           <Dialog.Content>
             <PaperTextInput
+              mode="outlined"
               value={editField.value}
               onChangeText={(text) => setEditField(prev => ({ ...prev, value: text }))}
+              keyboardType={editField.keyboardType}
+              placeholder={editField.placeholder}
               autoFocus
+              autoCapitalize={editField.key === 'email' ? 'none' : 'words'}
             />
           </Dialog.Content>
           <Dialog.Actions>
@@ -408,11 +427,16 @@ export default function AccountPage() {
         <Dialog visible={showDeleteDialog} onDismiss={() => setShowDeleteDialog(false)}>
           <Dialog.Title>Supprimer le compte</Dialog.Title>
           <Dialog.Content>
-            <Text>Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</Text>
+            <Text style={{ marginBottom: 12 }}>
+              Êtes-vous sûr de vouloir supprimer votre compte ?
+            </Text>
+            <Text style={{ color: '#D32F2F', fontWeight: '500' }}>
+              Cette action est irréversible. Toutes vos données seront perdues.
+            </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setShowDeleteDialog(false)}>Annuler</Button>
-            <Button mode="contained" onPress={confirmDeleteAccount} buttonColor={currentTheme.colors.error}>
+            <Button mode="contained" onPress={confirmDeleteAccount} buttonColor="#D32F2F">
               Supprimer
             </Button>
           </Dialog.Actions>
@@ -426,64 +450,127 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  content: {
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginRight: 32,
+  },
+  headerSpacer: {
+    width: 32,
+  },
+  // ScrollView
+  scrollView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
-    padding: 16,
+  scrollContent: {
+    paddingBottom: 40,
   },
-  userCard: {
-    marginBottom: 16,
-    borderRadius: 12,
+  // Sections
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    marginTop: 24,
+    marginBottom: 8,
+    marginHorizontal: 20,
   },
-  userCardContent: {
+  menuSection: {
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  // Menu Item
+  menuItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  menuItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  userAvatar: {
-    marginRight: 16,
+  menuIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  userInfo: {
+  menuIcon: {
+    fontSize: 22,
+  },
+  menuTextContainer: {
     flex: 1,
+    marginLeft: 14,
   },
-  userName: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 4,
+  menuLabel: {
+    fontSize: 16,
+    fontWeight: '500',
   },
-  userEmail: {
+  menuValue: {
     fontSize: 14,
-    marginBottom: 8,
+    marginTop: 2,
   },
-  userStats: {
-    flexDirection: 'row',
-    gap: 8,
+  editIcon: {
+    fontSize: 16,
   },
-  statChip: {
-    height: 28,
+  chevron: {
+    fontSize: 22,
+    fontWeight: '300',
   },
-  menuCard: {
-    marginBottom: 12,
-    borderRadius: 12,
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginLeft: 74,
   },
-  sectionCard: {
-    marginBottom: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
+  // Danger Zone
   dangerButton: {
-    borderRadius: 8,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  bottomSpacer: {
-    height: 32,
+  dangerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
   },
-  // Loading et Error styles
+  dangerTextContainer: {
+    marginLeft: 14,
+  },
+  dangerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#D32F2F',
+  },
+  dangerSubtitle: {
+    fontSize: 13,
+    color: '#E57373',
+    marginTop: 2,
+  },
+  // Member info
+  memberInfo: {
+    alignItems: 'center',
+    marginTop: 30,
+    paddingHorizontal: 16,
+  },
+  memberText: {
+    fontSize: 13,
+  },
+  // Loading & Error
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -508,6 +595,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   retryButton: {
-    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  retryButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  bottomSpacer: {
+    height: 32,
   },
 });
