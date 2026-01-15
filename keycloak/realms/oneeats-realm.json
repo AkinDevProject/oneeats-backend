@@ -109,7 +109,9 @@
         "exp://192.168.1.111:8081/--/*",
         "oneeats://*",
         "oneeats://auth/callback",
-        "http://localhost:8081/*"
+        "http://localhost:8081/*",
+        "http://192.168.1.111:8081/*",
+        "https://auth.expo.io/*"
       ],
       "webOrigins": ["*"],
       "protocol": "openid-connect",

@@ -247,6 +247,20 @@ export default function AuthScreen() {
               </Text>
             </Animated.View>
           )}
+
+          {/* Debug link - visible in dev */}
+          {__DEV__ && (
+            <Animated.View entering={FadeIn.delay(900)}>
+              <TouchableOpacity
+                onPress={() => router.push('/auth/debug')}
+                style={styles.debugLink}
+              >
+                <Text style={[styles.debugLinkText, { color: currentTheme.colors.outline }]}>
+                  🔧 Debug Auth
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -421,5 +435,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: '#F57C00',
+  },
+  // Debug link
+  debugLink: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  debugLinkText: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
