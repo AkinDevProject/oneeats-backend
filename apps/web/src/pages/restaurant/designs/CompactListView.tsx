@@ -1,44 +1,46 @@
 import React, { useState } from 'react';
-import { Clock, CheckCircle, AlertCircle, ChefHat, Phone, MessageCircle, MoreVertical, Timer, Euro, Zap, Flame, Sparkles } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChefHat, Phone, MessageCircle, MoreVertical, Timer, Euro, Zap, Flame, Sparkles, Loader2 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
-import { mockOrders } from '../../../data/mockData';
-import { Order } from '../../../types';
+import { useRestaurantData } from '../../../hooks/useRestaurantData';
 
 const CompactListView: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [activeTab, setActiveTab] = useState<string>('all');
 
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour du statut:', err);
+    }
   };
 
   const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return { 
-          color: 'bg-orange-500', 
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING':
+        return {
+          color: 'bg-orange-500',
           label: 'En attente',
           textColor: 'text-orange-600',
           bgColor: 'bg-orange-50',
           icon: AlertCircle,
           dot: 'bg-orange-400'
         };
-      case 'preparing':
-        return { 
-          color: 'bg-blue-500', 
+      case 'PREPARING':
+        return {
+          color: 'bg-blue-500',
           label: 'En préparation',
           textColor: 'text-blue-600',
           bgColor: 'bg-blue-50',
           icon: ChefHat,
           dot: 'bg-blue-400'
         };
-      case 'ready':
-        return { 
-          color: 'bg-green-500', 
+      case 'READY':
+        return {
+          color: 'bg-green-500',
           label: 'Prêt',
           textColor: 'text-green-600',
           bgColor: 'bg-green-50',
@@ -46,8 +48,8 @@ const CompactListView: React.FC = () => {
           dot: 'bg-green-400'
         };
       default:
-        return { 
-          color: 'bg-gray-500', 
+        return {
+          color: 'bg-gray-500',
           label: status,
           textColor: 'text-gray-600',
           bgColor: 'bg-gray-50',
@@ -57,34 +59,62 @@ const CompactListView: React.FC = () => {
     }
   };
 
-  const filteredOrders = activeTab === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === activeTab);
+  const filteredOrders = activeTab === 'all'
+    ? orders
+    : orders.filter(order => order.status.toUpperCase() === activeTab.toUpperCase());
 
   const tabs = [
     { key: 'all', label: 'Toutes', count: orders.length },
-    { key: 'pending', label: 'En attente', count: orders.filter(o => o.status === 'pending').length },
-    { key: 'preparing', label: 'En cours', count: orders.filter(o => o.status === 'preparing').length },
-    { key: 'ready', label: 'Prêtes', count: orders.filter(o => o.status === 'ready').length },
+    { key: 'PENDING', label: 'En attente', count: orders.filter(o => o.status === 'PENDING').length },
+    { key: 'PREPARING', label: 'En cours', count: orders.filter(o => o.status === 'PREPARING').length },
+    { key: 'READY', label: 'Prêtes', count: orders.filter(o => o.status === 'READY').length },
   ];
 
   const getNextStatus = (currentStatus: string) => {
-    switch (currentStatus) {
-      case 'pending': return 'preparing';
-      case 'preparing': return 'ready';
-      case 'ready': return 'completed';
+    const normalizedStatus = currentStatus.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING': return 'PREPARING';
+      case 'PREPARING': return 'READY';
+      case 'READY': return 'COMPLETED';
       default: return currentStatus;
     }
   };
 
   const getActionLabel = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Accepter';
-      case 'preparing': return 'Prêt';
-      case 'ready': return 'Livrer';
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING': return 'Accepter';
+      case 'PREPARING': return 'Prêt';
+      case 'READY': return 'Livrer';
       default: return 'Action';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des commandes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="text-center p-8 max-w-md mx-auto">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={refetch} variant="primary">
+            Réessayer
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -268,9 +298,9 @@ const CompactListView: React.FC = () => {
                     <div className={`w-3 h-3 ${config.dot} rounded-full animate-pulse`} />
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="font-bold text-gray-900">#{order.id.split('-')[1]}</span>
-                        <Badge 
-                          variant={order.status === 'pending' ? 'warning' : order.status === 'preparing' ? 'primary' : 'success'}
+                        <span className="font-bold text-gray-900">#{order.orderNumber || order.id.split('-')[1]}</span>
+                        <Badge
+                          variant={order.status === 'PENDING' ? 'warning' : order.status === 'PREPARING' ? 'primary' : 'success'}
                           size="sm"
                         >
                           {config.label}
@@ -332,15 +362,15 @@ const CompactListView: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    {order.status !== 'completed' && (
+                    {order.status !== 'COMPLETED' && (
                       <Button
                         onClick={() => handleStatusUpdate(order.id, nextStatus)}
-                        variant={order.status === 'pending' ? 'primary' : order.status === 'preparing' ? 'success' : 'outline'}
+                        variant={order.status === 'PENDING' ? 'primary' : order.status === 'PREPARING' ? 'success' : 'outline'}
                         size="sm"
                         className="min-w-[80px]"
                         icon={
-                          order.status === 'pending' ? <ChefHat className="h-4 w-4" /> :
-                          order.status === 'preparing' ? <CheckCircle className="h-4 w-4" /> :
+                          order.status === 'PENDING' ? <ChefHat className="h-4 w-4" /> :
+                          order.status === 'PREPARING' ? <CheckCircle className="h-4 w-4" /> :
                           <CheckCircle className="h-4 w-4" />
                         }
                       >
@@ -380,15 +410,15 @@ const CompactListView: React.FC = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="flex items-center justify-center space-x-8">
           <div className="text-center">
-            <div className="text-lg font-bold text-orange-600">{orders.filter(o => o.status === 'pending').length}</div>
+            <div className="text-lg font-bold text-orange-600">{orders.filter(o => o.status === 'PENDING').length}</div>
             <div className="text-xs text-gray-600">En attente</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-blue-600">{orders.filter(o => o.status === 'preparing').length}</div>
+            <div className="text-lg font-bold text-blue-600">{orders.filter(o => o.status === 'PREPARING').length}</div>
             <div className="text-xs text-gray-600">En cours</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-green-600">{orders.filter(o => o.status === 'ready').length}</div>
+            <div className="text-lg font-bold text-green-600">{orders.filter(o => o.status === 'READY').length}</div>
             <div className="text-xs text-gray-600">Prêtes</div>
           </div>
           <div className="text-center">

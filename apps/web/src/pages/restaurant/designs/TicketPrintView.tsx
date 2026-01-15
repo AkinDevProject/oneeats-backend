@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import { Printer, Check, Clock, AlertTriangle, ChefHat, Receipt, Play, Pause, RotateCcw } from 'lucide-react';
+import { Printer, Check, Clock, AlertTriangle, ChefHat, Receipt, Play, Pause, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
-import { mockOrders } from '../../../data/mockData';
+import { useRestaurantData } from '../../../hooks/useRestaurantData';
 import { Order } from '../../../types';
 
 const TicketPrintView: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
 
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour du statut:', err);
+    }
   };
 
   const handlePrint = (order: Order) => {
@@ -22,37 +24,64 @@ const TicketPrintView: React.FC = () => {
   };
 
   const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return { 
-          color: 'border-l-orange-500 bg-orange-50', 
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING':
+        return {
+          color: 'border-l-orange-500 bg-orange-50',
           headerColor: 'bg-orange-500',
           label: 'NOUVELLE COMMANDE',
           priority: '🔥 URGENT'
         };
-      case 'preparing':
-        return { 
-          color: 'border-l-blue-500 bg-blue-50', 
+      case 'PREPARING':
+        return {
+          color: 'border-l-blue-500 bg-blue-50',
           headerColor: 'bg-blue-500',
           label: 'EN COURS DE PRÉPARATION',
           priority: '⚡ EN COURS'
         };
-      case 'ready':
-        return { 
-          color: 'border-l-green-500 bg-green-50', 
+      case 'READY':
+        return {
+          color: 'border-l-green-500 bg-green-50',
           headerColor: 'bg-green-500',
           label: 'PRÊT POUR LIVRAISON',
           priority: '✅ PRÊT'
         };
       default:
-        return { 
-          color: 'border-l-gray-500 bg-gray-50', 
+        return {
+          color: 'border-l-gray-500 bg-gray-50',
           headerColor: 'bg-gray-500',
           label: 'COMMANDE',
           priority: ''
         };
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <p className="text-gray-400">Chargement des tickets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <Card className="text-center p-8 max-w-md mx-auto bg-gray-800">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Erreur de chargement</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <Button onClick={refetch} variant="primary">
+            Réessayer
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
@@ -173,12 +202,12 @@ const TicketPrintView: React.FC = () => {
 
               {/* Action Buttons */}
               <div className="mt-4 space-y-2">
-                {order.status === 'pending' && (
+                {order.status === 'PENDING' && (
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStatusUpdate(order.id, 'preparing');
+                        handleStatusUpdate(order.id, 'PREPARING');
                       }}
                       variant="success"
                       size="sm"
@@ -202,12 +231,12 @@ const TicketPrintView: React.FC = () => {
                   </div>
                 )}
 
-                {order.status === 'preparing' && (
+                {order.status === 'PREPARING' && (
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStatusUpdate(order.id, 'ready');
+                        handleStatusUpdate(order.id, 'READY');
                       }}
                       variant="primary"
                       size="sm"
@@ -219,7 +248,7 @@ const TicketPrintView: React.FC = () => {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStatusUpdate(order.id, 'pending');
+                        handleStatusUpdate(order.id, 'PENDING');
                       }}
                       variant="warning"
                       size="sm"
@@ -231,12 +260,12 @@ const TicketPrintView: React.FC = () => {
                   </div>
                 )}
 
-                {order.status === 'ready' && (
+                {order.status === 'READY' && (
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStatusUpdate(order.id, 'completed');
+                        handleStatusUpdate(order.id, 'COMPLETED');
                       }}
                       variant="success"
                       size="sm"
@@ -248,7 +277,7 @@ const TicketPrintView: React.FC = () => {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStatusUpdate(order.id, 'preparing');
+                        handleStatusUpdate(order.id, 'PREPARING');
                       }}
                       variant="outline"
                       size="sm"
@@ -264,9 +293,9 @@ const TicketPrintView: React.FC = () => {
               {/* Status Indicator */}
               <div className="absolute top-2 right-2">
                 <div className={`w-3 h-3 rounded-full ${
-                  order.status === 'pending' ? 'bg-orange-400' :
-                  order.status === 'preparing' ? 'bg-blue-400 animate-pulse' :
-                  order.status === 'ready' ? 'bg-green-400' :
+                  order.status === 'PENDING' ? 'bg-orange-400' :
+                  order.status === 'PREPARING' ? 'bg-blue-400 animate-pulse' :
+                  order.status === 'READY' ? 'bg-green-400' :
                   'bg-gray-400'
                 }`} />
               </div>
@@ -289,19 +318,19 @@ const TicketPrintView: React.FC = () => {
         <div className="flex items-center justify-center space-x-8 font-mono text-sm">
           <div className="text-center">
             <div className="text-orange-400 text-lg font-bold">
-              {orders.filter(o => o.status === 'pending').length}
+              {orders.filter(o => o.status === 'PENDING').length}
             </div>
             <div className="text-gray-400 text-xs">NOUVELLES</div>
           </div>
           <div className="text-center">
             <div className="text-blue-400 text-lg font-bold">
-              {orders.filter(o => o.status === 'preparing').length}
+              {orders.filter(o => o.status === 'PREPARING').length}
             </div>
             <div className="text-gray-400 text-xs">EN COURS</div>
           </div>
           <div className="text-center">
             <div className="text-green-400 text-lg font-bold">
-              {orders.filter(o => o.status === 'ready').length}
+              {orders.filter(o => o.status === 'READY').length}
             </div>
             <div className="text-gray-400 text-xs">PRÊTES</div>
           </div>

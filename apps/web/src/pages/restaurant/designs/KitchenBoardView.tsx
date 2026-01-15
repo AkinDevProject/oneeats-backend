@@ -1,62 +1,90 @@
-import React, { useState } from 'react';
-import { Clock, CheckCircle, AlertCircle, ChefHat, Timer, Users } from 'lucide-react';
+import React from 'react';
+import { Clock, CheckCircle, AlertCircle, ChefHat, Timer, Users, Loader2 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
-import { mockOrders } from '../../../data/mockData';
-import { Order } from '../../../types';
+import { useRestaurantData } from '../../../hooks/useRestaurantData';
 
 const KitchenBoardView: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { orders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
 
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+    } catch (err) {
+      console.error('Erreur lors de la mise à jour du statut:', err);
+    }
   };
 
   const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return { 
-          color: 'bg-orange-500', 
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING':
+        return {
+          color: 'bg-orange-500',
           textColor: 'text-orange-600',
           bgColor: 'bg-orange-50 border-orange-200',
           label: 'EN ATTENTE',
-          icon: AlertCircle 
+          icon: AlertCircle
         };
-      case 'preparing':
-        return { 
-          color: 'bg-blue-500', 
+      case 'PREPARING':
+        return {
+          color: 'bg-blue-500',
           textColor: 'text-blue-600',
           bgColor: 'bg-blue-50 border-blue-200',
           label: 'EN PRÉPARATION',
-          icon: ChefHat 
+          icon: ChefHat
         };
-      case 'ready':
-        return { 
-          color: 'bg-green-500', 
+      case 'READY':
+        return {
+          color: 'bg-green-500',
           textColor: 'text-green-600',
           bgColor: 'bg-green-50 border-green-200',
           label: 'PRÊT',
-          icon: CheckCircle 
+          icon: CheckCircle
         };
       default:
-        return { 
-          color: 'bg-gray-500', 
+        return {
+          color: 'bg-gray-500',
           textColor: 'text-gray-600',
           bgColor: 'bg-gray-50 border-gray-200',
           label: status.toUpperCase(),
-          icon: Clock 
+          icon: Clock
         };
     }
   };
 
   const groupedOrders = {
-    pending: orders.filter(order => order.status === 'pending'),
-    preparing: orders.filter(order => order.status === 'preparing'),
-    ready: orders.filter(order => order.status === 'ready')
+    pending: orders.filter(order => order.status === 'PENDING'),
+    preparing: orders.filter(order => order.status === 'PREPARING'),
+    ready: orders.filter(order => order.status === 'READY')
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des commandes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center bg-white rounded-xl p-8 shadow-lg">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={refetch} variant="primary">
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -105,8 +133,8 @@ const KitchenBoardView: React.FC = () => {
                       <p className="text-sm text-gray-600">{orderList.length} commandes</p>
                     </div>
                   </div>
-                  <Badge 
-                    variant={status === 'pending' ? 'warning' : status === 'preparing' ? 'primary' : 'success'}
+                  <Badge
+                    variant={status === 'PENDING' ? 'warning' : status === 'PREPARING' ? 'primary' : 'success'}
                     className="text-lg font-bold px-3 py-1"
                   >
                     {orderList.length}
@@ -170,9 +198,9 @@ const KitchenBoardView: React.FC = () => {
 
                       {/* Action Buttons */}
                       <div className="flex space-x-2 pt-2">
-                        {status === 'pending' && (
+                        {status === 'PENDING' && (
                           <Button
-                            onClick={() => handleStatusUpdate(order.id, 'preparing')}
+                            onClick={() => handleStatusUpdate(order.id, 'PREPARING')}
                             variant="primary"
                             size="sm"
                             className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -181,9 +209,9 @@ const KitchenBoardView: React.FC = () => {
                             Commencer
                           </Button>
                         )}
-                        {status === 'preparing' && (
+                        {status === 'PREPARING' && (
                           <Button
-                            onClick={() => handleStatusUpdate(order.id, 'ready')}
+                            onClick={() => handleStatusUpdate(order.id, 'READY')}
                             variant="success"
                             size="sm"
                             className="flex-1"
@@ -192,9 +220,9 @@ const KitchenBoardView: React.FC = () => {
                             Marquer Prêt
                           </Button>
                         )}
-                        {status === 'ready' && (
+                        {status === 'READY' && (
                           <Button
-                            onClick={() => handleStatusUpdate(order.id, 'completed')}
+                            onClick={() => handleStatusUpdate(order.id, 'COMPLETED')}
                             variant="outline"
                             size="sm"
                             className="flex-1"

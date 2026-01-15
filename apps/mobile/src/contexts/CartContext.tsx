@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CartItem, MenuItem, Order, generateMockOrder, CartItemOption, mockMenuItems } from '../data/mockData';
+import { CartItem, MenuItem, Order, CartItemOption, mockMenuItems } from '../data/mockData';
 import { useAuth } from './AuthContext';
+import apiService from '../services/api';
+import { ENV } from '../config/env';
 
 interface CartContextType {
   items: CartItem[];
@@ -185,17 +187,50 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     if (items.length === 0) return null;
 
     try {
-      const order = generateMockOrder(restaurantId, items, customerData);
-      if (customerNotes) {
-        order.customerNotes = customerNotes;
-      }
+      // Appeler l'API réelle au lieu de generateMockOrder
+      const createdOrder = await apiService.orders.create({
+        userId: user?.id || ENV.DEV_USER_ID,
+        restaurantId: restaurantId,
+        totalAmount: totalPrice,
+        specialInstructions: customerNotes,
+        items: items.map(item => ({
+          menuItemId: item.menuItem.id,
+          menuItemName: item.menuItem.name,
+          unitPrice: item.menuItem.price,
+          quantity: item.quantity,
+          specialNotes: item.specialInstructions
+        }))
+      });
 
-      // In a real app, you would send this to your API
+      // Transformer la réponse API en format Order frontend
+      const order: Order = {
+        id: createdOrder.id,
+        orderNumber: createdOrder.orderNumber,
+        restaurantId: createdOrder.restaurantId,
+        restaurantName: createdOrder.restaurantName || 'Restaurant',
+        clientName: customerData?.customerName || user?.firstName || 'Client',
+        clientPhone: customerData?.customerPhone || user?.phone || '',
+        items: createdOrder.items.map((item: any) => ({
+          id: item.id,
+          menuItemId: item.menuItemId,
+          name: item.menuItemName,
+          quantity: item.quantity,
+          price: item.unitPrice,
+          totalPrice: item.totalPrice || (item.quantity * item.unitPrice)
+        })),
+        total: createdOrder.totalAmount,
+        status: createdOrder.status,
+        createdAt: new Date(createdOrder.createdAt),
+        estimatedTime: createdOrder.estimatedPreparationTime || 20,
+        customerNotes: customerNotes,
+        pickupTime: customerData?.pickupTime
+      };
+
       clearCart();
       return order;
     } catch (error) {
       console.error('Error creating order:', error);
-      return null;
+      throw error; // Propager l'erreur pour que l'UI puisse la gérer
     }
   };
 

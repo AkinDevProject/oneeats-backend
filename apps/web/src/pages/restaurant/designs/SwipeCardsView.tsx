@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
-import { CheckCircle, X, Clock, ChefHat, ArrowRight, Timer, MapPin } from 'lucide-react';
+import { CheckCircle, X, Clock, ChefHat, ArrowRight, Timer, MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
-import { mockOrders } from '../../../data/mockData';
-import { Order } from '../../../types';
+import { useRestaurantData } from '../../../hooks/useRestaurantData';
 
 const SwipeCardsView: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders.filter(o => o.status !== 'completed'));
+  const { orders: allOrders, loading, error, updateOrderStatus, refetch } = useRestaurantData();
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Filtrer les commandes non complétées
+  const orders = allOrders.filter(o => o.status !== 'COMPLETED');
   const currentOrder = orders[currentIndex];
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (currentOrder) {
-      setOrders(prev => prev.map(order => 
-        order.id === currentOrder.id 
-          ? { ...order, status: currentOrder.status === 'pending' ? 'preparing' : 'ready' }
-          : order
-      ));
-      nextOrder();
+      try {
+        const newStatus = currentOrder.status === 'PENDING' ? 'PREPARING' : 'READY';
+        await updateOrderStatus(currentOrder.id, newStatus);
+        nextOrder();
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour du statut:', err);
+      }
     }
   };
 
@@ -29,12 +31,15 @@ const SwipeCardsView: React.FC = () => {
   };
 
   const nextOrder = () => {
-    setCurrentIndex(prev => (prev + 1) % orders.length);
+    if (orders.length > 0) {
+      setCurrentIndex(prev => (prev + 1) % orders.length);
+    }
   };
 
   const getStatusInfo = (status: string) => {
-    switch (status) {
-      case 'pending':
+    const normalizedStatus = status.toUpperCase();
+    switch (normalizedStatus) {
+      case 'PENDING':
         return {
           title: 'NOUVELLE COMMANDE',
           subtitle: 'Accepter pour commencer la préparation',
@@ -42,7 +47,7 @@ const SwipeCardsView: React.FC = () => {
           actionText: 'Commencer la préparation',
           actionIcon: ChefHat
         };
-      case 'preparing':
+      case 'PREPARING':
         return {
           title: 'EN PRÉPARATION',
           subtitle: 'Marquer comme prêt quand terminé',
@@ -50,7 +55,7 @@ const SwipeCardsView: React.FC = () => {
           actionText: 'Marquer prêt',
           actionIcon: CheckCircle
         };
-      case 'ready':
+      case 'READY':
         return {
           title: 'COMMANDE PRÊTE',
           subtitle: 'En attente de livraison',
@@ -68,6 +73,32 @@ const SwipeCardsView: React.FC = () => {
         };
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-600">Chargement des commandes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Card className="text-center p-8 max-w-md mx-auto">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Erreur de chargement</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={refetch} variant="primary">
+            Réessayer
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (!currentOrder) {
     return (
