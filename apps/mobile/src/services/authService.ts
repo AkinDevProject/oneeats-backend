@@ -75,10 +75,19 @@ class AuthService {
 
   /**
    * Demarre le flow d'authentification OAuth avec PKCE
+   * @param provider - Optional identity provider hint (e.g., 'google', 'apple', 'facebook')
+   *                   This will skip Keycloak login page and go directly to the provider
    */
-  async login(): Promise<KeycloakTokens | null> {
+  async login(provider?: string): Promise<KeycloakTokens | null> {
     try {
-      console.log('🔐 Starting OAuth login flow...');
+      console.log(`🔐 Starting OAuth login flow${provider ? ` with ${provider}` : ''}...`);
+
+      // Extra params pour Keycloak (identity provider hint)
+      const extraParams: Record<string, string> = {};
+      if (provider) {
+        // kc_idp_hint tells Keycloak to skip login page and go directly to the provider
+        extraParams.kc_idp_hint = provider;
+      }
 
       // Creer la requete d'autorisation avec PKCE
       const request = new AuthSession.AuthRequest({
@@ -87,6 +96,7 @@ class AuthService {
         redirectUri: this.redirectUri,
         usePKCE: true,
         responseType: AuthSession.ResponseType.Code,
+        extraParams,
       });
 
       // Prompt pour l'authentification

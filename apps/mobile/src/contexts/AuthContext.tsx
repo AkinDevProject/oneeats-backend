@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  loginWithSSO: () => Promise<boolean>;
+  loginWithSSO: (provider?: string) => Promise<boolean>;
   loginGuest: (email: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -161,16 +161,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * Login via Keycloak SSO
+   * @param provider - Optional identity provider hint (e.g., 'google', 'apple')
    */
-  const loginWithSSO = useCallback(async (): Promise<boolean> => {
+  const loginWithSSO = useCallback(async (provider?: string): Promise<boolean> => {
     try {
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
         console.warn('SSO login not available in mock mode');
-        return false;
+        // En mode mock, simuler un login reussi pour les tests
+        const mockUser: User = {
+          id: Math.random().toString(36).substring(7),
+          name: provider ? `User via ${provider}` : 'SSO User',
+          email: `${provider || 'sso'}@example.com`,
+          favoriteRestaurants: [],
+          orders: [],
+        };
+        await saveUser(mockUser);
+        return true;
       }
 
-      console.log('🔐 Starting SSO login...');
-      const tokens = await authService.login();
+      console.log(`🔐 Starting SSO login${provider ? ` with ${provider}` : ''}...`);
+      const tokens = await authService.login(provider);
 
       if (tokens) {
         // Recuperer les infos utilisateur
