@@ -85,7 +85,7 @@ services:
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
     ports:
-      - "8180:8080"
+      - "8480:8080"
     volumes:
       - ./keycloak/realms:/opt/keycloak/data/import:ro
     depends_on:

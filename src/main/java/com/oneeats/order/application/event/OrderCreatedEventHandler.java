@@ -2,8 +2,8 @@ package com.oneeats.order.application.event;
 
 import com.oneeats.notification.infrastructure.websocket.WebSocketNotificationService;
 import com.oneeats.order.domain.event.OrderCreatedEvent;
-import com.oneeats.order.infrastructure.persistence.JpaOrderRepository;
-import com.oneeats.user.infrastructure.persistence.JpaUserRepository;
+import com.oneeats.order.infrastructure.repository.JpaOrderRepository;
+import com.oneeats.user.infrastructure.repository.JpaUserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -73,7 +73,7 @@ public class OrderCreatedEventHandler {
     private double getOrderTotal(java.util.UUID orderId) {
         try {
             return orderRepository.findById(orderId)
-                .map(order -> order.getTotalAmount().doubleValue())
+                .map(order -> order.getTotalAmount().getAmount().doubleValue())
                 .orElse(0.0);
         } catch (Exception e) {
             LOGGER.warning("Could not fetch order total: " + e.getMessage());

@@ -90,8 +90,8 @@ quarkus:
 
   # Sécurité OIDC/Keycloak
   oidc:
-    # URL du serveur Keycloak (port 8180 en dev)
-    auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}/realms/oneeats
+    # URL du serveur Keycloak (port 8480 en dev - 8180 bloque par Hyper-V)
+    auth-server-url: ${KEYCLOAK_URL:http://localhost:8480}/realms/oneeats
     client-id: ${KEYCLOAK_CLIENT_ID:oneeats-web}
     credentials:
       secret: ${KEYCLOAK_CLIENT_SECRET:oneeats-web-secret-dev}

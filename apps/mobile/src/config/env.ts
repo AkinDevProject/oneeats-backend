@@ -21,7 +21,7 @@ const getApiUrl = () => {
 const getKeycloakUrl = () => {
   if (__DEV__) {
     // Meme logique que l'API - utiliser l'IP reseau pour appareil physique
-    return 'http://192.168.1.36:8180';
+    return 'http://192.168.1.36:8480';
   }
   return 'https://auth.your-production.com';
 };

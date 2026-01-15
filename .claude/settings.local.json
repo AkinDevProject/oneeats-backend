@@ -73,7 +73,8 @@
       "WebSearch",
       "WebFetch(domain:quarkus.io)",
       "Skill(bmad:bmm:agents:architect)",
-      "Bash(npx expo install expo-auth-session expo-secure-store expo-crypto)"
+      "Bash(npx expo install expo-auth-session expo-secure-store expo-crypto)",
+      "Bash(netsh interface ipv4 show excludedportrange:*)"
     ],
     "deny": [],
     "ask": []
