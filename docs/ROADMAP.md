@@ -17,14 +17,17 @@
 
 ## Tâche en cours
 
-> **Sprint 1 — Restructuration Documentation** ✅ **TERMINÉ**
+> **Sprint 2 — Intégration Frontend-Backend** ✅ **DASHBOARD WEB TERMINÉ**
 >
-> Dernière amélioration : Ajout de liens croisés entre BUSINESS_RULES.md et USE_CASES.md
-> - ✅ Tous les use cases (UC-001 à UC-205) renvoient vers les règles métier associées
-> - ✅ Toutes les sections de règles métier renvoient vers les use cases pertinents
-> - ✅ Navigation bidirectionnelle facilitée pour Claude Code
+> L'intégration API du dashboard web est complète :
+> - ✅ Toutes les pages connectées aux vraies APIs backend
+> - ✅ Hooks personnalisés (useRestaurantData, useOrders, useUsers, etc.)
+> - ✅ Service API centralisé (apiService singleton)
+> - ✅ Gestion des états loading/error
+> - ✅ Auto-refresh toutes les 30 secondes
+> - ✅ Nettoyage du code obsolète (mockData.ts supprimé)
 >
-> **Prochaine étape** : Intégration frontend web et mobile avec les APIs backend
+> **Prochaine étape** : Intégration frontend mobile avec les APIs backend
 
 ---
 
@@ -85,17 +88,17 @@
 
 ---
 
-## Phase 2 - Intégration Frontend-Backend (En cours 40%)
+## Phase 2 - Intégration Frontend-Backend (En cours 70%)
 
-### Dashboard Restaurant Web
+### Dashboard Restaurant Web (100% Complet)
 - [x] Interface complète avec React + TypeScript + Vite
 - [x] Tailwind CSS pour le styling
 - [x] Pages : Dashboard, Menu, Commandes, Paramètres
 - [x] Components UI réutilisables
-- [ ] **➡️ Connexion aux vraies APIs** ← EN COURS
-- [ ] Remplacement des mock data
-- [ ] Gestion des états loading/error
-- [ ] Configuration environnement (.env.local)
+- [x] Connexion aux vraies APIs
+- [x] Remplacement des mock data (fichier mockData.ts supprimé)
+- [x] Gestion des états loading/error
+- [x] Configuration environnement (.env.local)
 - [ ] Tests E2E des flux principaux
 
 ### Application Mobile Client
@@ -286,7 +289,7 @@
 
 | ID  | Description                              | Priorité | Status       | Assigné à |
 |-----|------------------------------------------|----------|--------------|-----------|
-| #01 | Mock data encore utilisé dans web/mobile | Haute    | ➡️ En cours  | Sprint 1  |
+| #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu (web) | Sprint 2  |
 | #02 | Auth JWT non implémentée                 | Haute    | 📋 Backlog   | Sprint 3  |
 | #03 | WebSocket temps réel manquant            | Moyenne  | 📋 Backlog   | Sprint 4  |
 | #04 | Mode offline non implémenté (mobile)     | Moyenne  | 📋 Backlog   | Sprint 5  |
@@ -409,7 +412,7 @@
 
 ### Frontend Web
 - **UI/UX** : ✅ 90% (Interface complète)
-- **Intégration API** : ❌ 10% (Mock data encore utilisé)
+- **Intégration API** : ✅ 100% (Toutes les pages connectées aux APIs)
 - **Tests** : ❌ 20% (Tests unitaires basiques)
 
 ### Frontend Mobile
@@ -419,7 +422,31 @@
 - **Tests** : ❌ 10% (À implémenter)
 
 ### Global MVP
-**Progression globale** : ⚠️ **65%**
+**Progression globale** : ⚠️ **70%**
+
+---
+
+### Session 2026-01-15 : Finalisation Intégration API Dashboard Web
+
+**Travail effectué** :
+- ✅ Audit complet du dashboard web - intégration API déjà réalisée (commit 512f70a)
+- ✅ Suppression du fichier `apps/web/src/data/mockData.ts` (obsolète, non utilisé)
+- ✅ Nettoyage de `apps/web/src/hooks/useApi.ts` (suppression de 2 hooks référençant des méthodes API inexistantes)
+- ✅ Vérification du build npm : OK
+
+**Architecture API validée** :
+- Service API centralisé (`api.ts`) avec singleton pattern
+- Hooks personnalisés pour chaque domaine (useRestaurants, useOrders, useUsers, useDashboard)
+- Auto-refresh toutes les 30 secondes pour les données temps réel
+- Gestion des états loading/error sur toutes les pages
+
+**Pages connectées aux APIs** :
+- AdminDashboard, RestaurantsManagementPage, UsersPage, OrdersSupervisionPage
+- MenuPage, OrdersManagementPage, RestaurantSettingsPage, StatsPage, AnalyticsSystemPage
+
+**Ce qui suit** :
+- Intégration frontend mobile avec les APIs backend
+- Tests E2E pour le dashboard web
 
 ---
 

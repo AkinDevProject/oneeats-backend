@@ -82,17 +82,9 @@ export function useOrdersByStatus(restaurantId: string, status: string) {
   return useApiCall(() => apiService.orders.getByStatus(restaurantId, status), [restaurantId, status]);
 }
 
-export function useTodayOrdersStats(restaurantId: string) {
-  return useApiCall(() => apiService.orders.getTodayStats(restaurantId), [restaurantId]);
-}
-
 // Users hooks (for admin)
 export function useUsers() {
   return useApiCall(() => apiService.users.getAll());
-}
-
-export function useUsersByRole(role: string) {
-  return useApiCall(() => apiService.users.getByRole(role), [role]);
 }
 
 // Mutation hooks for CRUD operations
