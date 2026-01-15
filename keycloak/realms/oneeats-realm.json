@@ -3,6 +3,7 @@
   "enabled": true,
   "displayName": "OneEats",
   "displayNameHtml": "<strong>OneEats</strong>",
+  "loginTheme": "oneeats",
   "sslRequired": "external",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
@@ -67,15 +68,13 @@
       "secret": "oneeats-web-secret-dev",
       "redirectUris": [
         "http://localhost:8080/*",
-        "http://localhost:5173/*"
-      ],
-      "postLogoutRedirectUris": [
-        "http://localhost:8080/*",
-        "http://localhost:5173/*"
+        "http://localhost:5173/*",
+        "http://192.168.1.111:8080/*"
       ],
       "webOrigins": [
         "http://localhost:8080",
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://192.168.1.111:8080"
       ],
       "publicClient": false,
       "protocol": "openid-connect",

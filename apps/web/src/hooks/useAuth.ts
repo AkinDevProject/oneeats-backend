@@ -42,13 +42,17 @@ export const useAuthProvider = () => {
 
       const data = await response.json();
 
+      // Convertir en tableau si nécessaire et vérifier le rôle
+      const roles = Array.isArray(data.roles) ? data.roles : [];
+      const userRole = roles.includes('admin') ? 'admin' :
+                       roles.includes('restaurant') ? 'restaurant' : 'user';
+
       // Mapper les données backend vers le format User du frontend
       return {
         id: data.id,
         email: data.email,
         name: data.fullName || `${data.firstName} ${data.lastName}`,
-        role: data.roles?.includes('admin') ? 'admin' :
-              data.roles?.includes('restaurant') ? 'restaurant' : 'user',
+        role: userRole,
         createdAt: new Date(),
         restaurantId: data.restaurants?.[0]?.restaurantId,
       };
@@ -90,8 +94,9 @@ export const useAuthProvider = () => {
    * Quarkus gère le flow OIDC et les cookies de session.
    */
   const loginWithSSO = () => {
-    // Rediriger vers une page protégée - Quarkus redirigera automatiquement vers Keycloak
-    window.location.href = '/restaurant';
+    // Rediriger vers une route PROTÉGÉE pour déclencher OIDC
+    // Quarkus redirigera vers Keycloak, puis après auth vers /callback (redirect-path)
+    window.location.href = '/api/auth/me';
   };
 
   /**
