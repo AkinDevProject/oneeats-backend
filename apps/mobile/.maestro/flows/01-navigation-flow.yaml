@@ -1,0 +1,54 @@
+# Flow de test E2E: Navigation principale
+# Verifie que la navigation entre les ecrans fonctionne correctement
+
+appId: com.oneeats.mobile
+name: Main Navigation Flow
+tags:
+  - smoke
+  - navigation
+---
+
+# 1. Lancement de l'application
+- launchApp:
+    clearState: true
+
+# 2. Verifier l'ecran d'accueil (restaurants)
+- assertVisible: "OneEats"
+
+# 3. Attendre le chargement des restaurants
+- extendedWaitUntil:
+    visible: "Restaurant"
+    timeout: 10000
+
+# 4. Naviguer vers l'onglet Panier
+- tapOn:
+    text: "Panier"
+- assertVisible:
+    text: "Votre Panier"
+    optional: false
+
+# 5. Verifier l'etat vide du panier
+- assertVisible:
+    text: ".*vide.*|.*Découvrir.*"
+    regex: true
+
+# 6. Naviguer vers l'onglet Profil
+- tapOn:
+    text: "Profil"
+- assertVisible:
+    text: ".*compte.*|.*connecter.*"
+    regex: true
+
+# 7. Retour a l'accueil
+- tapOn:
+    text: "Accueil"
+- assertVisible: "Restaurants"
+
+# 8. Test du scroll sur la liste des restaurants
+- scroll:
+    direction: DOWN
+- scroll:
+    direction: UP
+
+# 9. Verification finale
+- assertVisible: "OneEats"

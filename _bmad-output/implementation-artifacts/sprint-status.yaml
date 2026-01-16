@@ -1,0 +1,246 @@
+# Sprint Status - OneEats Mobile MVP
+# Generated: 2026-01-16
+# Workflow: sprint-planning
+
+generated: "2026-01-16T22:00:00Z"
+project: "OneEats Mobile App"
+project_key: "ONEEATS-MOBILE"
+tracking_system: "file-system"
+story_location: "_bmad-output/implementation-artifacts/stories"
+
+# Current Sprint: Mobile MVP Finalization
+sprint:
+  name: "Sprint Mobile MVP"
+  goal: "Finaliser l'authentification Keycloak et valider le flow complet de commande"
+  started: "2026-01-16"
+
+# Development Status
+# Statuses: backlog, ready-for-dev, in-progress, review, done
+# Epic statuses: backlog, in-progress, done
+development_status:
+  # ===================
+  # EPIC 1: Authentication
+  # ===================
+  epic-1:
+    name: "Authentification Keycloak"
+    status: in-progress
+
+  1-1-debug-oauth-redirect:
+    epic: 1
+    name: "Débugger le redirect URI OAuth"
+    description: "Identifier et corriger le mismatch de redirect URI entre expo-auth-session et Keycloak"
+    status: ready-for-dev
+    priority: P0
+    tasks:
+      - "Afficher le redirect URI généré par expo-auth-session dans les logs"
+      - "Comparer avec les URIs configurées dans Keycloak"
+      - "Ajouter l'URI manquante dans Keycloak Admin Console"
+      - "Tester le login sur web et mobile"
+    acceptance_criteria:
+      - "Le flow OAuth complète sans erreur 'page introuvable'"
+      - "Les tokens sont stockés dans SecureStore"
+      - "L'utilisateur est redirigé vers l'app après login"
+
+  1-2-test-login-flow:
+    epic: 1
+    name: "Tester le flow login complet"
+    description: "Valider le flow complet: login → token → refresh → logout"
+    status: backlog
+    priority: P0
+    depends_on: ["1-1-debug-oauth-redirect"]
+    tasks:
+      - "Se connecter avec client@oneeats.com / client123"
+      - "Vérifier que le token est stocké"
+      - "Vérifier le refresh automatique du token"
+      - "Tester le logout et la suppression des tokens"
+    acceptance_criteria:
+      - "Login réussit et stocke access_token + refresh_token"
+      - "Le refresh token fonctionne avant expiration"
+      - "Logout supprime tous les tokens"
+
+  1-3-test-api-auth:
+    epic: 1
+    name: "Tester les appels API authentifiés"
+    description: "Vérifier que les appels API avec Bearer token fonctionnent"
+    status: backlog
+    priority: P0
+    depends_on: ["1-2-test-login-flow"]
+    tasks:
+      - "Appeler GET /api/restaurants avec Bearer token"
+      - "Appeler GET /api/users/me pour récupérer le profil"
+      - "Vérifier la gestion des erreurs 401"
+    acceptance_criteria:
+      - "Les appels API retournent 200 avec token valide"
+      - "Les appels API retournent 401 sans token"
+      - "Le refresh automatique fonctionne sur 401"
+
+  epic-1-retrospective:
+    name: "Retrospective Epic 1 - Auth"
+    status: optional
+
+  # ===================
+  # EPIC 2: Order Flow
+  # ===================
+  epic-2:
+    name: "Flow de commande"
+    status: backlog
+
+  2-1-test-cart-api:
+    epic: 2
+    name: "Tester l'intégration panier"
+    description: "Vérifier que le panier persiste côté serveur"
+    status: backlog
+    priority: P1
+    depends_on: ["1-3-test-api-auth"]
+    tasks:
+      - "Ajouter des items au panier"
+      - "Vérifier la synchronisation avec l'API"
+      - "Tester la modification des quantités"
+      - "Tester la suppression d'items"
+    acceptance_criteria:
+      - "Le panier se synchronise avec le backend"
+      - "Les modifications sont persistées"
+
+  2-2-test-order-creation:
+    epic: 2
+    name: "Tester la création de commande"
+    description: "Valider le flow complet de création de commande"
+    status: backlog
+    priority: P1
+    depends_on: ["2-1-test-cart-api"]
+    tasks:
+      - "Créer une commande depuis le panier"
+      - "Vérifier le statut de la commande"
+      - "Tester l'historique des commandes"
+    acceptance_criteria:
+      - "La commande est créée avec statut PENDING"
+      - "La commande apparaît dans l'historique"
+
+  2-3-test-order-status:
+    epic: 2
+    name: "Tester le suivi de commande"
+    description: "Vérifier les mises à jour de statut en temps réel"
+    status: backlog
+    priority: P1
+    depends_on: ["2-2-test-order-creation"]
+    tasks:
+      - "Vérifier la page de suivi de commande"
+      - "Tester les notifications de changement de statut"
+    acceptance_criteria:
+      - "Le statut se met à jour en temps réel"
+      - "Les notifications fonctionnent"
+
+  epic-2-retrospective:
+    name: "Retrospective Epic 2 - Order Flow"
+    status: optional
+
+  # ===================
+  # EPIC 3: Device Testing
+  # ===================
+  epic-3:
+    name: "Tests sur appareils"
+    status: backlog
+
+  3-1-test-android:
+    epic: 3
+    name: "Tester sur Android"
+    description: "Valider l'app sur émulateur et appareil physique Android"
+    status: backlog
+    priority: P1
+    depends_on: ["2-3-test-order-status"]
+    tasks:
+      - "Tester sur émulateur Android"
+      - "Tester sur appareil physique Android"
+      - "Vérifier le deep linking oneeats://"
+      - "Vérifier les performances"
+    acceptance_criteria:
+      - "L'app fonctionne sur Android 10+"
+      - "Le deep linking OAuth fonctionne"
+      - "Pas de crash ou freeze"
+
+  3-2-test-ios:
+    epic: 3
+    name: "Tester sur iOS"
+    description: "Valider l'app sur simulateur iOS"
+    status: backlog
+    priority: P2
+    depends_on: ["2-3-test-order-status"]
+    tasks:
+      - "Tester sur simulateur iOS"
+      - "Vérifier le deep linking"
+      - "Vérifier les performances"
+    acceptance_criteria:
+      - "L'app fonctionne sur iOS 14+"
+      - "Le deep linking OAuth fonctionne"
+
+  epic-3-retrospective:
+    name: "Retrospective Epic 3 - Device Testing"
+    status: optional
+
+  # ===================
+  # EPIC 4: Automated Tests (Optional for MVP)
+  # ===================
+  epic-4:
+    name: "Tests automatisés"
+    status: backlog
+
+  4-1-unit-tests-auth:
+    epic: 4
+    name: "Tests unitaires Auth"
+    description: "Implémenter les tests unitaires pour AuthContext"
+    status: backlog
+    priority: P2
+    tasks:
+      - "Configurer Jest avec React Native"
+      - "Tester AuthContext (login, logout, refresh)"
+      - "Tester authService"
+    acceptance_criteria:
+      - "Couverture > 80% sur AuthContext"
+      - "Tests passent en CI"
+
+  4-2-unit-tests-cart:
+    epic: 4
+    name: "Tests unitaires Cart"
+    description: "Implémenter les tests unitaires pour CartContext"
+    status: backlog
+    priority: P2
+    tasks:
+      - "Tester CartContext (add, remove, update)"
+      - "Tester le calcul des totaux"
+    acceptance_criteria:
+      - "Couverture > 80% sur CartContext"
+
+  4-3-e2e-tests-maestro:
+    epic: 4
+    name: "Tests E2E Maestro"
+    description: "Implémenter les tests E2E critiques avec Maestro"
+    status: backlog
+    priority: P2
+    tasks:
+      - "Installer et configurer Maestro"
+      - "Créer le test flow de commande"
+      - "Créer le test flow d'authentification"
+    acceptance_criteria:
+      - "Tests E2E passent sur Android"
+
+  epic-4-retrospective:
+    name: "Retrospective Epic 4 - Tests"
+    status: optional
+
+# Summary counts (auto-calculated)
+summary:
+  total_epics: 4
+  total_stories: 10
+  epics_done: 0
+  epics_in_progress: 1
+  stories_done: 0
+  stories_in_progress: 0
+  stories_ready: 1
+  stories_backlog: 9
+
+# Notes
+notes:
+  - "Epic 1 (Auth) est critique et bloquant pour les autres epics"
+  - "Epic 4 (Tests) est optionnel pour le MVP mais recommandé"
+  - "Prioriser la résolution du redirect URI OAuth avant tout"
+  - "Documentation créée: USER_STORIES.md et TEST_STRATEGY.md"

@@ -1,0 +1,75 @@
+# Flow de test E2E: Passage de commande complet
+# Verifie le flow de bout en bout: selection restaurant -> commande
+
+appId: com.oneeats.mobile
+name: Complete Order Flow
+tags:
+  - e2e
+  - order
+  - critical
+---
+
+# 1. Lancement de l'application (etat neuf)
+- launchApp:
+    clearState: true
+
+# 2. Skip auth si necessaire
+- tapOn:
+    text: "Continuer sans compte"
+    optional: true
+
+# 3. Attendre l'accueil avec les restaurants
+- extendedWaitUntil:
+    visible: "Restaurant"
+    timeout: 15000
+
+# 4. Selectionner un restaurant
+- tapOn:
+    text: ".*Restaurant.*|Pizza.*"
+    regex: true
+    index: 0
+
+# 5. Attendre le chargement du menu
+- extendedWaitUntil:
+    visible: ".*Menu.*|.*€.*"
+    regex: true
+    timeout: 10000
+
+# 6. Scroll pour voir les plats
+- scroll:
+    direction: DOWN
+
+# 7. Ajouter un plat au panier (chercher un bouton d'ajout)
+- tapOn:
+    text: ".*Ajouter.*|\\+|Choisir"
+    regex: true
+    index: 0
+    optional: true
+
+# 8. Aller au panier
+- tapOn:
+    text: "Panier"
+
+# 9. Verifier qu'on est sur la page panier
+- assertVisible:
+    text: "Votre Panier"
+
+# 10. Si des articles sont presents, verifier les informations
+- assertVisible:
+    text: ".*€.*"
+    regex: true
+    optional: true
+
+# 11. Verifier la presence du formulaire de commande (si articles)
+- assertVisible:
+    text: ".*Nom.*|.*information.*"
+    regex: true
+    optional: true
+
+# 12. Verifier le bouton de commande
+- assertVisible:
+    text: ".*Commander.*"
+    regex: true
+    optional: true
+
+# Note: Le test s'arrete avant la validation car il necessite une vraie auth

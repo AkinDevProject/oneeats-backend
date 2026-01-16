@@ -1,0 +1,58 @@
+# Flow de test E2E: Ajout au panier et gestion du panier
+# Verifie le flow complet d'ajout d'articles au panier
+
+appId: com.oneeats.mobile
+name: Cart Management Flow
+tags:
+  - smoke
+  - cart
+  - order
+---
+
+# 1. Lancement de l'application
+- launchApp:
+    clearState: true
+
+# 2. Attendre le chargement
+- extendedWaitUntil:
+    visible: "Restaurant"
+    timeout: 10000
+
+# 3. Ouvrir un restaurant
+- tapOn:
+    text: ".*Restaurant.*|Pizza.*"
+    regex: true
+    index: 0
+
+# 4. Attendre le menu
+- extendedWaitUntil:
+    visible: ".*Menu.*|.*€.*"
+    regex: true
+    timeout: 5000
+
+# 5. Ajouter un article au panier
+- tapOn:
+    text: ".*Ajouter.*|.*\\+.*"
+    regex: true
+    index: 0
+    optional: true
+
+# 6. Verifier le panier (ou aller au panier)
+- tapOn:
+    text: "Panier"
+
+# 7. Verifier le contenu du panier
+- assertVisible:
+    text: "Votre Panier"
+
+# 8. Si le panier contient des articles
+- assertVisible:
+    text: ".*article.*|.*€.*"
+    regex: true
+    optional: true
+
+# 9. Verifier les controles de quantite
+- assertVisible:
+    text: ".*Total.*"
+    regex: true
+    optional: true

@@ -82,7 +82,9 @@
       "Bash(REDIRECT_URI=\"oneeats://auth/callback\")",
       "Bash(AUTH_URL=\"http://192.168.1.111:8480/realms/oneeats/protocol/openid-connect/auth?client_id=oneeats-mobile&redirect_uri=$REDIRECT_URI&response_type=code&scope=openid%20profile%20email&code_challenge=test123&code_challenge_method=S256\":*)",
       "Bash(echo:*)",
-      "Skill(bmad:bmm:workflows:sprint-status)"
+      "Skill(bmad:bmm:workflows:sprint-status)",
+      "Bash(npx jest:*)",
+      "Bash(head:*)"
     ],
     "deny": [],
     "ask": []

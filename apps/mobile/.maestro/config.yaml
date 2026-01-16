@@ -1,0 +1,23 @@
+# Configuration Maestro pour OneEats Mobile
+# Documentation: https://maestro.mobile.dev
+
+appId: com.oneeats.mobile
+
+# Timeout global pour les assertions
+defaultTimeout: 10000
+
+# Flows a executer
+flows:
+  - flows/*.yaml
+
+# Configuration de l'emulateur/device
+device:
+  platform: android # ou ios
+  # Pour Android: api 28+
+  # Pour iOS: iOS 15+
+
+# Variables d'environnement
+env:
+  API_URL: http://192.168.1.111:8080/api
+  TEST_USER_EMAIL: test@oneeats.com
+  TEST_USER_PASSWORD: password123
