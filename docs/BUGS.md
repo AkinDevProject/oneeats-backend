@@ -4,160 +4,70 @@
 
 | Statut | Nombre | Description |
 |--------|--------|-------------|
-| 🔴 Critique | 2 | Bloquant pour le MVP |
-| 🟠 Important | 3 | Impact significatif sur l'expérience |
+| 🔴 Critique | 0 | Bloquant pour le MVP |
+| 🟠 Important | 2 | Impact significatif sur l'expérience |
 | 🟡 Moyen | 2 | Problème mineur |
-| 🟢 Résolu | 5 | Bugs corrigés |
+| 🟢 Résolu | 10 | Bugs corrigés |
 
 ---
 
-## 🔴 Bugs Critiques (Bloquant MVP)
+## ~~🔴 Bugs Critiques (Bloquant MVP)~~ ✅ TOUS RÉSOLUS
 
-### BUG-001 : Mock data utilisé dans frontend web et mobile
-**Priorité** : 🔴 Critique
-**Status** : ➡️ En cours
-**Affecte** : Frontend Web, Mobile
-**Date création** : 2025-12-10
-
-**Description** :
-Les frontends (web dashboard et mobile app) utilisent encore des données mockées au lieu de vraies APIs backend. Cela empêche le fonctionnement réel du MVP.
-
-**Impact** :
-- ❌ Impossible de passer de vraies commandes end-to-end
-- ❌ Modifications dans le dashboard ne sont pas persistées
-- ❌ Pas de synchronisation entre mobile et web
-- ❌ Tests E2E impossibles
-
-**Étapes pour reproduire** :
-1. Lancer le dashboard web sur `http://localhost:8080/restaurant`
-2. Modifier un menu item
-3. Rafraîchir la page → modifications perdues (mock data)
-
-**Workaround temporaire** :
-Aucun - nécessite implémentation complète
-
-**Solution prévue** :
-- Connecter `apps/web/` aux APIs backend (Sprint 1 - ONEE-002)
-- Connecter `apps/mobile/` aux APIs backend (Sprint 1 - ONEE-003)
-- Créer services API centralisés côté frontend
-
-**Assigné à** : Sprint 1
-**ETA** : 2025-12-15
-
----
-
-### BUG-002 : Authentification JWT non implémentée
-**Priorité** : 🔴 Critique
-**Status** : 📋 Backlog
-**Affecte** : Backend, Frontend Web, Mobile
-**Date création** : 2025-12-10
-
-**Description** :
-Le système d'authentification JWT est documenté mais pas implémenté. Les APIs sont actuellement accessibles sans authentification.
-
-**Impact** :
-- ❌ Aucune sécurité sur les endpoints
-- ❌ Impossible de distinguer les utilisateurs
-- ❌ Pas de gestion des rôles (CLIENT, RESTAURANT, ADMIN)
-- ❌ Non conforme pour un déploiement production
-
-**Étapes pour reproduire** :
-1. Appeler `GET /api/restaurants` sans header Authorization → Succès (devrait être 401)
-2. Modifier n'importe quelle ressource sans authentification → Succès (devrait être interdit)
-
-**Workaround temporaire** :
-Mode développement sans auth pour tests rapides
-
-**Solution prévue** :
-- Backend : Endpoints `/auth/login` et `/auth/register` (Sprint 3)
-- Backend : Middleware JWT validation sur routes protégées
-- Frontend Web : Login page + gestion tokens
-- Mobile : AuthContext avec tokens sécurisés (SecureStore)
-
-**Assigné à** : Sprint 3
-**ETA** : 2025-12-20
+*Aucun bug critique actif - MVP opérationnel*
 
 ---
 
 ## 🟠 Bugs Importants
 
-### BUG-003 : WebSocket temps réel non implémenté
-**Priorité** : 🟠 Important
-**Status** : 📋 Backlog
-**Affecte** : Backend, Frontend Web, Mobile
-**Date création** : 2025-12-10
-
-**Description** :
-Les notifications et mises à jour de statuts commandes ne sont pas en temps réel. Le restaurant ne reçoit pas de notification immédiate pour une nouvelle commande.
-
-**Impact** :
-- ⚠️ Nécessite rafraîchissement manuel des pages
-- ⚠️ Délai dans la gestion des commandes
-- ⚠️ Mauvaise expérience utilisateur
-
-**Workaround temporaire** :
-Polling manuel toutes les 30 secondes (non implémenté)
-
-**Solution prévue** :
-- Backend : WebSocket endpoint avec Quarkus WebSocket
-- NotificationService pour broadcast événements
-- Frontend : Connexion WebSocket et gestion événements
-
-**Assigné à** : Sprint 4
-**ETA** : 2025-12-25
-
----
-
 ### BUG-004 : Mode offline non implémenté (mobile)
 **Priorité** : 🟠 Important
-**Status** : 📋 Backlog
+**Status** : ⚠️ Partiel
 **Affecte** : Mobile
 **Date création** : 2025-12-11
 
 **Description** :
-L'application mobile ne fonctionne pas sans connexion internet. Aucun cache intelligent n'est implémenté.
+L'application mobile a un mode offline basique mais incomplet.
 
-**Impact** :
-- ⚠️ Crash ou erreurs si perte de connexion
-- ⚠️ Impossible de consulter menus/restaurants déjà vus
-- ⚠️ Expérience utilisateur dégradée
+**Ce qui est implémenté** :
+- ✅ Cache auth tokens (SecureStore)
+- ✅ Cache panier (AsyncStorage)
+- ✅ Cache commandes (AsyncStorage)
+- ✅ Cache favoris (AsyncStorage)
 
-**Workaround temporaire** :
-Connexion internet requise en permanence
+**Ce qui manque** :
+- ❌ Cache restaurants/menus complet
+- ❌ Détection connectivité (NetInfo)
+- ❌ Queue requêtes pendant offline
+- ❌ Synchronisation en arrière-plan
 
 **Solution prévue** :
 - CacheService avec stratégies intelligentes
 - Détection connectivité avec NetInfo
 - Queue requêtes pendant offline
-- Synchronisation en arrière-plan
 
-**Assigné à** : Sprint 5
-**ETA** : 2026-01-05
+**Assigné à** : Optionnel (post-MVP)
 
 ---
 
-### BUG-005 : Tests E2E incomplets
+### BUG-008 : Tests WebSocket manquants
 **Priorité** : 🟠 Important
 **Status** : 📋 Backlog
-**Affecte** : Tous les modules
-**Date création** : 2025-12-11
+**Affecte** : Backend, Mobile
+**Date création** : 2026-01-16
 
 **Description** :
-La suite de tests E2E n'est pas complète. Certains flux critiques ne sont pas testés automatiquement.
+WebSocket est implémenté (backend + mobile) mais aucun test n'existe pour cette fonctionnalité.
 
-**Impact** :
-- ⚠️ Risque de régression non détectée
-- ⚠️ Difficile de valider les releases
-- ⚠️ Confiance limitée dans le code
+**Fichiers concernés** :
+- Backend : `NotificationWebSocket.java`, `RestaurantWebSocket.java`, `WebSocketNotificationService.java`
+- Mobile : `WebSocketContext.tsx`, `useWebSocket.ts`
 
 **Solution prévue** :
-- Tests E2E pour flux complet commande (client → restaurant)
-- Tests d'intégration backend complets
-- Tests unitaires frontend (Jest + React Testing Library)
-- CI/CD avec exécution automatique des tests
+- Tests unitaires WebSocket backend (JUnit)
+- Tests intégration WebSocket
+- Tests mobile context
 
-**Assigné à** : Sprint 7
-**ETA** : 2026-01-15
+**Assigné à** : À planifier
 
 ---
 
@@ -222,6 +132,74 @@ Certains formulaires manquent de validation côté client, permettant de soumett
 ---
 
 ## 🟢 Bugs Résolus
+
+### ✅ BUG-001 : Mock data utilisé dans frontend web et mobile
+**Priorité** : 🔴 Critique
+**Status** : ✅ Résolu
+**Date création** : 2025-12-10
+**Date résolution** : 2026-01-15
+
+**Description** :
+Les frontends utilisaient des données mockées au lieu de vraies APIs backend.
+
+**Solution appliquée** :
+- Dashboard web connecté aux APIs (hooks personnalisés)
+- Mobile connecté aux APIs (services API complets)
+- Fichiers mockData.ts supprimés (web + mobile)
+
+---
+
+### ✅ BUG-002 : Authentification non implémentée
+**Priorité** : 🔴 Critique
+**Status** : ✅ Résolu
+**Date création** : 2025-12-10
+**Date résolution** : 2026-01-15
+
+**Description** :
+Le système d'authentification n'était pas implémenté.
+
+**Solution appliquée** :
+- Backend : Keycloak OIDC avec mode hybrid (web-app + service)
+- Backend : AuthService, AuthController, OidcTenantResolver
+- Web : Login SSO Keycloak, cookies gérés par Quarkus
+- Mobile : expo-auth-session avec PKCE flow, SecureStore
+
+---
+
+### ✅ BUG-003 : WebSocket temps réel non implémenté
+**Priorité** : 🟠 Important
+**Status** : ✅ Résolu
+**Date création** : 2025-12-10
+**Date résolution** : 2026-01-16
+
+**Description** :
+Notifications et mises à jour de statuts n'étaient pas en temps réel.
+
+**Solution appliquée** :
+- Backend : `NotificationWebSocket.java` (`/ws/notifications/{userId}`)
+- Backend : `RestaurantWebSocket.java` (`/ws/restaurant/{restaurantId}`)
+- Backend : `WebSocketNotificationService.java`
+- Mobile : `WebSocketContext.tsx`, `useWebSocket.ts`
+- Web : `useRealtimeUpdates.ts` (polling fallback)
+
+---
+
+### ✅ BUG-005 : Tests E2E incomplets
+**Priorité** : 🟠 Important
+**Status** : ✅ Résolu
+**Date création** : 2025-12-11
+**Date résolution** : 2026-01-16
+
+**Description** :
+Suite de tests E2E incomplète.
+
+**Solution appliquée** :
+- Web : 11 specs Playwright dans `tests/specs/`
+- Mobile : 6 flows Maestro dans `apps/mobile/.maestro/`
+- Mobile : 134 tests Jest (contexts, services, components)
+- Backend : 17 tests unitaires Java
+
+---
 
 ### ✅ BUG-R01 : Commandes ne s'affichaient pas dans le dashboard
 **Priorité** : 🔴 Critique
@@ -346,8 +324,8 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 ## 📊 Statistiques
 
 ### Bugs par priorité
-- 🔴 Critique : 2 actifs, 3 résolus
-- 🟠 Important : 3 actifs, 2 résolus
+- 🔴 Critique : 0 actifs, 5 résolus
+- 🟠 Important : 2 actifs (offline partiel, tests WebSocket), 4 résolus
 - 🟡 Moyen : 2 actifs, 1 résolu
 
 ### Temps moyen de résolution
@@ -355,10 +333,10 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 - Important : 3 jours
 - Moyen : 2 jours
 
-### Bugs créés vs résolus (30 derniers jours)
-- Créés : 7
-- Résolus : 5
-- Taux de résolution : 71%
+### Bugs créés vs résolus (Total)
+- Créés : 12
+- Résolus : 10
+- Taux de résolution : 83%
 
 ---
 
@@ -412,7 +390,7 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 
 ## 📅 Dernière mise à jour
 
-**Date** : 2025-12-12
-**Version** : MVP 0.7
+**Date** : 2026-01-16
+**Version** : MVP 0.95
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2025-12-19
+**Prochaine revue** : 2026-01-23

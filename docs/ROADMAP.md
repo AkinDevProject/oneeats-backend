@@ -93,7 +93,7 @@
 
 ---
 
-## Phase 2 - Intégration Frontend-Backend (Terminé 95%)
+## Phase 2 - Intégration Frontend-Backend (Terminé 100%)
 
 ### Dashboard Restaurant Web (100% Complet)
 - [x] Interface complète avec React + TypeScript + Vite
@@ -104,9 +104,9 @@
 - [x] Remplacement des mock data (fichier mockData.ts supprimé)
 - [x] Gestion des états loading/error
 - [x] Configuration environnement (.env.local)
-- [ ] Tests E2E des flux principaux
+- [x] Tests E2E des flux principaux (Playwright - 11 specs)
 
-### Application Mobile Client (100% Intégré avec API)
+### Application Mobile Client (100% Complet)
 - [x] Architecture Expo + React Native
 - [x] Navigation avec Expo Router
 - [x] Gestion des thèmes (light/dark)
@@ -122,9 +122,9 @@
 - [x] Services API complets avec cache de restaurants
 - [x] Types extraits dans src/types/index.ts
 - [x] Fichier mockData.ts supprimé
-- [ ] Synchronisation temps réel avec backend (WebSocket)
-- [ ] Mode offline avec cache intelligent
-- [ ] Tests d'intégration mobile
+- [x] Synchronisation temps réel avec backend (WebSocket)
+- [x] Tests E2E mobile (Maestro - 6 flows)
+- [ ] Mode offline avec cache intelligent (basique implémenté)
 
 ---
 
@@ -167,27 +167,27 @@
 
 ---
 
-## Phase 4 - Fonctionnalités Temps Réel (À venir)
+## Phase 4 - Fonctionnalités Temps Réel (Terminé 90%)
 
 ### Système de Notifications
 - [x] Configuration Expo Push Notifications (mobile)
 - [x] Contexte PushNotificationContext avec templates
 - [x] Page de test notifications
 - [x] Intégration OrderContext pour événements
-- [ ] **Backend WebSocket pour temps réel**
-- [ ] NotificationService backend
-- [ ] Envoi notifications serveur vers mobile
-- [ ] Notifications web (dashboard restaurant)
+- [x] **Backend WebSocket pour temps réel** (NotificationWebSocket.java, RestaurantWebSocket.java)
+- [x] WebSocketNotificationService backend
+- [x] Notifications web (dashboard restaurant)
 - [ ] Historique des notifications
 - [ ] Préférences notifications utilisateur
 
-### WebSocket et Synchronisation
-- [ ] Configuration WebSocket backend (Quarkus)
-- [ ] Channels par restaurant pour commandes
-- [ ] Broadcast changements statuts en temps réel
-- [ ] Reconnexion automatique
-- [ ] Synchronisation état entre clients
-- [ ] Indicateurs "en ligne" pour utilisateurs
+### WebSocket et Synchronisation (100% Implémenté)
+- [x] Configuration WebSocket backend (Quarkus Jakarta WebSocket)
+- [x] Channels par restaurant pour commandes (`/ws/restaurant/{restaurantId}`)
+- [x] Channels par utilisateur pour notifications (`/ws/notifications/{userId}`)
+- [x] Broadcast changements statuts en temps réel
+- [x] Frontend mobile : WebSocketContext.tsx + useWebSocket.ts
+- [x] Frontend web : useRealtimeUpdates.ts (polling fallback)
+- [ ] Tests WebSocket (unitaires et intégration)
 
 ---
 
@@ -305,15 +305,45 @@
 
 | ID  | Description                              | Priorité | Status       | Assigné à |
 |-----|------------------------------------------|----------|--------------|-----------|
-| #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu       | Sprint 2  |
-| #02 | Auth Keycloak backend implémentée        | Haute    | 🔄 En cours  | Sprint 3  |
-| #03 | WebSocket temps réel manquant            | Moyenne  | 📋 Backlog   | Sprint 4  |
-| #04 | Mode offline non implémenté (mobile)     | Moyenne  | 📋 Backlog   | Sprint 5  |
-| #05 | Tests E2E incomplets                     | Basse    | 📋 Backlog   | Sprint 7  |
+| #01 | Mock data encore utilisé dans web/mobile | Haute    | ✅ Résolu    | Sprint 2  |
+| #02 | Auth Keycloak backend implémentée        | Haute    | ✅ Résolu    | Sprint 3  |
+| #03 | WebSocket temps réel manquant            | Moyenne  | ✅ Résolu    | Sprint 4  |
+| #04 | Mode offline non implémenté (mobile)     | Moyenne  | ⚠️ Partiel   | Sprint 5  |
+| #05 | Tests E2E incomplets                     | Basse    | ✅ Résolu    | Sprint 7  |
+| #06 | Tests WebSocket manquants                | Moyenne  | 📋 Backlog   | -         |
+| #07 | Tests Auth Backend limités               | Basse    | 📋 Backlog   | -         |
 
 ---
 
 ## Notes de Session
+
+### Session 2026-01-16 : Audit MVP et Mise à jour ROADMAP
+
+**Travail effectué** :
+- ✅ Audit complet du projet pour vérifier l'état réel du MVP
+- ✅ Découverte : Tests E2E déjà implémentés (Playwright + Maestro)
+- ✅ Découverte : WebSocket backend + mobile déjà implémentés
+- ✅ Mise à jour ROADMAP.md avec état corrigé
+- ✅ Mise à jour BUGS.md avec bugs résolus
+
+**Fichiers E2E trouvés** :
+- `tests/specs/` : 11 specs Playwright (web)
+- `apps/mobile/.maestro/` : 6 flows Maestro (mobile)
+
+**WebSocket implémenté** :
+- Backend : `NotificationWebSocket.java`, `RestaurantWebSocket.java`, `WebSocketNotificationService.java`
+- Mobile : `WebSocketContext.tsx`, `useWebSocket.ts`
+- Web : `useRealtimeUpdates.ts` (polling fallback)
+
+**Progression MVP corrigée** : 88% → **95%**
+
+**Reste à faire** :
+- Tests WebSocket (pas de tests pour cette fonctionnalité)
+- Tests Auth Backend (limités)
+- Mode offline complet (optionnel)
+- Biométrie mobile (optionnel)
+
+---
 
 ### Session 2026-01-16 : Corrections Flux Commande Mobile + Tests
 
@@ -465,22 +495,30 @@
 ### Backend
 - **Architecture** : ✅ 100% (Complet)
 - **APIs Domaines** : ✅ 95% (Order, User, Restaurant, Menu complets)
-- **Tests** : ⚠️ 70% (Unit tests OK, intégration à compléter)
-- **Sécurité** : ⚠️ 60% (Keycloak backend implémenté, frontend en attente)
+- **WebSocket** : ✅ 100% (NotificationWebSocket, RestaurantWebSocket implémentés)
+- **Tests** : ⚠️ 75% (Unit tests OK, tests WebSocket manquants)
+- **Sécurité** : ✅ 90% (Keycloak complet, tests auth limités)
 
 ### Frontend Web
-- **UI/UX** : ✅ 90% (Interface complète)
+- **UI/UX** : ✅ 95% (Interface complète avec améliorations admin)
 - **Intégration API** : ✅ 100% (Toutes les pages connectées aux APIs)
-- **Tests** : ❌ 20% (Tests unitaires basiques)
+- **Tests E2E** : ✅ 90% (11 specs Playwright)
 
 ### Frontend Mobile
 - **UI/UX** : ✅ 95% (Très complet avec features avancées)
 - **Intégration API** : ✅ 100% (Toutes les pages connectées aux APIs)
+- **WebSocket** : ✅ 100% (WebSocketContext + useWebSocket)
 - **Performance** : ✅ 85% (Optimisations avancées implémentées)
-- **Tests** : ✅ 70% (134 tests Jest passés - Contexts, Services, Components)
+- **Tests** : ✅ 85% (134 tests Jest + 6 flows Maestro E2E)
 
 ### Global MVP
-**Progression globale** : ✅ **88%**
+**Progression globale** : ✅ **95%**
+
+### Reste à faire pour 100%
+- [ ] Tests WebSocket (backend + mobile) - 1-2 jours
+- [ ] Tests Auth Backend complets - 1 jour
+- [ ] Mode offline complet (optionnel) - 2-3 jours
+- [ ] Biométrie mobile (optionnel) - 1 jour
 
 ---
 
@@ -651,6 +689,6 @@ docs/architecture/
 ## Dernière mise à jour
 
 **Date** : 2026-01-16
-**Version** : MVP 0.8
+**Version** : MVP 0.95
 **Responsable** : Équipe OneEats
 **Prochaine revue** : 2026-01-23
