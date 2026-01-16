@@ -6,6 +6,7 @@ import com.oneeats.user.infrastructure.entity.UserEntity;
 import com.oneeats.user.infrastructure.repository.JpaUserRepository;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -27,13 +28,23 @@ public class AuthService {
     SecurityIdentity securityIdentity;
 
     @Inject
-    JsonWebToken jwt;
+    Instance<JsonWebToken> jwtInstance;
 
     @Inject
     JpaUserRepository userRepository;
 
     @Inject
     JpaRestaurantStaffRepository staffRepository;
+
+    /**
+     * Recupere le JWT si disponible (OIDC active)
+     */
+    private Optional<JsonWebToken> getJwt() {
+        if (jwtInstance.isResolvable()) {
+            return Optional.of(jwtInstance.get());
+        }
+        return Optional.empty();
+    }
 
     /**
      * Recupere l'utilisateur courant depuis le token JWT.
@@ -45,7 +56,12 @@ public class AuthService {
             return Optional.empty();
         }
 
-        String keycloakId = jwt.getSubject();
+        Optional<JsonWebToken> jwtOpt = getJwt();
+        if (jwtOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String keycloakId = jwtOpt.get().getSubject();
         if (keycloakId == null) {
             return Optional.empty();
         }
@@ -193,7 +209,11 @@ public class AuthService {
 
     private String getClaimAsString(String claimName, String defaultValue) {
         try {
-            Object claim = jwt.getClaim(claimName);
+            Optional<JsonWebToken> jwtOpt = getJwt();
+            if (jwtOpt.isEmpty()) {
+                return defaultValue;
+            }
+            Object claim = jwtOpt.get().getClaim(claimName);
             return claim != null ? claim.toString() : defaultValue;
         } catch (Exception e) {
             return defaultValue;

@@ -86,7 +86,14 @@
       "Bash(npx jest:*)",
       "Bash(head:*)",
       "Skill(bmad:core:workflows:party-mode)",
-      "Bash(move tech-spec-wip.md tech-spec-tests-mvp-websocket-auth.md)"
+      "Bash(move tech-spec-wip.md tech-spec-tests-mvp-websocket-auth.md)",
+      "Bash(mvnw.cmd test:*)",
+      "Bash(mvn:*)",
+      "Bash(choco --version:*)",
+      "Bash(winget:*)",
+      "Bash(\"C:\\\\Users\\\\akin_\\\\.jdks\\\\corretto-21.0.8\\\\bin\\\\java.exe\" -version)",
+      "Bash(unzip:*)",
+      "Bash(source:*)"
     ],
     "deny": [],
     "ask": []

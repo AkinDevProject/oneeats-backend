@@ -28,11 +28,8 @@ class WebSocketIT {
     // F7 Fix: Timeout configurable pour eviter les tests flaky
     private static final int TIMEOUT_SECONDS = 10; // Augmente de 5 a 10 pour CI lent
 
-    @TestHTTPResource("/ws/notifications/{userId}")
-    URI notificationWsUri;
-
-    @TestHTTPResource("/ws/restaurant/{restaurantId}")
-    URI restaurantWsUri;
+    @TestHTTPResource("/")
+    URI baseUri;
 
     private static final UUID VALID_USER_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
     private static final UUID VALID_RESTAURANT_ID = UUID.fromString("660e8400-e29b-41d4-a716-446655440001");
@@ -43,6 +40,28 @@ class WebSocketIT {
     @BeforeEach
     void setUp() {
         container = ContainerProvider.getWebSocketContainer();
+    }
+
+    /**
+     * Construit l'URI WebSocket pour les notifications utilisateur
+     */
+    private URI buildNotificationUri(String userId) {
+        String wsBase = baseUri.toString().replace("http://", "ws://").replace("https://", "wss://");
+        if (!wsBase.endsWith("/")) {
+            wsBase += "/";
+        }
+        return URI.create(wsBase + "ws/notifications/" + userId);
+    }
+
+    /**
+     * Construit l'URI WebSocket pour les restaurants
+     */
+    private URI buildRestaurantUri(String restaurantId) {
+        String wsBase = baseUri.toString().replace("http://", "ws://").replace("https://", "wss://");
+        if (!wsBase.endsWith("/")) {
+            wsBase += "/";
+        }
+        return URI.create(wsBase + "ws/restaurant/" + restaurantId);
     }
 
     @Nested
@@ -119,11 +138,6 @@ class WebSocketIT {
 
             session.close();
         }
-
-        private URI buildNotificationUri(String userId) {
-            String baseUri = notificationWsUri.toString().replace("{userId}", userId);
-            return URI.create(baseUri.replace("http://", "ws://").replace("https://", "wss://"));
-        }
     }
 
     @Nested
@@ -156,11 +170,6 @@ class WebSocketIT {
                 !client.isConnected() || client.getCloseReason() != null,
                 "Client should be disconnected or have close reason"
             );
-        }
-
-        private URI buildNotificationUri(String userId) {
-            String baseUri = notificationWsUri.toString().replace("{userId}", userId);
-            return URI.create(baseUri.replace("http://", "ws://").replace("https://", "wss://"));
         }
     }
 
@@ -239,11 +248,6 @@ class WebSocketIT {
             session1.close();
             session2.close();
         }
-
-        private URI buildRestaurantUri(String restaurantId) {
-            String baseUri = restaurantWsUri.toString().replace("{restaurantId}", restaurantId);
-            return URI.create(baseUri.replace("http://", "ws://").replace("https://", "wss://"));
-        }
     }
 
     @Nested
@@ -267,11 +271,6 @@ class WebSocketIT {
                 boolean closed = client.awaitClose(TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 assertTrue(closed || !session.isOpen(), "Session should be closed for invalid UUID");
             }
-        }
-
-        private URI buildRestaurantUri(String restaurantId) {
-            String baseUri = restaurantWsUri.toString().replace("{restaurantId}", restaurantId);
-            return URI.create(baseUri.replace("http://", "ws://").replace("https://", "wss://"));
         }
     }
 

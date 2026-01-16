@@ -8,10 +8,12 @@ import com.oneeats.user.domain.model.UserStatus;
 import com.oneeats.user.infrastructure.entity.UserEntity;
 import com.oneeats.user.infrastructure.repository.JpaUserRepository;
 import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.enterprise.inject.Instance;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,12 +33,14 @@ class AuthServiceTest {
     private JsonWebToken jwt;
 
     @Mock
+    private Instance<JsonWebToken> jwtInstance;
+
+    @Mock
     private JpaUserRepository userRepository;
 
     @Mock
     private JpaRestaurantStaffRepository staffRepository;
 
-    @InjectMocks
     private AuthService authService;
 
     private AutoCloseable mocks;
@@ -46,8 +50,25 @@ class AuthServiceTest {
     private static final UUID RESTAURANT_ID = UUID.fromString("660e8400-e29b-41d4-a716-446655440001");
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mocks = MockitoAnnotations.openMocks(this);
+
+        // Configure le mock Instance pour retourner le JWT mock
+        when(jwtInstance.isResolvable()).thenReturn(true);
+        when(jwtInstance.get()).thenReturn(jwt);
+
+        // Creer AuthService et injecter les mocks via reflexion
+        authService = new AuthService();
+        injectField(authService, "securityIdentity", securityIdentity);
+        injectField(authService, "jwtInstance", jwtInstance);
+        injectField(authService, "userRepository", userRepository);
+        injectField(authService, "staffRepository", staffRepository);
+    }
+
+    private void injectField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 
     @AfterEach
