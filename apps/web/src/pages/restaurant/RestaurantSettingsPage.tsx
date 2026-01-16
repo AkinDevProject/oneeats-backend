@@ -1,925 +1,467 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Camera, Clock, MapPin, Phone, Mail, Settings, Save, Upload, Store, Palette, Bell,
-  Power
+  Camera, Clock, MapPin, Phone, Mail, Save, Upload, Store, Bell, Power, X
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Badge } from '../../components/ui/Badge';
+import { cn } from '../../lib/utils';
 import apiService from '../../services/api';
 
-const RestaurantSettingsPage: React.FC = () => {
-  // ID du restaurant Pizza Palace
-  const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
-  
-  const [restaurant, setRestaurant] = useState(null);
-  const [originalRestaurant, setOriginalRestaurant] = useState(null); // Données d'origine pour annuler
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [originalIsOpen, setOriginalIsOpen] = useState(false); // État d'origine pour annuler
-  const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
+const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 
-  // Fonction pour charger les données du restaurant
+const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+const dayLabels: Record<string, string> = {
+  monday: 'Lundi', tuesday: 'Mardi', wednesday: 'Mercredi',
+  thursday: 'Jeudi', friday: 'Vendredi', saturday: 'Samedi', sunday: 'Dimanche'
+};
+
+const RestaurantSettingsPage: React.FC = () => {
+  const [restaurant, setRestaurant] = useState<any>(null);
+  const [originalRestaurant, setOriginalRestaurant] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [originalIsOpen, setOriginalIsOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Load restaurant data
   const loadRestaurantData = async () => {
     try {
       setLoading(true);
       setError(null);
-      
       const apiData = await apiService.restaurants.getById(RESTAURANT_ID);
-      
-      // Mapper les données de l'API vers le format attendu par la page
       const mappedData = {
         ...apiData,
-        category: apiData.cuisineType, // Mapping cuisineType -> category
-        schedule: apiData.schedule || { // Utiliser les données de l'API, sinon valeurs par défaut
+        category: apiData.cuisineType,
+        schedule: apiData.schedule || {
           monday: { open: '09:00', close: '18:00' },
           tuesday: { open: '09:00', close: '18:00' },
           wednesday: { open: '09:00', close: '18:00' },
           thursday: { open: '09:00', close: '18:00' },
           friday: { open: '09:00', close: '18:00' },
           saturday: { open: '10:00', close: '17:00' },
-          sunday: null // Fermé le dimanche
+          sunday: null
         }
       };
-      
       setRestaurant(mappedData);
-      setOriginalRestaurant(mappedData); // Sauvegarder les données d'origine
+      setOriginalRestaurant(mappedData);
       setIsOpen(apiData.isOpen);
-      setOriginalIsOpen(apiData.isOpen); // Sauvegarder l'état d'origine
-      
+      setOriginalIsOpen(apiData.isOpen);
     } catch (err) {
-      console.error('Error loading restaurant data:', err);
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fonction pour valider l'URL d'image
-  const isValidImageUrl = (url: string): boolean => {
-    if (!url || url.trim() === '') return false;
-    
-    try {
-      // Si c'est une URL relative, c'est valide
-      if (url.startsWith('/')) return true;
-      
-      // Si c'est une URL complète, valider
-      new URL(url);
-      return true;
-    } catch {
-      // URL invalide
-      console.warn('Invalid image URL detected:', url);
-      return false;
-    }
-  };
+  useEffect(() => {
+    loadRestaurantData();
+  }, []);
 
-  // Fonction pour construire l'URL complète de l'image
-  const getImageUrl = (imageUrl: string): string => {
-    if (!imageUrl) return '';
-    
-    // Nettoyer l'URL des espaces
-    const cleanUrl = imageUrl.trim();
-    
-    // Si c'est une URL externe (http/https), utiliser le proxy
-    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
-      return `http://localhost:8080/api/proxy/image?url=${encodeURIComponent(cleanUrl)}`;
-    }
-    
-    // Si c'est une URL relative, ajouter le serveur local
-    if (cleanUrl.startsWith('/')) {
-      return `http://localhost:8080${cleanUrl}`;
-    }
-    
-    // Par défaut, traiter comme une URL relative
-    return `http://localhost:8080/${cleanUrl}`;
-  };
-
-  // Fonction pour vérifier s'il y a des modifications
-  const hasChanges = () => {
+  // Check for changes
+  const hasChanges = useMemo(() => {
     if (!restaurant || !originalRestaurant) return false;
-    
-    // Vérifier si le statut ouvert/fermé a changé
     if (isOpen !== originalIsOpen) return true;
-    
-    // Vérifier les champs de base
     if (restaurant.name !== originalRestaurant.name ||
         restaurant.email !== originalRestaurant.email ||
         restaurant.phone !== originalRestaurant.phone ||
         restaurant.address !== originalRestaurant.address ||
-        restaurant.category !== originalRestaurant.category) {
-      return true;
-    }
-    
-    // Vérifier les horaires
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    for (const day of days) {
-      const current = restaurant.schedule[day];
-      const original = originalRestaurant.schedule[day];
-      
-      // Comparer les horaires (null vs null, ou open/close times)
-      if (JSON.stringify(current) !== JSON.stringify(original)) {
-        return true;
-      }
-    }
-    
-    return false;
+        restaurant.category !== originalRestaurant.category) return true;
+    return JSON.stringify(restaurant.schedule) !== JSON.stringify(originalRestaurant.schedule);
+  }, [restaurant, originalRestaurant, isOpen, originalIsOpen]);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
   };
 
-  // Fonction pour annuler les modifications (sans rechargement)
   const handleCancel = () => {
-    if (originalRestaurant && hasChanges()) {
+    if (originalRestaurant && hasChanges) {
       setRestaurant(originalRestaurant);
       setIsOpen(originalIsOpen);
     }
   };
 
-  // Charger les données au montage
-  useEffect(() => {
-    loadRestaurantData();
-  }, []);
-
   const handleSave = async () => {
     if (!restaurant) return;
-
     try {
       setSaving(true);
-      setError(null);
-      
-      // Préparer les données à envoyer (mapper les champs UI vers l'API)
       const updateData = {
         name: restaurant.name,
         email: restaurant.email,
         phone: restaurant.phone,
         address: restaurant.address,
-        cuisineType: restaurant.category, // Mapper category -> cuisineType
-        isOpen: isOpen,
-        schedule: {
-          monday: restaurant.schedule.monday,
-          tuesday: restaurant.schedule.tuesday,
-          wednesday: restaurant.schedule.wednesday,
-          thursday: restaurant.schedule.thursday,
-          friday: restaurant.schedule.friday,
-          saturday: restaurant.schedule.saturday,
-          sunday: restaurant.schedule.sunday
-        }
+        cuisineType: restaurant.category,
+        isOpen,
+        schedule: restaurant.schedule
       };
-
-      console.log('Saving restaurant settings:', updateData);
-      
-      // Envoyer les données au backend
-      const updatedRestaurant = await apiService.restaurants.update(RESTAURANT_ID, updateData);
-      
-      console.log('Restaurant updated successfully:', updatedRestaurant);
-      
-      // Mettre à jour l'état local avec les données retournées du serveur
-      const mappedData = {
-        ...updatedRestaurant,
-        category: updatedRestaurant.cuisineType,
-        schedule: updatedRestaurant.schedule // Utiliser les horaires mis à jour du serveur
-      };
-      
+      const updated = await apiService.restaurants.update(RESTAURANT_ID, updateData);
+      const mappedData = { ...updated, category: updated.cuisineType, schedule: updated.schedule };
       setRestaurant(mappedData);
-      setOriginalRestaurant(mappedData); // Mettre à jour les données d'origine après sauvegarde
-      setIsOpen(updatedRestaurant.isOpen);
-      setOriginalIsOpen(updatedRestaurant.isOpen); // Mettre à jour l'état d'origine
-      
-      // Afficher le message de succès
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-      
+      setOriginalRestaurant(mappedData);
+      setIsOpen(updated.isOpen);
+      setOriginalIsOpen(updated.isOpen);
+      showNotification('success', 'Modifications enregistrées');
     } catch (err) {
-      console.error('Error saving restaurant settings:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde');
+      showNotification('error', err instanceof Error ? err.message : 'Erreur de sauvegarde');
     } finally {
       setSaving(false);
     }
   };
-
 
   const handleToggleOpen = async () => {
     try {
       setSaving(true);
-      setError(null);
-      
-      const newOpenStatus = !isOpen;
-      console.log('Toggling restaurant status:', newOpenStatus);
-      
-      // Appel direct à l'API pour changer le statut
-      const updatedRestaurant = await apiService.restaurants.toggleStatus(RESTAURANT_ID, newOpenStatus);
-      
-      console.log('Restaurant status updated:', updatedRestaurant);
-      
-      // Mettre à jour l'état local avec les données retournées
-      const mappedData = {
-        ...updatedRestaurant,
-        category: updatedRestaurant.cuisineType,
-        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
-      };
-      
-      setRestaurant(mappedData);
-      setIsOpen(updatedRestaurant.isOpen);
-      
+      const updated = await apiService.restaurants.toggleStatus(RESTAURANT_ID, !isOpen);
+      setRestaurant({ ...updated, category: updated.cuisineType, schedule: updated.schedule || restaurant?.schedule });
+      setIsOpen(updated.isOpen);
+      showNotification('success', `Restaurant ${updated.isOpen ? 'ouvert' : 'fermé'}`);
     } catch (err) {
-      console.error('Error toggling restaurant status:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors du changement de statut');
+      showNotification('error', err instanceof Error ? err.message : 'Erreur');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validate file
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Seuls les fichiers JPG, PNG et WebP sont autorisés');
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      showNotification('error', 'Format non supporté (JPG, PNG, WebP)');
       return;
     }
-
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      setError('La taille du fichier ne peut pas dépasser 5MB');
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('error', 'Fichier trop volumineux (max 5MB)');
       return;
     }
-
     try {
       setUploading(true);
-      setError(null);
-      
-      console.log('Uploading restaurant image:', file.name);
-      
-      // Upload image
-      const updatedRestaurant = await apiService.restaurants.uploadImage(RESTAURANT_ID, file);
-      
-      console.log('Image uploaded successfully:', updatedRestaurant);
-      
-      // Update local state
-      const mappedData = {
-        ...updatedRestaurant,
-        category: updatedRestaurant.cuisineType,
-        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
-      };
-      
-      setRestaurant(mappedData);
-      
-      // Show success message
-      setUploadSuccess(true);
-      setTimeout(() => setUploadSuccess(false), 3000);
-      
+      const updated = await apiService.restaurants.uploadImage(RESTAURANT_ID, file);
+      setRestaurant({ ...updated, category: updated.cuisineType, schedule: updated.schedule || restaurant?.schedule });
+      showNotification('success', 'Image uploadée');
     } catch (err) {
-      console.error('Error uploading image:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload de l\'image');
+      showNotification('error', 'Erreur upload');
     } finally {
       setUploading(false);
-      // Reset file input
-      event.target.value = '';
+      e.target.value = '';
     }
   };
 
   const handleImageDelete = async () => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer l\'image de profil ?')) {
-      return;
-    }
-
+    if (!window.confirm('Supprimer l\'image ?')) return;
     try {
-      setDeleting(true);
-      setError(null);
-      
-      console.log('Deleting restaurant image');
-      
-      // Delete image
-      const updatedRestaurant = await apiService.restaurants.deleteImage(RESTAURANT_ID);
-      
-      console.log('Image deleted successfully:', updatedRestaurant);
-      
-      // Update local state
-      const mappedData = {
-        ...updatedRestaurant,
-        category: updatedRestaurant.cuisineType,
-        schedule: updatedRestaurant.schedule || (restaurant ? restaurant.schedule : {})
-      };
-      
-      setRestaurant(mappedData);
-      
-      // Show success message
-      setDeleteSuccess(true);
-      setTimeout(() => setDeleteSuccess(false), 3000);
-      
+      setUploading(true);
+      const updated = await apiService.restaurants.deleteImage(RESTAURANT_ID);
+      setRestaurant({ ...updated, category: updated.cuisineType, schedule: updated.schedule || restaurant?.schedule });
+      showNotification('success', 'Image supprimée');
     } catch (err) {
-      console.error('Error deleting image:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression de l\'image');
+      showNotification('error', 'Erreur suppression');
     } finally {
-      setDeleting(false);
+      setUploading(false);
     }
   };
 
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const dayLabels = {
-    monday: 'Lundi',
-    tuesday: 'Mardi',
-    wednesday: 'Mercredi',
-    thursday: 'Jeudi',
-    friday: 'Vendredi',
-    saturday: 'Samedi',
-    sunday: 'Dimanche'
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return `http://localhost:8080/api/proxy/image?url=${encodeURIComponent(url)}`;
+    return url.startsWith('/') ? `http://localhost:8080${url}` : `http://localhost:8080/${url}`;
   };
 
-  // Afficher un état de chargement
+  // Loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Chargement des paramètres du restaurant...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto" />
+          <p className="mt-4 text-gray-600">Chargement...</p>
         </div>
       </div>
     );
   }
 
-  // Afficher l'erreur si nécessaire
-  if (error) {
+  // Error state
+  if (error || !restaurant) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Erreur de chargement</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={loadRestaurantData}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            Réessayer
-          </button>
+          <p className="text-danger-600 mb-4">{error || 'Erreur'}</p>
+          <Button onClick={loadRestaurantData}>Réessayer</Button>
         </div>
       </div>
     );
   }
 
-  // Ne pas afficher la page si les données ne sont pas encore chargées
-  if (!restaurant) {
-    return null;
-  }
-
   return (
-    <div className="bg-gray-50">
-      {/* Mobile & Tablet Optimized Header - Identical to Orders/Menu Page */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        {/* Mobile Header */}
-        <div className="px-4 py-3 sm:hidden">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-purple-700">PARAMÈTRES</span>
-              <span className="text-xs text-gray-500">Configuration</span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleToggleOpen}
-                disabled={saving}
-                className={`group relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed ${
-                  isOpen 
-                    ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105' 
-                    : 'bg-gradient-to-r from-red-400 to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
-                }`}
-              >
-                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                <div className="relative flex items-center space-x-1">
-                  <div className={`w-2 h-2 rounded-full animate-pulse ${
-                    isOpen ? 'bg-green-200' : 'bg-red-200'
-                  }`}></div>
-                  <span>{isOpen ? 'Ouvert' : 'Fermé'}</span>
-                </div>
-              </button>
-            </div>
-          </div>
-          
-          {/* Mobile Settings Tabs */}
-          <div className="grid grid-cols-1 gap-2">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-3 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                  <Settings className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Configuration Restaurant</div>
-                  <div className="text-xs text-purple-100">Gérez vos paramètres</div>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Notification */}
+      {notification && (
+        <div className="fixed top-4 right-4 z-50 animate-fade-in">
+          <div className={cn(
+            'px-4 py-3 rounded-lg shadow-lg flex items-center gap-2',
+            notification.type === 'success' ? 'bg-success-500 text-white' : 'bg-danger-500 text-white'
+          )}>
+            <span>{notification.message}</span>
+            <button onClick={() => setNotification(null)} className="hover:bg-white/20 rounded p-1">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
-        
-        {/* Tablet Header */}
-        <div className="hidden sm:block lg:hidden px-5 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-purple-700">PARAMÈTRES RESTAURANT</span>
-              <span className="text-sm text-gray-500">• Configuration complète</span>
+      )}
+
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-secondary-700">PARAMÈTRES</span>
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleToggleOpen}
-                disabled={saving}
-                className={`group relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 overflow-hidden border-2 disabled:opacity-60 disabled:cursor-not-allowed ${
-                  isOpen 
-                    ? 'bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white border-green-400 shadow-lg shadow-green-500/40 hover:shadow-green-500/60 hover:scale-105' 
-                    : 'bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-white border-red-400 shadow-lg shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105'
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                <div className="relative flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full animate-pulse shadow-md ${
-                    isOpen ? 'bg-green-200' : 'bg-red-200'
-                  }`}></div>
-                  <span>Restaurant {isOpen ? 'Ouvert' : 'Fermé'}</span>
-                </div>
-              </button>
-            </div>
-          </div>
-          
-          {/* Tablet Settings Cards */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-4 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                  <Settings className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Configuration</div>
-                  <div className="text-xs text-purple-100">Paramètres généraux</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                  <Settings className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-medium text-sm">Sécurisé</div>
-                  <div className="text-xs text-orange-100">Données protégées</div>
-                </div>
-              </div>
-            </div>
+            <button
+              onClick={handleToggleOpen}
+              disabled={saving}
+              className={cn(
+                'px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2',
+                isOpen
+                  ? 'bg-success-500 text-white hover:bg-success-600'
+                  : 'bg-danger-500 text-white hover:bg-danger-600',
+                saving && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              <Power className="h-4 w-4" />
+              {isOpen ? 'OUVERT' : 'FERMÉ'}
+            </button>
           </div>
         </div>
-        
-        {/* Desktop Header */}
-        <div className="hidden lg:block px-6 py-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-purple-700">PARAMÈTRES RESTAURANT</span>
-              <span className="text-sm text-gray-500">• Configuration complète • Gestion du profil</span>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleToggleOpen}
-                disabled={saving}
-                className={`group relative px-6 py-3 rounded-2xl text-sm font-bold transition-all duration-300 overflow-hidden border-2 disabled:opacity-60 disabled:cursor-not-allowed ${
-                  isOpen 
-                    ? 'bg-gradient-to-br from-green-400 via-green-500 to-green-600 text-white border-green-300 shadow-xl shadow-green-500/50 hover:shadow-green-500/70 hover:scale-105' 
-                    : 'bg-gradient-to-br from-red-400 via-red-500 to-red-600 text-white border-red-300 shadow-xl shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105'
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                <div className="relative flex items-center space-x-2">
-                  <Power className={`w-5 h-5 ${
-                    isOpen ? 'animate-pulse' : 'opacity-75'
-                  }`} />
-                  <span>{isOpen ? 'OUVERT' : 'FERMÉ'}</span>
-                </div>
-              </button>
+      </header>
+
+      {/* Main Content */}
+      <main className="px-4 py-6 max-w-4xl mx-auto pb-24">
+        {/* General Information */}
+        <Card className="mb-6">
+          <div className="px-4 py-3 border-b border-gray-200 bg-primary-50">
+            <div className="flex items-center gap-2">
+              <Store className="h-5 w-5 text-primary-600" />
+              <h3 className="font-bold text-primary-800">Informations générales</h3>
             </div>
           </div>
-          
-        </div>
-      </div>
-
-      {/* Main Content - Responsive Optimized */}
-      <div className="px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
-
-
-
-        {/* Restaurant Information - Enhanced Responsive */}
-        <Card className="bg-white mb-4 sm:mb-6 lg:mb-8 shadow-sm hover:shadow-md transition-shadow">
-          <div className="px-3 py-3 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600">
-                <Store className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-blue-800">Informations générales</h3>
+          <div className="p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Nom du restaurant"
+                value={restaurant.name}
+                onChange={(e) => setRestaurant({ ...restaurant, name: e.target.value })}
+              />
+              <Input
+                label="Catégorie"
+                value={restaurant.category}
+                onChange={(e) => setRestaurant({ ...restaurant, category: e.target.value })}
+              />
             </div>
-          </div>
-          <div className="p-3 sm:p-4 lg:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-8 h-4 w-4 text-gray-400" />
                 <Input
-                  label="Nom du restaurant"
-                  value={restaurant.name}
-                  onChange={(e) => setRestaurant({...restaurant, name: e.target.value})}
-                  className="text-sm sm:text-base"
-                />
-                <Input
-                  label="Catégorie"
-                  value={restaurant.category}
-                  onChange={(e) => setRestaurant({...restaurant, category: e.target.value})}
-                  className="text-sm sm:text-base"
+                  label="Email"
+                  type="email"
+                  value={restaurant.email}
+                  onChange={(e) => setRestaurant({ ...restaurant, email: e.target.value })}
+                  className="pl-10"
                 />
               </div>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-7 sm:top-8 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                  <Input
-                    label="Email"
-                    type="email"
-                    value={restaurant.email}
-                    onChange={(e) => setRestaurant({...restaurant, email: e.target.value})}
-                    className="pl-8 sm:pl-10 text-sm sm:text-base"
-                  />
-                </div>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-7 sm:top-8 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
-                  <Input
-                    label="Téléphone"
-                    value={restaurant.phone}
-                    onChange={(e) => setRestaurant({...restaurant, phone: e.target.value})}
-                    className="pl-8 sm:pl-10 text-sm sm:text-base"
-                  />
-                </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-8 h-4 w-4 text-gray-400" />
+                <Input
+                  label="Téléphone"
+                  value={restaurant.phone}
+                  onChange={(e) => setRestaurant({ ...restaurant, phone: e.target.value })}
+                  className="pl-10"
+                />
               </div>
             </div>
-            <div className="mt-4 sm:mt-6 lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
-                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-500" />
-                <span className="text-xs sm:text-sm">Adresse complète</span>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                <MapPin className="h-4 w-4" /> Adresse
               </label>
               <textarea
                 value={restaurant.address}
-                onChange={(e) => setRestaurant({...restaurant, address: e.target.value})}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm sm:text-base"
-                placeholder="Entrez l'adresse complète de votre restaurant..."
+                onChange={(e) => setRestaurant({ ...restaurant, address: e.target.value })}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
         </Card>
 
-        {/* Logo Upload - Enhanced Responsive */}
-        <Card className="bg-white mb-4 sm:mb-6 lg:mb-8 shadow-sm hover:shadow-md transition-shadow">
-          <div className="px-3 py-3 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-gradient-to-r from-purple-500 to-pink-600">
-                <Palette className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-purple-800">Image de profil</h3>
+        {/* Image */}
+        <Card className="mb-6">
+          <div className="px-4 py-3 border-b border-gray-200 bg-secondary-50">
+            <div className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-secondary-600" />
+              <h3 className="font-bold text-secondary-800">Image de profil</h3>
             </div>
           </div>
-          <div className="p-3 sm:p-4 lg:p-6">
-            <div className="flex flex-col lg:flex-row lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
-              {/* Image Preview */}
-              <div className="flex-shrink-0">
-                <div className="relative group mx-auto lg:mx-0 w-32 h-32 lg:w-40 lg:h-40">
-                  <div className="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center border-2 border-purple-200 overflow-hidden shadow-lg">
-                    {restaurant?.imageUrl ? (
-                      <img 
-                        src={getImageUrl(restaurant.imageUrl)}
-                        alt="Restaurant logo" 
-                        className="w-full h-full object-cover"
-                        onLoad={(e) => {
-                          console.log('Image loaded successfully:', restaurant.imageUrl);
-                          // Hide fallback if visible
-                          const fallbackDiv = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
-                          if (fallbackDiv) {
-                            fallbackDiv.style.display = 'none';
-                          }
-                        }}
-                        onError={(e) => {
-                          console.error('Failed to load image:', restaurant.imageUrl);
-                          // Show fallback on error
-                          e.currentTarget.style.display = 'none';
-                          const fallbackDiv = e.currentTarget.parentElement?.querySelector('.image-fallback') as HTMLElement;
-                          if (fallbackDiv) {
-                            fallbackDiv.style.display = 'flex';
-                          }
-                        }}
-                      />
-                    ) : (
-                      <Camera className="h-12 w-12 lg:h-16 lg:w-16 text-purple-500" />
-                    )}
-                    <div className="image-fallback hidden items-center justify-center w-full h-full absolute inset-0 bg-gradient-to-br from-purple-100 to-blue-100">
-                      <Camera className="h-12 w-12 lg:h-16 lg:w-16 text-purple-500" />
-                    </div>
+          <div className="p-4">
+            <div className="flex items-center gap-6">
+              <div className="relative w-24 h-24 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                {restaurant.imageUrl ? (
+                  <img
+                    src={getImageUrl(restaurant.imageUrl)}
+                    alt="Restaurant"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Camera className="h-8 w-8 text-gray-400" />
                   </div>
-                  
-                  {/* Loading Overlay */}
-                  {(uploading || deleting) && (
-                    <div className="absolute inset-0 rounded-xl bg-black bg-opacity-50 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                    </div>
-                  )}
-                </div>
-                
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
                 <input
                   id="image-upload"
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageUpload}
                   className="hidden"
-                  disabled={uploading || deleting}
                 />
-              </div>
-              {/* Controls */}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h4 className="font-medium text-base text-gray-900 mb-1">Logo de votre restaurant</h4>
-                  <p className="text-sm text-gray-600">Ajoutez une image qui représente votre établissement</p>
-                </div>
-                
-                {/* Current Image Info */}
-                {restaurant?.imageUrl && (
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center space-x-2 text-sm">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-800 font-medium">Image actuelle chargée</span>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-1 break-all">
-                      {restaurant.imageUrl.length > 50 ? `${restaurant.imageUrl.substring(0, 50)}...` : restaurant.imageUrl}
-                    </p>
-                  </div>
-                )}
-                
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<Upload className="h-4 w-4" />}
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={uploading}
+                  >
+                    {restaurant.imageUrl ? 'Changer' : 'Uploader'}
+                  </Button>
+                  {restaurant.imageUrl && (
                     <Button
                       variant="outline"
-                      icon={uploading ? (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <Upload className="h-4 w-4" />
-                      )}
                       size="sm"
-                      className="flex-1 shadow-sm"
-                      onClick={() => document.getElementById('image-upload')?.click()}
-                      disabled={uploading || deleting}
+                      className="text-danger-600 border-danger-300"
+                      onClick={handleImageDelete}
+                      disabled={uploading}
                     >
-                      {uploading ? 'Upload en cours...' : (restaurant?.imageUrl ? 'Changer l\'image' : 'Télécharger une image')}
+                      Supprimer
                     </Button>
-                    
-                    {restaurant?.imageUrl && (
-                      <Button
-                        variant="outline"
-                        icon={deleting ? (
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <span className="text-red-500">✕</span>
-                        )}
-                        size="sm"
-                        className="flex-1 sm:flex-none border-red-300 text-red-600 hover:bg-red-50 shadow-sm"
-                        onClick={handleImageDelete}
-                        disabled={uploading || deleting}
-                      >
-                        {deleting ? 'Suppression...' : 'Supprimer'}
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <p className="text-xs text-gray-500">
-                    Formats acceptés : JPG, PNG, WebP • Taille max : 5MB
-                  </p>
+                  )}
                 </div>
+                <p className="text-xs text-gray-500">JPG, PNG, WebP • Max 5MB</p>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Opening Hours - Enhanced Responsive */}
-        <Card className="bg-white mb-4 sm:mb-6 lg:mb-8 shadow-sm hover:shadow-md transition-shadow">
-          <div className="px-3 py-3 sm:px-4 sm:py-3 lg:px-6 lg:py-4 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-red-50">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-gradient-to-r from-orange-500 to-red-600">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-orange-800">Horaires d'ouverture</h3>
+        {/* Schedule */}
+        <Card className="mb-6">
+          <div className="px-4 py-3 border-b border-gray-200 bg-warning-50">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-warning-600" />
+              <h3 className="font-bold text-warning-800">Horaires d'ouverture</h3>
             </div>
           </div>
-          <div className="p-3 sm:p-4 lg:p-6">
-            {/* Enhanced Responsive Schedule Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              {days.map((day, index) => {
-                const isOpen = restaurant.schedule[day] !== null;
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {days.map((day) => {
+                const dayOpen = restaurant.schedule[day] !== null;
                 return (
-                  <div key={day} className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
-                    isOpen 
-                      ? 'border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100' 
-                      : 'border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100'
-                  }`}>
-                    {/* Day Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full transition-colors ${
-                          isOpen ? 'bg-green-500 animate-pulse' : 'bg-gray-300'
-                        }`}></div>
-                        <span className="text-sm sm:text-base font-bold text-gray-800 capitalize">
-                          {dayLabels[day as keyof typeof dayLabels]}
-                        </span>
-                      </div>
-                      <div className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        isOpen ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                      }`}>
-                        {isOpen ? 'OUVERT' : 'FERMÉ'}
-                      </div>
-                    </div>
-
-                    {/* Toggle Switch */}
-                    <div className="mb-4">
-                      <label className="flex items-center space-x-3 cursor-pointer group">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={isOpen}
-                            onChange={(e) => {
-                              const newSchedule = { ...restaurant.schedule };
-                              if (e.target.checked) {
-                                newSchedule[day] = { open: '09:00', close: '18:00' };
-                              } else {
-                                newSchedule[day] = null;
-                              }
-                              setRestaurant({...restaurant, schedule: newSchedule});
-                            }}
-                            className="sr-only"
-                          />
-                          <div className={`w-12 h-6 rounded-full transition-colors ${
-                            isOpen ? 'bg-green-500' : 'bg-gray-300'
-                          }`}>
-                            <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
-                              isOpen ? 'translate-x-6' : 'translate-x-0.5'
-                            } mt-0.5`}></div>
-                          </div>
+                  <div
+                    key={day}
+                    className={cn(
+                      'p-3 rounded-lg border-2 transition-all',
+                      dayOpen ? 'border-success-300 bg-success-50' : 'border-gray-200 bg-gray-50'
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-900">{dayLabels[day]}</span>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={dayOpen}
+                          onChange={(e) => {
+                            const newSchedule = { ...restaurant.schedule };
+                            newSchedule[day] = e.target.checked ? { open: '09:00', close: '18:00' } : null;
+                            setRestaurant({ ...restaurant, schedule: newSchedule });
+                          }}
+                          className="sr-only"
+                        />
+                        <div className={cn(
+                          'w-10 h-5 rounded-full transition-colors',
+                          dayOpen ? 'bg-success-500' : 'bg-gray-300'
+                        )}>
+                          <div className={cn(
+                            'w-4 h-4 bg-white rounded-full transform transition-transform mt-0.5',
+                            dayOpen ? 'translate-x-5' : 'translate-x-0.5'
+                          )} />
                         </div>
-                        <span className={`text-sm font-medium ${
-                          isOpen ? 'text-green-700' : 'text-gray-500'
-                        }`}>
-                          {isOpen ? 'Restaurant ouvert' : 'Restaurant fermé'}
-                        </span>
                       </label>
                     </div>
-
-                    {/* Time Inputs */}
-                    {isOpen && (
-                      <div className="space-y-3 animate-fade-in">
-                        <div className="bg-white rounded-lg p-3 border border-green-200">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">Ouverture</label>
-                              <div className="relative">
-                                <input
-                                  type="time"
-                                  value={restaurant.schedule[day]?.open || '09:00'}
-                                  onChange={(e) => {
-                                    const newSchedule = { ...restaurant.schedule };
-                                    if (newSchedule[day]) {
-                                      newSchedule[day] = { ...newSchedule[day], open: e.target.value };
-                                    }
-                                    setRestaurant({...restaurant, schedule: newSchedule});
-                                  }}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-medium text-gray-600 mb-1">Fermeture</label>
-                              <div className="relative">
-                                <input
-                                  type="time"
-                                  value={restaurant.schedule[day]?.close || '18:00'}
-                                  onChange={(e) => {
-                                    const newSchedule = { ...restaurant.schedule };
-                                    if (newSchedule[day]) {
-                                      newSchedule[day] = { ...newSchedule[day], close: e.target.value };
-                                    }
-                                    setRestaurant({...restaurant, schedule: newSchedule});
-                                  }}
-                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-2 text-center">
-                            <span className="text-xs text-green-600 font-medium">
-                              {restaurant.schedule[day]?.open} - {restaurant.schedule[day]?.close}
-                            </span>
-                          </div>
-                        </div>
+                    {dayOpen && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <input
+                          type="time"
+                          value={restaurant.schedule[day]?.open || '09:00'}
+                          onChange={(e) => {
+                            const newSchedule = { ...restaurant.schedule };
+                            if (newSchedule[day]) newSchedule[day] = { ...newSchedule[day], open: e.target.value };
+                            setRestaurant({ ...restaurant, schedule: newSchedule });
+                          }}
+                          className="px-2 py-1 border border-gray-300 rounded text-sm"
+                        />
+                        <span className="text-gray-500">à</span>
+                        <input
+                          type="time"
+                          value={restaurant.schedule[day]?.close || '18:00'}
+                          onChange={(e) => {
+                            const newSchedule = { ...restaurant.schedule };
+                            if (newSchedule[day]) newSchedule[day] = { ...newSchedule[day], close: e.target.value };
+                            setRestaurant({ ...restaurant, schedule: newSchedule });
+                          }}
+                          className="px-2 py-1 border border-gray-300 rounded text-sm"
+                        />
                       </div>
                     )}
                   </div>
                 );
               })}
             </div>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs sm:text-sm text-blue-700 flex items-start sm:items-center space-x-2">
-                <Bell className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 sm:mt-0 flex-shrink-0" />
-                <span>Les clients verront vos horaires d'ouverture sur votre profil</span>
-              </p>
+            <div className="mt-4 p-3 bg-primary-50 rounded-lg flex items-center gap-2">
+              <Bell className="h-4 w-4 text-primary-600" />
+              <span className="text-sm text-primary-700">Les clients verront vos horaires sur votre profil</span>
             </div>
           </div>
         </Card>
+      </main>
 
-        {/* Success/Error Messages */}
-        {(saveSuccess || uploadSuccess || deleteSuccess || error) && (
-          <div className="fixed top-4 right-4 z-50 max-w-sm space-y-2">
-            {saveSuccess && (
-              <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
-                <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
-                <span className="font-medium">Modifications enregistrées avec succès !</span>
-              </div>
-            )}
-            {uploadSuccess && (
-              <div className="bg-blue-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
-                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse"></div>
-                <span className="font-medium">Image uploadée avec succès !</span>
-              </div>
-            )}
-            {deleteSuccess && (
-              <div className="bg-orange-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in">
-                <div className="w-2 h-2 bg-orange-200 rounded-full animate-pulse"></div>
-                <span className="font-medium">Image supprimée avec succès !</span>
-              </div>
-            )}
-            {error && (
-              <div className="bg-red-500 text-white p-4 rounded-lg shadow-lg flex items-center space-x-2">
-                <div className="w-2 h-2 bg-red-200 rounded-full"></div>
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Fixed Action Bar - Always Accessible */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:relative lg:shadow-none lg:border-t-0 lg:bg-transparent lg:pt-6">
-          <div className="px-4 py-3 lg:px-0 lg:py-0">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3 lg:justify-end">
-                {/* Mobile: Full width buttons */}
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full lg:w-auto order-2 sm:order-1"
-                  onClick={handleCancel}
-                  disabled={saving || !hasChanges()}
-                >
-                  <span className="sm:hidden">
-                    {hasChanges() ? 'Annuler' : 'Aucune modification'}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {hasChanges() ? 'Annuler les modifications' : 'Aucune modification'}
-                  </span>
-                </Button>
-                
-                <Button
-                  onClick={handleSave}
-                  variant="primary"
-                  size="lg"
-                  icon={saving ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Save className="h-5 w-5" />}
-                  className="w-full lg:w-auto order-1 sm:order-2 shadow-lg lg:shadow-none"
-                  disabled={saving || !hasChanges()}
-                >
-                  <span className="sm:hidden">
-                    {saving ? 'Enregistrement...' : hasChanges() ? 'Enregistrer' : 'Aucune modification'}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {saving ? 'Enregistrement en cours...' : hasChanges() ? 'Enregistrer les modifications' : 'Aucune modification'}
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Bottom safe area for mobile */}
-          <div className="h-safe-area-inset-bottom lg:hidden"></div>
+      {/* Fixed Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 p-4">
+        <div className="max-w-4xl mx-auto flex gap-3 justify-end">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={saving || !hasChanges}
+          >
+            Annuler
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving || !hasChanges}
+            icon={saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Save className="h-4 w-4" />}
+          >
+            {saving ? 'Enregistrement...' : 'Enregistrer'}
+          </Button>
         </div>
-        
-        {/* Spacer to prevent content from being hidden behind fixed buttons */}
-        <div className="h-20 lg:hidden"></div>
       </div>
     </div>
   );
 };
 
 export default RestaurantSettingsPage;
-
