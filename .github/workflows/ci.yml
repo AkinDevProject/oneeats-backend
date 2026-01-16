@@ -1,25 +1,552 @@
-## A basic GitHub Actions workflow for your Quarkus application.
+# =============================================================================
+# OneEats - Pipeline CI/CD Complete
+# =============================================================================
+# Pipeline professionnelle avec:
+# - Build & Lint parallele (Backend, Web, Mobile)
+# - Tests unitaires paralleles
+# - Tests d'integration avec PostgreSQL
+# - Detection de tests flaky (burn-in)
+# - Couverture de code et artefacts
+# - Notifications sur echec
+#
+# Auteur: BMAD Test Architect
+# Version: 1.0.0
+# =============================================================================
 
-name: CI build
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main, develop]
+  # Execution hebdomadaire pour detecter les regressions
+  schedule:
+    - cron: '0 6 * * 1' # Lundi a 6h UTC
+
+# Annuler les executions precedentes sur la meme branche
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: '21'
+  NODE_VERSION: '20'
+  MAVEN_OPTS: '-Xmx1024m'
 
 jobs:
-  build:
+  # ===========================================================================
+  # STAGE 1: BUILD & LINT (Parallele)
+  # ===========================================================================
+
+  build-backend:
+    name: "🔨 Backend - Build & Lint"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
           cache: maven
 
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build Backend
+        run: ./mvnw compile -B -DskipTests
+
+      - name: Check code style (Checkstyle)
+        run: ./mvnw checkstyle:check -B || echo "::warning::Checkstyle not configured"
+        continue-on-error: true
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: target/classes
+          retention-days: 1
+
+  build-web:
+    name: "🌐 Web App - Build & Lint"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
       - name: Build
-        run: ./mvnw verify -B
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/dist
+          retention-days: 1
+
+  build-mobile:
+    name: "📱 Mobile - Build & Lint"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+  # ===========================================================================
+  # STAGE 2: TESTS UNITAIRES (Parallele)
+  # ===========================================================================
+
+  test-backend-unit:
+    name: "🧪 Backend - Tests Unitaires"
+    runs-on: ubuntu-latest
+    needs: build-backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run unit tests
+        run: ./mvnw test -B -Dtest="!*IT" -Djacoco.destFile=target/jacoco-unit.exec
+
+      - name: Generate coverage report
+        run: ./mvnw jacoco:report -B
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-test-results
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: target/site/jacoco/jacoco.xml
+          flags: backend-unit
+          name: backend-unit-coverage
+        continue-on-error: true
+
+  test-mobile-unit:
+    name: "🧪 Mobile - Tests Unitaires"
+    runs-on: ubuntu-latest
+    needs: build-mobile
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:ci
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-unit-test-results
+          path: |
+            apps/mobile/coverage/
+            apps/mobile/junit.xml
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: apps/mobile/coverage/lcov.info
+          flags: mobile-unit
+          name: mobile-unit-coverage
+        continue-on-error: true
+
+  # ===========================================================================
+  # STAGE 3: TESTS D'INTEGRATION (avec PostgreSQL)
+  # ===========================================================================
+
+  test-backend-integration:
+    name: "🔗 Backend - Tests Integration"
+    runs-on: ubuntu-latest
+    needs: test-backend-unit
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: oneeats_test
+          POSTGRES_USER: oneeats_test_user
+          POSTGRES_PASSWORD: oneeats_test_password
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5433 -U oneeats_test_user && break
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
+      - name: Run integration tests
+        run: ./mvnw test -B -Dtest="*IT" -Djacoco.destFile=target/jacoco-it.exec
+        env:
+          QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://localhost:5433/oneeats_test
+          QUARKUS_DATASOURCE_USERNAME: oneeats_test_user
+          QUARKUS_DATASOURCE_PASSWORD: oneeats_test_password
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-integration-test-results
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 7
+
+  # ===========================================================================
+  # STAGE 4: BURN-IN - Detection Tests Flaky (PR vers main seulement)
+  # ===========================================================================
+
+  burn-in:
+    name: "🔥 Burn-in - Detection Flaky Tests"
+    runs-on: ubuntu-latest
+    needs: [test-backend-integration, test-mobile-unit]
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: oneeats_test
+          POSTGRES_USER: oneeats_test_user
+          POSTGRES_PASSWORD: oneeats_test_password
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5433 -U oneeats_test_user && break
+            sleep 2
+          done
+
+      - name: "🔥 Burn-in Backend (10 iterations)"
+        run: |
+          echo "=========================================="
+          echo "🔥 BURN-IN: Detection de tests instables"
+          echo "=========================================="
+
+          FAILURES=0
+          for i in {1..10}; do
+            echo ""
+            echo "🔄 Iteration $i/10"
+            echo "-------------------"
+
+            if ! ./mvnw test -B -q 2>&1; then
+              FAILURES=$((FAILURES + 1))
+              echo "❌ Iteration $i FAILED"
+            else
+              echo "✅ Iteration $i PASSED"
+            fi
+          done
+
+          echo ""
+          echo "=========================================="
+          echo "📊 RESULTATS BURN-IN"
+          echo "=========================================="
+          echo "Iterations: 10"
+          echo "Echecs: $FAILURES"
+
+          if [ $FAILURES -gt 0 ]; then
+            echo ""
+            echo "🚨 ATTENTION: $FAILURES test(s) instable(s) detecte(s)!"
+            echo "Les tests flaky doivent etre corriges avant le merge."
+            exit 1
+          else
+            echo ""
+            echo "✅ Tous les tests sont stables!"
+          fi
+        env:
+          QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://localhost:5433/oneeats_test
+          QUARKUS_DATASOURCE_USERNAME: oneeats_test_user
+          QUARKUS_DATASOURCE_PASSWORD: oneeats_test_password
+
+      - name: Upload burn-in results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: burn-in-failures
+          path: target/surefire-reports/
+          retention-days: 30
+
+  # ===========================================================================
+  # STAGE 5: TESTS E2E MOBILE (Optionnel - Maestro)
+  # ===========================================================================
+
+  test-mobile-e2e:
+    name: "📱 Mobile - Tests E2E (Maestro)"
+    runs-on: ubuntu-latest
+    needs: test-mobile-unit
+    if: github.event_name == 'pull_request'
+    continue-on-error: true  # Ne bloque pas le merge si E2E echoue
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Enable KVM (for Android emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api-33
+
+      - name: Create AVD and run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          script: |
+            cd apps/mobile
+            npx expo run:android --no-build-cache &
+            sleep 120  # Attendre le build
+            maestro test .maestro/flows/ --format junit --output maestro-results.xml
+        continue-on-error: true
+
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-e2e-results
+          path: |
+            apps/mobile/maestro-results.xml
+            apps/mobile/.maestro/screenshots/
+          retention-days: 7
+
+  # ===========================================================================
+  # STAGE 6: RAPPORT FINAL & NOTIFICATIONS
+  # ===========================================================================
+
+  report:
+    name: "📊 Rapport Final"
+    runs-on: ubuntu-latest
+    needs: [test-backend-integration, test-mobile-unit]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate summary
+        run: |
+          echo "# 📊 Rapport CI/CD OneEats" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Resultats des Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Composant | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Build | ${{ needs.build-backend.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Unit Tests | ${{ needs.test-backend-unit.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Integration | ${{ needs.test-backend-integration.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mobile Unit Tests | ${{ needs.test-mobile-unit.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artefacts" >> $GITHUB_STEP_SUMMARY
+          echo "Les rapports de tests sont disponibles dans les artefacts du workflow." >> $GITHUB_STEP_SUMMARY
+
+  notify-failure:
+    name: "🔔 Notification Echec"
+    runs-on: ubuntu-latest
+    needs: [test-backend-integration, test-mobile-unit, burn-in]
+    if: failure() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            🚨 *CI/CD Pipeline Failed*
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Create issue on failure
+        if: github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 CI Pipeline Failed - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## CI Pipeline Failure
+
+            **Branch:** ${context.ref}
+            **Commit:** ${context.sha}
+            **Author:** ${context.actor}
+            **Workflow Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+            Please investigate and fix the failing tests.
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['ci-failure', 'bug']
+            });
+        continue-on-error: true
