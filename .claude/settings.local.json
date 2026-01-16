@@ -84,7 +84,8 @@
       "Bash(echo:*)",
       "Skill(bmad:bmm:workflows:sprint-status)",
       "Bash(npx jest:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Skill(bmad:core:workflows:party-mode)"
     ],
     "deny": [],
     "ask": []
