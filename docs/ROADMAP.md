@@ -315,6 +315,48 @@
 
 ## Notes de Session
 
+### Session 2026-01-16 : Corrections Flux Commande Mobile + Tests
+
+**Travail effectué** :
+
+**Tests Mobile (134 tests passés)** :
+- ✅ 8 suites de tests Jest implémentées
+- ✅ Tests Contexts : AuthContext, CartContext, OrderContext
+- ✅ Tests Services : apiService, authService
+- ✅ Tests Components et Hooks
+
+**Corrections Flux de Commande** :
+- ✅ `cart.tsx` : Détection erreurs auth (401/token expired) + redirection login
+- ✅ `CartContext.tsx` : Format `Order` corrigé avec objets `restaurant` et `CartItem[]`
+- ✅ `OrderContext.tsx` :
+  - `addOrder` ne crée plus de doublon API (commande déjà créée par CartContext)
+  - `updateOrderStatus` appelle maintenant l'API backend avant mise à jour locale
+  - Suppression `CustomEvent` (API browser non disponible en React Native)
+- ✅ `api.ts` : Correction `{ status }` → `{ newStatus }` pour endpoint PUT /orders/{id}/status
+
+**Fichiers modifiés** :
+- `apps/mobile/app/(tabs)/cart.tsx`
+- `apps/mobile/src/contexts/CartContext.tsx`
+- `apps/mobile/src/contexts/OrderContext.tsx`
+- `apps/mobile/src/services/api.ts`
+
+**Fonctionnalités opérationnelles** :
+- ✅ Authentification Keycloak (SSO) avec refresh token
+- ✅ Création de commande (persistée backend)
+- ✅ Annulation de commande (persistée backend)
+- ✅ Polling statuts commandes (toutes les 15s)
+- ✅ Push notifications locales
+
+**Reste à faire (Mobile)** :
+- ⏳ WebSocket temps réel (remplacer polling)
+- ⏳ Tests E2E Maestro
+- ⏳ Mode offline avec synchronisation
+- ⏳ Optimisations cache images
+
+**Prochaine étape** : Travail sur Web App Restaurant (Dashboard)
+
+---
+
 ### Session du 2025-12-12
 **Objectif** : Restructurer la documentation du projet selon les bonnes pratiques Claude Code
 
@@ -435,10 +477,10 @@
 - **UI/UX** : ✅ 95% (Très complet avec features avancées)
 - **Intégration API** : ✅ 100% (Toutes les pages connectées aux APIs)
 - **Performance** : ✅ 85% (Optimisations avancées implémentées)
-- **Tests** : ❌ 10% (À implémenter)
+- **Tests** : ✅ 70% (134 tests Jest passés - Contexts, Services, Components)
 
 ### Global MVP
-**Progression globale** : ✅ **85%**
+**Progression globale** : ✅ **88%**
 
 ---
 
@@ -608,7 +650,7 @@ docs/architecture/
 
 ## Dernière mise à jour
 
-**Date** : 2026-01-15
-**Version** : MVP 0.7
+**Date** : 2026-01-16
+**Version** : MVP 0.8
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2026-01-22
+**Prochaine revue** : 2026-01-23
