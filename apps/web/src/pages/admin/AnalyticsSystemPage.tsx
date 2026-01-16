@@ -50,7 +50,7 @@ const AnalyticsSystemPage: React.FC = () => {
   const { platformStats, loading, error, refetch } = useSystemAnalytics();
 
   // Shortcuts help modal
-  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+  const { isVisible: showShortcuts, toggle: toggleShortcuts, hide: closeShortcuts } = useShortcutsHelp();
 
   const handleExport = useCallback(() => {
     if (!platformStats?.dailyStats) return;
@@ -268,10 +268,9 @@ const AnalyticsSystemPage: React.FC = () => {
 
       {/* Keyboard Shortcuts Help */}
       <AdminShortcutsHelp
-        isOpen={showShortcuts}
+        isVisible={showShortcuts}
         onClose={closeShortcuts}
         shortcuts={shortcuts}
-        title="Raccourcis - Analytics Système"
       />
     </div>
   );

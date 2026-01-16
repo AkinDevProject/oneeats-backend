@@ -11,7 +11,9 @@ import {
   Eye,
   CheckCircle,
   Bell,
-  BellOff
+  BellOff,
+  Info,
+  Users
 } from 'lucide-react';
 
 type AlertSeverity = 'critical' | 'warning' | 'info';
@@ -19,13 +21,18 @@ type AlertType = 'order' | 'restaurant' | 'system' | 'user';
 
 export interface AdminAlert {
   id: string;
-  type: AlertType;
   severity: AlertSeverity;
   title: string;
   message: string;
-  timestamp: Date;
+  type?: AlertType;
+  timestamp?: Date;
+  // Support both formats for actions
   actionLabel?: string;
   onAction?: () => void;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
   metadata?: Record<string, unknown>;
 }
 
@@ -71,21 +78,38 @@ const typeIcons: Record<AlertType, React.ElementType> = {
   order: ShoppingCart,
   restaurant: Store,
   system: AlertTriangle,
-  user: Clock,
+  user: Users,
 };
 
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
+// Get icon based on type or severity
+function getAlertIcon(alert: AdminAlert): React.ElementType {
+  if (alert.type && typeIcons[alert.type]) {
+    return typeIcons[alert.type];
+  }
+  // Default icons based on severity
+  if (alert.severity === 'critical') return AlertTriangle;
+  if (alert.severity === 'warning') return Clock;
+  return Info;
+}
 
-  if (diffMins < 1) return "À l'instant";
-  if (diffMins < 60) return `Il y a ${diffMins} min`;
+function formatTimeAgo(date?: Date): string {
+  if (!date) return '';
 
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `Il y a ${diffHours}h`;
+  try {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
 
-  return `Il y a ${Math.floor(diffHours / 24)}j`;
+    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 60) return `Il y a ${diffMins} min`;
+
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `Il y a ${diffHours}h`;
+
+    return `Il y a ${Math.floor(diffHours / 24)}j`;
+  } catch {
+    return '';
+  }
 }
 
 function AlertItem({
@@ -98,7 +122,19 @@ function AlertItem({
   onAction?: (alert: AdminAlert) => void;
 }) {
   const config = severityConfig[alert.severity];
-  const Icon = typeIcons[alert.type];
+  const Icon = getAlertIcon(alert);
+
+  // Support both action formats
+  const actionLabel = alert.actionLabel || alert.action?.label;
+  const handleAction = () => {
+    if (alert.onAction) {
+      alert.onAction();
+    } else if (alert.action?.onClick) {
+      alert.action.onClick();
+    } else if (onAction) {
+      onAction(alert);
+    }
+  };
 
   return (
     <div
@@ -139,14 +175,16 @@ function AlertItem({
           </span>
         </div>
         <p className="text-sm text-gray-600 mt-0.5 truncate">{alert.message}</p>
-        <span className="text-xs text-gray-400 mt-1">{formatTimeAgo(alert.timestamp)}</span>
+        {alert.timestamp && (
+          <span className="text-xs text-gray-400 mt-1">{formatTimeAgo(alert.timestamp)}</span>
+        )}
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {alert.actionLabel && (
+        {actionLabel && (
           <button
-            onClick={() => onAction?.(alert)}
+            onClick={handleAction}
             className={cn(
               'flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors',
               alert.severity === 'critical'
@@ -159,7 +197,7 @@ function AlertItem({
             {alert.type === 'restaurant' ? <Phone className="h-3.5 w-3.5" /> :
              alert.type === 'order' ? <Eye className="h-3.5 w-3.5" /> :
              <ChevronRight className="h-3.5 w-3.5" />}
-            {alert.actionLabel}
+            {actionLabel}
           </button>
         )}
         {onDismiss && (
@@ -198,7 +236,10 @@ export function AdminAlertZone({
     if (severityOrder[a.severity] !== severityOrder[b.severity]) {
       return severityOrder[a.severity] - severityOrder[b.severity];
     }
-    return b.timestamp.getTime() - a.timestamp.getTime();
+    // Handle missing timestamps
+    const aTime = a.timestamp?.getTime() ?? 0;
+    const bTime = b.timestamp?.getTime() ?? 0;
+    return bTime - aTime;
   });
 
   const criticalCount = alerts.filter(a => a.severity === 'critical').length;

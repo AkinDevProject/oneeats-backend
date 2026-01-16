@@ -25,6 +25,17 @@ import { useOrders } from '../../hooks/data/useOrders';
 import { OrderStatus, Order } from '../../types';
 import OrderDetailModal from '../../components/modals/OrderDetailModal';
 
+// Helper function to safely format dates
+function safeFormat(date: Date | string | null | undefined, formatStr: string, options?: { locale?: typeof fr }): string {
+  if (!date) return 'N/A';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return format(d, formatStr, options);
+  } catch {
+    return 'N/A';
+  }
+}
+
 const statusConfig: Record<OrderStatus, { label: string; variant: 'warning' | 'info' | 'default' | 'success' | 'danger'; icon: React.FC<{ className?: string }> }> = {
   PENDING: { label: 'En attente', variant: 'warning', icon: Clock },
   CONFIRMED: { label: 'Confirmée', variant: 'info', icon: CheckCircle },
@@ -41,7 +52,7 @@ const OrdersSupervisionPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Shortcuts help modal
-  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+  const { isVisible: showShortcuts, toggle: toggleShortcuts, hide: closeShortcuts } = useShortcutsHelp();
 
   const stats = getOrderStats();
 
@@ -104,7 +115,7 @@ const OrdersSupervisionPage: React.FC = () => {
         order.orderNumber,
         `${order.clientFirstName} ${order.clientLastName}`,
         order.clientEmail,
-        format(order.createdAt, 'dd/MM/yyyy HH:mm'),
+        safeFormat(order.createdAt, 'dd/MM/yyyy HH:mm'),
         statusConfig[order.status].label,
         `${order.totalAmount.toFixed(2)}€`
       ])
@@ -308,10 +319,9 @@ const OrdersSupervisionPage: React.FC = () => {
 
       {/* Keyboard Shortcuts Help */}
       <AdminShortcutsHelp
-        isOpen={showShortcuts}
+        isVisible={showShortcuts}
         onClose={closeShortcuts}
         shortcuts={shortcuts}
-        title="Raccourcis - Commandes"
       />
     </div>
   );
@@ -380,9 +390,9 @@ function OrderRow({ order, index, onViewDetails, onStatusChange }: {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900">{format(order.createdAt, 'dd MMM yyyy', { locale: fr })}</div>
-        <div className="text-sm text-gray-500">{format(order.createdAt, 'HH:mm', { locale: fr })}</div>
-        {order.estimatedPickupTime && <div className="text-xs text-gray-400">Récup.: {format(order.estimatedPickupTime, 'HH:mm', { locale: fr })}</div>}
+        <div className="text-sm font-medium text-gray-900">{safeFormat(order.createdAt, 'dd MMM yyyy', { locale: fr })}</div>
+        <div className="text-sm text-gray-500">{safeFormat(order.createdAt, 'HH:mm', { locale: fr })}</div>
+        {order.estimatedPickupTime && <div className="text-xs text-gray-400">Récup.: {safeFormat(order.estimatedPickupTime, 'HH:mm', { locale: fr })}</div>}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">

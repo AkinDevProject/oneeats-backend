@@ -26,7 +26,7 @@ const StatsPage: React.FC = () => {
   const loading = dashboardLoading || analyticsLoading;
 
   // Shortcuts help modal
-  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+  const { isVisible: showShortcuts, toggle: toggleShortcuts, hide: closeShortcuts } = useShortcutsHelp();
 
   // Restaurant data for pie chart
   const restaurantData = useMemo(() => {
@@ -221,10 +221,9 @@ const StatsPage: React.FC = () => {
 
       {/* Keyboard Shortcuts Help */}
       <AdminShortcutsHelp
-        isOpen={showShortcuts}
+        isVisible={showShortcuts}
         onClose={closeShortcuts}
         shortcuts={shortcuts}
-        title="Raccourcis - Statistiques"
       />
     </div>
   );

@@ -61,7 +61,7 @@ const UsersPage: React.FC = () => {
   });
 
   // Shortcuts help modal
-  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+  const { isVisible: showShortcuts, toggle: toggleShortcuts, hide: closeShortcuts } = useShortcutsHelp();
 
   // Stats et données filtrées
   const { filteredUsers, stats } = useMemo(() => {
@@ -132,9 +132,19 @@ const UsersPage: React.FC = () => {
   }, [modalState, createUser, updateUser]);
 
   const handleExportCSV = useCallback(() => {
+    const safeFormatDate = (date: Date | string | null | undefined) => {
+      if (!date) return 'N/A';
+      try {
+        const d = typeof date === 'string' ? new Date(date) : date;
+        return format(d, 'dd/MM/yyyy');
+      } catch {
+        return 'N/A';
+      }
+    };
+
     const csvContent = [
       ['Prénom', 'Nom', 'Email', "Date d'inscription", 'Statut'],
-      ...filteredUsers.map(user => [user.firstName, user.lastName, user.email, format(user.createdAt, 'dd/MM/yyyy'), user.status])
+      ...filteredUsers.map(user => [user.firstName, user.lastName, user.email, safeFormatDate(user.createdAt), user.status])
     ].map(row => row.join(';')).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -336,14 +346,24 @@ const UsersPage: React.FC = () => {
 
       {/* Keyboard Shortcuts Help */}
       <AdminShortcutsHelp
-        isOpen={showShortcuts}
+        isVisible={showShortcuts}
         onClose={closeShortcuts}
         shortcuts={shortcuts}
-        title="Raccourcis - Utilisateurs"
       />
     </div>
   );
 };
+
+// Helper function to safely format dates
+function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return 'N/A';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return format(d, 'dd MMM yyyy', { locale: fr });
+  } catch {
+    return 'N/A';
+  }
+}
 
 // Sub-components
 function UserCard({ user, index, onViewProfile, onToggleStatus }: { user: User; index: number; onViewProfile: () => void; onToggleStatus: () => void }) {
@@ -377,11 +397,11 @@ function UserCard({ user, index, onViewProfile, onToggleStatus }: { user: User; 
         <div className="space-y-2 p-3 bg-gray-50 rounded-lg text-sm">
           <div className="flex items-center justify-between">
             <span className="text-gray-600 flex items-center gap-1"><Calendar className="h-3 w-3" />Inscription:</span>
-            <span className="font-medium text-gray-900">{format(user.createdAt, 'dd MMM yyyy', { locale: fr })}</span>
+            <span className="font-medium text-gray-900">{formatDate(user.createdAt)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-600 flex items-center gap-1"><Calendar className="h-3 w-3" />Dernière MAJ:</span>
-            <span className="font-medium text-gray-900">{format(user.updatedAt, 'dd MMM yyyy', { locale: fr })}</span>
+            <span className="font-medium text-gray-900">{formatDate(user.updatedAt)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-gray-600">Statut:</span>
