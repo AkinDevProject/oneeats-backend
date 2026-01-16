@@ -291,83 +291,74 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
   const addOrder = useCallback(async (order: Order) => {
     try {
       setError(null);
-      
-      // Créer la commande via l'API - Format attendu par CreateOrderCommand
-      const createdOrder = await apiService.orders.create({
-        userId: user?.id || ENV.DEV_USER_ID,
-        restaurantId: order.restaurantId,
-        totalAmount: order.total,
-        specialInstructions: order.customerNotes,
-        items: order.items.map(item => ({
-          menuItemId: item.menuItem.id,
-          menuItemName: item.menuItem.name,
-          unitPrice: item.menuItem.price,
-          quantity: item.quantity,
-          specialNotes: item.specialInstructions
-        }))
-      });
-      
-      // Charger les détails du restaurant pour la nouvelle commande
-      const restaurant = await fetchRestaurantDetails(createdOrder.restaurantId);
 
-      // Ajouter la commande créée à la liste locale
-      const processedOrder = {
-        ...createdOrder,
-        orderTime: new Date(createdOrder.createdAt || createdOrder.orderTime),
-        pickupTime: new Date(createdOrder.estimatedPickupTime || createdOrder.pickupTime),
-        status: mapApiStatusToMobileStatus(createdOrder.status),
-        // Adapter les items de l'API au format mobile
-        items: createdOrder.items?.map((item: any) => ({
-          ...item,
-          menuItem: {
-            id: item.menuItemId,
-            name: item.menuItemName,
-            price: item.unitPrice,
-            restaurantId: createdOrder.restaurantId,
-          },
-          totalPrice: item.subtotal || item.totalPrice,
-          specialInstructions: item.specialNotes || item.specialInstructions,
-        })) || [],
-        // Utiliser les vraies données du restaurant
-        restaurant,
+      // La commande a deja ete creee par CartContext.createOrder()
+      // Ici on l'ajoute simplement a la liste locale des commandes
+
+      // Charger les details du restaurant si pas deja present
+      let restaurant = order.restaurant;
+      if (!restaurant && order.restaurantId) {
+        restaurant = await fetchRestaurantDetails(order.restaurantId);
+      }
+
+      // Preparer la commande avec les donnees restaurant
+      const processedOrder: Order = {
+        ...order,
+        orderTime: order.orderTime instanceof Date ? order.orderTime : new Date(order.orderTime || order.createdAt),
+        status: order.status,
+        restaurant: restaurant || {
+          id: order.restaurantId,
+          name: order.restaurantName || 'Restaurant',
+          image: '',
+          cuisine: '',
+          rating: 0,
+          deliveryTime: '',
+          deliveryFee: 0,
+          distance: '',
+          featured: false,
+          isOpen: true,
+        },
       };
 
-      console.log('✅ Adding new order to list:', processedOrder.id);
+      console.log('✅ Adding order to local list:', processedOrder.id);
       setOrders(currentOrders => [processedOrder, ...currentOrders]);
 
       return processedOrder;
     } catch (error) {
-      console.error('Error creating order:', error);
-      setError('Erreur lors de la création de la commande');
+      console.error('Error adding order to list:', error);
+      setError('Erreur lors de l\'ajout de la commande');
 
-      // Fallback - ajouter localement seulement
+      // Ajouter quand meme a la liste locale
       setOrders(currentOrders => [order, ...currentOrders]);
+      return order;
+    }
+  }, [fetchRestaurantDetails]);
+
+  const updateOrderStatus = useCallback(async (orderId: string, status: Order['status']) => {
+    try {
+      // Mapper le statut mobile vers le statut API (uppercase)
+      const apiStatus = status.toUpperCase();
+
+      // Appeler l'API pour mettre à jour le statut
+      console.log('📦 Updating order status via API:', { orderId, status: apiStatus });
+      await apiService.orders.updateStatus(orderId, apiStatus);
+
+      // Mettre à jour l'état local après succès API
+      setOrders(currentOrders =>
+        currentOrders.map(order => {
+          if (order.id === orderId) {
+            const updatedOrder = { ...order, status };
+            console.log('✅ Order status updated locally:', { orderId, status, restaurantName: order.restaurant?.name });
+            return updatedOrder;
+          }
+          return order;
+        })
+      );
+    } catch (error) {
+      console.error('❌ Failed to update order status:', error);
+      // Optionnel: afficher une alerte à l'utilisateur
       throw error;
     }
-  }, []);
-
-  const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
-    setOrders(currentOrders =>
-      currentOrders.map(order => {
-        if (order.id === orderId) {
-          const updatedOrder = { ...order, status };
-          
-          // Émettre un événement pour déclencher les notifications push
-          if (typeof window !== 'undefined') {
-            const event = new CustomEvent('orderStatusUpdated', {
-              detail: { orderId, status, restaurantName: order.restaurant.name }
-            });
-            window.dispatchEvent(event);
-          } else {
-            // Pour React Native - On peut utiliser console.log pour le moment
-            console.log('Order status updated:', { orderId, status, restaurantName: order.restaurant.name });
-          }
-          
-          return updatedOrder;
-        }
-        return order;
-      })
-    );
   }, []);
 
   const getOrderById = useCallback((orderId: string): Order | undefined => {

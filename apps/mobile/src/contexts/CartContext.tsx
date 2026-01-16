@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CartItem, MenuItem, Order, CartItemOption } from '../types';
+import { CartItem, MenuItem, Order, CartItemOption, Restaurant } from '../types';
 import { useAuth } from './AuthContext';
 import apiService from '../services/api';
 import { ENV } from '../config/env';
@@ -202,27 +202,53 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       });
 
       // Transformer la réponse API en format Order frontend
+      // Créer un objet restaurant minimal
+      const restaurantObj: Restaurant = {
+        id: createdOrder.restaurantId,
+        name: createdOrder.restaurantName || 'Restaurant',
+        image: '',
+        cuisine: '',
+        rating: 0,
+        deliveryTime: '',
+        deliveryFee: 0,
+        distance: '',
+        featured: false,
+        isOpen: true,
+      };
+
+      // Transformer les items au format CartItem
+      const orderItems: CartItem[] = createdOrder.items.map((item: any) => ({
+        id: item.id || `item-${item.menuItemId}`,
+        menuItem: {
+          id: item.menuItemId,
+          restaurantId: createdOrder.restaurantId,
+          name: item.menuItemName,
+          description: '',
+          price: item.unitPrice,
+          image: '',
+          category: '',
+          popular: false,
+          available: true,
+        },
+        quantity: item.quantity,
+        totalPrice: item.totalPrice || (item.quantity * item.unitPrice),
+        specialInstructions: item.specialNotes,
+      }));
+
       const order: Order = {
         id: createdOrder.id,
-        orderNumber: createdOrder.orderNumber,
         restaurantId: createdOrder.restaurantId,
-        restaurantName: createdOrder.restaurantName || 'Restaurant',
-        clientName: customerData?.customerName || user?.firstName || 'Client',
-        clientPhone: customerData?.customerPhone || user?.phone || '',
-        items: createdOrder.items.map((item: any) => ({
-          id: item.id,
-          menuItemId: item.menuItemId,
-          name: item.menuItemName,
-          quantity: item.quantity,
-          price: item.unitPrice,
-          totalPrice: item.totalPrice || (item.quantity * item.unitPrice)
-        })),
+        restaurant: restaurantObj,
+        items: orderItems,
+        status: createdOrder.status?.toLowerCase() as Order['status'] || 'pending',
         total: createdOrder.totalAmount,
-        status: createdOrder.status,
-        createdAt: new Date(createdOrder.createdAt),
-        estimatedTime: createdOrder.estimatedPreparationTime || 20,
-        customerNotes: customerNotes,
+        orderTime: new Date(createdOrder.createdAt),
         pickupTime: customerData?.pickupTime
+          ? new Date(customerData.pickupTime)
+          : new Date(Date.now() + (createdOrder.estimatedPreparationTime || 20) * 60000),
+        customerName: customerData?.customerName || user?.firstName,
+        customerPhone: customerData?.customerPhone || user?.phone,
+        customerNotes: customerNotes,
       };
 
       clearCart();

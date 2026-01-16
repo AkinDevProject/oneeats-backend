@@ -163,7 +163,28 @@ export default function CartScreen() {
 
     } catch (error) {
       console.error('Erreur commande:', error);
-      Alert.alert('Erreur', 'Impossible de créer la commande.');
+
+      // Detecter les erreurs d'authentification
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isAuthError = errorMessage.includes('Unauthorized') ||
+                          errorMessage.includes('401') ||
+                          errorMessage.includes('token');
+
+      if (isAuthError) {
+        Alert.alert(
+          'Session expirée',
+          'Votre session a expiré. Veuillez vous reconnecter pour finaliser votre commande.',
+          [
+            { text: 'Annuler', style: 'cancel' },
+            {
+              text: 'Se reconnecter',
+              onPress: () => router.replace('/login')
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Erreur', 'Impossible de créer la commande. Veuillez réessayer.');
+      }
     } finally {
       setIsLoading(false);
     }

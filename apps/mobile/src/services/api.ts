@@ -126,7 +126,7 @@ class ApiService {
             }
           }
         }
-        throw new Error('Unauthorized');
+        throw new Error('Unauthorized - Session expired, please login again');
       }
 
       if (!response.ok) {
@@ -183,7 +183,7 @@ class ApiService {
     updateStatus: (id: string, status: string) =>
       this.request<any>(`/orders/${id}/status`, {
         method: 'PUT',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ newStatus: status }),
       }),
   };
 
