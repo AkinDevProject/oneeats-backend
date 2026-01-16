@@ -1,35 +1,87 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ["class"],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
+        // === OneEats Brand Colors ===
+        oneeats: {
+          primary: '#00CCBC',
+          'primary-dark': '#00A89D',
+          'primary-light': '#4DD9CD',
+          secondary: '#FF6D00',
+          'secondary-dark': '#E65100',
+          'secondary-light': '#FF9E40',
+        },
+
+        // === Primary (Turquoise OneEats) ===
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe', 
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49'
+          50: '#E6FAF8',
+          100: '#B3F0EB',
+          200: '#80E6DD',
+          300: '#4DD9CD',
+          400: '#26D0C2',
+          500: '#00CCBC',  // Main brand color
+          600: '#00A89D',
+          700: '#008078',
+          800: '#005A54',
+          900: '#003330',
+          950: '#001A18',
+          DEFAULT: '#00CCBC',
         },
+
+        // === Secondary (Orange OneEats) ===
         secondary: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          200: '#f5d0fe',
-          300: '#f0abfc',
-          400: '#e879f9',
-          500: '#d946ef',
-          600: '#c026d3',
-          700: '#a21caf',
-          800: '#86198f',
-          900: '#701a75',
-          950: '#4a044e'
+          50: '#FFF3E0',
+          100: '#FFE0B2',
+          200: '#FFCC80',
+          300: '#FFB74D',
+          400: '#FFA726',
+          500: '#FF6D00',  // Main accent color
+          600: '#E65100',
+          700: '#BF4700',
+          800: '#993900',
+          900: '#662600',
+          950: '#331300',
+          DEFAULT: '#FF6D00',
         },
+
+        // === Order Status Colors ===
+        status: {
+          pending: {
+            DEFAULT: '#FFC107',
+            bg: '#FEF3C7',
+            text: '#92400E',
+            border: '#FCD34D',
+          },
+          preparing: {
+            DEFAULT: '#00CCBC',
+            bg: '#CCFBF1',
+            text: '#065F46',
+            border: '#5EEAD4',
+          },
+          ready: {
+            DEFAULT: '#22C55E',
+            bg: '#D1FAE5',
+            text: '#065F46',
+            border: '#6EE7B7',
+          },
+          completed: {
+            DEFAULT: '#6B7280',
+            bg: '#F3F4F6',
+            text: '#374151',
+            border: '#D1D5DB',
+          },
+          cancelled: {
+            DEFAULT: '#EF4444',
+            bg: '#FEE2E2',
+            text: '#991B1B',
+            border: '#FCA5A5',
+          },
+        },
+
+        // === Semantic Colors ===
         success: {
           50: '#f0fdf4',
           100: '#dcfce7',
@@ -41,7 +93,8 @@ export default {
           700: '#15803d',
           800: '#166534',
           900: '#14532d',
-          950: '#052e16'
+          950: '#052e16',
+          DEFAULT: '#22c55e',
         },
         warning: {
           50: '#fffbeb',
@@ -54,7 +107,8 @@ export default {
           700: '#b45309',
           800: '#92400e',
           900: '#78350f',
-          950: '#451a03'
+          950: '#451a03',
+          DEFAULT: '#f59e0b',
         },
         danger: {
           50: '#fef2f2',
@@ -67,42 +121,125 @@ export default {
           700: '#b91c1c',
           800: '#991b1b',
           900: '#7f1d1d',
-          950: '#450a0a'
-        }
+          950: '#450a0a',
+          DEFAULT: '#ef4444',
+        },
+
+        // === Neutral / Surface Colors ===
+        surface: {
+          DEFAULT: '#FFFFFF',
+          hover: '#F9FAFB',
+          muted: '#F3F4F6',
+        },
+        background: '#F8F9FA',
+
+        // === shadcn/ui compatible colors ===
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        foreground: "hsl(var(--foreground))",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
       },
+
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
+
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
+        'sm': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
+        'base': ['1rem', { lineHeight: '1.5rem' }],     // 16px
+        'lg': ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],   // 20px
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],      // 24px
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
+      },
+
+      spacing: {
+        '18': '4.5rem',  // 72px
+        '88': '22rem',   // 352px
+        '128': '32rem',  // 512px
+      },
+
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-in': 'slideIn 0.3s ease-out',
-        'bounce-gentle': 'bounceGentle 0.6s ease-in-out',
-        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'fade-out': 'fadeOut 0.2s ease-out',
+        'slide-in': 'slideIn 0.2s ease-out',
+        'slide-up': 'slideUp 0.2s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'pulse-subtle': 'pulseSubtle 2s ease-in-out infinite',
+        'shimmer': 'shimmer 1.5s ease-in-out infinite',
       },
+
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' }
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
         },
         slideIn: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(0)' }
+          '0%': { transform: 'translateX(-10px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
         },
-        bounceGentle: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-5px)' }
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 5px rgba(59, 130, 246, 0.4)' },
-          '50%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' }
-        }
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.7' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
+
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 30px -5px rgba(0, 0, 0, 0.04)',
-        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 4px 25px -5px rgba(0, 0, 0, 0.1)'
-      }
+        'soft': '0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 4px 12px -4px rgba(0, 0, 0, 0.05)',
+        'medium': '0 4px 16px -4px rgba(0, 0, 0, 0.08), 0 8px 24px -8px rgba(0, 0, 0, 0.06)',
+        'strong': '0 8px 32px -8px rgba(0, 0, 0, 0.12), 0 16px 48px -16px rgba(0, 0, 0, 0.08)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)',
+      },
+
+      transitionDuration: {
+        '200': '200ms',
+        '300': '300ms',
+      },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
