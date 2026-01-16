@@ -94,7 +94,8 @@
       "Bash(\"C:\\\\Users\\\\akin_\\\\.jdks\\\\corretto-21.0.8\\\\bin\\\\java.exe\" -version)",
       "Bash(unzip:*)",
       "Bash(source:*)",
-      "Skill(bmad:bmm:workflows:testarch-ci)"
+      "Skill(bmad:bmm:workflows:testarch-ci)",
+      "Bash(./scripts/ci-local.sh:*)"
     ],
     "deny": [],
     "ask": []
