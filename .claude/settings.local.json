@@ -85,7 +85,8 @@
       "Skill(bmad:bmm:workflows:sprint-status)",
       "Bash(npx jest:*)",
       "Bash(head:*)",
-      "Skill(bmad:core:workflows:party-mode)"
+      "Skill(bmad:core:workflows:party-mode)",
+      "Bash(move tech-spec-wip.md tech-spec-tests-mvp-websocket-auth.md)"
     ],
     "deny": [],
     "ask": []
