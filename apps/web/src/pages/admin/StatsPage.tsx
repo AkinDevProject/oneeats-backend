@@ -1,9 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Download, BarChart3, TrendingUp } from 'lucide-react';
+import { Download, BarChart3, TrendingUp, RefreshCcw } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { cn } from '../../lib/utils';
-import { AdminMetricCard, AdminPageHeader } from '../../components/admin';
+import {
+  AdminMetricCard,
+  AdminPageHeader,
+  AdminMetricCardSkeleton,
+  AdminChartSkeleton,
+  AdminQuickActions,
+  AdminShortcutsHelp,
+} from '../../components/admin';
+import type { QuickAction } from '../../components/admin';
+import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import { useDashboard } from '../../hooks/data/useDashboard';
 import { useSystemAnalytics } from '../../hooks/business/useAnalytics';
 
@@ -15,6 +24,9 @@ const StatsPage: React.FC = () => {
   const { platformStats, loading: analyticsLoading, refetch: refetchAnalytics } = useSystemAnalytics();
 
   const loading = dashboardLoading || analyticsLoading;
+
+  // Shortcuts help modal
+  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
 
   // Restaurant data for pie chart
   const restaurantData = useMemo(() => {
@@ -34,7 +46,7 @@ const StatsPage: React.FC = () => {
     }));
   }, [platformStats]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     if (!stats?.weeklyData) return;
     const csv = [
       ['Date', 'Commandes', "Chiffre d'affaires"],
@@ -45,16 +57,48 @@ const StatsPage: React.FC = () => {
     link.href = URL.createObjectURL(blob);
     link.download = 'statistiques.csv';
     link.click();
-  };
+  }, [stats]);
 
-  const handleRefresh = () => { refetch(); refetchAnalytics(); };
+  const handleRefresh = useCallback(() => { refetch(); refetchAnalytics(); }, [refetch, refetchAnalytics]);
 
+  // Keyboard shortcuts
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
+    { key: 'r', ctrl: true, description: 'Actualiser', action: handleRefresh, category: 'Actions' },
+    { key: 'e', ctrl: true, description: 'Exporter CSV', action: handleExport, category: 'Actions' },
+    { key: 'd', alt: true, description: "Période: Aujourd'hui", action: () => setPeriod('day'), category: 'Période' },
+    { key: 'w', alt: true, description: 'Période: 7 jours', action: () => setPeriod('week'), category: 'Période' },
+    { key: 'm', alt: true, description: 'Période: 30 jours', action: () => setPeriod('month'), category: 'Période' },
+    { key: '?', description: 'Aide raccourcis', action: toggleShortcuts, category: 'Navigation' },
+  ], [handleRefresh, handleExport, toggleShortcuts]);
+
+  useKeyboardShortcuts(shortcuts, { enabled: !showShortcuts });
+
+  // Quick actions
+  const quickActions: QuickAction[] = useMemo(() => [
+    {
+      id: 'download-report',
+      label: 'Rapport complet',
+      icon: <Download className="h-5 w-5" />,
+      color: 'bg-blue-500 hover:bg-blue-600',
+      onClick: handleExport,
+    },
+  ], [handleExport]);
+
+  // Loading with skeleton
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Chargement des statistiques...</p>
+      <div className="min-h-screen bg-gray-100">
+        <AdminPageHeader
+          title="Analytics Dashboard - Statistiques Avancées"
+          subtitle="Analyse prédictive • Métriques temps réel • Intelligence business"
+        />
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => <AdminMetricCardSkeleton key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => <AdminChartSkeleton key={i} />)}
+          </div>
         </div>
       </div>
     );
@@ -167,6 +211,21 @@ const StatsPage: React.FC = () => {
           </ChartCard>
         </div>
       </div>
+
+      {/* Quick Actions FAB */}
+      <AdminQuickActions
+        actions={quickActions}
+        onRefresh={handleRefresh}
+        onExport={handleExport}
+      />
+
+      {/* Keyboard Shortcuts Help */}
+      <AdminShortcutsHelp
+        isOpen={showShortcuts}
+        onClose={closeShortcuts}
+        shortcuts={shortcuts}
+        title="Raccourcis - Statistiques"
+      />
     </div>
   );
 };

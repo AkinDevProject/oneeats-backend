@@ -3,13 +3,24 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   ShoppingCart, Clock, CheckCircle, XCircle, AlertTriangle, Package,
-  TrendingUp, Calendar, Eye, RefreshCcw, User, Mail
+  TrendingUp, Calendar, Eye, RefreshCcw, User, Mail, Download
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { cn } from '../../lib/utils';
-import { AdminMetricCard, AdminPageHeader, AdminSearchFilter } from '../../components/admin';
+import {
+  AdminMetricCard,
+  AdminPageHeader,
+  AdminSearchFilter,
+  AdminMetricCardSkeleton,
+  AdminTableSkeleton,
+  AdminAlertZone,
+  AdminQuickActions,
+  AdminShortcutsHelp,
+} from '../../components/admin';
+import type { AdminAlert, QuickAction } from '../../components/admin';
+import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import { useOrders } from '../../hooks/data/useOrders';
 import { OrderStatus, Order } from '../../types';
 import OrderDetailModal from '../../components/modals/OrderDetailModal';
@@ -29,6 +40,9 @@ const OrdersSupervisionPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Shortcuts help modal
+  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+
   const stats = getOrderStats();
 
   const filterTabs = useMemo(() => [
@@ -38,6 +52,37 @@ const OrdersSupervisionPage: React.FC = () => {
     { key: 'READY', label: 'Prêtes', count: stats.ready },
     { key: 'COMPLETED', label: 'Terminées', count: stats.completed }
   ], [stats]);
+
+  // Alerts
+  const alerts = useMemo<AdminAlert[]>(() => {
+    const alertList: AdminAlert[] = [];
+    if (stats.pending > 5) {
+      alertList.push({
+        id: 'high-pending',
+        severity: 'critical',
+        title: `${stats.pending} commandes en attente`,
+        message: 'Un nombre élevé de commandes attendent une action. Risque de retard client.',
+        action: { label: 'Voir en attente', onClick: () => setFilters({ ...filters, status: 'PENDING' }) },
+      });
+    } else if (stats.pending > 0) {
+      alertList.push({
+        id: 'pending-orders',
+        severity: 'warning',
+        title: `${stats.pending} commande${stats.pending > 1 ? 's' : ''} en attente`,
+        message: 'Des commandes nécessitent une confirmation.',
+        action: { label: 'Traiter', onClick: () => setFilters({ ...filters, status: 'PENDING' }) },
+      });
+    }
+    if (stats.cancelled > 3) {
+      alertList.push({
+        id: 'cancelled-orders',
+        severity: 'info',
+        title: `${stats.cancelled} commandes annulées`,
+        message: 'Surveillez le taux d\'annulation pour identifier les problèmes.',
+      });
+    }
+    return alertList;
+  }, [stats, filters, setFilters]);
 
   const handleStatusChange = useCallback(async (orderId: string, newStatus: OrderStatus) => {
     try { await updateOrderStatus(orderId, newStatus); } catch (e) { console.error('Erreur:', e); }
@@ -52,13 +97,72 @@ const OrdersSupervisionPage: React.FC = () => {
     setFilters({ ...filters, status: status as OrderStatus || undefined });
   }, [filters, setFilters]);
 
-  // Loading
+  const handleExportCSV = useCallback(() => {
+    const csvContent = [
+      ['N° Commande', 'Client', 'Email', 'Date', 'Statut', 'Montant'],
+      ...filteredOrders.map(order => [
+        order.orderNumber,
+        `${order.clientFirstName} ${order.clientLastName}`,
+        order.clientEmail,
+        format(order.createdAt, 'dd/MM/yyyy HH:mm'),
+        statusConfig[order.status].label,
+        `${order.totalAmount.toFixed(2)}€`
+      ])
+    ].map(row => row.join(';')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'commandes.csv';
+    link.click();
+  }, [filteredOrders]);
+
+  const handleConfirmAllPending = useCallback(async () => {
+    const pendingOrders = filteredOrders.filter(o => o.status === 'PENDING');
+    for (const order of pendingOrders) {
+      await updateOrderStatus(order.id, 'CONFIRMED');
+    }
+  }, [filteredOrders, updateOrderStatus]);
+
+  // Keyboard shortcuts
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
+    { key: 'r', ctrl: true, description: 'Actualiser', action: refetch, category: 'Actions' },
+    { key: 'e', ctrl: true, description: 'Exporter CSV', action: handleExportCSV, category: 'Actions' },
+    { key: 'p', alt: true, description: 'Filtrer: En attente', action: () => handleStatusFilter('PENDING'), category: 'Filtres' },
+    { key: 'c', alt: true, description: 'Filtrer: En préparation', action: () => handleStatusFilter('PREPARING'), category: 'Filtres' },
+    { key: 'r', alt: true, description: 'Filtrer: Prêtes', action: () => handleStatusFilter('READY'), category: 'Filtres' },
+    { key: 't', alt: true, description: 'Toutes les commandes', action: () => handleStatusFilter(''), category: 'Filtres' },
+    { key: '?', description: 'Aide raccourcis', action: toggleShortcuts, category: 'Navigation' },
+  ], [refetch, handleExportCSV, handleStatusFilter, toggleShortcuts]);
+
+  useKeyboardShortcuts(shortcuts, { enabled: !isModalOpen && !showShortcuts });
+
+  // Quick actions
+  const quickActions: QuickAction[] = useMemo(() => [
+    {
+      id: 'confirm-all',
+      label: 'Confirmer toutes',
+      icon: <CheckCircle className="h-5 w-5" />,
+      color: 'bg-green-500 hover:bg-green-600',
+      onClick: handleConfirmAllPending,
+      badge: stats.pending,
+      disabled: stats.pending === 0,
+    },
+  ], [handleConfirmAllPending, stats.pending]);
+
+  // Loading with skeleton
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Chargement des commandes...</p>
+      <div className="min-h-screen bg-gray-100">
+        <AdminPageHeader
+          title="Analytics Dashboard - Supervision Commandes"
+          subtitle="Monitoring temps réel • Gestion avancée • Supervision intelligente"
+        />
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => <AdminMetricCardSkeleton key={i} />)}
+          </div>
+          <AdminTableSkeleton rows={8} columns={7} />
         </div>
       </div>
     );
@@ -68,11 +172,11 @@ const OrdersSupervisionPage: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <Card className="text-center py-16 border-danger-200 bg-danger-50">
+        <Card className="text-center py-16 border-danger-200 bg-danger-50 max-w-md">
           <AlertTriangle className="h-16 w-16 text-danger-500 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-danger-900 mb-2">Erreur de chargement</h3>
-          <p className="text-danger-700">{error}</p>
-          <Button variant="outline" onClick={refetch} className="mt-4" icon={<RefreshCcw className="h-4 w-4" />}>Réessayer</Button>
+          <p className="text-danger-700 mb-4">{error}</p>
+          <Button variant="outline" onClick={refetch} icon={<RefreshCcw className="h-4 w-4" />}>Réessayer</Button>
         </Card>
       </div>
     );
@@ -84,16 +188,49 @@ const OrdersSupervisionPage: React.FC = () => {
         title="Analytics Dashboard - Supervision Commandes"
         subtitle="Monitoring temps réel • Gestion avancée • Supervision intelligente"
         onRefresh={refetch}
-        onExport={() => {}}
+        onExport={handleExportCSV}
       />
 
       <div className="p-8 space-y-6">
+        {/* Alerts */}
+        {alerts.length > 0 && (
+          <AdminAlertZone alerts={alerts} maxVisible={2} />
+        )}
+
         {/* Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <AdminMetricCard title="Total Commandes" value={stats.total} subtitle="Toutes les commandes" icon={<ShoppingCart className="h-6 w-6" />} color="violet" />
-          <AdminMetricCard title="En Attente" value={stats.pending} subtitle={stats.pending > 0 ? 'Action requise!' : 'Tout traité'} icon={<Clock className="h-6 w-6" />} color="orange" alert={stats.pending > 0} />
-          <AdminMetricCard title="En Préparation" value={stats.preparing + stats.confirmed} subtitle="Cuisines actives" icon={<Package className="h-6 w-6" />} color="blue" />
-          <AdminMetricCard title="Terminées" value={stats.completed + stats.ready} subtitle="Succès plateforme" icon={<CheckCircle className="h-6 w-6" />} color="green" />
+          <AdminMetricCard
+            title="Total Commandes"
+            value={stats.total}
+            subtitle="Toutes les commandes"
+            icon={<ShoppingCart className="h-6 w-6" />}
+            color="violet"
+          />
+          <AdminMetricCard
+            title="En Attente"
+            value={stats.pending}
+            subtitle={stats.pending > 0 ? 'Action requise!' : 'Tout traité'}
+            icon={<Clock className="h-6 w-6" />}
+            color="orange"
+            alert={stats.pending > 0}
+            onClick={() => handleStatusFilter('PENDING')}
+          />
+          <AdminMetricCard
+            title="En Préparation"
+            value={stats.preparing + stats.confirmed}
+            subtitle="Cuisines actives"
+            icon={<Package className="h-6 w-6" />}
+            color="blue"
+            onClick={() => handleStatusFilter('PREPARING')}
+          />
+          <AdminMetricCard
+            title="Terminées"
+            value={stats.completed + stats.ready}
+            subtitle="Succès plateforme"
+            icon={<CheckCircle className="h-6 w-6" />}
+            color="green"
+            onClick={() => handleStatusFilter('COMPLETED')}
+          />
         </div>
 
         {/* Search & Filters */}
@@ -160,6 +297,22 @@ const OrdersSupervisionPage: React.FC = () => {
 
         <OrderDetailModal order={selectedOrder} isOpen={isModalOpen} onClose={() => { setSelectedOrder(null); setIsModalOpen(false); }} onStatusChange={updateOrderStatus} />
       </div>
+
+      {/* Quick Actions FAB */}
+      <AdminQuickActions
+        actions={quickActions}
+        onRefresh={refetch}
+        onExport={handleExportCSV}
+        pendingOrdersCount={stats.pending}
+      />
+
+      {/* Keyboard Shortcuts Help */}
+      <AdminShortcutsHelp
+        isOpen={showShortcuts}
+        onClose={closeShortcuts}
+        shortcuts={shortcuts}
+        title="Raccourcis - Commandes"
+      />
     </div>
   );
 };

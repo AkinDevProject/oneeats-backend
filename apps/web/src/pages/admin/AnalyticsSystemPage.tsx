@@ -1,16 +1,58 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChart3, TrendingUp, Users, Store, ShoppingCart, DollarSign, Package } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Store, ShoppingCart, DollarSign, Package, Download, RefreshCcw } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { cn } from '../../lib/utils';
-import { AdminMetricCard, AdminPageHeader } from '../../components/admin';
+import {
+  AdminMetricCard,
+  AdminPageHeader,
+  AdminMetricCardSkeleton,
+  AdminChartSkeleton,
+  AdminQuickActions,
+  AdminShortcutsHelp,
+  AdminAlertZone,
+} from '../../components/admin';
+import type { QuickAction, AdminAlert } from '../../components/admin';
+import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import { useSystemAnalytics } from '../../hooks/business/useAnalytics';
+
+// Skeleton for status cards
+function StatusCardSkeleton() {
+  return (
+    <div className="animate-pulse rounded-lg p-4 bg-gray-100 border border-gray-200">
+      <div className="h-3 w-20 bg-gray-200 rounded mx-auto mb-2" />
+      <div className="h-8 w-12 bg-gray-200 rounded mx-auto" />
+    </div>
+  );
+}
+
+// Skeleton for rank items
+function RankItemSkeleton() {
+  return (
+    <div className="animate-pulse flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-gray-200 rounded-full" />
+        <div className="space-y-1">
+          <div className="h-4 w-32 bg-gray-200 rounded" />
+          <div className="h-3 w-20 bg-gray-200 rounded" />
+        </div>
+      </div>
+      <div className="space-y-1 text-right">
+        <div className="h-4 w-16 bg-gray-200 rounded" />
+        <div className="h-3 w-24 bg-gray-200 rounded" />
+      </div>
+    </div>
+  );
+}
 
 const AnalyticsSystemPage: React.FC = () => {
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
   const { platformStats, loading, error, refetch } = useSystemAnalytics();
 
-  const handleExport = () => {
+  // Shortcuts help modal
+  const { isOpen: showShortcuts, toggle: toggleShortcuts, close: closeShortcuts } = useShortcutsHelp();
+
+  const handleExport = useCallback(() => {
     if (!platformStats?.dailyStats) return;
     const csv = [
       ['Date', 'Commandes', "Chiffre d'affaires"],
@@ -21,26 +63,94 @@ const AnalyticsSystemPage: React.FC = () => {
     link.href = URL.createObjectURL(blob);
     link.download = 'analytics-system.csv';
     link.click();
-  };
+  }, [platformStats]);
 
+  // Alerts
+  const alerts = useMemo<AdminAlert[]>(() => {
+    const alertList: AdminAlert[] = [];
+    if (platformStats?.pendingOrders && platformStats.pendingOrders > 10) {
+      alertList.push({
+        id: 'high-pending',
+        severity: 'critical',
+        title: `${platformStats.pendingOrders} commandes en attente`,
+        message: 'Nombre anormalement élevé de commandes non traitées.',
+      });
+    }
+    if (platformStats?.cancelledOrders && platformStats.cancelledOrders > 5) {
+      alertList.push({
+        id: 'high-cancelled',
+        severity: 'warning',
+        title: `Taux d'annulation élevé`,
+        message: `${platformStats.cancelledOrders} commandes annulées récemment. Investiguer les causes.`,
+      });
+    }
+    return alertList;
+  }, [platformStats]);
+
+  // Keyboard shortcuts
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
+    { key: 'r', ctrl: true, description: 'Actualiser', action: refetch, category: 'Actions' },
+    { key: 'e', ctrl: true, description: 'Exporter CSV', action: handleExport, category: 'Actions' },
+    { key: 'd', alt: true, description: "Période: Aujourd'hui", action: () => setPeriod('day'), category: 'Période' },
+    { key: 'w', alt: true, description: 'Période: 7 jours', action: () => setPeriod('week'), category: 'Période' },
+    { key: 'm', alt: true, description: 'Période: 30 jours', action: () => setPeriod('month'), category: 'Période' },
+    { key: '?', description: 'Aide raccourcis', action: toggleShortcuts, category: 'Navigation' },
+  ], [refetch, handleExport, toggleShortcuts]);
+
+  useKeyboardShortcuts(shortcuts, { enabled: !showShortcuts });
+
+  // Quick actions
+  const quickActions: QuickAction[] = useMemo(() => [
+    {
+      id: 'download-analytics',
+      label: 'Télécharger rapport',
+      icon: <Download className="h-5 w-5" />,
+      color: 'bg-blue-500 hover:bg-blue-600',
+      onClick: handleExport,
+    },
+  ], [handleExport]);
+
+  // Loading with skeleton
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Chargement des analytics système...</p>
+      <div className="min-h-screen bg-gray-100">
+        <AdminPageHeader
+          title="Analytics Système"
+          subtitle="Vue d'ensemble complète de la plateforme OneEats"
+        />
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {[...Array(5)].map((_, i) => <AdminMetricCardSkeleton key={i} />)}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => <StatusCardSkeleton key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <AdminChartSkeleton />
+            <Card className="p-6">
+              <div className="h-5 w-32 bg-gray-200 rounded mb-6" />
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => <RankItemSkeleton key={i} />)}
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Error
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
+        <Card className="text-center py-16 max-w-md">
+          <BarChart3 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <p className="text-red-600 mb-4">Erreur: {error}</p>
-          <button onClick={refetch} className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg">Réessayer</button>
-        </div>
+          <button onClick={refetch} className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2">
+            <RefreshCcw className="h-4 w-4" />
+            Réessayer
+          </button>
+        </Card>
       </div>
     );
   }
@@ -64,6 +174,11 @@ const AnalyticsSystemPage: React.FC = () => {
       />
 
       <div className="p-8 space-y-6">
+        {/* Alerts */}
+        {alerts.length > 0 && (
+          <AdminAlertZone alerts={alerts} maxVisible={2} />
+        )}
+
         {/* Main Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <AdminMetricCard title="Total Restaurants" value={platformStats?.totalRestaurants || 0} subtitle={`${platformStats?.activeRestaurants || 0} actifs`} icon={<Store className="h-6 w-6" />} color="blue" />
@@ -143,6 +258,21 @@ const AnalyticsSystemPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* Quick Actions FAB */}
+      <AdminQuickActions
+        actions={quickActions}
+        onRefresh={refetch}
+        onExport={handleExport}
+      />
+
+      {/* Keyboard Shortcuts Help */}
+      <AdminShortcutsHelp
+        isOpen={showShortcuts}
+        onClose={closeShortcuts}
+        shortcuts={shortcuts}
+        title="Raccourcis - Analytics Système"
+      />
     </div>
   );
 };
