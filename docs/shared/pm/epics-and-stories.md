@@ -6,13 +6,13 @@ stepsCompleted:
   - epic-breakdown
   - story-details
 inputDocuments:
-  - docs/product/prd.md
-  - docs/architecture/target-architecture.md
-  - docs/adr/ADR-001-auth.md
-  - docs/adr/ADR-002-order-statuses.md
-  - docs/adr/ADR-003-notifications.md
-  - docs/adr/ADR-004-uploads.md
-  - docs/api/API_SPECS.md
+  - docs/shared/pm/prd.md
+  - docs/shared/architect/architecture.md
+  - docs/shared/architect/adr/ADR-001-auth.md
+  - docs/shared/architect/adr/ADR-002-order-statuses.md
+  - docs/shared/architect/adr/ADR-003-notifications.md
+  - docs/shared/architect/adr/ADR-004-uploads.md
+  - docs/shared/architect-dev/API_SPECS.md
 ---
 
 # OneEats Backend - Epic Breakdown

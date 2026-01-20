@@ -1,16 +1,17 @@
 # Documentation OneEats
 
-Point d'entrée principal pour la documentation du projet OneEats.
+Point d'entree principal pour la documentation du projet OneEats.
+Organisation hybride: **par plateforme** (shared/backend/mobile/web) et **par agent BMAD**.
 
 ---
 
-## Table des matières
+## Table des matieres
 
 - [Quick Reference](#quick-reference)
 - [Demarrage Rapide](#demarrage-rapide)
 - [Structure de la Documentation](#structure-de-la-documentation)
+- [Flux de Creation des Documents](#flux-de-creation-des-documents)
 - [Cas d'Usage](#cas-dusage)
-- [Conventions](#conventions)
 
 ---
 
@@ -19,13 +20,12 @@ Point d'entrée principal pour la documentation du projet OneEats.
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | OneEats - Plateforme Click & Collect |
-| **Type** | Monorepo Multi-Part (3 parties) |
+| **Type** | Monorepo (Backend + Mobile + Web) |
 | **Backend** | Java 21 / Quarkus 3.24.2 |
-| **Web** | React 18 / TypeScript / Vite (Quinoa) |
+| **Web** | React 18 / TypeScript / Vite |
 | **Mobile** | React Native / Expo |
 | **Architecture** | Hexagonale (DDD) |
 | **Database** | PostgreSQL |
-| **Auth** | Keycloak (OIDC) |
 
 ---
 
@@ -33,24 +33,9 @@ Point d'entrée principal pour la documentation du projet OneEats.
 
 ### Pour Claude Code
 
-**Commencez toujours par lire ces fichiers dans cet ordre :**
-
-1. **[ROADMAP.md](ROADMAP.md)** - Tache en cours et prochaines etapes
-2. **[business/BUSINESS_RULES.md](business/BUSINESS_RULES.md)** - Regles metier
-3. **[architecture/](architecture/)** - Architecture technique
-
-### Pour les Developpeurs
-
-```bash
-# 1. Demarrer PostgreSQL
-docker-compose up -d
-
-# 2. Lancer le backend via IntelliJ IDEA (Quarkus dev mode)
-# URL: http://localhost:8080
-
-# 3. Mobile (optionnel)
-cd apps/mobile && npm start
-```
+1. **[ROADMAP.md](ROADMAP.md)** - Tache en cours
+2. **[shared/analyst/BUSINESS_RULES.md](shared/analyst/BUSINESS_RULES.md)** - Regles metier
+3. **[shared/architect/](shared/architect/)** - Architecture technique
 
 ### URLs de Developpement
 
@@ -64,6 +49,40 @@ cd apps/mobile && npm start
 
 ## Structure de la Documentation
 
+```
+docs/
+├── README.md                 # Cet index
+├── ROADMAP.md                # Progression projet
+├── BUGS.md                   # Bugs connus
+│
+├── shared/                   # Documents PARTAGES (toutes plateformes)
+│   ├── pm/                   # Product Manager
+│   ├── analyst/              # Analyste Business
+│   ├── architect/            # Architecte (+ adr/)
+│   ├── architect-dev/        # Partage Arch+Dev
+│   ├── tea/                  # Tests partages
+│   ├── bmad/                 # Workflows BMAD
+│   └── concepts/             # Concepts futurs
+│
+├── backend/                  # Documentation BACKEND (Java/Quarkus)
+│   └── dev/                  # Guides developpeur backend
+│
+├── mobile/                   # Documentation MOBILE (React Native/Expo)
+│   ├── dev/                  # Guides developpeur mobile
+│   ├── ux-designer/          # Specs UI mobile
+│   └── tea/                  # Tests mobile
+│
+├── web/                      # Documentation WEB (React/Vite)
+│   ├── ux-designer/          # Specs UI web
+│   └── tea/                  # Tests web
+│
+└── archive/                  # Documents archives
+```
+
+---
+
+## Documents par Section
+
 ### Fichiers Racine
 
 | Fichier | Description |
@@ -71,131 +90,177 @@ cd apps/mobile && npm start
 | **[ROADMAP.md](ROADMAP.md)** | Progression projet, taches en cours |
 | **[BUGS.md](BUGS.md)** | Bugs connus et suivi |
 
-### /architecture/ - Architecture Technique
+---
+
+### /shared/ - Documents Partages
+
+Documents communs a toutes les plateformes (business, architecture, API).
+
+#### shared/pm/ - Product Manager
 
 | Document | Description |
 |----------|-------------|
-| **[README.md](architecture/README.md)** | Vue d'ensemble architecture |
-| **[architecture.md](architecture/architecture.md)** | Document d'architecture BMAD (C4) |
-| **[hexagonal-guide.md](architecture/hexagonal-guide.md)** | Guide DDD/Architecture Hexagonale |
-| **[implementation-status.md](architecture/implementation-status.md)** | Statut d'implementation |
+| **[prd.md](shared/pm/prd.md)** | Product Requirements Document |
+| **[epics-and-stories.md](shared/pm/epics-and-stories.md)** | Epics et User Stories |
+| **[USER_STORIES.md](shared/pm/USER_STORIES.md)** | Stories utilisateur |
+| **[sprint-status.yaml](shared/pm/sprint-status.yaml)** | Suivi sprint BMAD |
 
-### /api/ - Specifications API
-
-| Document | Description |
-|----------|-------------|
-| **[API_SPECS.md](api/API_SPECS.md)** | Endpoints API REST |
-| **[DATA_MODEL.md](api/DATA_MODEL.md)** | Schema base de donnees |
-
-### /business/ - Specifications Metier
+#### shared/analyst/ - Analyste Business
 
 | Document | Description |
 |----------|-------------|
-| **[BUSINESS_RULES.md](business/BUSINESS_RULES.md)** | Regles metier et workflows |
-| **[USE_CASES.md](business/USE_CASES.md)** | Cas d'utilisation |
-| **[REQUIREMENTS_SPECIFICATION.md](business/REQUIREMENTS_SPECIFICATION.md)** | Specifications fonctionnelles |
-| **[WEB_UI_SPECIFICATIONS.md](business/WEB_UI_SPECIFICATIONS.md)** | Specs UI Dashboard Web |
-| **[MOBILE_UI_SPECIFICATIONS.md](business/MOBILE_UI_SPECIFICATIONS.md)** | Specs UI App Mobile |
+| **[BUSINESS_RULES.md](shared/analyst/BUSINESS_RULES.md)** | Regles metier |
+| **[USE_CASES.md](shared/analyst/USE_CASES.md)** | Cas d'utilisation |
+| **[REQUIREMENTS_SPECIFICATION.md](shared/analyst/REQUIREMENTS_SPECIFICATION.md)** | Specifications |
 
-### /guides/ - Guides Techniques
+#### shared/architect/ - Architecte
 
 | Document | Description |
 |----------|-------------|
-| **[GETTING_STARTED.md](guides/GETTING_STARTED.md)** | Guide de demarrage |
-| **[DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)** | Guide de deploiement |
-| **[SECURITY_GUIDE.md](guides/SECURITY_GUIDE.md)** | Guide securite |
-| **[TROUBLESHOOTING.md](guides/TROUBLESHOOTING.md)** | Depannage |
+| **[architecture.md](shared/architect/architecture.md)** | Architecture globale (C4) |
+| **[hexagonal-guide.md](shared/architect/hexagonal-guide.md)** | Guide DDD/Hexagonal |
+| **[implementation-status.md](shared/architect/implementation-status.md)** | Statut implementation |
+| **[adr/](shared/architect/adr/)** | Architecture Decision Records (5 ADRs) |
 
-### /mobile/ - Documentation Mobile
-
-| Document | Description |
-|----------|-------------|
-| **[TECHNICAL_GUIDE.md](mobile/TECHNICAL_GUIDE.md)** | Guide technique mobile |
-| **[NAVIGATION_SETUP.md](mobile/NAVIGATION_SETUP.md)** | Configuration navigation |
-| **[THEMING_GUIDE.md](mobile/THEMING_GUIDE.md)** | Guide de theme |
-
-### /tests/ - Documentation Tests
+#### shared/architect-dev/ - Partage Architecte + Dev
 
 | Document | Description |
 |----------|-------------|
-| **[TEST_STRATEGY.md](tests/TEST_STRATEGY.md)** | Strategie de tests globale |
-| **[TEST-DESIGN.md](tests/TEST-DESIGN.md)** | Conception des tests |
-| **[PLAN_TESTS_APP_MOBILE.md](tests/PLAN_TESTS_APP_MOBILE.md)** | Plan tests mobile |
-| **[PLAN_TESTS_DASHBOARD_ADMIN.md](tests/PLAN_TESTS_DASHBOARD_ADMIN.md)** | Plan tests admin |
-| **[PLAN_TESTS_DASHBOARD_RESTAURANT.md](tests/PLAN_TESTS_DASHBOARD_RESTAURANT.md)** | Plan tests restaurant |
+| **[API_SPECS.md](shared/architect-dev/API_SPECS.md)** | Specifications API REST |
+| **[DATA_MODEL.md](shared/architect-dev/DATA_MODEL.md)** | Schema base de donnees |
+| **[SECURITY_GUIDE.md](shared/architect-dev/SECURITY_GUIDE.md)** | Guide securite |
 
-### /product/ - Planification Produit (BMAD)
+#### shared/tea/ - Tests Partages
 
 | Document | Description |
 |----------|-------------|
-| **[prd.md](product/prd.md)** | Product Requirements Document |
-| **[epics-and-stories.md](product/epics-and-stories.md)** | Epics et User Stories |
-| **[sprint-status.yaml](product/sprint-status.yaml)** | Suivi de sprint BMAD (statut courant) |
+| **[TEST_STRATEGY.md](shared/tea/TEST_STRATEGY.md)** | Strategie de tests globale |
+| **[TEST-DESIGN.md](shared/tea/TEST-DESIGN.md)** | Conception des tests |
 
-### /adr/ - Architecture Decision Records
-
-| Document | Description |
-|----------|-------------|
-| **[ADR-001-auth.md](adr/ADR-001-auth.md)** | Decision authentification |
-| **[ADR-002-order-statuses.md](adr/ADR-002-order-statuses.md)** | Decision statuts commande |
-| **[ADR-003-notifications.md](adr/ADR-003-notifications.md)** | Decision notifications |
-| **[ADR-004-uploads.md](adr/ADR-004-uploads.md)** | Decision uploads fichiers |
-
-### /concepts/ - Concepts Futurs
+#### shared/bmad/ - BMAD
 
 | Document | Description |
 |----------|-------------|
-| **[AI_MENU_GENERATION.md](concepts/AI_MENU_GENERATION.md)** | Generation IA de menus |
+| **[BMAD_FLOW.md](shared/bmad/BMAD_FLOW.md)** | Flow et workflows BMAD |
 
-### /archive/ - Archives
+#### shared/concepts/ - Concepts Futurs
 
-Anciens fichiers et documentation historique. Voir [archive/README.md](archive/README.md) pour le contenu.
+| Document | Description |
+|----------|-------------|
+| **[AI_MENU_GENERATION.md](shared/concepts/AI_MENU_GENERATION.md)** | Generation IA de menus |
+
+---
+
+### /backend/ - Backend Java/Quarkus
+
+Documentation specifique au backend.
+
+#### backend/dev/ - Developpeur Backend
+
+| Document | Description |
+|----------|-------------|
+| **[GETTING_STARTED.md](backend/dev/GETTING_STARTED.md)** | Guide de demarrage |
+| **[DEPLOYMENT_GUIDE.md](backend/dev/DEPLOYMENT_GUIDE.md)** | Guide deploiement |
+| **[CI_CD_GUIDE.md](backend/dev/CI_CD_GUIDE.md)** | Guide CI/CD |
+| **[CI_SECRETS_CHECKLIST.md](backend/dev/CI_SECRETS_CHECKLIST.md)** | Checklist secrets |
+| **[TROUBLESHOOTING.md](backend/dev/TROUBLESHOOTING.md)** | Depannage |
+
+---
+
+### /mobile/ - App Mobile React Native/Expo
+
+Documentation specifique a l'application mobile.
+
+#### mobile/dev/ - Developpeur Mobile
+
+| Document | Description |
+|----------|-------------|
+| **[TECHNICAL_GUIDE.md](mobile/dev/TECHNICAL_GUIDE.md)** | Guide technique mobile |
+| **[NAVIGATION_SETUP.md](mobile/dev/NAVIGATION_SETUP.md)** | Configuration navigation |
+
+#### mobile/ux-designer/ - UX Mobile
+
+| Document | Description |
+|----------|-------------|
+| **[MOBILE_UI_SPECIFICATIONS.md](mobile/ux-designer/MOBILE_UI_SPECIFICATIONS.md)** | Specs UI mobile |
+| **[THEMING_GUIDE.md](mobile/ux-designer/THEMING_GUIDE.md)** | Guide theming |
+
+#### mobile/tea/ - Tests Mobile
+
+| Document | Description |
+|----------|-------------|
+| **[TEST_STRATEGY_MOBILE.md](mobile/tea/TEST_STRATEGY_MOBILE.md)** | Strategie tests mobile |
+| **[PLAN_TESTS_APP_MOBILE.md](mobile/tea/PLAN_TESTS_APP_MOBILE.md)** | Plan tests mobile |
+
+---
+
+### /web/ - Dashboard Web React/Vite
+
+Documentation specifique aux dashboards web (restaurant et admin).
+
+#### web/ux-designer/ - UX Web
+
+| Document | Description |
+|----------|-------------|
+| **[WEB_UI_SPECIFICATIONS.md](web/ux-designer/WEB_UI_SPECIFICATIONS.md)** | Specs UI web |
+
+#### web/tea/ - Tests Web
+
+| Document | Description |
+|----------|-------------|
+| **[PLAN_TESTS_DASHBOARD_ADMIN.md](web/tea/PLAN_TESTS_DASHBOARD_ADMIN.md)** | Plan tests admin |
+| **[PLAN_TESTS_DASHBOARD_RESTAURANT.md](web/tea/PLAN_TESTS_DASHBOARD_RESTAURANT.md)** | Plan tests restaurant |
+
+---
+
+## Flux de Creation des Documents
+
+```
+PHASE 1: DISCOVERY (shared/)
+    Analyst --> BUSINESS_RULES, USE_CASES, REQUIREMENTS
+
+PHASE 2: DEFINITION (shared/)
+    PM       --> PRD, epics-and-stories
+    Architect --> architecture, ADRs, API_SPECS, DATA_MODEL
+
+PHASE 3: DESIGN (par plateforme)
+    Mobile UX  --> mobile/ux-designer/*
+    Web UX     --> web/ux-designer/*
+    TEA        --> shared/tea/* + mobile/tea/* + web/tea/*
+
+PHASE 4: IMPLEMENTATION (par plateforme)
+    Backend Dev --> backend/dev/*
+    Mobile Dev  --> mobile/dev/*
+    Web Dev     --> web/dev/* (si necessaire)
+```
 
 ---
 
 ## Cas d'Usage
 
-### Je veux comprendre le systeme de commandes
+### Je travaille sur le BACKEND
 
-1. **[business/USE_CASES.md](business/USE_CASES.md)** - UC-004 (Commander), UC-101 (Recevoir)
-2. **[business/BUSINESS_RULES.md](business/BUSINESS_RULES.md)** - Section "Gestion des Commandes"
-3. **[api/DATA_MODEL.md](api/DATA_MODEL.md)** - Tables `orders` et `order_items`
+1. **[backend/dev/GETTING_STARTED.md](backend/dev/GETTING_STARTED.md)** - Setup
+2. **[shared/architect-dev/API_SPECS.md](shared/architect-dev/API_SPECS.md)** - API
+3. **[shared/architect/hexagonal-guide.md](shared/architect/hexagonal-guide.md)** - Architecture
 
-### Je veux ajouter un endpoint API
+### Je travaille sur le MOBILE
 
-1. **[api/API_SPECS.md](api/API_SPECS.md)** - Patterns existants
-2. **[architecture/hexagonal-guide.md](architecture/hexagonal-guide.md)** - Structure hexagonale
-3. **[business/BUSINESS_RULES.md](business/BUSINESS_RULES.md)** - Regles a implementer
+1. **[mobile/dev/TECHNICAL_GUIDE.md](mobile/dev/TECHNICAL_GUIDE.md)** - Guide technique
+2. **[mobile/ux-designer/MOBILE_UI_SPECIFICATIONS.md](mobile/ux-designer/MOBILE_UI_SPECIFICATIONS.md)** - UI
+3. **[shared/analyst/USE_CASES.md](shared/analyst/USE_CASES.md)** - Use cases client
 
-### Je veux corriger un bug
+### Je travaille sur le WEB
 
-1. **[BUGS.md](BUGS.md)** - Verifier s'il est repertorie
-2. **[guides/TROUBLESHOOTING.md](guides/TROUBLESHOOTING.md)** - Problemes courants
+1. **[web/ux-designer/WEB_UI_SPECIFICATIONS.md](web/ux-designer/WEB_UI_SPECIFICATIONS.md)** - UI
+2. **[shared/analyst/USE_CASES.md](shared/analyst/USE_CASES.md)** - Use cases restaurant/admin
+3. **[shared/architect-dev/API_SPECS.md](shared/architect-dev/API_SPECS.md)** - API
 
-### Je veux deployer l'application
+### Je veux comprendre le BUSINESS
 
-1. **[guides/DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)** - Instructions
-2. **[guides/SECURITY_GUIDE.md](guides/SECURITY_GUIDE.md)** - Securite
-
----
-
-## Conventions
-
-### Style Markdown
-
-- **Format** : GitHub Flavored Markdown
-- **Langue** : Francais
-- **Titres** : Sans emojis (H1, H2, H3)
-- **Listes** : Tirets `-`
-
-### Mise a Jour
-
-| Document | Frequence |
-|----------|-----------|
-| ROADMAP.md | Apres chaque session |
-| BUGS.md | Des qu'un bug est decouvert/resolu |
-| API_SPECS.md | A chaque modification API |
-| DATA_MODEL.md | A chaque migration DB |
+1. **[shared/analyst/BUSINESS_RULES.md](shared/analyst/BUSINESS_RULES.md)** - Regles
+2. **[shared/analyst/USE_CASES.md](shared/analyst/USE_CASES.md)** - Use cases
+3. **[shared/pm/prd.md](shared/pm/prd.md)** - PRD
 
 ---
 
@@ -203,8 +268,7 @@ Anciens fichiers et documentation historique. Voir [archive/README.md](archive/R
 
 - **[CLAUDE.md](../CLAUDE.md)** - Instructions pour Claude Code
 - **[CONTEXT.md](../CONTEXT.md)** - Contexte projet
-- **[README.md](../README.md)** - Documentation racine
 
 ---
 
-**Derniere mise a jour** : 2026-01-15
+**Derniere mise a jour** : 2026-01-20

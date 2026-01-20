@@ -8,13 +8,13 @@ stepsCompleted:
   - adr-decisions
   - delivery-plan
 inputDocuments:
-  - docs/product/prd.md
+  - docs/shared/pm/prd.md
   - docs/ROADMAP.md
-  - docs/business/BUSINESS_RULES.md
-  - docs/business/USE_CASES.md
-  - docs/api/DATA_MODEL.md
-  - docs/api/API_SPECS.md
-  - docs/tests/TEST_STRATEGY.md
+  - docs/shared/analyst/BUSINESS_RULES.md
+  - docs/shared/analyst/USE_CASES.md
+  - docs/shared/architect-dev/DATA_MODEL.md
+  - docs/shared/architect-dev/API_SPECS.md
+  - docs/shared/tea/TEST_STRATEGY.md
 workflowType: 'architecture'
 project_name: 'OneEats Backend'
 user_name: 'Equipe OneEats'
