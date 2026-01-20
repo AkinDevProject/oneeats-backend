@@ -5,9 +5,9 @@
 | Statut | Nombre | Description |
 |--------|--------|-------------|
 | 🔴 Critique | 0 | Bloquant pour le MVP |
-| 🟠 Important | 2 | Impact significatif sur l'expérience |
-| 🟡 Moyen | 2 | Problème mineur |
-| 🟢 Résolu | 12 | Bugs corrigés |
+| 🟠 Important | 1 | Impact significatif sur l'expérience |
+| 🟡 Moyen | 0 | Problème mineur |
+| 🟢 Résolu | 16 | Bugs corrigés |
 
 ---
 
@@ -49,85 +49,118 @@ L'application mobile a un mode offline basique mais incomplet.
 
 ---
 
-### BUG-008 : Tests WebSocket manquants
+### ✅ BUG-008 : Tests WebSocket manquants
 **Priorité** : 🟠 Important
-**Status** : 📋 Backlog
+**Status** : ✅ Résolu
 **Affecte** : Backend, Mobile
 **Date création** : 2026-01-16
+**Date résolution** : 2026-01-20
 
 **Description** :
-WebSocket est implémenté (backend + mobile) mais aucun test n'existe pour cette fonctionnalité.
+WebSocket est implémenté (backend + mobile) mais les tests n'étaient pas documentés/complets.
 
-**Fichiers concernés** :
-- Backend : `NotificationWebSocket.java`, `RestaurantWebSocket.java`, `WebSocketNotificationService.java`
-- Mobile : `WebSocketContext.tsx`, `useWebSocket.ts`
+**Solution appliquée** :
 
-**Solution prévue** :
-- Tests unitaires WebSocket backend (JUnit)
-- Tests intégration WebSocket
-- Tests mobile context
+**Backend (déjà existant)** - Tests unitaires et d'intégration complets :
+- `NotificationWebSocketTest.java` (342 lignes) : 15 tests pour connexion, messages, notifications
+- `RestaurantWebSocketTest.java` (429 lignes) : 17 tests pour multi-sessions, broadcast
+- `WebSocketNotificationServiceTest.java` (363 lignes) : 12 tests pour DTOs et envoi de notifications
+- `WebSocketIT.java` (338 lignes) : Tests d'intégration avec vrais WebSockets
 
-**Assigné à** : À planifier
+**Mobile (nouveau)** :
+- `apps/mobile/tests/unit/hooks/useWebSocket.test.ts` : 20+ tests couvrant :
+  - Connexion initiale et gestion userId
+  - Gestion des messages (connected, order_status_update, heartbeat, echo)
+  - Heartbeat périodique
+  - Gestion des erreurs
+  - Reconnexion automatique avec backoff exponentiel
+  - Déconnexion manuelle
+  - Envoi de messages
+  - Cycle de vie de l'app (background/foreground)
+
+**Commit** : À committer
 
 ---
 
 ## 🟡 Bugs Mineurs
 
-### BUG-006 : Images non optimisées automatiquement
+### ✅ BUG-006 : Images non optimisées automatiquement
 **Priorité** : 🟡 Moyen
-**Status** : 📋 Backlog
-**Affecte** : Frontend Web, Mobile
+**Status** : ✅ Résolu
+**Affecte** : Backend, Frontend Web, Mobile
 **Date création** : 2025-12-11
+**Date résolution** : 2026-01-20
 
 **Description** :
-Les images uploadées ne sont pas automatiquement redimensionnées ni optimisées. Cela peut entraîner des temps de chargement longs.
+Les images uploadées n'étaient pas automatiquement redimensionnées ni optimisées.
 
-**Impact** :
-- ⚠️ Temps de chargement pages plus long
-- ⚠️ Consommation data mobile élevée
-- ⚠️ Performance dégradée
+**Solution appliquée** :
 
-**Workaround temporaire** :
-Manuel - demander aux restaurants d'uploader des images déjà optimisées
+**Backend - Génération automatique de thumbnails** :
+- `FileStorageService.java` : Génère automatiquement 3 tailles lors de l'upload
+  - Original (800x800 max) : Image principale optimisée
+  - Medium (400x400) : Pour cartes de menu, listes
+  - Small (150x150) : Pour icônes, miniatures
+- `FileController.java` : Nouveau paramètre `?size=` pour servir les thumbnails
+  - `/uploads/menu-items/abc.jpg` → Image originale (800px)
+  - `/uploads/menu-items/abc.jpg?size=small` → Thumbnail 150px
+  - `/uploads/menu-items/abc.jpg?size=medium` → Thumbnail 400px
+- Suppression automatique des thumbnails lors de la suppression d'image
+- Fallback vers l'image originale si le thumbnail n'existe pas
 
-**Solution prévue** :
-- Backend : Service d'optimisation d'images (Sharp ou Imagemagick)
-- Génération automatique de thumbnails (small, medium, large)
-- Compression automatique avec qualité configurable
-- CDN pour servir les images
+**Frontend Web** :
+- `imageUtils.ts` : Mise à jour pour utiliser le paramètre `?size=`
+  - `getListThumbnailUrl()` → Demande `?size=small`
+  - `getMenuCardImageUrl()` → Demande `?size=medium`
+  - `getModalPreviewImageUrl()` → Image originale
+- Support Unsplash : Ajout des paramètres de redimensionnement natifs
 
-**Assigné à** : Sprint 5
-**ETA** : 2026-01-05
+**Stockage des fichiers** :
+```
+uploads/
+├── restaurants/
+│   ├── abc123.jpg           (800x800 max)
+│   └── thumbnails/
+│       ├── abc123_small.jpg  (150x150)
+│       └── abc123_medium.jpg (400x400)
+└── menu-items/
+    ├── def456.jpg           (800x800 max)
+    └── thumbnails/
+        ├── def456_small.jpg  (150x150)
+        └── def456_medium.jpg (400x400)
+```
+
+**Commit** : À committer
 
 ---
 
-### BUG-007 : Validation côté client insuffisante
+### ✅ BUG-007 : Validation côté client insuffisante
 **Priorité** : 🟡 Moyen
-**Status** : 📋 Backlog
-**Affecte** : Frontend Web, Mobile
+**Status** : ✅ Résolu (Web)
+**Affecte** : Frontend Web
 **Date création** : 2025-12-11
+**Date résolution** : 2026-01-20
 
 **Description** :
-Certains formulaires manquent de validation côté client, permettant de soumettre des données invalides au backend.
+Certains formulaires manquaient de validation côté client, permettant de soumettre des données invalides au backend.
 
-**Impact** :
-- ⚠️ Messages d'erreur backend pas user-friendly
-- ⚠️ Requêtes inutiles vers le serveur
-- ⚠️ Expérience utilisateur dégradée
+**Solution appliquée** :
+Création d'un utilitaire de validation complet (`apps/web/src/utils/validationUtils.ts`) :
+- `validatePrice()` : Validation prix (positif, max 9999.99€)
+- `validateEmail()` : Validation email (regex RFC 5322)
+- `validatePhone()` / `validatePhoneOptional()` : Validation téléphone français
+- `validatePassword()` : Validation force mot de passe
+- `validateRequired()` / `validateLength()` : Validation texte
+- `hasErrors()` / `FormErrors` : Helpers de formulaire
 
-**Exemples** :
-- Email sans validation format côté mobile
-- Prix négatif possible dans formulaire menu
-- Téléphone sans validation format
+**Fichiers corrigés** :
+- `apps/web/src/utils/validationUtils.ts` - Nouvel utilitaire de validation
+- `apps/web/src/pages/restaurant/MenuPage.tsx` - Validation prix, nom, catégorie avec `min="0"` `max="9999.99"`
+- `apps/web/src/pages/restaurant/RestaurantSettingsPage.tsx` - Validation email, téléphone, adresse
 
-**Solution prévue** :
-- Validation Yup côté mobile (Formik + Yup)
-- Validation React Hook Form côté web
-- Messages d'erreur clairs et traduits
-- Feedback visuel immédiat
+**Note** : Validation mobile (React Native) à implémenter séparément si nécessaire.
 
-**Assigné à** : Sprint 6
-**ETA** : 2026-01-10
+**Commit** : À committer
 
 ---
 
@@ -188,42 +221,30 @@ Mise à jour de `src/main/resources/import-dev.sql` avec des URLs Unsplash valid
 
 ---
 
-### BUG-011 : Redirection de port inconsistante (8080 vs 5173)
-**Priorité** : 🟡 Moyen (Info)
-**Status** : 📋 Nouveau
+### ✅ BUG-011 : Redirection de port inconsistante (8080 vs 5173)
+**Priorité** : 🟡 Moyen
+**Status** : ✅ Résolu
 **Affecte** : Frontend Web, Configuration
 **Date création** : 2026-01-20
+**Date résolution** : 2026-01-20
 
 **Description** :
-La navigation via `localhost:8080` (Quinoa/backend) redirige parfois vers `localhost:5173` (Vite dev server). Cela crée une inconsistance dans les URLs et peut causer des problèmes de session.
+Certains fichiers frontend avaient des URLs hardcodées `localhost:8080` ce qui causait des incohérences lors du développement sur différents ports.
 
-**Impact** :
-- ⚠️ Confusion sur le port à utiliser
-- ⚠️ Potentiels problèmes de cookies/session entre les ports
-- ⚠️ Configuration Keycloak doit gérer les deux ports
+**Cause** :
+URLs hardcodées dans le frontend au lieu d'utiliser des URLs dynamiques basées sur `window.location.origin`.
 
-**Étapes pour reproduire** :
-1. Accéder à `http://localhost:8080/restaurant`
-2. Se connecter via Keycloak
-3. Naviguer dans l'application
-4. Observer que certaines navigations redirigent vers `localhost:5173`
+**Solution appliquée** :
+Remplacement des URLs hardcodées par une fonction `getApiBaseUrl()` qui :
+- Utilise `window.location.origin` par défaut
+- Redirige automatiquement du port 5173 (Vite) vers 8080 (backend) si nécessaire
+- Fallback sur la variable d'environnement `VITE_API_URL`
 
-**Comportement attendu** :
-L'application devrait rester sur un seul port de manière cohérente.
+**Fichiers corrigés** :
+- `apps/web/src/utils/imageUtils.ts` - Ajout de `getApiBaseUrl()` pour les images locales
+- `apps/web/src/pages/restaurant/RestaurantSettingsPage.tsx` - Fonction `getImageUrl()` dynamique
 
-**Cause probable** :
-- Configuration Quinoa qui proxifie vers Vite
-- Redirections codées en dur dans le frontend
-- Configuration CORS/redirect URLs
-
-**Workaround temporaire** :
-Utiliser directement `localhost:5173` pour le développement frontend.
-
-**Fichiers concernés** :
-- `src/main/resources/application.yml` (Quinoa config)
-- `apps/web/vite.config.ts`
-
-**Assigné à** : À planifier
+**Commit** : À committer
 
 ---
 
@@ -421,8 +442,8 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 
 ### Bugs par priorité
 - 🔴 Critique : 0 actifs, 5 résolus
-- 🟠 Important : 2 actifs (offline partiel, tests WebSocket), 4 résolus
-- 🟡 Moyen : 3 actifs (images optimisation, validation, ports), 3 résolus
+- 🟠 Important : 1 actif (offline partiel), 5 résolus
+- 🟡 Moyen : 0 actifs, 6 résolus
 
 ### Temps moyen de résolution
 - Critique : 5 jours
@@ -430,9 +451,9 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 - Moyen : 2 jours
 
 ### Bugs créés vs résolus (Total)
-- Créés : 15
-- Résolus : 12
-- Taux de résolution : 80%
+- Créés : 17
+- Résolus : 16
+- Taux de résolution : 94%
 
 ---
 
@@ -490,4 +511,4 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 **Version** : MVP 0.95
 **Responsable** : Équipe OneEats
 **Prochaine revue** : 2026-01-27
-**Derniers bugs ajoutés** : BUG-009, BUG-010, BUG-011 (tests manuels web dashboard)
+**Derniers bugs résolus** : BUG-006 (images optimisées), BUG-007 (validation), BUG-008 (tests WebSocket), BUG-009, BUG-010, BUG-011

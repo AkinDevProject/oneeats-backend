@@ -15,6 +15,7 @@ import { useRestaurantData } from '../../hooks/useRestaurantData';
 import { cn, formatPrice } from '../../lib/utils';
 import { CategoryTabs, CategoryTabsCompact, AvailabilityTabs } from '../../components/menu';
 import apiService from '../../services/api';
+import { validatePrice, validateRequired, FormErrors, hasErrors } from '../../utils/validationUtils';
 
 const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -35,6 +36,7 @@ const MenuPage: React.FC = () => {
     available: true,
     options: [] as MenuItemOption[]
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Computed values
   const availableCategories = useMemo(() =>
@@ -108,11 +110,33 @@ const MenuPage: React.FC = () => {
         options: []
       });
     }
+    setFormErrors({});
     setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation côté client
+    const errors: FormErrors = {};
+    const nameValidation = validateRequired(formData.name, 'Le nom du plat');
+    if (!nameValidation.isValid) errors.name = nameValidation.error;
+
+    const descValidation = validateRequired(formData.description, 'La description');
+    if (!descValidation.isValid) errors.description = descValidation.error;
+
+    const priceValidation = validatePrice(formData.price);
+    if (!priceValidation.isValid) errors.price = priceValidation.error;
+
+    const categoryValidation = validateRequired(formData.category, 'La catégorie');
+    if (!categoryValidation.isValid) errors.category = categoryValidation.error;
+
+    setFormErrors(errors);
+    if (hasErrors(errors)) {
+      toast.error('Veuillez corriger les erreurs du formulaire', 'Erreur de validation');
+      return;
+    }
+
     try {
       const cleanOptions = formData.options.map((option, index) => ({
         name: option.name,
@@ -369,6 +393,7 @@ const MenuPage: React.FC = () => {
             label="Nom du plat"
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
+            error={formErrors.name}
             required
           />
           <div>
@@ -379,22 +404,32 @@ const MenuPage: React.FC = () => {
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className={cn(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500",
+                formErrors.description ? "border-danger-500" : "border-gray-300"
+              )}
               required
             />
+            {formErrors.description && (
+              <p className="mt-1 text-sm text-danger-600">{formErrors.description}</p>
+            )}
           </div>
           <Input
             label="Prix (€)"
             type="number"
             step="0.01"
+            min="0"
+            max="9999.99"
             value={formData.price}
             onChange={(e) => setFormData({...formData, price: e.target.value})}
+            error={formErrors.price}
             required
           />
           <Input
             label="Catégorie"
             value={formData.category}
             onChange={(e) => setFormData({...formData, category: e.target.value})}
+            error={formErrors.category}
             required
           />
           <div className="flex items-center gap-2">

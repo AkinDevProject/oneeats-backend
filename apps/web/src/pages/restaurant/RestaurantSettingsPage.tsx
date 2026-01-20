@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { cn } from '../../lib/utils';
 import apiService from '../../services/api';
+import { validateEmail, validatePhoneOptional, validateRequired, FormErrors, hasErrors } from '../../utils/validationUtils';
 
 const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -39,6 +40,7 @@ const RestaurantSettingsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Load restaurant data
   const loadRestaurantData = async () => {
@@ -100,6 +102,27 @@ const RestaurantSettingsPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!restaurant) return;
+
+    // Validation côté client
+    const errors: FormErrors = {};
+    const nameValidation = validateRequired(restaurant.name, 'Le nom');
+    if (!nameValidation.isValid) errors.name = nameValidation.error;
+
+    const emailValidation = validateEmail(restaurant.email);
+    if (!emailValidation.isValid) errors.email = emailValidation.error;
+
+    const phoneValidation = validatePhoneOptional(restaurant.phone);
+    if (!phoneValidation.isValid) errors.phone = phoneValidation.error;
+
+    const addressValidation = validateRequired(restaurant.address, 'L\'adresse');
+    if (!addressValidation.isValid) errors.address = addressValidation.error;
+
+    setFormErrors(errors);
+    if (hasErrors(errors)) {
+      showNotification('error', 'Veuillez corriger les erreurs du formulaire');
+      return;
+    }
+
     try {
       setSaving(true);
       const updateData = {
@@ -179,8 +202,18 @@ const RestaurantSettingsPage: React.FC = () => {
 
   const getImageUrl = (url: string) => {
     if (!url) return '';
-    if (url.startsWith('http')) return `http://localhost:8080/api/proxy/image?url=${encodeURIComponent(url)}`;
-    return url.startsWith('/') ? `http://localhost:8080${url}` : `http://localhost:8080/${url}`;
+    // Déterminer l'URL de base dynamiquement
+    const getBaseUrl = () => {
+      const origin = window.location.origin;
+      // Si on est sur le port Vite dev (5173), rediriger vers le backend (8080)
+      if (origin.includes(':5173')) {
+        return origin.replace(':5173', ':8080');
+      }
+      return origin;
+    };
+    const baseUrl = getBaseUrl();
+    if (url.startsWith('http')) return `${baseUrl}/api/proxy/image?url=${encodeURIComponent(url)}`;
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
   };
 
   // Loading state
@@ -266,6 +299,7 @@ const RestaurantSettingsPage: React.FC = () => {
                 label="Nom du restaurant"
                 value={restaurant.name}
                 onChange={(e) => setRestaurant({ ...restaurant, name: e.target.value })}
+                error={formErrors.name}
               />
               <Input
                 label="Catégorie"
@@ -282,15 +316,19 @@ const RestaurantSettingsPage: React.FC = () => {
                   value={restaurant.email}
                   onChange={(e) => setRestaurant({ ...restaurant, email: e.target.value })}
                   className="pl-10"
+                  error={formErrors.email}
                 />
               </div>
               <div className="relative">
                 <Phone className="absolute left-3 top-8 h-4 w-4 text-gray-400" />
                 <Input
                   label="Téléphone"
+                  type="tel"
                   value={restaurant.phone}
                   onChange={(e) => setRestaurant({ ...restaurant, phone: e.target.value })}
                   className="pl-10"
+                  placeholder="06 12 34 56 78"
+                  error={formErrors.phone}
                 />
               </div>
             </div>
@@ -302,8 +340,14 @@ const RestaurantSettingsPage: React.FC = () => {
                 value={restaurant.address}
                 onChange={(e) => setRestaurant({ ...restaurant, address: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className={cn(
+                  "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent",
+                  formErrors.address ? "border-danger-500" : "border-gray-300"
+                )}
               />
+              {formErrors.address && (
+                <p className="mt-1 text-sm text-danger-600">{formErrors.address}</p>
+              )}
             </div>
           </div>
         </Card>

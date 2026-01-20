@@ -1,5 +1,6 @@
 package com.oneeats.shared.infrastructure.web;
 
+import com.oneeats.shared.infrastructure.service.FileStorageService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -13,11 +14,27 @@ import java.nio.file.Paths;
 @Path("/uploads")
 public class FileController {
 
+    private static final String THUMBNAILS_DIR = "thumbnails";
+
+    /**
+     * Serve image files with optional size parameter for thumbnails
+     *
+     * @param category Category folder (restaurants, menu-items)
+     * @param filename The image filename
+     * @param size Optional size parameter: "small" (150px), "medium" (400px), or null for original (800px)
+     * @return The image file
+     *
+     * Examples:
+     * - /uploads/menu-items/abc123.jpg          -> Returns original (800px max)
+     * - /uploads/menu-items/abc123.jpg?size=small  -> Returns 150px thumbnail
+     * - /uploads/menu-items/abc123.jpg?size=medium -> Returns 400px thumbnail
+     */
     @GET
     @Path("/{category}/{filename}")
     public Response getFile(
             @PathParam("category") String category,
-            @PathParam("filename") String filename) {
+            @PathParam("filename") String filename,
+            @QueryParam("size") String size) {
 
         try {
             // Validate category to prevent directory traversal
@@ -34,21 +51,33 @@ public class FileController {
                     .build();
             }
 
-            java.nio.file.Path filePath = Paths.get("uploads", category, filename);
+            // Determine which file to serve based on size parameter
+            java.nio.file.Path filePath = resolveFilePath(category, filename, size);
 
             // Check if file exists
             if (!Files.exists(filePath)) {
-                return Response.status(Response.Status.NOT_FOUND)
-                    .entity("File not found")
-                    .build();
+                // If thumbnail doesn't exist, fall back to original
+                if (size != null && !size.isEmpty()) {
+                    filePath = Paths.get("uploads", category, filename);
+                    if (!Files.exists(filePath)) {
+                        return Response.status(Response.Status.NOT_FOUND)
+                            .entity("File not found")
+                            .build();
+                    }
+                } else {
+                    return Response.status(Response.Status.NOT_FOUND)
+                        .entity("File not found")
+                        .build();
+                }
             }
 
             // Get content type based on file extension
             String contentType = getContentType(filename);
 
             // Create streaming response
+            final java.nio.file.Path finalPath = filePath;
             StreamingOutput stream = output -> {
-                try (InputStream input = Files.newInputStream(filePath)) {
+                try (InputStream input = Files.newInputStream(finalPath)) {
                     byte[] buffer = new byte[8192];
                     int bytesRead;
                     while ((bytesRead = input.read(buffer)) != -1) {
@@ -61,6 +90,7 @@ public class FileController {
             return Response.ok(stream)
                 .type(contentType)
                 .header("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+                .header("Vary", "Accept") // Vary by Accept header for content negotiation
                 .build();
 
         } catch (Exception e) {
@@ -70,8 +100,51 @@ public class FileController {
         }
     }
 
+    /**
+     * Resolve the file path based on size parameter
+     */
+    private java.nio.file.Path resolveFilePath(String category, String filename, String size) {
+        if (size == null || size.isEmpty()) {
+            // Return original image
+            return Paths.get("uploads", category, filename);
+        }
+
+        // Get base filename and extension
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex == -1) {
+            return Paths.get("uploads", category, filename);
+        }
+
+        String baseFilename = filename.substring(0, dotIndex);
+        String extension = filename.substring(dotIndex);
+
+        // Determine suffix based on size
+        String suffix;
+        switch (size.toLowerCase()) {
+            case "small":
+            case "thumbnail":
+            case "thumb":
+                suffix = FileStorageService.SUFFIX_SMALL;
+                break;
+            case "medium":
+            case "med":
+                suffix = FileStorageService.SUFFIX_MEDIUM;
+                break;
+            case "large":
+            case "original":
+            default:
+                // Return original for large or unknown sizes
+                return Paths.get("uploads", category, filename);
+        }
+
+        // Build thumbnail path
+        String thumbnailFilename = baseFilename + suffix + extension;
+        return Paths.get("uploads", category, THUMBNAILS_DIR, thumbnailFilename);
+    }
+
     private boolean isValidCategory(String category) {
         // Only allow specific categories to prevent directory traversal
+        // Note: thumbnails are served via size query parameter, not as a separate category
         return "restaurants".equals(category) || "menu-items".equals(category);
     }
 

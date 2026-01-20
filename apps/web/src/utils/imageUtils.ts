@@ -2,25 +2,58 @@
  * Utilitaires pour la gestion des images et miniatures
  */
 
+// URL de base de l'API (utilise la variable d'environnement ou l'origine actuelle)
+const getApiBaseUrl = (): string => {
+  // En production ou via Quinoa, utiliser l'origine actuelle
+  if (typeof window !== 'undefined' && window.location.origin) {
+    const origin = window.location.origin;
+    // Si on est sur le port Vite dev (5173), rediriger vers le backend (8080)
+    if (origin.includes(':5173')) {
+      return origin.replace(':5173', ':8080');
+    }
+    return origin;
+  }
+  return import.meta.env.VITE_API_URL || 'http://localhost:8080';
+};
+
 /**
- * Génère l'URL d'une miniature depuis une image complète
- * Pour l'instant, utilise l'image originale avec le FileController
+ * Genere l'URL d'une miniature depuis une image complete
+ * Utilise le parametre size pour demander la bonne taille au backend
+ *
+ * Tailles disponibles:
+ * - small: 150x150 (pour les listes, icones)
+ * - medium: 400x400 (pour les cartes de menu)
+ * - large: 800x800 (pour les modals, details)
  */
 export const getThumbnailUrl = (imageUrl: string, size: 'small' | 'medium' | 'large' = 'medium'): string => {
-  // Note: size parameter reserved for future thumbnail generation support
-  void size;
-
   if (!imageUrl) return '';
 
   // Si l'URL commence par /uploads/, c'est une image locale
   if (imageUrl.startsWith('/uploads/')) {
-    // Convertir l'URL vers le bon format pour le FileController
-    // De: /uploads/menu-items/filename.jpg
-    // Vers: http://localhost:8080/uploads/menu-items/filename.jpg
-    return `http://localhost:8080${imageUrl}`;
+    const baseUrl = `${getApiBaseUrl()}${imageUrl}`;
+
+    // Pour 'large', retourner l'image originale sans parametre
+    if (size === 'large') {
+      return baseUrl;
+    }
+
+    // Ajouter le parametre de taille pour les thumbnails
+    return `${baseUrl}?size=${size}`;
   }
 
-  // Pour les URLs externes, retourner l'URL originale
+  // Pour les URLs externes (Unsplash, etc.), retourner l'URL originale
+  // Unsplash supporte ses propres parametres de redimensionnement
+  if (imageUrl.includes('unsplash.com')) {
+    // Ajouter les parametres Unsplash pour optimiser la taille
+    const sizeMap = {
+      small: 'w=150&h=150&fit=crop',
+      medium: 'w=400&h=400&fit=crop',
+      large: 'w=800&h=800&fit=crop'
+    };
+    const separator = imageUrl.includes('?') ? '&' : '?';
+    return `${imageUrl}${separator}${sizeMap[size]}`;
+  }
+
   return imageUrl;
 };
 
