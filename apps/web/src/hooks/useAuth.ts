@@ -82,9 +82,12 @@ export const useAuthProvider = () => {
    * Login avec email/password - non supporté avec Keycloak.
    * Utiliser loginWithSSO() qui redirige vers Keycloak.
    */
-  const login = async (_email: string, _password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     // Avec Keycloak, le login direct n'est pas supporté
     // L'utilisateur doit utiliser loginWithSSO()
+    // Parameters kept for interface compatibility
+    void email;
+    void password;
     console.warn('Direct login not supported. Use loginWithSSO() instead.');
     return false;
   };

@@ -6,7 +6,10 @@
  * Génère l'URL d'une miniature depuis une image complète
  * Pour l'instant, utilise l'image originale avec le FileController
  */
-export const getThumbnailUrl = (imageUrl: string, _size: 'small' | 'medium' | 'large' = 'medium'): string => {
+export const getThumbnailUrl = (imageUrl: string, size: 'small' | 'medium' | 'large' = 'medium'): string => {
+  // Note: size parameter reserved for future thumbnail generation support
+  void size;
+
   if (!imageUrl) return '';
 
   // Si l'URL commence par /uploads/, c'est une image locale
@@ -14,7 +17,6 @@ export const getThumbnailUrl = (imageUrl: string, _size: 'small' | 'medium' | 'l
     // Convertir l'URL vers le bon format pour le FileController
     // De: /uploads/menu-items/filename.jpg
     // Vers: http://localhost:8080/uploads/menu-items/filename.jpg
-    // Note: _size parameter reserved for future thumbnail generation support
     return `http://localhost:8080${imageUrl}`;
   }
 

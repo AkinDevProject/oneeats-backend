@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -27,7 +26,6 @@ import { Restaurant } from '../../types';
 import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 
 const RestaurantsManagementPage: React.FC = () => {
-  const _navigate = useNavigate();
   const { restaurants, loading, error, refetch, updateRestaurantStatus, deleteRestaurant } = useRestaurants();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

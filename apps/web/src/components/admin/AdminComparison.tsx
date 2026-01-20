@@ -247,6 +247,7 @@ export function AdminComparison({
 /**
  * Hook pour générer les métriques de comparaison à partir des données
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useComparisonMetrics(
   currentData: { revenue: number; orders: number; users: number; restaurants: number },
   previousData: { revenue: number; orders: number; users: number; restaurants: number }

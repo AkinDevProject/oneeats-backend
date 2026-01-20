@@ -288,7 +288,7 @@ describe('apiService', () => {
           'http://localhost:8080/api/orders/order-1/status',
           expect.objectContaining({
             method: 'PUT',
-            body: JSON.stringify({ status: 'READY' })
+            body: JSON.stringify({ newStatus: 'READY' })
           })
         );
       });

@@ -93,6 +93,7 @@ export interface ToastManager {
   info: (message: string, title?: string) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = (): ToastManager & { toasts: React.ReactNode } => {
   const [toasts, setToasts] = useState<(ToastProps & { id: string })[]>([]);
 

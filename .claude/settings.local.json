@@ -95,7 +95,8 @@
       "Bash(unzip:*)",
       "Bash(source:*)",
       "Skill(bmad:bmm:workflows:testarch-ci)",
-      "Bash(./scripts/ci-local.sh:*)"
+      "Bash(./scripts/ci-local.sh:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []

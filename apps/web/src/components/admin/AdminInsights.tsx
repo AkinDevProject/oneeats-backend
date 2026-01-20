@@ -266,6 +266,7 @@ export function AdminInsights({
 /**
  * Hook pour générer des insights automatiques à partir des données
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAutoInsights(data: {
   todayRevenue: number;
   yesterdayRevenue: number;

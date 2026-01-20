@@ -4,8 +4,7 @@ import { Restaurant, MenuItem, Order } from '../types';
 
 // Generic hook for API calls
 export function useApiCall<T>(
-  apiCall: () => Promise<T>,
-  _dependencies: unknown[] = []
+  apiCall: () => Promise<T>
 ) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);

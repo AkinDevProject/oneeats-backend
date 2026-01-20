@@ -141,6 +141,7 @@ export const useRestaurantWebSocket = (
     return () => {
       disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]); // On ne met pas connect/disconnect dans les deps pour eviter les reconnexions infinies
 
   // Fonction pour envoyer un message
@@ -280,7 +281,8 @@ export const useUserWebSocket = (
     return () => {
       disconnect();
     };
-  }, [userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]); // On ne met pas connect/disconnect dans les deps pour eviter les reconnexions infinies
 
   const sendMessage = useCallback((message: object) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

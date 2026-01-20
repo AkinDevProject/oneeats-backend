@@ -110,6 +110,7 @@ export function TimerBadge({
 /**
  * Hook to get timer state for custom implementations
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTimerState(
   startTime: Date | string,
   warningThreshold: number = 10,

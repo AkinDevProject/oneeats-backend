@@ -115,6 +115,7 @@ export function StatusBadge({
 /**
  * Get the status label for an order status
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getStatusLabel(status: OrderStatus): string {
   return statusConfig[status]?.label || status;
 }
@@ -122,6 +123,7 @@ export function getStatusLabel(status: OrderStatus): string {
 /**
  * Get the status color class for an order status
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getStatusColorClass(status: OrderStatus): string {
   return statusConfig[status]?.className || '';
 }
@@ -129,6 +131,7 @@ export function getStatusColorClass(status: OrderStatus): string {
 /**
  * Get the status bar color class for order cards
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getStatusBarClass(status: OrderStatus): string {
   const barClasses: Record<OrderStatus, string> = {
     PENDING: 'bg-status-pending',
