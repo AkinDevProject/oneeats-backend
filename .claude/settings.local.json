@@ -121,7 +121,15 @@
       "Bash(node:*)",
       "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright --version 2>&1\")",
       "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/simple-api-tests.spec.ts --reporter=list 2>&1\")",
-      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/restaurant --reporter=list 2>&1\")"
+      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/restaurant --reporter=list 2>&1\")",
+      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/auth.setup.ts --reporter=list 2>&1\")",
+      "Bash(powershell -Command \"cd ''C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\tests''; npx playwright test --project=setup 2>&1\")",
+      "Bash(powershell -Command \"curl -s -X POST ''http://localhost:8580/realms/oneeats/protocol/openid-connect/token'' -H ''Content-Type: application/x-www-form-urlencoded'' -d ''grant_type=password&client_id=oneeats-web&username=restaurant@oneeats.com&password=restaurant123'' | ConvertFrom-Json | Select-Object -Property access_token\")",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:8580/realms/oneeats/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=oneeats-web&username=restaurant@oneeats.com&password=restaurant123'' | Select-Object -Property access_token\")",
+      "Bash(powershell -Command \"Invoke-RestMethod -Uri ''http://localhost:8580/realms/oneeats/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=oneeats-web&client_secret=oneeats-web-secret-dev&username=restaurant@oneeats.com&password=restaurant123'' | Select-Object -Property access_token\")",
+      "Bash(powershell -Command \"$token = \\(Invoke-RestMethod -Uri ''http://localhost:8580/realms/master/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=admin-cli&username=admin&password=admin''\\).access_token; Write-Host ''Admin token obtained''; $users = Invoke-RestMethod -Uri ''http://localhost:8580/admin/realms/oneeats/users?username=restaurant@oneeats.com'' -Headers @{Authorization=\"\"Bearer $token\"\"}; $users | ConvertTo-Json -Depth 3\")",
+      "Bash(powershell -Command \"$tokenResp = Invoke-RestMethod -Uri ''http://localhost:8580/realms/master/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=admin-cli&username=admin&password=admin''; Write-Host ''Admin token obtained:'' $tokenResp.access_token.Substring\\(0,20\\)\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)"
     ],
     "deny": [],
     "ask": []

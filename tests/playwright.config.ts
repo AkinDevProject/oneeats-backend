@@ -1,8 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
 // Load environment variables
 dotenv.config();
+
+// Storage state path for authenticated sessions
+const STORAGE_STATE_PATH = path.join(__dirname, '.auth', 'storageState.json');
 
 export default defineConfig({
   testDir: './specs',
@@ -46,12 +50,21 @@ export default defineConfig({
   },
 
   projects: [
-    // Tests Web Dashboard - Chrome  
+    // Setup project - runs authentication before dashboard tests
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
+
+    // Tests Web Dashboard - Chrome (requires authentication)
     {
       name: 'restaurant-dashboard',
       testMatch: /restaurant\//,
-      use: { 
+      dependencies: ['setup'], // Run setup first
+      use: {
         ...devices['Desktop Chrome'],
+        // Use authenticated session
+        storageState: STORAGE_STATE_PATH,
         // Paramètres spécifiques pour les tests restaurant
         actionTimeout: 15000,
         navigationTimeout: 30000,

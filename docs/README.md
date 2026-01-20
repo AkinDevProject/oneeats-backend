@@ -136,6 +136,8 @@ Documents communs a toutes les plateformes (business, architecture, API).
 |----------|-------------|
 | **[TEST_STRATEGY.md](shared/tea/TEST_STRATEGY.md)** | Strategie de tests globale |
 | **[TEST-DESIGN.md](shared/tea/TEST-DESIGN.md)** | Conception des tests |
+| **[TESTING_INFRASTRUCTURE.md](shared/tea/TESTING_INFRASTRUCTURE.md)** | Infrastructure technique (Playwright, Maestro, MCP) |
+| **[TESTING_GUIDE.md](shared/tea/TESTING_GUIDE.md)** | Guide d'utilisation des tests |
 
 #### shared/bmad/ - BMAD
 

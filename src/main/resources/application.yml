@@ -30,7 +30,7 @@ quarkus:
           policy: authenticated
         # API publiques (lecture seule pour mobile)
         api-public-read:
-          paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*
+          paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*,/api/menu-items,/api/menu-items/*
           policy: permit
           methods: GET
         # API protégées (écriture et utilisateurs)

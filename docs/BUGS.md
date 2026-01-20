@@ -5,19 +5,106 @@
 | Statut | Nombre | Description |
 |--------|--------|-------------|
 | 🔴 Critique | 0 | Bloquant pour le MVP |
-| 🟠 Important | 1 | Impact significatif sur l'expérience |
+| 🟠 Important | 2 | Impact significatif sur l'expérience |
 | 🟡 Moyen | 0 | Problème mineur |
-| 🟢 Résolu | 16 | Bugs corrigés |
+| 🟢 Résolu | 17 | Bugs corrigés |
 
 ---
 
-## ~~🔴 Bugs Critiques (Bloquant MVP)~~ ✅ TOUS RÉSOLUS
+## 🔴 Bugs Critiques (Bloquant MVP)
 
-*Aucun bug critique actif - MVP opérationnel*
+### BUG-012 : Endpoint `/api/menu-items/*` requiert authentification (devrait être public)
+**Priorité** : 🔴 Critique
+**Status** : ✅ Résolu
+**Affecte** : Backend, Mobile, Tests E2E
+**Date création** : 2026-01-20
+**Découvert par** : UAT automatisé
+
+**Description** :
+L'endpoint `/api/menu-items/*` (GET) requiert une authentification alors qu'il devrait être public pour permettre aux utilisateurs mobiles de voir les menus sans être connectés.
+
+**Impact** :
+- Application mobile ne peut pas afficher les menus sans authentification
+- Tests E2E échouent au setup car `/api/menu-items/restaurant/{id}` retourne HTML (page de login)
+- Expérience utilisateur dégradée (doit se connecter pour voir les menus)
+
+**Configuration actuelle** (`application.yml`):
+```yaml
+api-public-read:
+  paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*
+  policy: permit
+  methods: GET
+api-protected:
+  paths: /api/*
+  policy: authenticated
+```
+
+**Solution proposée** :
+Ajouter `/api/menu-items,/api/menu-items/*` à `api-public-read` :
+```yaml
+api-public-read:
+  paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*,/api/menu-items,/api/menu-items/*
+  policy: permit
+  methods: GET
+```
+
+**Solution appliquée** :
+Modification de `src/main/resources/application.yml` - Ajout de `/api/menu-items,/api/menu-items/*` aux endpoints publics.
+
+**Date résolution** : 2026-01-20
+
+**Note** : Nécessite redémarrage du backend pour prise en compte.
 
 ---
 
 ## 🟠 Bugs Importants
+
+### BUG-013 : Tests E2E dashboard ne peuvent pas interagir avec l'interface (auth requise)
+**Priorité** : 🟠 Important
+**Status** : 📋 Nouveau
+**Affecte** : Tests E2E
+**Date création** : 2026-01-20
+**Découvert par** : UAT automatisé
+
+**Description** :
+Les tests E2E Playwright pour le dashboard restaurant/admin ne peuvent pas interagir avec l'interface car les pages sont protégées par authentification Keycloak. Les tests voient la page de login au lieu du dashboard.
+
+**Impact** :
+- Tests de menu management échouent : "no button found" (les boutons sont dans le dashboard protégé)
+- Tests de gestion des commandes échouent
+- Couverture de test réduite pour les fonctionnalités dashboard
+
+**Résultats UAT** :
+- 21 tests exécutés avant erreur EPIPE
+- ~10 tests échoués (liés à l'auth)
+- ~11 tests passés (tests API publiques + tests graceful degradation)
+
+**Solution proposée** :
+1. Créer un fichier de stockage d'état authentifié (`storageState.json`)
+2. Ajouter un setup de test qui se connecte via Keycloak et sauvegarde les cookies
+3. Utiliser `storageState` dans les tests pour maintenir la session
+
+**Exemple de fix** :
+```typescript
+// setup/auth-setup.ts
+export async function authenticateUser(browser) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('/restaurant');
+  await page.fill('#username', 'restaurant@oneeats.com');
+  await page.fill('#password', 'Test123!');
+  await page.click('#kc-login');
+  await context.storageState({ path: 'storageState.json' });
+  await context.close();
+}
+```
+
+**Workaround temporaire** :
+Tests manuels avec guides UAT (docs/UAT_GUIDE_RESTAURANT.md).
+
+**Assigné à** : Backlog (tests)
+
+---
 
 ### BUG-004 : Mode offline non implémenté (mobile)
 **Priorité** : 🟠 Important
