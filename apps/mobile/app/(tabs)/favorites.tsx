@@ -52,7 +52,7 @@ export default function Favorites() {
     setRefreshing(false);
   };
 
-  const removeFavorite = async (restaurantId: string, restaurantName: string) => {
+  const removeFavorite = useCallback(async (restaurantId: string, restaurantName: string) => {
     Alert.alert(
       'Retirer des favoris',
       `Voulez-vous retirer "${restaurantName}" de vos favoris ?`,
@@ -76,7 +76,7 @@ export default function Favorites() {
         },
       ]
     );
-  };
+  }, [toggleFavorite]);
 
   const navigateToRestaurant = (restaurant: Restaurant) => {
     // Navigation vers la page du restaurant

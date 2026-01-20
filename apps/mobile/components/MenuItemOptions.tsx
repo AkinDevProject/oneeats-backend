@@ -158,7 +158,7 @@ export const MenuItemOptions: React.FC<MenuItemOptionsProps> = ({
             
             {option.type === 'choice' && option.maxChoices && option.maxChoices > 1 && (
               <Text style={styles.optionSubtitle}>
-                Choisissez jusqu'à {option.maxChoices} option{option.maxChoices > 1 ? 's' : ''}
+                Choisissez jusqu&apos;à {option.maxChoices} option{option.maxChoices > 1 ? 's' : ''}
               </Text>
             )}
             {option.type === 'choice' && option.maxChoices === 1 && (

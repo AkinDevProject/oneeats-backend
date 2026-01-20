@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { cn } from '../../lib/utils';
 import {
   Bell,
@@ -11,7 +11,6 @@ import {
   Store,
   Users,
   AlertTriangle,
-  Info,
   Clock,
   ChevronRight,
   Settings,

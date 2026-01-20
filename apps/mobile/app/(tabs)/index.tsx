@@ -8,7 +8,6 @@ import {
   RefreshControl,
   Dimensions,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -16,7 +15,6 @@ import * as Haptics from 'expo-haptics';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
   FadeIn,
 } from 'react-native-reanimated';
@@ -40,7 +38,6 @@ import { useRestaurants } from '../../src/hooks/useRestaurants';
 import { useFavorites } from '../../src/hooks/useFavorites';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useAuth } from '../../src/contexts/AuthContext';
-import OptimizedImage from '../../src/components/OptimizedImage';
 import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
 import { useRenderTime, useOptimizedCallback } from '../../src/hooks/usePerformanceMonitor';
 

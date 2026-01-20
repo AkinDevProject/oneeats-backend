@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { useApiCall } from '../useApi';
 import apiService from '../../services/api';
-import { Order, PlatformStats, RevenueData, TrendsData } from '../../types';
+import { Order } from '../../types';
 
 /**
  * Hook personnalisé pour la génération et gestion des analytics
@@ -186,7 +185,6 @@ export const useAnalytics = ({
   type,
   timeRange,
   orders = [],
-  restaurantId
 }: UseAnalyticsOptions): AnalyticsData => {
   
   return useMemo(() => {

@@ -1,6 +1,5 @@
 import React from 'react';
 import { X, Keyboard } from 'lucide-react';
-import { cn } from '../../lib/utils';
 import type { KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 
 interface AdminShortcutsHelpProps {

@@ -16,10 +16,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSpring,
-  FadeIn,
   FadeInDown,
-  SlideInRight,
   Layout,
 } from 'react-native-reanimated';
 import {
@@ -34,7 +31,6 @@ import {
 import { router } from 'expo-router';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAuth } from '../../src/contexts/AuthContext';
@@ -95,7 +91,7 @@ export default function CartScreen() {
 
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 600 });
-  }, []);
+  }, [headerOpacity]);
 
   const scrollToInput = (yOffset: number) => {
     scrollViewRef.current?.scrollTo({

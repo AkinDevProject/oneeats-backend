@@ -90,7 +90,7 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
     onChange([...options, newOption]);
   };
 
-  const updateOption = (optionId: string, field: keyof MenuItemOption, value: any) => {
+  const updateOption = (optionId: string, field: keyof MenuItemOption, value: MenuItemOption[keyof MenuItemOption]) => {
     const updatedOptions = options.map(option =>
       option.id === optionId ? { ...option, [field]: value } : option
     );
@@ -123,7 +123,7 @@ export const MenuItemOptionsForm: React.FC<MenuItemOptionsFormProps> = ({ option
     onChange(updatedOptions);
   };
 
-  const updateChoice = (optionId: string, choiceId: string, field: keyof MenuItemChoice, value: any) => {
+  const updateChoice = (optionId: string, choiceId: string, field: keyof MenuItemChoice, value: MenuItemChoice[keyof MenuItemChoice]) => {
     const updatedOptions = options.map(option =>
       option.id === optionId
         ? {

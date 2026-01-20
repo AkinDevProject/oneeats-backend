@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Download, Ban, Eye, Users, UserPlus, Activity, Calendar, Mail, EyeOff, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { Ban, Eye, Users, UserPlus, Activity, Calendar, Mail, EyeOff, RefreshCcw } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';

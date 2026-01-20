@@ -19,7 +19,7 @@ const OrdersManagementPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newOrderSound, setNewOrderSound] = useState(false);
+  const [newOrderSound] = useState(false);
   const [realtimeNotification, setRealtimeNotification] = useState<string | null>(null);
 
   // Gestionnaire de messages WebSocket
@@ -43,7 +43,7 @@ const OrdersManagementPage: React.FC = () => {
   }, [refetch, newOrderSound]);
 
   // Connexion WebSocket
-  const { status: wsStatus, isConnected } = useRestaurantWebSocket(
+  const { isConnected } = useRestaurantWebSocket(
     user?.restaurantId,
     {
       onMessage: handleWebSocketMessage,
@@ -58,7 +58,7 @@ const OrdersManagementPage: React.FC = () => {
       const audio = new Audio('/notification-sound.mp3');
       audio.volume = 0.5;
       audio.play().catch(e => console.log('Could not play sound:', e));
-    } catch (e) {
+    } catch {
       console.log('Sound not available');
     }
   };

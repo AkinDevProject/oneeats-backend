@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Download, BarChart3, TrendingUp, RefreshCcw } from 'lucide-react';
+import { Download, BarChart3, TrendingUp } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { cn } from '../../lib/utils';
 import {

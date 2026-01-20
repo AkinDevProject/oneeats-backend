@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Camera, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Upload, Camera, Trash2 } from 'lucide-react';
 import { Button } from './Button';
 import { validateImageFile, getMenuCardImageUrl, getModalPreviewImageUrl } from '../../utils/imageUtils';
 

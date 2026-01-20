@@ -19,7 +19,7 @@ import apiService from '../../services/api';
 const RESTAURANT_ID = '11111111-1111-1111-1111-111111111111';
 
 const MenuPage: React.FC = () => {
-  const { menuItems, loading, error, refetch } = useRestaurantData();
+  const { menuItems, refetch } = useRestaurantData();
   const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -309,7 +309,7 @@ const MenuPage: React.FC = () => {
         {selectedCategory === 'all' && filteredItems.length > 0 && (
           <div className="space-y-6">
             {Object.entries(groupedItems)
-              .filter(([_, items]) => items.length > 0)
+              .filter(([, items]) => items.length > 0)
               .map(([category, items]) => (
                 <section key={category} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">

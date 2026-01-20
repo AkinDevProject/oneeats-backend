@@ -166,7 +166,7 @@ export function OrderCard({
   onReady,
   onComplete,
   onReactivate,
-  onViewDetails,
+  // onViewDetails is available in props but used externally
   className,
   defaultExpanded = false,
 }: OrderCardProps) {

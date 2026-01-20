@@ -25,7 +25,62 @@ const mapOrderStatus = (backendStatus: string): Order['status'] => {
 };
 
 // Helper function to convert backend data to frontend format
-const transformBackendOrder = (backendOrder: any): Order => {
+interface BackendOrderItem {
+  id: string;
+  menuItemId: string;
+  menuItemName?: string;
+  name?: string;
+  quantity: number;
+  unitPrice?: number;
+  price?: number;
+  totalPrice?: number;
+}
+
+interface BackendOrder {
+  id: string;
+  orderNumber: string;
+  restaurantId: string;
+  restaurantName?: string;
+  clientFirstName?: string;
+  clientLastName?: string;
+  clientEmail?: string;
+  items?: BackendOrderItem[];
+  totalAmount?: number;
+  total?: number;
+  status: string;
+  createdAt: string;
+  estimatedPreparationTime?: number;
+}
+
+interface BackendChoice {
+  id: string;
+  name: string;
+  additionalPrice?: number;
+  displayOrder?: number;
+  isAvailable?: boolean;
+}
+
+interface BackendOption {
+  id: string;
+  name: string;
+  type: string;
+  isRequired?: boolean;
+  maxChoices?: number;
+  displayOrder?: number;
+  choices?: BackendChoice[];
+}
+
+interface BackendMenuItem {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  isAvailable?: boolean;
+  options?: BackendOption[];
+  [key: string]: unknown;
+}
+
+const transformBackendOrder = (backendOrder: BackendOrder): Order => {
   // Construire le nom client à partir des données enrichies du backend
   let clientName = 'Client';
   if (backendOrder.clientFirstName || backendOrder.clientLastName) {
@@ -41,7 +96,7 @@ const transformBackendOrder = (backendOrder: any): Order => {
     restaurantName: backendOrder.restaurantName || 'Pizza Palace',
     clientName: clientName,
     clientEmail: backendOrder.clientEmail || '',
-    items: (backendOrder.items || []).map((item: any) => ({
+    items: (backendOrder.items || []).map((item: BackendOrderItem) => ({
       id: item.id,
       menuItemId: item.menuItemId,
       name: item.menuItemName || item.name,
@@ -60,7 +115,7 @@ export const useRestaurantData = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,17 +134,17 @@ export const useRestaurantData = () => {
       console.log('Raw menu data from API:', menuData);
       
       // Transform backend data to frontend format
-      const transformedMenuItems = menuData.map((item: any) => ({
+      const transformedMenuItems = menuData.map((item: BackendMenuItem) => ({
         ...item,
         available: item.isAvailable, // Map backend isAvailable to frontend available
-        options: (item.options || []).map((option: any) => ({
+        options: (item.options || []).map((option: BackendOption) => ({
           id: option.id,
           name: option.name,
           type: option.type, // Backend already sends the enum value (CHOICE, EXTRA, etc.)
           isRequired: option.isRequired,
           maxChoices: option.maxChoices,
           displayOrder: option.displayOrder,
-          choices: (option.choices || []).map((choice: any) => ({
+          choices: (option.choices || []).map((choice: BackendChoice) => ({
             id: choice.id,
             name: choice.name,
             price: choice.additionalPrice || 0, // Map backend additionalPrice to frontend price

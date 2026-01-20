@@ -1,14 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 import { OrderStatus } from '../../types';
-import { Clock, CheckCircle, ChefHat, Package, XCircle, AlertCircle } from 'lucide-react';
-
-interface FilterTab {
-  key: OrderStatus | 'ALL';
-  label: string;
-  shortLabel: string;
-  count: number;
-}
+import { CheckCircle, ChefHat, Package, XCircle, AlertCircle } from 'lucide-react';
 
 interface FilterTabsProps {
   /** Currently selected filter */

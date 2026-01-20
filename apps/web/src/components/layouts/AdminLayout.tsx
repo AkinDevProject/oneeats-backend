@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Store, Users, ShoppingCart, BarChart3, LogOut,
-  Menu, X, Bell, Zap, Shield, Database, RefreshCw, Settings
+  Menu, X, Zap, Shield, Database, RefreshCw, Settings
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';

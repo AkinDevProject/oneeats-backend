@@ -16,9 +16,22 @@ const dayLabels: Record<string, string> = {
   thursday: 'Jeudi', friday: 'Vendredi', saturday: 'Samedi', sunday: 'Dimanche'
 };
 
+interface RestaurantSettings {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  category: string;
+  cuisineType?: string;
+  isOpen: boolean;
+  imageUrl?: string;
+  schedule: Record<string, { open: string; close: string } | null>;
+  [key: string]: unknown;
+}
+
 const RestaurantSettingsPage: React.FC = () => {
-  const [restaurant, setRestaurant] = useState<any>(null);
-  const [originalRestaurant, setOriginalRestaurant] = useState<any>(null);
+  const [restaurant, setRestaurant] = useState<RestaurantSettings | null>(null);
+  const [originalRestaurant, setOriginalRestaurant] = useState<RestaurantSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -142,7 +155,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const updated = await apiService.restaurants.uploadImage(RESTAURANT_ID, file);
       setRestaurant({ ...updated, category: updated.cuisineType, schedule: updated.schedule || restaurant?.schedule });
       showNotification('success', 'Image uploadée');
-    } catch (err) {
+    } catch {
       showNotification('error', 'Erreur upload');
     } finally {
       setUploading(false);
@@ -157,7 +170,7 @@ const RestaurantSettingsPage: React.FC = () => {
       const updated = await apiService.restaurants.deleteImage(RESTAURANT_ID);
       setRestaurant({ ...updated, category: updated.cuisineType, schedule: updated.schedule || restaurant?.schedule });
       showNotification('success', 'Image supprimée');
-    } catch (err) {
+    } catch {
       showNotification('error', 'Erreur suppression');
     } finally {
       setUploading(false);

@@ -24,9 +24,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   onClose,
   onAction
 }) => {
-  if (!order) return null;
+  // Hook must be called unconditionally - use a default date when no order
+  const { state: timerState } = useTimerState(order?.createdAt || new Date(), 10, 20, 30000);
 
-  const { state: timerState } = useTimerState(order.createdAt, 10, 20, 30000);
+  if (!order) return null;
 
   const handleAction = (action: 'accept' | 'cancel' | 'prete' | 'recuperee' | 'reactivate') => {
     onAction(order.id, action);

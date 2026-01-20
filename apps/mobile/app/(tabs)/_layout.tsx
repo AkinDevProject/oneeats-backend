@@ -9,7 +9,6 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCart } from '../../src/contexts/CartContext';
 import { useNotification } from '../../src/contexts/NotificationContext';
-import { Badge } from 'react-native-paper';
 import AnimatedBadge from '../../src/components/ui/AnimatedBadge';
 
 // Custom badge component for tab bar (using AnimatedBadge)

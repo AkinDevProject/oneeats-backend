@@ -426,7 +426,7 @@ const RestaurantProfilePage: React.FC = () => {
   );
 };
 
-function FormField({ label, isEditing, children }: { label: string; isEditing: boolean; children: React.ReactNode }) {
+function FormField({ label, children }: { label: string; isEditing?: boolean; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>

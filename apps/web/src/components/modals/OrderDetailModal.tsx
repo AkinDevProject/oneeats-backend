@@ -7,8 +7,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
-  Clock,
   Package,
   ShoppingCart,
   AlertTriangle,

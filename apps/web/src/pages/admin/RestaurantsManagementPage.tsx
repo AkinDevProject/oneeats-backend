@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   Store, Eye, Trash2, Check, X, AlertTriangle, MapPin, Phone, Mail,
-  Calendar, CheckCircle, XCircle, Clock, Keyboard, Plus
+  Calendar, CheckCircle, XCircle, Clock, Keyboard
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
@@ -27,7 +27,7 @@ import { Restaurant } from '../../types';
 import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 
 const RestaurantsManagementPage: React.FC = () => {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const { restaurants, loading, error, refetch, updateRestaurantStatus, deleteRestaurant } = useRestaurants();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

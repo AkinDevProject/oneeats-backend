@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   ShoppingCart, Clock, CheckCircle, XCircle, AlertTriangle, Package,
-  TrendingUp, Calendar, Eye, RefreshCcw, User, Mail, Download
+  TrendingUp, Calendar, Eye, RefreshCcw, User, Mail
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';

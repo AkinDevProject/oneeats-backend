@@ -163,7 +163,8 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run unit tests
-        run: ./mvnw test -B -Dtest="!*IT" -Djacoco.destFile=target/jacoco-unit.exec
+        # Surefire exclut automatiquement les tests IT via pom.xml
+        run: ./mvnw test -B -Djacoco.destFile=target/jacoco-unit.exec
 
       - name: Generate coverage report
         run: ./mvnw jacoco:report -B
@@ -283,7 +284,9 @@ jobs:
           done
 
       - name: Run integration tests
-        run: ./mvnw test -B -Dtest="*IT" -Djacoco.destFile=target/jacoco-it.exec
+        # Utilise Failsafe directement pour les tests d'integration Quarkus
+        # -Dsurefire.skip saute les tests unitaires, -DskipITs=false active les tests IT
+        run: ./mvnw verify -B -Dsurefire.skip=true -DskipITs=false -Djacoco.destFile=target/jacoco-it.exec
         env:
           QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://localhost:5433/oneeats_test
           QUARKUS_DATASOURCE_USERNAME: oneeats_test_user
@@ -362,7 +365,7 @@ jobs:
             echo "🔄 Iteration $i/10"
             echo "-------------------"
 
-            if ! ./mvnw test -B -q 2>&1; then
+            if ! ./mvnw verify -B -q -DskipITs=false 2>&1; then
               FAILURES=$((FAILURES + 1))
               echo "❌ Iteration $i FAILED"
             else

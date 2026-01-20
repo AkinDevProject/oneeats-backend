@@ -196,7 +196,7 @@ export default function MenuItemDetail() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme.colors.primary} />
           <Text style={[styles.loadingText, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Chargement de l'article...
+            Chargement de l&apos;article...
           </Text>
         </View>
       </SafeAreaView>

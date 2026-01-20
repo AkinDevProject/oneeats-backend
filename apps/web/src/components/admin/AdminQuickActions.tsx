@@ -12,8 +12,6 @@ import {
   RefreshCcw,
   Download,
   MessageSquare,
-  Send,
-  AlertTriangle,
 } from 'lucide-react';
 
 export interface QuickAction {

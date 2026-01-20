@@ -170,6 +170,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
+                    <!-- Exclure les tests d'integration (IT) - ils sont executes par Failsafe -->
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/integration/**/*.java</exclude>
+                    </excludes>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
@@ -188,6 +193,11 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <!-- Inclure uniquement les tests d'integration -->
+                    <includes>
+                        <include>**/*IT.java</include>
+                        <include>**/integration/**/*.java</include>
+                    </includes>
                     <systemPropertyVariables>
                         <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>

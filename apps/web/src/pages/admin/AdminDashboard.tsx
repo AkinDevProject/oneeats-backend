@@ -212,7 +212,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     // Map restaurants data
-    const mapData: MapRestaurant[] = restaurants.slice(0, 10).map((r, i) => ({
+    const mapData: MapRestaurant[] = restaurants.slice(0, 10).map((r) => ({
       id: r.id,
       name: r.name,
       address: r.address || 'Paris, France',

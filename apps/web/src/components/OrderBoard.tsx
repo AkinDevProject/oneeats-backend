@@ -110,7 +110,7 @@ const OrderBoard: React.FC<OrderBoardProps> = ({ orders, onOrderAction }) => {
                     </div>
                   </div>
                 </div>
-                <Badge variant={config.color as any} size="md">
+                <Badge variant={config.color as 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'} size="md">
                   {config.label}
                 </Badge>
               </div>

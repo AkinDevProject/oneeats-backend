@@ -371,7 +371,7 @@ export default function OrderDetailScreen() {
             <View style={styles.directionsContent}>
               <Text style={{ fontSize: 20 }}>🗺️</Text>
               <Text style={[styles.directionsText, { color: currentTheme.colors.onPrimaryContainer }]}>
-                Voir l'itinéraire
+                Voir l&apos;itinéraire
               </Text>
               <MaterialIcons name="chevron-right" size={24} color={currentTheme.colors.onPrimaryContainer} />
             </View>

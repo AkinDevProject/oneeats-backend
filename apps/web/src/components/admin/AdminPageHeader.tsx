@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { RefreshCcw, Download, Eye, EyeOff, Filter } from 'lucide-react';
-import { Button } from '../ui/Button';
+import { RefreshCcw, Download, Eye, EyeOff } from 'lucide-react';
 
 interface AdminPageHeaderProps {
   title: string;

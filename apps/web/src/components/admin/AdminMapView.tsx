@@ -4,7 +4,6 @@ import { Card } from '../ui/Card';
 import {
   MapPin,
   Store,
-  Filter,
   ZoomIn,
   ZoomOut,
   Maximize2,

@@ -21,7 +21,7 @@ export default function NotFoundScreen() {
             Page introuvable
           </Animated.Text>
           <Animated.Text entering={SlideInUp.delay(600)} style={styles.subtitle}>
-            Cette page n'existe pas ou a été déplacée
+            Cette page n&apos;existe pas ou a été déplacée
           </Animated.Text>
           
           <Animated.View entering={SlideInUp.delay(800)} style={styles.buttonContainer}>
@@ -33,7 +33,7 @@ export default function NotFoundScreen() {
                 icon={() => <Home size={20} color="#E53E3E" />}
                 buttonColor="white"
               >
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Button>
             </Link>
           </Animated.View>
