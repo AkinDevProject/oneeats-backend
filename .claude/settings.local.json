@@ -96,7 +96,8 @@
       "Bash(source:*)",
       "Skill(bmad:bmm:workflows:testarch-ci)",
       "Bash(./scripts/ci-local.sh:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm run test:ci:*)"
     ],
     "deny": [],
     "ask": []
