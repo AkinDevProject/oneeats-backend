@@ -6,8 +6,8 @@
 |--------|--------|-------------|
 | 🔴 Critique | 0 | Bloquant pour le MVP |
 | 🟠 Important | 2 | Impact significatif sur l'expérience |
-| 🟡 Moyen | 3 | Problème mineur |
-| 🟢 Résolu | 11 | Bugs corrigés |
+| 🟡 Moyen | 2 | Problème mineur |
+| 🟢 Résolu | 12 | Bugs corrigés |
 
 ---
 
@@ -159,41 +159,32 @@ Ajout de `key={location.pathname}` sur l'élément `<main>` parent du `<Outlet /
 
 ---
 
-### BUG-010 : Images de certains plats ne se chargent pas (Web Dashboard)
+### ✅ BUG-010 : Images de certains plats ne se chargent pas (Web Dashboard)
 **Priorité** : 🟡 Moyen
-**Status** : 📋 Nouveau
+**Status** : ✅ Résolu
 **Affecte** : Frontend Web
 **Date création** : 2026-01-20
+**Date résolution** : 2026-01-20
 
 **Description** :
-Dans la page Menu, certaines images de plats affichent le texte "Menu item" au lieu de l'image réelle. Cela concerne notamment Pasta Carbonara et une des pizzas.
+Dans la page Menu, certaines images de plats affichaient le texte "Menu item" au lieu de l'image réelle (Pasta Carbonara, Coca-Cola, Frites).
 
-**Impact** :
-- ⚠️ Présentation du menu incomplète
-- ⚠️ Confusion pour les restaurateurs
+**Cause** :
+URLs d'images Unsplash invalides ou manquantes (null) dans `import-dev.sql` :
+- Pasta Carbonara : URL `photo-1621996346565-e3dbc794d72b` invalide
+- Coca-Cola : URL null
+- Frites : URL null
 
-**Étapes pour reproduire** :
-1. Se connecter au dashboard restaurant
-2. Aller sur la page Menu
-3. Scroller pour voir tous les plats
-4. Observer que Pasta Carbonara et certaines pizzas affichent "Menu item" au lieu d'une image
+**Solution appliquée** :
+Mise à jour de `src/main/resources/import-dev.sql` avec des URLs Unsplash valides :
+- Coca-Cola : `https://images.unsplash.com/photo-1554866585-cd94860890b7`
+- Pasta Carbonara : `https://images.unsplash.com/photo-1588013273468-315fd88ea34c`
+- Frites : `https://images.unsplash.com/photo-1630384060421-cb20d0e0649d`
+- Pizza Margherita : `https://images.unsplash.com/photo-1574071318508-1cdbab80d002`
 
-**Comportement attendu** :
-Toutes les images devraient se charger correctement depuis Unsplash.
+**Testé et vérifié** : Toutes les images du menu s'affichent correctement après redémarrage du backend.
 
-**Cause probable** :
-- URLs d'images invalides ou expirées dans la base de données
-- Problème de fallback dans le composant image
-- Erreur de chargement non gérée
-
-**Workaround temporaire** :
-Mettre à jour manuellement les URLs des images concernées dans la base de données.
-
-**Fichiers concernés** :
-- `apps/web/src/components/MenuItemCard.tsx`
-- `src/main/resources/import-dev.sql` (données de test)
-
-**Assigné à** : À planifier
+**Commit** : À committer
 
 ---
 
@@ -431,7 +422,7 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 ### Bugs par priorité
 - 🔴 Critique : 0 actifs, 5 résolus
 - 🟠 Important : 2 actifs (offline partiel, tests WebSocket), 4 résolus
-- 🟡 Moyen : 4 actifs (images optimisation, validation, images menu, ports), 2 résolus
+- 🟡 Moyen : 3 actifs (images optimisation, validation, ports), 3 résolus
 
 ### Temps moyen de résolution
 - Critique : 5 jours
@@ -440,8 +431,8 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 
 ### Bugs créés vs résolus (Total)
 - Créés : 15
-- Résolus : 11
-- Taux de résolution : 73%
+- Résolus : 12
+- Taux de résolution : 80%
 
 ---
 

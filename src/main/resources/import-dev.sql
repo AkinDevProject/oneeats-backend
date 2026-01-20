@@ -69,20 +69,20 @@ INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone
 
 -- Menu items pour Pizza Palace
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at, version) VALUES
-('91111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Pizza Margherita', 'Tomate, mozzarella, basilic frais', 12.50, 'PIZZA', 'https://images.unsplash.com/photo-1604382354936-07c5b6d5c5b0', true, true, false, 15, 'gluten,dairy', NOW(), NOW(), 0),
+('91111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Pizza Margherita', 'Tomate, mozzarella, basilic frais', 12.50, 'PIZZA', 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002', true, true, false, 15, 'gluten,dairy', NOW(), NOW(), 0),
 ('91111111-1111-1111-1111-111111111112', '11111111-1111-1111-1111-111111111111', 'Pizza Pepperoni', 'Tomate, mozzarella, pepperoni épicé', 14.00, 'PIZZA', 'https://images.unsplash.com/photo-1628840042765-356cda07504e', true, false, false, 18, 'gluten,dairy', NOW(), NOW(), 0),
 ('91111111-1111-1111-1111-111111111113', '11111111-1111-1111-1111-111111111111', 'Tiramisu', 'Dessert italien traditionnel', 7.00, 'DESSERT', 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9', true, true, false, 5, 'gluten,dairy,eggs', NOW(), NOW(), 0),
-('91111111-1111-1111-1111-111111111114', '11111111-1111-1111-1111-111111111111', 'Coca-Cola', 'Boisson gazeuse 33cl', 3.00, 'BEVERAGE', null, true, true, true, 1, '', NOW(), NOW(), 0),
+('91111111-1111-1111-1111-111111111114', '11111111-1111-1111-1111-111111111111', 'Coca-Cola', 'Boisson gazeuse 33cl', 3.00, 'BEVERAGE', 'https://images.unsplash.com/photo-1554866585-cd94860890b7', true, true, true, 1, '', NOW(), NOW(), 0),
 ('91111111-1111-1111-1111-111111111115', '11111111-1111-1111-1111-111111111111', 'Pizza 4 Fromages', 'Mozzarella, gorgonzola, parmesan, chèvre', 15.50, 'PIZZA', 'https://images.unsplash.com/photo-1513104890138-7c749659a591', true, true, false, 20, 'gluten,dairy', NOW(), NOW(), 0),
 ('91111111-1111-1111-1111-111111111116', '11111111-1111-1111-1111-111111111111', 'Pizza Personnalisée', 'Base tomate et mozzarella, créez votre pizza', 13.00, 'PIZZA', 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47', true, true, false, 18, 'gluten,dairy', NOW(), NOW(), 0),
 ('91111111-1111-1111-1111-111111111117', '11111111-1111-1111-1111-111111111111', 'Salade César', 'Salade romaine, parmesan, croûtons, sauce césar', 9.50, 'SALAD', 'https://images.unsplash.com/photo-1546793665-c74683f339c1', true, true, false, 8, 'gluten,dairy,eggs', NOW(), NOW(), 0),
-('91111111-1111-1111-1111-111111111118', '11111111-1111-1111-1111-111111111111', 'Pasta Carbonara', 'Spaghetti, lardons, crème, parmesan, œuf', 12.00, 'PASTA', 'https://images.unsplash.com/photo-1621996346565-e3dbc794d72b', true, false, false, 12, 'gluten,dairy,eggs', NOW(), NOW(), 0);
+('91111111-1111-1111-1111-111111111118', '11111111-1111-1111-1111-111111111111', 'Pasta Carbonara', 'Spaghetti, lardons, crème, parmesan, œuf', 12.00, 'PASTA', 'https://images.unsplash.com/photo-1588013273468-315fd88ea34c', true, false, false, 12, 'gluten,dairy,eggs', NOW(), NOW(), 0);
 
 -- Menu items pour Burger House
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at, version) VALUES
 ('92222222-2222-2222-2222-222222222221', '22222222-2222-2222-2222-222222222222', 'Classic Burger', 'Steak haché, salade, tomate, cornichon', 11.00, 'BURGER', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd', true, false, false, 12, 'gluten', NOW(), NOW(), 0),
 ('92222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', 'Cheese Burger', 'Steak haché, cheddar, salade, tomate', 12.50, 'BURGER', 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90', true, false, false, 12, 'gluten,dairy', NOW(), NOW(), 0),
-('92222222-2222-2222-2222-222222222223', '22222222-2222-2222-2222-222222222222', 'Frites', 'Frites croustillantes maison', 4.50, 'SIDE', null, true, true, true, 8, '', NOW(), NOW(), 0);
+('92222222-2222-2222-2222-222222222223', '22222222-2222-2222-2222-222222222222', 'Frites', 'Frites croustillantes maison', 4.50, 'SIDE', 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d', true, true, true, 8, '', NOW(), NOW(), 0);
 
 -- Options pour Salade César (91111111-1111-1111-1111-111111111117)
 INSERT INTO menu_item_option (id, menu_item_id, name, option_type, is_required, max_choices, display_order, created_at, updated_at, version) VALUES
