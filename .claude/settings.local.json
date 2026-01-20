@@ -80,7 +80,7 @@
       "Skill(bmad:bmm:agents:tea)",
       "Bash(ss:*)",
       "Bash(REDIRECT_URI=\"oneeats://auth/callback\")",
-      "Bash(AUTH_URL=\"http://192.168.1.111:8480/realms/oneeats/protocol/openid-connect/auth?client_id=oneeats-mobile&redirect_uri=$REDIRECT_URI&response_type=code&scope=openid%20profile%20email&code_challenge=test123&code_challenge_method=S256\":*)",
+      "Bash(AUTH_URL=\"http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?client_id=oneeats-mobile&redirect_uri=$REDIRECT_URI&response_type=code&scope=openid%20profile%20email&code_challenge=test123&code_challenge_method=S256\":*)",
       "Bash(echo:*)",
       "Skill(bmad:bmm:workflows:sprint-status)",
       "Bash(npx jest:*)",
@@ -97,7 +97,8 @@
       "Skill(bmad:bmm:workflows:testarch-ci)",
       "Bash(./scripts/ci-local.sh:*)",
       "Bash(npm run lint:*)",
-      "Bash(npm run test:ci:*)"
+      "Bash(npm run test:ci:*)",
+      "Bash(net stop winnat)"
     ],
     "deny": [],
     "ask": []

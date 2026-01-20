@@ -2,7 +2,7 @@
 
 ## 1. Objectif du projet
 
-OneEats est une **plateforme de commande de plats à récupérer sur place** (MVP).  
+OneEats est une **plateforme de commande de plats à récupérer sur place** (MVP).
 Les objectifs principaux sont :
 - Permettre aux **clients** de commander facilement via une application mobile
 - Permettre aux **restaurants** de gérer leurs menus et commandes via une interface web
@@ -16,7 +16,7 @@ Les objectifs principaux sont :
 
 ### **Setup Backend + Frontend**
 - **Backend** : Quarkus Java lancé depuis **IntelliJ IDEA** (pas de JDK terminal)
-- **Frontend Dashboard** : React intégré via **Quinoa** dans Quarkus 
+- **Frontend Dashboard** : React intégré via **Quinoa** dans Quarkus
 - **URL unique** : `http://localhost:8080` (backend + dashboard)
 - **Mobile App** : React Native/Expo séparée sur `apps/mobile/`
 
@@ -24,7 +24,7 @@ Les objectifs principaux sont :
 - **API Backend** : `http://localhost:8080/api`
 - **Dashboard Restaurant** : `http://localhost:8080/restaurant`
 - **Base de données** : PostgreSQL Docker `localhost:5432`
-- **Keycloak** : `http://192.168.1.111:8480` (port 8480 pour éviter conflit Hyper-V)
+- **Keycloak** : `http://192.168.1.111:8580` (port 8580 pour éviter conflit Hyper-V)
 - **App mobile** : `http://192.168.1.111:8080/api` (IP réseau local)
 
 ### **Outils de développement**
@@ -45,7 +45,7 @@ Les objectifs principaux sont :
 
 ### 2.1 Acteurs principaux
 - **Client** : Consulte les restaurants, passe des commandes, récupère sur place
-- **Restaurant** : Gère son menu, ses commandes et son profil  
+- **Restaurant** : Gère son menu, ses commandes et son profil
 - **Administrateur** : Supervise la plateforme, gère les comptes restaurants, accède aux statistiques
 
 ### 2.2 Fonctionnalités principales
@@ -74,7 +74,7 @@ Les objectifs principaux sont :
 
 ### 3.1 Architecture générale
 
-**Monorepo** avec architecture **hexagonale/clean** suivant les principes **Domain-Driven Design**.  
+**Monorepo** avec architecture **hexagonale/clean** suivant les principes **Domain-Driven Design**.
 **Architecture monolithique** avec structure modulaire dans le code source.
 
 ```
@@ -132,12 +132,12 @@ oneeats-backend/
 #### Frontend Web (Restaurant)
 - **Framework** : React 18 + TypeScript
 - **Build** : Vite 5.4
-- **Styling** : Tailwind CSS + PostCSS  
+- **Styling** : Tailwind CSS + PostCSS
 - **Navigation** : React Router DOM 7.6
 - **Charts** : Recharts
 - **Icons** : Lucide React
 
-#### Frontend Mobile (Client) 
+#### Frontend Mobile (Client)
 - **Framework** : React Native + Expo 53
 - **Navigation** : Expo Router 5.1
 - **State** : TanStack React Query + AsyncStorage
@@ -159,7 +159,7 @@ src/main/java/com/oneeats/
 ├── OneEatsApplication.java           # Point d'entrée unique
 ├── common/                           # Utilitaires partagés
 │   ├── domain/BaseEntity.java        # Entité de base
-│   ├── events/DomainEvent.java       # Interface événements  
+│   ├── events/DomainEvent.java       # Interface événements
 │   └── exception/BusinessException.java
 ├── configuration/                    # Configuration globale
 │   └── ApplicationConfiguration.java
@@ -182,7 +182,7 @@ src/main/java/com/oneeats/
 order/
 ├── api/
 │   ├── CreateOrderRequest.java       # DTO requête création
-│   ├── OrderDto.java                 # DTO réponse  
+│   ├── OrderDto.java                 # DTO réponse
 │   └── UpdateOrderStatusRequest.java # DTO changement statut
 ├── domain/
 │   ├── Order.java                    # Entité aggregate root
@@ -225,11 +225,11 @@ order/
 - **Localisation** : `src/main/java/com/oneeats/common/`
 
 ### 4.2 Order (com.oneeats.order) ✅ COMPLET
-- **Entités** : 
+- **Entités** :
   - `Order` (aggregate root) - Commande avec logique métier complexe
   - `OrderItem` - Article commandé avec calculs et validation
 - **State Machine** : `OrderStatus` (EN_ATTENTE → EN_PREPARATION → PRETE → RECUPEREE)
-- **Événements** : 
+- **Événements** :
   - `OrderCreatedEvent` - Notifications restaurants/users + métriques
   - `OrderStatusChangedEvent` - Suivi des changements avec actions automatiques
 - **Services** : `OrderService` pour use cases métier (création, validation, transitions)
@@ -242,7 +242,7 @@ order/
 - **Propriétés** : email (unique), passwordHash, firstName, lastName, phone, address
 - **Logique métier** : Profile updates, activation/désactivation, fullName
 - **API REST** : CRUD `/api/users` avec recherche par nom
-- **Repository** : Requêtes par email, recherche, comptage utilisateurs actifs  
+- **Repository** : Requêtes par email, recherche, comptage utilisateurs actifs
 - **Localisation** : `src/main/java/com/oneeats/user/`
 
 ### 4.4 Restaurant (com.oneeats.restaurant) ✅ COMPLET
@@ -269,7 +269,7 @@ order/
 - **Use Cases** : Gestion restaurants, supervision commandes, audit
 - **Localisation** : `src/main/java/com/oneeats/admin/`
 
-### 4.7 Notification (com.oneeats.notification) 🔨 À CRÉER  
+### 4.7 Notification (com.oneeats.notification) 🔨 À CRÉER
 - **Entité** : `Notification` - Messages push et notifications système
 - **Use Cases** : Notifications commandes, push mobile Expo
 - **Localisation** : `src/main/java/com/oneeats/notification/`
@@ -298,7 +298,7 @@ order/
 - **API Documentation** : http://localhost:8080/q/swagger-ui
 - **Health Check** : http://localhost:8080/q/health
 - **Métriques** : http://localhost:8080/q/metrics (Prometheus)
-- **Keycloak** : http://192.168.1.111:8480 (port 8480 pour éviter conflit Hyper-V)
+- **Keycloak** : http://192.168.1.111:8580 (port 8580 pour éviter conflit Hyper-V)
 
 ### 5.4 Architecture d'Authentification Keycloak
 
@@ -343,7 +343,7 @@ application.yml
 - Sécurité désactivée pour faciliter les tests
 - Quinoa intégré pour le frontend web
 
-#### Production (application-prod.yml) 
+#### Production (application-prod.yml)
 - Package natif pour performances optimales
 - Logs JSON pour systèmes centralisés
 - Base de données : validation du schéma uniquement
@@ -352,7 +352,7 @@ application.yml
 
 #### Test (à créer)
 - Base H2 en mémoire
-- Données de test isolées  
+- Données de test isolées
 - Configuration minimale pour tests rapides
 
 ---
@@ -425,7 +425,7 @@ class ComponentTest {
         @DisplayName("Should do X when Y condition")
         void shouldDoXWhenYCondition() {
             // Given - Arrange
-            // When - Act  
+            // When - Act
             // Then - Assert
         }
     }
@@ -437,7 +437,7 @@ class ComponentTest {
 # Tests unitaires seulement (rapide, développement)
 ./mvnw test -Dtest="com.oneeats.unit.**"
 
-# Tests intégration seulement (complet, validation)  
+# Tests intégration seulement (complet, validation)
 ./mvnw test -Dtest="com.oneeats.integration.**"
 
 # Tous les tests
@@ -461,7 +461,7 @@ class ComponentTest {
 # ✅ Démarrage base de données
 docker-compose up -d
 
-# ✅ Mobile (séparément) 
+# ✅ Mobile (séparément)
 cd apps/mobile && npm start
 
 # ✅ Tests E2E
@@ -486,7 +486,7 @@ cd tests && npm test
 # Dashboard Restaurant (Quinoa intégré)
 http://localhost:8080/restaurant/menu
 
-# API Backend 
+# API Backend
 http://localhost:8080/api/restaurants
 http://localhost:8080/api/menu-items/restaurant/{id}
 
@@ -575,7 +575,7 @@ cd apps/mobile && npm run android
 
 **📦 Domaine Order (référence complète)**
 - Entités `Order` + `OrderItem` avec logique métier riche
-- State Machine `OrderStatus` avec transitions validées  
+- State Machine `OrderStatus` avec transitions validées
 - Service `OrderService` pour use cases complexes avec événements CDI
 - Repository `OrderRepository` PanacheRepository + requêtes métier personnalisées
 - API REST complète `/api/orders` avec validation Bean + endpoints spécialisés
@@ -616,7 +616,7 @@ cd apps/mobile && npm run android
 
 **📱 Frontend existant (à connecter)**
 - Interface web React restaurant dans `apps/web/`
-- Application mobile React Native client dans `apps/mobile/`  
+- Application mobile React Native client dans `apps/mobile/`
 - Intégration à adapter aux nouvelles APIs REST
 
 ### 9.4 🚀 PROCHAINES ÉTAPES PRIORITAIRES
@@ -695,7 +695,7 @@ cd apps/mobile && npm run android
   - 💾 **Monitoring mémoire** : `useMemoryMonitor` avec surveillance utilisation heap JavaScript (mode web)
   - 🔧 **Callbacks optimisés** : `useOptimizedCallback` avec détection callbacks coûteux (>5ms)
   - 📈 **Rapports développement** : `logPerformanceReport` avec métriques détaillées console
-- **Composants optimisés** : 
+- **Composants optimisés** :
   - 🖼️ **OptimizedImage** : Cache mémoire, lazy loading, retry automatique, optimisation qualité
   - 📱 **VirtualizedList** : FlatList et VirtualizedList optimisées avec stratégies adaptatives
   - 🔄 **MemoizedListItem** : Composant mémoïsé générique pour listes performantes
@@ -703,7 +703,7 @@ cd apps/mobile && npm run android
   - ⚡ **AuthContext** : useCallback et useMemo pour prévenir re-renders inutiles
   - 📦 **OrderContext** : Optimisation des fonctions et state management
   - 🎯 **Hooks stratégiques** : `useOptimizedListStrategy`, `useInfiniteScroll`, `useFilteredList`
-- **Page d'accueil optimisée** : 
+- **Page d'accueil optimisée** :
   - 🎨 **RestaurantCard mémoïsée** : Composant React.memo pour cartes restaurants
   - 📋 **Liste virtualisée** : Remplacement ScrollView par OptimizedFlatList
   - 🖼️ **Images optimisées** : IntégrationOptimizedImage avec cache et lazy loading
