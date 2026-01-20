@@ -28,18 +28,19 @@ This file provides guidance to Claude Code when working with the OneEats project
 
 | Document | Purpose | When to Read |
 |----------|---------|--------------|
-| **[analyst/BUSINESS_RULES.md](docs/analyst/BUSINESS_RULES.md)** | Business logic, workflows, validation | Implementing features |
-| **[architect/](docs/architect/)** | Technical architecture, patterns | Designing components |
-| **[architect-dev/API_SPECS.md](docs/architect-dev/API_SPECS.md)** | API endpoints documentation | Creating/calling APIs |
-| **[architect-dev/DATA_MODEL.md](docs/architect-dev/DATA_MODEL.md)** | Database schema, relations | Working with DB |
-| **[BUGS.md](docs/BUGS.md)** | Known issues, workarounds | Encountering problems |
+| **[shared/analyst/BUSINESS_RULES.md](docs/shared/analyst/BUSINESS_RULES.md)** | Business logic, workflows | Implementing features |
+| **[shared/architect/](docs/shared/architect/)** | Technical architecture | Designing components |
+| **[shared/architect-dev/API_SPECS.md](docs/shared/architect-dev/API_SPECS.md)** | API endpoints | Creating/calling APIs |
+| **[shared/architect-dev/DATA_MODEL.md](docs/shared/architect-dev/DATA_MODEL.md)** | Database schema | Working with DB |
+| **[BUGS.md](docs/BUGS.md)** | Known issues | Encountering problems |
 
-### Additional Guides
+### Platform-Specific Guides
 
-- **[dev/GETTING_STARTED.md](docs/dev/GETTING_STARTED.md)** - Development commands and setup
-- **[dev/DEPLOYMENT_GUIDE.md](docs/dev/DEPLOYMENT_GUIDE.md)** - Deployment instructions
-- **[architect-dev/SECURITY_GUIDE.md](docs/architect-dev/SECURITY_GUIDE.md)** - Security best practices
-- **[dev/TROUBLESHOOTING.md](docs/dev/TROUBLESHOOTING.md)** - Common issues and fixes
+| Platform | Dev Guide | UX Specs | Tests |
+|----------|-----------|----------|-------|
+| **Backend** | [backend/dev/](docs/backend/dev/) | - | shared/tea/ |
+| **Mobile** | [mobile/dev/](docs/mobile/dev/) | [mobile/ux-designer/](docs/mobile/ux-designer/) | [mobile/tea/](docs/mobile/tea/) |
+| **Web** | - | [web/ux-designer/](docs/web/ux-designer/) | [web/tea/](docs/web/tea/) |
 
 ---
 
@@ -78,7 +79,7 @@ docker-compose -f docker-compose.yml up -d
 cd apps/mobile && npm start
 ```
 
-For detailed commands, see [dev/GETTING_STARTED.md](docs/dev/GETTING_STARTED.md)
+For detailed commands, see [backend/dev/GETTING_STARTED.md](docs/backend/dev/GETTING_STARTED.md)
 
 ---
 
@@ -97,7 +98,7 @@ src/main/java/com/oneeats/[domain]/
 **Implemented Domains**: User, Restaurant, Menu, Order
 **To Implement**: Admin, Notification
 
-For detailed architecture, see [docs/architect/](docs/architect/)
+For detailed architecture, see [docs/shared/architect/](docs/shared/architect/)
 
 ---
 
@@ -106,8 +107,8 @@ For detailed architecture, see [docs/architect/](docs/architect/)
 ### When Starting a New Task
 
 1. **Read** `docs/ROADMAP.md` - Identify current task
-2. **Read** relevant `docs/analyst/BUSINESS_RULES.md` section - Understand domain rules
-3. **Read** `docs/architect-dev/DATA_MODEL.md` - Check database schema if needed
+2. **Read** relevant `docs/shared/analyst/BUSINESS_RULES.md` section - Understand domain rules
+3. **Read** `docs/shared/architect-dev/DATA_MODEL.md` - Check database schema if needed
 4. **Check** `docs/BUGS.md` - Avoid known issues
 5. **Implement** the task following existing patterns (use Order domain as reference)
 6. **Update** `docs/ROADMAP.md` - Mark task progress in "Notes de Session"
@@ -115,7 +116,7 @@ For detailed architecture, see [docs/architect/](docs/architect/)
 ### When Encountering Issues
 
 1. **Check** `docs/BUGS.md` - Is it a known issue?
-2. **Check** `docs/dev/TROUBLESHOOTING.md` - Common problems
+2. **Check** `docs/backend/dev/TROUBLESHOOTING.md` - Common problems
 3. **Check** `CONTEXT.md` - Environment constraints
 4. **Report** in `docs/BUGS.md` if new issue
 
@@ -170,24 +171,37 @@ For detailed conventions, see [CONTEXT.md](CONTEXT.md)
 
 ---
 
-## Documentation Structure (By BMAD Agent)
+## Documentation Structure (Hybrid: Platform + BMAD Agent)
 
 ```
 docs/
-├── README.md              # Index principal
-├── ROADMAP.md             # Progression projet
-├── BUGS.md                # Bugs connus
-├── pm/                    # Product Manager (PRD, Epics, Stories)
-├── analyst/               # Analyste (Business Rules, Use Cases)
-├── architect/             # Architecte (Architecture, ADRs)
-│   └── adr/               # Architecture Decision Records
-├── architect-dev/         # Partage Arch+Dev (API, Data Model, Security)
-├── dev/                   # Developpeur (Guides techniques)
-├── ux-designer/           # UX (Specs UI, Theming)
-├── tea/                   # Test Architect (Tests Strategy, Plans)
-├── bmad/                  # Documentation BMAD
-├── concepts/              # Concepts futurs
-└── archive/               # Fichiers archives
+├── README.md                 # Index principal
+├── ROADMAP.md                # Progression projet
+├── BUGS.md                   # Bugs connus
+│
+├── shared/                   # Documents PARTAGES (toutes plateformes)
+│   ├── pm/                   # Product Manager (PRD, Epics, Stories)
+│   ├── analyst/              # Analyste (Business Rules, Use Cases)
+│   ├── architect/            # Architecte (Architecture, ADRs)
+│   │   └── adr/              # Architecture Decision Records
+│   ├── architect-dev/        # Partage Arch+Dev (API, Data Model, Security)
+│   ├── tea/                  # Tests partages (Strategy, Design)
+│   ├── bmad/                 # Documentation BMAD
+│   └── concepts/             # Concepts futurs
+│
+├── backend/                  # Documentation BACKEND (Java/Quarkus)
+│   └── dev/                  # Guides developpeur backend
+│
+├── mobile/                   # Documentation MOBILE (React Native/Expo)
+│   ├── dev/                  # Guides developpeur mobile
+│   ├── ux-designer/          # Specs UI mobile
+│   └── tea/                  # Tests mobile
+│
+├── web/                      # Documentation WEB (React/Vite)
+│   ├── ux-designer/          # Specs UI web
+│   └── tea/                  # Tests web
+│
+└── archive/                  # Fichiers archives
 ```
 
 ---
@@ -196,7 +210,7 @@ docs/
 
 **Date**: 2026-01-20
 **Version**: MVP 0.7
-**Status**: Documentation reorganized by BMAD agent
+**Status**: Documentation reorganized (hybrid: platform + BMAD agent)
 
 ---
 
@@ -205,5 +219,5 @@ docs/
 - [Full Documentation Index](docs/README.md)
 - [Current Roadmap](docs/ROADMAP.md)
 - [Project Context](CONTEXT.md)
-- [Architecture Details](docs/architect/)
+- [Architecture Details](docs/shared/architect/)
 - [Known Bugs](docs/BUGS.md)
