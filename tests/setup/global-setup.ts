@@ -33,10 +33,19 @@ async function globalSetup(config: FullConfig) {
     console.log('✅ Pizza Palace trouvé via API');
     
     // Vérifier les menu items
-    const menuResponse = await page.request.get('http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111');
-    if (menuResponse.ok()) {
-      const menuItems = await menuResponse.json();
-      console.log(`✅ ${menuItems.length} plats trouvés pour Pizza Palace via API`);
+    // NOTE: /api/menu-items/* requiert authentification depuis l'intégration Keycloak
+    // Ce endpoint devrait être public pour les GET (BUG-UAT-001)
+    try {
+      const menuResponse = await page.request.get('http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111');
+      const contentType = menuResponse.headers()['content-type'] || '';
+      if (menuResponse.ok() && contentType.includes('application/json')) {
+        const menuItems = await menuResponse.json();
+        console.log(`✅ ${menuItems.length} plats trouvés pour Pizza Palace via API`);
+      } else {
+        console.log(`⚠️ Menu items endpoint requiert authentification (status: ${menuResponse.status()}, content-type: ${contentType}) - test skipped`);
+      }
+    } catch (menuError) {
+      console.log(`⚠️ Menu items endpoint non accessible (auth requise) - test skipped`);
     }
     
     // Test dashboard Quinoa

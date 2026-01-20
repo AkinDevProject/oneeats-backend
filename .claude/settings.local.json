@@ -112,7 +112,16 @@
       "Bash(bash -c:*)",
       "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend && mvnw.cmd quarkus:dev\":*)",
       "Bash(powershell.exe:*)",
-      "Bash(cmd.exe /c \"del \\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")"
+      "Bash(cmd.exe /c \"del \\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
+      "Bash(npx @anthropic-ai/mcp-server-playwright --help)",
+      "Bash(npm search:*)",
+      "Bash(npx @playwright/mcp@latest --help)",
+      "Bash(npm --version:*)",
+      "Bash(powershell -Command \"& ''C:\\\\Users\\\\akin_\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe'' devices\")",
+      "Bash(node:*)",
+      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright --version 2>&1\")",
+      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/simple-api-tests.spec.ts --reporter=list 2>&1\")",
+      "Bash(powershell -Command \"cd ''C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/tests''; npx playwright test specs/restaurant --reporter=list 2>&1\")"
     ],
     "deny": [],
     "ask": []
