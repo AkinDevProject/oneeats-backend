@@ -317,6 +317,40 @@
 
 ## Notes de Session
 
+### Session 2026-01-20 : Setup UAT Automatisé (Claude Code + Playwright + Maestro)
+
+**Objectif** : Permettre à Claude Code de tester automatiquement l'application web ET mobile, détecter les bugs, et générer des rapports.
+
+**Discussion réalisée** :
+- ✅ Analyse des capacités de test de Claude Code
+- ✅ Choix des outils : **Playwright MCP** (web) + **Maestro** (mobile)
+- ✅ Architecture définie pour tests cross-platform
+- ✅ Documentation créée : `docs/UAT_SETUP.md`
+
+**Architecture UAT cible** :
+```
+Claude Code
+    │
+    ├── Playwright MCP → Chrome → Dashboard Web (localhost:8080/restaurant)
+    ├── Maestro (Bash) → Émulateur Android → App Mobile
+    └── Backend Logs → PostgreSQL + API
+```
+
+**Prochaines étapes** :
+1. [ ] Vérifier si Android Studio / émulateur est installé
+2. [ ] Installer Playwright MCP (`npm install -g @playwright/mcp`)
+3. [ ] Configurer Claude Code pour Playwright (`~/.claude/settings.json`)
+4. [ ] Installer Maestro
+5. [ ] Créer les premiers scripts de test
+6. [ ] Tester un flow complet (commande mobile → dashboard web)
+
+**Fichiers créés** :
+- `docs/UAT_SETUP.md` - Guide complet pour reprendre le setup
+
+**Pour reprendre** : Dire à Claude "Continue le setup UAT" ou "Lis docs/UAT_SETUP.md"
+
+---
+
 ### Session 2026-01-16 : Audit MVP et Mise à jour ROADMAP
 
 **Travail effectué** :
@@ -440,6 +474,13 @@
 ---
 
 ## Objectifs à Court Terme
+
+0. **Setup UAT Automatisé** (En cours)
+   - Installer Playwright MCP pour tests web automatisés
+   - Installer Maestro pour tests mobile automatisés
+   - Configurer émulateur Android
+   - Créer scénarios de test cross-platform
+   - Voir `docs/UAT_SETUP.md` pour détails
 
 1. **Finir restructuration documentation** (1 jour)
    - Créer `DATA_MODEL.md` et `BUGS.md`
@@ -690,7 +731,7 @@ docs/shared/architect/
 
 ## Dernière mise à jour
 
-**Date** : 2026-01-16
+**Date** : 2026-01-20
 **Version** : MVP 0.95
 **Responsable** : Équipe OneEats
 **Prochaine revue** : 2026-01-23

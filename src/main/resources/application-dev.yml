@@ -6,7 +6,7 @@ quarkus:
   # Base de données développement
   datasource:
     jdbc:
-      url: jdbc:postgresql://localhost:5432/oneeats_dev2
+      url: jdbc:postgresql://localhost:5432/oneeats_dev
     username: oneeats_user
     password: oneeats_password
 

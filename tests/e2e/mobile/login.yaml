@@ -1,0 +1,22 @@
+# Test de connexion mobile OneEats
+# Scénario: Un client se connecte à l'application
+
+appId: com.oneeats.mobile
+---
+# Lancer l'application
+- launchApp
+
+# Attendre l'écran de connexion
+- assertVisible: "Se connecter"
+
+# Saisir les identifiants
+- tapOn: "Email"
+- inputText: "test.client@oneeats.com"
+- tapOn: "Mot de passe"
+- inputText: "Test123!"
+
+# Se connecter
+- tapOn: "Se connecter"
+
+# Vérifier l'accès à l'écran d'accueil
+- assertVisible: "Restaurants"

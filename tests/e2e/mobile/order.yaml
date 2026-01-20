@@ -1,0 +1,28 @@
+# Test de passage de commande mobile OneEats
+# Scénario: Un client passe une commande
+
+appId: com.oneeats.mobile
+---
+# Prérequis: être connecté (exécuter login.yaml avant)
+- launchApp
+
+# Sélectionner un restaurant
+- tapOn: "Le Petit Bistrot"
+- assertVisible: "Menu"
+
+# Ajouter un item au panier
+- tapOn: "Burger Classic"
+- tapOn: "Ajouter au panier"
+- assertVisible: "1 item"
+
+# Ouvrir le panier
+- tapOn: "Voir le panier"
+- assertVisible: "Total"
+
+# Valider la commande
+- tapOn: "Commander"
+- assertVisible: "Commande confirmée"
+
+# Vérifier le numéro de commande
+- assertVisible:
+    id: "orderNumber"

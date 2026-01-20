@@ -1,0 +1,23 @@
+# Test du profil utilisateur mobile OneEats
+# Scénario: Un client consulte et modifie son profil
+
+appId: com.oneeats.mobile
+---
+# Prérequis: être connecté
+- launchApp
+
+# Naviguer vers le profil
+- tapOn: "Profil"
+- assertVisible: "Mon Profil"
+
+# Vérifier les informations affichées
+- assertVisible: "test.client@oneeats.com"
+
+# Accéder aux paramètres
+- tapOn: "Paramètres"
+- assertVisible: "Notifications"
+
+# Se déconnecter
+- tapOn: "Se déconnecter"
+- tapOn: "Confirmer"
+- assertVisible: "Se connecter"
