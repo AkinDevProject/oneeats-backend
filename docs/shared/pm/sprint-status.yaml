@@ -23,7 +23,7 @@ generated: 2026-01-15 09:30
 project: OneEats Backend
 project_key: ONEEATS
 tracking_system: file-system
-story_location: docs/product/epics-and-stories.md
+story_location: docs/shared/pm/epics-and-stories.md
 
 # Current Sprint: Integration Frontend-Backend
 # Sprint 2 - Focus on connecting frontends to real APIs

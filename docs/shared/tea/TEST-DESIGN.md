@@ -1,6 +1,6 @@
 # Test Design — OneEats Backend (MVP)
 
-Basé sur : PRD (`docs/product/PRD-oneeats-backend.md`), Architecture cible (`docs/architecture/ARCHITECTURE-TARGET.md`), ADR-001..004, Épics (`docs/product/EPICS-USER-STORIES.md`), `API_SPECS.md`, `TEST_STRATEGY.md`.
+Basé sur : PRD (`docs/shared/pm/prd.md`), Architecture cible (`docs/shared/architect/architecture.md`), ADR-001..005 (`docs/shared/architect/adr/`), Épics (`docs/shared/pm/epics-and-stories.md`), `docs/shared/architect-dev/API_SPECS.md`, `docs/shared/tea/TEST_STRATEGY.md`.
 Périmètre : P0/P1 (MVP core + notifications/uploads/analytics de base).
 
 ## 1. Objectifs & Scope
@@ -38,7 +38,7 @@ Périmètre : P0/P1 (MVP core + notifications/uploads/analytics de base).
 - Push mobile (si retenu) : token device stocké, envoi push sur order.created.
 
 ## 6. Artefacts & livraison
-- Ce plan : `docs/tests/TEST-DESIGN.md`.
+- Ce plan : `docs/shared/tea/TEST-DESIGN.md`.
 - À produire : suites de tests (unit/int/contract/e2e), fixtures seed, scripts CI (run tests), rapport de couverture (Jacoco/RestAssured), checklists de revues.
 - Coordination : valider scope E2E (backend-only vs web/mobile smoke) avec PM/QA; aligner enums statuts/front; intégrer limites uploads dans front.
 

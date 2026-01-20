@@ -15,12 +15,12 @@ stepsCompleted:
   - execution-plan
 inputDocuments:
   - docs/ROADMAP.md
-  - docs/business/BUSINESS_RULES.md
-  - docs/business/USE_CASES.md
-  - docs/api/DATA_MODEL.md
-  - docs/business/REQUIREMENTS_SPECIFICATION.md
-  - docs/tests/TEST_STRATEGY.md
-  - docs/api/API_SPECS.md
+  - docs/shared/analyst/BUSINESS_RULES.md
+  - docs/shared/analyst/USE_CASES.md
+  - docs/shared/architect-dev/DATA_MODEL.md
+  - docs/shared/analyst/REQUIREMENTS_SPECIFICATION.md
+  - docs/shared/tea/TEST_STRATEGY.md
+  - docs/shared/architect-dev/API_SPECS.md
 workflowType: 'prd'
 ---
 

@@ -545,7 +545,7 @@
   - AuthController (/api/auth/me, /api/auth/status, /api/auth/restaurants)
 
 **Fichiers créés/modifiés** :
-- `docs/adr/ADR-005-authentication-strategy.md` (nouveau)
+- `docs/shared/architect/adr/ADR-005-authentication-strategy.md` (nouveau)
 - `docker-compose.dev.yml` (Keycloak ajouté)
 - `keycloak/realms/oneeats-realm.json` (nouveau)
 - `application.yml` (config OIDC)
@@ -634,24 +634,26 @@
 - ✅ Migration sprint-status.yaml vers format BMAD standard :
   - Structure development_status avec statuts (backlog, in-progress, done)
   - Tracking par epic et story
-- ✅ Creation docs/architecture/architecture.md conforme BMAD (remplace target-architecture.md)
+- ✅ Creation docs/shared/architect/architecture.md conforme BMAD (remplace target-architecture.md)
 - ✅ Mise a jour bmm-workflow-status.yaml avec nouveaux chemins
 
-**Structure finale docs/product/** :
+**Structure finale docs/shared/pm/** :
 ```
-docs/product/
+docs/shared/pm/
 ├── prd.md                    # PRD avec frontmatter BMAD
 ├── epics-and-stories.md      # Epics restructurees format BMAD
+├── USER_STORIES.md           # Stories utilisateur
 └── sprint-status.yaml        # Suivi sprint format BMAD
 ```
 
-**Structure finale docs/architecture/** :
+**Structure finale docs/shared/architect/** :
 ```
-docs/architecture/
+docs/shared/architect/
 ├── README.md                 # Index architecture
-├── architecture.md           # Document BMAD (nouveau)
+├── architecture.md           # Document BMAD
 ├── hexagonal-guide.md        # Guide DDD
-└── implementation-status.md  # Statut implementation
+├── implementation-status.md  # Statut implementation
+└── adr/                      # Architecture Decision Records
 ```
 
 **Impact** :
