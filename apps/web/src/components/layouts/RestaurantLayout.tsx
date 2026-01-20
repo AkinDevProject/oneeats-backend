@@ -306,7 +306,7 @@ const RestaurantLayout: React.FC = () => {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto" key={location.pathname}>
             <Outlet />
           </main>
         </div>

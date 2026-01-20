@@ -6,8 +6,8 @@
 |--------|--------|-------------|
 | 🔴 Critique | 0 | Bloquant pour le MVP |
 | 🟠 Important | 2 | Impact significatif sur l'expérience |
-| 🟡 Moyen | 2 | Problème mineur |
-| 🟢 Résolu | 10 | Bugs corrigés |
+| 🟡 Moyen | 3 | Problème mineur |
+| 🟢 Résolu | 11 | Bugs corrigés |
 
 ---
 
@@ -128,6 +128,111 @@ Certains formulaires manquent de validation côté client, permettant de soumett
 
 **Assigné à** : Sprint 6
 **ETA** : 2026-01-10
+
+---
+
+### ✅ BUG-009 : Navigation sidebar ne met pas à jour le contenu (Web Dashboard)
+**Priorité** : 🟡 Moyen
+**Status** : ✅ Résolu
+**Affecte** : Frontend Web
+**Date création** : 2026-01-20
+**Date résolution** : 2026-01-20
+
+**Description** :
+Lorsqu'on clique sur les liens de la sidebar (Menu, Paramètres, Commandes), l'URL dans le navigateur change correctement mais le contenu de la page ne se met pas à jour.
+
+**Cause** :
+Le composant `<Outlet />` de React Router ne se re-rendait pas quand le pathname changeait car il n'y avait pas de clé unique forçant le re-render.
+
+**Solution appliquée** :
+Ajout de `key={location.pathname}` sur l'élément `<main>` parent du `<Outlet />` dans les layouts :
+- `apps/web/src/components/layouts/RestaurantLayout.tsx`
+- `apps/web/src/components/layouts/AdminLayout.tsx`
+
+```tsx
+<main className="flex-1 overflow-auto" key={location.pathname}>
+  <Outlet />
+</main>
+```
+
+**Commit** : À committer
+
+---
+
+### BUG-010 : Images de certains plats ne se chargent pas (Web Dashboard)
+**Priorité** : 🟡 Moyen
+**Status** : 📋 Nouveau
+**Affecte** : Frontend Web
+**Date création** : 2026-01-20
+
+**Description** :
+Dans la page Menu, certaines images de plats affichent le texte "Menu item" au lieu de l'image réelle. Cela concerne notamment Pasta Carbonara et une des pizzas.
+
+**Impact** :
+- ⚠️ Présentation du menu incomplète
+- ⚠️ Confusion pour les restaurateurs
+
+**Étapes pour reproduire** :
+1. Se connecter au dashboard restaurant
+2. Aller sur la page Menu
+3. Scroller pour voir tous les plats
+4. Observer que Pasta Carbonara et certaines pizzas affichent "Menu item" au lieu d'une image
+
+**Comportement attendu** :
+Toutes les images devraient se charger correctement depuis Unsplash.
+
+**Cause probable** :
+- URLs d'images invalides ou expirées dans la base de données
+- Problème de fallback dans le composant image
+- Erreur de chargement non gérée
+
+**Workaround temporaire** :
+Mettre à jour manuellement les URLs des images concernées dans la base de données.
+
+**Fichiers concernés** :
+- `apps/web/src/components/MenuItemCard.tsx`
+- `src/main/resources/import-dev.sql` (données de test)
+
+**Assigné à** : À planifier
+
+---
+
+### BUG-011 : Redirection de port inconsistante (8080 vs 5173)
+**Priorité** : 🟡 Moyen (Info)
+**Status** : 📋 Nouveau
+**Affecte** : Frontend Web, Configuration
+**Date création** : 2026-01-20
+
+**Description** :
+La navigation via `localhost:8080` (Quinoa/backend) redirige parfois vers `localhost:5173` (Vite dev server). Cela crée une inconsistance dans les URLs et peut causer des problèmes de session.
+
+**Impact** :
+- ⚠️ Confusion sur le port à utiliser
+- ⚠️ Potentiels problèmes de cookies/session entre les ports
+- ⚠️ Configuration Keycloak doit gérer les deux ports
+
+**Étapes pour reproduire** :
+1. Accéder à `http://localhost:8080/restaurant`
+2. Se connecter via Keycloak
+3. Naviguer dans l'application
+4. Observer que certaines navigations redirigent vers `localhost:5173`
+
+**Comportement attendu** :
+L'application devrait rester sur un seul port de manière cohérente.
+
+**Cause probable** :
+- Configuration Quinoa qui proxifie vers Vite
+- Redirections codées en dur dans le frontend
+- Configuration CORS/redirect URLs
+
+**Workaround temporaire** :
+Utiliser directement `localhost:5173` pour le développement frontend.
+
+**Fichiers concernés** :
+- `src/main/resources/application.yml` (Quinoa config)
+- `apps/web/vite.config.ts`
+
+**Assigné à** : À planifier
 
 ---
 
@@ -326,7 +431,7 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 ### Bugs par priorité
 - 🔴 Critique : 0 actifs, 5 résolus
 - 🟠 Important : 2 actifs (offline partiel, tests WebSocket), 4 résolus
-- 🟡 Moyen : 2 actifs, 1 résolu
+- 🟡 Moyen : 4 actifs (images optimisation, validation, images menu, ports), 2 résolus
 
 ### Temps moyen de résolution
 - Critique : 5 jours
@@ -334,9 +439,9 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 - Moyen : 2 jours
 
 ### Bugs créés vs résolus (Total)
-- Créés : 12
-- Résolus : 10
-- Taux de résolution : 83%
+- Créés : 15
+- Résolus : 11
+- Taux de résolution : 73%
 
 ---
 
@@ -390,7 +495,8 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 
 ## 📅 Dernière mise à jour
 
-**Date** : 2026-01-16
+**Date** : 2026-01-20
 **Version** : MVP 0.95
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2026-01-23
+**Prochaine revue** : 2026-01-27
+**Derniers bugs ajoutés** : BUG-009, BUG-010, BUG-011 (tests manuels web dashboard)
