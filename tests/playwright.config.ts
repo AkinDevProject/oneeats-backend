@@ -63,29 +63,31 @@ export default defineConfig({
       },
     },
 
-    // Tests Web Dashboard - Chrome (requires authentication)
+    // Tests Web Dashboard - Edge (requires authentication)
     {
       name: 'restaurant-dashboard',
       testMatch: /restaurant\//,
       dependencies: ['setup'], // Run setup first
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chrome', // Use installed Chrome instead of Chromium
-        // Use authenticated session
-        storageState: STORAGE_STATE_PATH,
-        // Paramètres spécifiques pour les tests restaurant
+        channel: 'msedge', // Use Edge for Keycloak compatibility
+        storageState: STORAGE_STATE_PATH, // Use authenticated session
+        extraHTTPHeaders: {}, // Don't override form Content-Type
         actionTimeout: 15000,
         navigationTimeout: 30000,
       },
     },
     
-    // Tests Legacy (à migrer)
+    // Tests Legacy (à migrer) - Requires authentication
     {
       name: 'legacy-tests',
       testMatch: /phase1-dashboard|dashboard-ui/,
+      dependencies: ['setup'], // Run setup first for authentication
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chrome', // Use installed Chrome instead of Chromium
+        channel: 'msedge', // Use Edge for Keycloak compatibility
+        storageState: STORAGE_STATE_PATH, // Use authenticated session
+        extraHTTPHeaders: {}, // Don't override form Content-Type
         actionTimeout: 15000,
         navigationTimeout: 30000,
       },
@@ -103,13 +105,16 @@ export default defineConfig({
       },
     },
     
-    // Tests Intégration complète
+    // Tests Intégration complète - Requires authentication
     {
       name: 'integration',
       testMatch: /integration-complete/,
+      dependencies: ['setup'], // Run setup first for authentication
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chrome', // Use installed Chrome instead of Chromium
+        channel: 'msedge', // Use Edge for Keycloak compatibility
+        storageState: STORAGE_STATE_PATH, // Use authenticated session
+        extraHTTPHeaders: {}, // Don't override form Content-Type
         actionTimeout: 20000,
         navigationTimeout: 30000,
       },

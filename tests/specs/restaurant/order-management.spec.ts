@@ -33,7 +33,9 @@ test.describe('Restaurant Order Management', () => {
       
       // Verify page accessibility
       const pageContent = await page.content();
-      expect(pageContent).toContain('commande' || pageContent).toContain('order' || pageContent).toContain('Order');
+      const hasOrderContent = pageContent.toLowerCase().includes('commande') ||
+                              pageContent.toLowerCase().includes('order');
+      expect(hasOrderContent).toBeTruthy();
       console.log('✅ Orders page accessible');
       
       // Check for order cards

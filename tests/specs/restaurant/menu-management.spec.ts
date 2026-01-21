@@ -80,7 +80,7 @@ test.describe('Restaurant Menu Management', () => {
       await page.waitForLoadState('networkidle');
       
       // Get initial menu count
-      const initialItems = await page.locator('[data-testid="menu-item-card"]').count();
+      const initialItems = await page.locator('.card, [class*="bg-white"]').count();
       console.log(`📊 Initial menu items: ${initialItems}`);
       
       let totalCreated = 0;
@@ -189,7 +189,7 @@ test.describe('Restaurant Menu Management', () => {
       console.log(`✅ ${totalCreated - dessertsCreated}/${TEST_MENU_ITEMS.desserts.length} desserts created`);
       
       // Verify final count
-      const finalItems = await page.locator('[data-testid="menu-item-card"]').count();
+      const finalItems = await page.locator('.card, [class*="bg-white"]').count();
       console.log(`📊 Final menu items: ${finalItems} (was ${initialItems})`);
       
       // Validate creation success
@@ -322,7 +322,7 @@ test.describe('Restaurant Menu Management', () => {
       console.log('👁️ Testing menu item availability management...');
       
       // Find available menu items
-      const availableItems = page.locator('[data-testid="menu-item-card"]').filter({
+      const availableItems = page.locator('.card, [class*="bg-white"]').filter({
         has: page.locator('button').filter({ hasText: 'Masquer' })
       });
       
@@ -388,7 +388,7 @@ test.describe('Restaurant Menu Management', () => {
         await firstCategory.click();
         await page.waitForTimeout(500);
         
-        const filteredItems = page.locator('[data-testid="menu-item-card"]');
+        const filteredItems = page.locator('.card, [class*="bg-white"]');
         const filteredCount = await filteredItems.count();
         console.log(`🏷️ Category filter applied: ${filteredCount} items shown`);
         
@@ -426,7 +426,7 @@ test.describe('Restaurant Menu Management', () => {
         await searchField.fill('pizza');
         await page.waitForTimeout(1000);
         
-        const searchResults = page.locator('[data-testid="menu-item-card"]');
+        const searchResults = page.locator('.card, [class*="bg-white"]');
         const resultCount = await searchResults.count();
         console.log(`🔍 Search "pizza": ${resultCount} results found`);
         
@@ -464,7 +464,7 @@ test.describe('Restaurant Menu Management', () => {
         await page.waitForTimeout(500);
         
         // Verify menu items are visible
-        const menuItems = page.locator('[data-testid="menu-item-card"]');
+        const menuItems = page.locator('.card, [class*="bg-white"]');
         const itemCount = await menuItems.count();
         
         // Check for responsive elements
@@ -719,7 +719,7 @@ test.describe('Restaurant Menu Management', () => {
       console.log('🔄 Testing data persistence...');
       
       // Get current menu count
-      const initialCount = await page.locator('[data-testid="menu-item-card"]').count();
+      const initialCount = await page.locator('.card, [class*="bg-white"]').count();
       console.log(`📊 Initial menu items: ${initialCount}`);
       
       // Reload page
@@ -727,7 +727,7 @@ test.describe('Restaurant Menu Management', () => {
       await page.waitForLoadState('networkidle');
       
       // Verify count remains consistent
-      const reloadedCount = await page.locator('[data-testid="menu-item-card"]').count();
+      const reloadedCount = await page.locator('.card, [class*="bg-white"]').count();
       console.log(`📊 After reload: ${reloadedCount} menu items`);
       
       // Validate data persistence

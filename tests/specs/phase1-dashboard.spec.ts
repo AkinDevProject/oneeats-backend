@@ -1079,7 +1079,9 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Vérifier que nous sommes sur la page commandes
     const pageContent = await page.content();
-    expect(pageContent).toContain('commande' || pageContent).toContain('order' || pageContent).toContain('Order');
+    const hasOrderContent = pageContent.toLowerCase().includes('commande') ||
+                            pageContent.toLowerCase().includes('order');
+    expect(hasOrderContent).toBeTruthy();
     console.log('✅ Page commandes accessible');
     
     // Chercher les commandes affichées (structure Card réelle)
@@ -1858,16 +1860,16 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     // Test récupération après problème réseau
     console.log('🌐 Test récupération réseau...');
     
-    // Aller offline
-    await page.setOfflineMode(true);
+    // Aller offline (Playwright moderne: context.setOffline)
+    await page.context().setOffline(true);
     await page.waitForTimeout(1000);
-    
+
     // Tenter navigation
-    await page.goto('/restaurant/orders');
+    await page.goto('/restaurant/orders').catch(() => {});
     await page.waitForTimeout(2000);
-    
+
     // Revenir online
-    await page.setOfflineMode(false);
+    await page.context().setOffline(false);
     await page.waitForTimeout(1000);
     
     // Vérifier récupération

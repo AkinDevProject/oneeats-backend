@@ -130,7 +130,9 @@
       "Bash(powershell -Command \"$token = \\(Invoke-RestMethod -Uri ''http://localhost:8580/realms/master/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=admin-cli&username=admin&password=admin''\\).access_token; Write-Host ''Admin token obtained''; $users = Invoke-RestMethod -Uri ''http://localhost:8580/admin/realms/oneeats/users?username=restaurant@oneeats.com'' -Headers @{Authorization=\"\"Bearer $token\"\"}; $users | ConvertTo-Json -Depth 3\")",
       "Bash(powershell -Command \"$tokenResp = Invoke-RestMethod -Uri ''http://localhost:8580/realms/master/protocol/openid-connect/token'' -Method POST -ContentType ''application/x-www-form-urlencoded'' -Body ''grant_type=password&client_id=admin-cli&username=admin&password=admin''; Write-Host ''Admin token obtained:'' $tokenResp.access_token.Substring\\(0,20\\)\")",
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run test:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
