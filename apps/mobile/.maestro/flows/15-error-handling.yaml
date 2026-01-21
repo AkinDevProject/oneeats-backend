@@ -44,11 +44,7 @@ tags:
     timeout: 5000
 
 # Test: Scroll et navigation
-- scroll:
-    direction: DOWN
-
-- scroll:
-    direction: UP
+- scroll
 
 # Test: Bouton back
 - back

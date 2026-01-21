@@ -83,7 +83,6 @@ tags:
     timeout: 5000
 
 # Verifier qu'on peut voir les restaurants
-- scroll:
-    direction: DOWN
+- scroll
 
 - takeScreenshot: "04-guest-browsing"

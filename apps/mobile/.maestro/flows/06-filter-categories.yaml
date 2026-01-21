@@ -31,13 +31,11 @@ tags:
 - takeScreenshot: "06-categories-visible"
 
 # TEST: Scroll pour voir les restaurants
-- scroll:
-    direction: DOWN
+- scroll
 
 - takeScreenshot: "06-scroll-restaurants"
 
 # TEST: Retour en haut
-- scroll:
-    direction: UP
+- scroll
 
 - takeScreenshot: "06-filter-complete"

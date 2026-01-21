@@ -31,8 +31,7 @@ tags:
 - takeScreenshot: "07-home-with-restaurants"
 
 # Scroll pour voir les cartes restaurant
-- scroll:
-    direction: DOWN
+- scroll
 
 - takeScreenshot: "07-restaurants-list"
 

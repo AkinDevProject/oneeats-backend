@@ -33,8 +33,7 @@ tags:
 - takeScreenshot: "16-e2e-02-home"
 
 # PHASE 3: Navigation restaurants
-- scroll:
-    direction: DOWN
+- scroll
 
 - takeScreenshot: "16-e2e-03-scroll"
 

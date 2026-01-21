@@ -151,7 +151,13 @@
       "Bash(\"C:/Users/akin_/AppData/Local/Android/Sdk/platform-tools/adb.exe\" shell pm list packages)",
       "Bash(\"C:/Users/akin_/AppData/Local/Android/Sdk/platform-tools/adb.exe\" install -r \"C:/oneeats/android/app/build/outputs/apk/debug/app-debug.apk\")",
       "Bash(\"C:/Users/akin_/.maestro/bin/maestro/bin/maestro.bat\" test \"C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/apps/mobile/.maestro/flows/01-app-launch.yaml\")",
-      "Bash(\"C:/Users/akin_/.maestro/bin/maestro/bin/maestro.bat\" test \"C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/apps/mobile/.maestro/flows/\")"
+      "Bash(\"C:/Users/akin_/.maestro/bin/maestro/bin/maestro.bat\" test \"C:/Users/akin_/Documents/dev/FoodApp/Quarkus/oneeats-backend/apps/mobile/.maestro/flows/\")",
+      "Bash(npm test:*)",
+      "Bash(npx maestro test:*)",
+      "Bash(C:Usersakin_AppDataRoamingnpmmaestro.cmd --version)",
+      "Bash(wsl maestro:*)",
+      "Bash(wsl bash -c \"~/.maestro/bin/maestro --version\")",
+      "Bash(wsl bash:*)"
     ],
     "deny": [],
     "ask": []

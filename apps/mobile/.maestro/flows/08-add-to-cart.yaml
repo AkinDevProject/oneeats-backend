@@ -28,8 +28,7 @@ tags:
     timeout: 15000
 
 # Scroll et ouvrir un restaurant
-- scroll:
-    direction: DOWN
+- scroll
 
 - tapOn:
     text: "Voir le menu"
@@ -44,8 +43,7 @@ tags:
 - takeScreenshot: "08-restaurant-menu"
 
 # Scroll jusqu'au menu
-- scroll:
-    direction: DOWN
+- scroll
 
 # Essayer d'ajouter un article
 - tapOn:

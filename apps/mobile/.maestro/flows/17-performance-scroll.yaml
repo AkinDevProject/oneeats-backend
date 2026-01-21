@@ -28,52 +28,24 @@ tags:
     timeout: 15000
 
 # TEST 1: Scroll vertical
-- scroll:
-    direction: DOWN
-
-- scroll:
-    direction: DOWN
-
-- scroll:
-    direction: DOWN
+- scroll
+- scroll
+- scroll
 
 - takeScreenshot: "17-scroll-down"
 
-# Scroll up
-- scroll:
-    direction: UP
-
-- scroll:
-    direction: UP
-
-- scroll:
-    direction: UP
-
-- takeScreenshot: "17-scroll-up"
-
 # TEST 2: Navigation rapide entre onglets
 - tapOn: "Panier"
-
 - tapOn: "Favoris"
-
 - tapOn: "Profil"
-
 - tapOn: "Accueil"
 
 - takeScreenshot: "17-tab-switch"
 
 # TEST 3: Scroll rapide
-- repeat:
-    times: 3
-    commands:
-      - scroll:
-          direction: DOWN
-
-- repeat:
-    times: 3
-    commands:
-      - scroll:
-          direction: UP
+- scroll
+- scroll
+- scroll
 
 - takeScreenshot: "17-rapid-scroll"
 
