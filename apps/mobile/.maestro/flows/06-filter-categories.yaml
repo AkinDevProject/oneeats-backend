@@ -1,0 +1,197 @@
+# =============================================================================
+# FLOW 06: Filtrage par categories et filtres
+# =============================================================================
+# Teste les filtres de categorie cuisine et les chips de filtre
+# Tags: search, navigation
+# Prerequis: App sur l'ecran d'accueil
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "06 - Filter by Categories"
+tags:
+  - search
+  - navigation
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Acces a l'accueil
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Restaurants"
+        - text: "Continuer sans compte"
+    timeout: 15000
+
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+- extendedWaitUntil:
+    visible: "Catégories"
+    timeout: 10000
+
+# -----------------------------------------------------------------------------
+# TEST 1: Section categories visible
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Catégories"
+
+- takeScreenshot: "06-categories-visible"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Filtrer par categorie Pizza
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "🍕"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Pizza"
+        - text: "résultat"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-pizza"
+
+# -----------------------------------------------------------------------------
+# TEST 3: Filtrer par categorie Burger
+# -----------------------------------------------------------------------------
+- scroll:
+    direction: UP
+
+- tapOn:
+    text: "🍔"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Burger"
+        - text: "résultat"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-burger"
+
+# -----------------------------------------------------------------------------
+# TEST 4: Filtrer par categorie Sushi
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "🍣"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Sushi"
+        - text: "Japonais"
+        - text: "résultat"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-sushi"
+
+# -----------------------------------------------------------------------------
+# TEST 5: Retour a "Tous" (toutes categories)
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Tout"
+      - text: "🍽️"
+      - text: "Tous"
+
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 5000
+
+# -----------------------------------------------------------------------------
+# TEST 6: Utiliser le filtre "Rapide"
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Rapide"
+      - text: "⚡ Rapide"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "résultat"
+        - text: "min"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-quick"
+
+# Desactiver le filtre
+- tapOn:
+    anyOf:
+      - text: "Rapide"
+      - text: "⚡ Rapide"
+
+# -----------------------------------------------------------------------------
+# TEST 7: Utiliser le filtre "Top note"
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Top noté"
+      - text: "⭐ Top noté"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "résultat"
+        - text: "⭐"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-top-rated"
+
+# Desactiver le filtre
+- tapOn:
+    anyOf:
+      - text: "Top noté"
+      - text: "⭐ Top noté"
+
+# -----------------------------------------------------------------------------
+# TEST 8: Utiliser le filtre "Ouvert"
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Ouvert"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "résultat"
+        - text: "Ouvert"
+    timeout: 5000
+
+- takeScreenshot: "06-filter-open"
+
+# Desactiver
+- tapOn:
+    text: "Ouvert"
+
+# -----------------------------------------------------------------------------
+# TEST 9: Combiner plusieurs filtres
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "🍕"
+
+- tapOn:
+    anyOf:
+      - text: "Rapide"
+      - text: "⚡ Rapide"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "résultat"
+        - text: "Pizza"
+        - text: "Aucun"
+    timeout: 5000
+
+- takeScreenshot: "06-combined-filters"

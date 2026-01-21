@@ -1,0 +1,155 @@
+# =============================================================================
+# FLOW 05: Recherche de restaurants
+# =============================================================================
+# Teste la fonctionnalite de recherche de restaurants
+# Tags: search, e2e
+# Prerequis: App sur l'ecran d'accueil
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "05 - Search Restaurants"
+tags:
+  - search
+  - e2e
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Lancement et acces a l'accueil
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Restaurants"
+        - text: "Continuer sans compte"
+    timeout: 15000
+
+# Skip auth si necessaire
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+# Attendre l'accueil
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 10000
+
+# -----------------------------------------------------------------------------
+# TEST 1: Barre de recherche visible
+# -----------------------------------------------------------------------------
+- assertVisible:
+    anyOf:
+      - text: "Rechercher"
+      - text: "Rechercher un restaurant"
+
+- takeScreenshot: "05-search-bar-visible"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Recherche par nom de restaurant
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Rechercher un restaurant"
+      - text: "Rechercher"
+
+- inputText: "Pizza"
+
+# Attendre les resultats
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Pizza"
+        - text: "résultat"
+        - text: "Aucun"
+    timeout: 8000
+
+- takeScreenshot: "05-search-pizza-results"
+
+# -----------------------------------------------------------------------------
+# TEST 3: Verifier les resultats de recherche
+# -----------------------------------------------------------------------------
+- assertVisible:
+    anyOf:
+      - text: "résultat"
+      - text: "Pizza"
+      - text: "Aucun restaurant"
+
+# -----------------------------------------------------------------------------
+# TEST 4: Effacer la recherche
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - id: "clear-search"
+      - text: "✕"
+      - text: "×"
+
+# Verifier le retour a la liste complete
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 5000
+
+# -----------------------------------------------------------------------------
+# TEST 5: Recherche par type de cuisine
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Rechercher un restaurant"
+      - text: "Rechercher"
+
+- inputText: "Sushi"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Sushi"
+        - text: "Japonais"
+        - text: "résultat"
+        - text: "Aucun"
+    timeout: 8000
+
+- takeScreenshot: "05-search-sushi-results"
+
+# -----------------------------------------------------------------------------
+# TEST 6: Recherche sans resultat
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - id: "clear-search"
+      - text: "✕"
+
+- tapOn:
+    anyOf:
+      - text: "Rechercher un restaurant"
+      - text: "Rechercher"
+
+- inputText: "XYZZZZ Restaurant Inexistant"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Aucun"
+        - text: "0 résultat"
+        - text: "pas trouvé"
+    timeout: 5000
+
+- takeScreenshot: "05-search-no-results"
+
+# -----------------------------------------------------------------------------
+# CLEANUP: Effacer et retourner a l'accueil
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - id: "clear-search"
+      - text: "✕"
+      - text: "×"
+
+- hideKeyboard
+
+- tapOn:
+    text: "Accueil"

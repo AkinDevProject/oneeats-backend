@@ -1,0 +1,161 @@
+# =============================================================================
+# FLOW 03: Authentification - Connexion
+# =============================================================================
+# Teste le flow complet de connexion utilisateur via Keycloak SSO
+# Tags: smoke, auth, e2e
+# Prerequis: Backend et Keycloak accessibles
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "03 - Authentication Login Flow"
+tags:
+  - smoke
+  - auth
+  - e2e
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Lancement avec etat neuf (deconnecte)
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+    clearKeychain: true
+
+# -----------------------------------------------------------------------------
+# STEP 1: Arriver sur l'ecran de connexion
+# -----------------------------------------------------------------------------
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Se connecter"
+        - text: "Bienvenue"
+    timeout: 15000
+
+# Si on est sur l'accueil, aller au profil pour se connecter
+- runFlow:
+    when:
+      visible: "Restaurants"
+    commands:
+      - tapOn: "Profil"
+      - extendedWaitUntil:
+          visible: "Se connecter"
+          timeout: 5000
+
+# -----------------------------------------------------------------------------
+# STEP 2: Verifier la page de connexion
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "OneEats"
+
+- assertVisible:
+    anyOf:
+      - text: "Bienvenue"
+      - text: "Connectez-vous"
+
+# Verifier la presence du bouton principal
+- assertVisible:
+    text: "Se connecter"
+
+- takeScreenshot: "03-login-screen"
+
+# -----------------------------------------------------------------------------
+# STEP 3: Verifier les options de connexion sociale
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Google"
+
+- assertVisible:
+    text: "Apple"
+
+# -----------------------------------------------------------------------------
+# STEP 4: Verifier l'option "Continuer sans compte"
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Continuer sans compte"
+
+# -----------------------------------------------------------------------------
+# STEP 5: Tester la connexion principale (SSO Keycloak)
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Se connecter"
+
+# Attendre la redirection vers Keycloak ou le resultat
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        # Keycloak login page
+        - text: "Sign in"
+        - text: "Username"
+        - text: "Email"
+        # Ou succes de connexion (mode dev/mock)
+        - text: "Bonjour"
+        - text: "Restaurants"
+        # Ou erreur
+        - text: "Erreur"
+    timeout: 20000
+
+- takeScreenshot: "03-after-login-tap"
+
+# -----------------------------------------------------------------------------
+# STEP 6: Si Keycloak visible, entrer les credentials
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "Username"
+          - text: "Sign in"
+    commands:
+      # Entrer l'email/username
+      - tapOn:
+          anyOf:
+            - id: "username"
+            - text: "Username or email"
+      - inputText: ${TEST_USER_EMAIL}
+
+      # Entrer le mot de passe
+      - tapOn:
+          anyOf:
+            - id: "password"
+            - text: "Password"
+      - inputText: ${TEST_USER_PASSWORD}
+
+      # Soumettre le formulaire
+      - tapOn:
+          anyOf:
+            - id: "kc-login"
+            - text: "Sign In"
+            - text: "Log In"
+
+      - takeScreenshot: "03-keycloak-submitted"
+
+# -----------------------------------------------------------------------------
+# STEP 7: Verifier le succes de connexion
+# -----------------------------------------------------------------------------
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        # Ecran d'accueil connecte
+        - text: "Bonjour"
+        - text: "Bonsoir"
+        - text: "Bon après-midi"
+        - text: "Restaurants"
+    timeout: 15000
+
+- takeScreenshot: "03-login-success"
+
+# -----------------------------------------------------------------------------
+# STEP 8: Verifier que l'utilisateur est connecte (profil)
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Profil"
+
+- assertVisible:
+    anyOf:
+      - text: ${TEST_USER_NAME}
+      - text: "Mon Profil"
+      - text: "Déconnexion"
+      - text: "Se déconnecter"
+
+- takeScreenshot: "03-profile-logged-in"

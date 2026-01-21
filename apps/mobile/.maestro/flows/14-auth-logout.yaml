@@ -1,0 +1,150 @@
+# =============================================================================
+# FLOW 14: Deconnexion utilisateur
+# =============================================================================
+# Teste le flow de deconnexion et verification de l'etat post-logout
+# Tags: auth, e2e
+# Prerequis: Utilisateur connecte
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "14 - User Logout"
+tags:
+  - auth
+  - e2e
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Verifier la connexion
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Profil"
+        - text: "Restaurants"
+    timeout: 15000
+
+# Aller au profil
+- tapOn:
+    text: "Profil"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Déconnexion"
+        - text: "Se connecter"
+    timeout: 5000
+
+- takeScreenshot: "14-profile-before-logout"
+
+# -----------------------------------------------------------------------------
+# Si connecte, proceder a la deconnexion
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "Déconnexion"
+          - text: "Se déconnecter"
+    commands:
+      # STEP 1: Cliquer sur deconnexion
+      - scroll:
+          direction: DOWN
+
+      - tapOn:
+          anyOf:
+            - text: "Déconnexion"
+            - text: "Se déconnecter"
+
+      - takeScreenshot: "14-logout-tapped"
+
+      # STEP 2: Confirmer si dialog de confirmation
+      - runFlow:
+          when:
+            visible:
+              anyOf:
+                - text: "Confirmer"
+                - text: "Oui"
+                - text: "Déconnecter"
+          commands:
+            - tapOn:
+                anyOf:
+                  - text: "Confirmer"
+                  - text: "Oui"
+                  - text: "Déconnecter"
+                  - text: "OK"
+
+      # STEP 3: Attendre la deconnexion
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "Se connecter"
+              - text: "Connexion"
+              - text: "Bienvenue"
+              - text: "Restaurants"
+          timeout: 10000
+
+      - takeScreenshot: "14-logged-out"
+
+      # STEP 4: Verifier l'etat deconnecte
+      - tapOn:
+          text: "Profil"
+
+      - assertVisible:
+          anyOf:
+            - text: "Se connecter"
+            - text: "Connexion"
+
+      - takeScreenshot: "14-profile-after-logout"
+
+      # STEP 5: Verifier que l'app reste fonctionnelle
+      - tapOn:
+          text: "Accueil"
+
+      - assertVisible:
+          anyOf:
+            - text: "Restaurants"
+            - text: "Catégories"
+
+      # STEP 6: Verifier que le panier est vide apres logout (si applicable)
+      - tapOn:
+          text: "Panier"
+
+      - assertVisible:
+          anyOf:
+            - text: "Votre Panier"
+            - text: "panier est vide"
+            - text: "Total"
+
+      - takeScreenshot: "14-cart-after-logout"
+
+      # STEP 7: Verifier les favoris (doivent demander connexion)
+      - tapOn:
+          text: "Favoris"
+
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "Connectez-vous"
+              - text: "Se connecter"
+              - text: "Aucun favori"
+          timeout: 5000
+
+      - takeScreenshot: "14-favorites-after-logout"
+
+# -----------------------------------------------------------------------------
+# Si deja deconnecte
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible: "Se connecter"
+    commands:
+      - assertVisible:
+          anyOf:
+            - text: "Se connecter"
+            - text: "Connexion"
+      - takeScreenshot: "14-already-logged-out"

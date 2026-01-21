@@ -1,0 +1,242 @@
+# =============================================================================
+# FLOW 12: Gestion des favoris
+# =============================================================================
+# Teste l'ajout/suppression de restaurants favoris
+# Tags: favorites, e2e
+# Prerequis: Utilisateur connecte
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "12 - Favorites Management"
+tags:
+  - favorites
+  - e2e
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Connexion si necessaire
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Se connecter"
+        - text: "Restaurants"
+    timeout: 15000
+
+# Login pour avoir acces aux favoris
+- runFlow:
+    when:
+      visible: "Se connecter"
+    commands:
+      - tapOn: "Se connecter"
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "Restaurants"
+              - text: "Username"
+          timeout: 15000
+      - runFlow:
+          when:
+            visible: "Username"
+          commands:
+            - tapOn: "Username"
+            - inputText: ${TEST_USER_EMAIL}
+            - tapOn: "Password"
+            - inputText: ${TEST_USER_PASSWORD}
+            - tapOn:
+                anyOf:
+                  - text: "Sign In"
+                  - id: "kc-login"
+            - extendedWaitUntil:
+                visible: "Restaurants"
+                timeout: 15000
+
+# Si pas de Keycloak (mode mock), skip auth
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 15000
+
+- takeScreenshot: "12-home-for-favorites"
+
+# -----------------------------------------------------------------------------
+# TEST 1: Ajouter un restaurant aux favoris depuis l'accueil
+# -----------------------------------------------------------------------------
+- scroll:
+    direction: DOWN
+
+# Chercher le bouton coeur sur une carte restaurant
+- tapOn:
+    anyOf:
+      - text: "🤍"
+      - text: "♡"
+      - id: "favorite-button"
+    index: 0
+
+# Verifier le changement d'etat
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "❤️"
+        - text: "♥"
+        - text: "Ajouté aux favoris"
+    timeout: 5000
+
+- takeScreenshot: "12-favorite-added-home"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Verifier dans l'onglet Favoris
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Favoris"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Mes Favoris"
+        - text: "Vos Favoris"
+        - text: "favori"
+    timeout: 5000
+
+# Verifier que le restaurant est liste
+- assertVisible:
+    anyOf:
+      - text: "Restaurant"
+      - text: "⭐"
+      - text: "€"
+
+- takeScreenshot: "12-favorites-list"
+
+# -----------------------------------------------------------------------------
+# TEST 3: Acceder au restaurant depuis les favoris
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "Restaurant"
+      - text: "⭐"
+    index: 0
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Menu"
+        - text: "€"
+        - text: "Ouvert"
+        - text: "Fermé"
+    timeout: 10000
+
+- takeScreenshot: "12-restaurant-from-favorites"
+
+# Retour aux favoris
+- back
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Favoris"
+        - text: "Mes Favoris"
+    timeout: 5000
+
+# -----------------------------------------------------------------------------
+# TEST 4: Supprimer un favori depuis la liste
+# -----------------------------------------------------------------------------
+- tapOn:
+    anyOf:
+      - text: "❤️"
+      - text: "♥"
+      - id: "remove-favorite"
+    index: 0
+
+# Confirmer si dialog
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "Retirer"
+          - text: "Supprimer"
+    commands:
+      - tapOn:
+          anyOf:
+            - text: "Retirer"
+            - text: "Supprimer"
+            - text: "Oui"
+
+- takeScreenshot: "12-favorite-removed"
+
+# -----------------------------------------------------------------------------
+# TEST 5: Verifier l'etat apres suppression
+# -----------------------------------------------------------------------------
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Aucun favori"
+        - text: "Ajoutez vos"
+        - text: "Favoris"
+    timeout: 5000
+
+# -----------------------------------------------------------------------------
+# TEST 6: Ajouter un favori depuis la page restaurant
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Accueil"
+
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 5000
+
+- scroll:
+    direction: DOWN
+
+# Ouvrir un restaurant
+- tapOn:
+    anyOf:
+      - id: "restaurant-card-0"
+      - text: "⭐"
+    index: 0
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Menu"
+        - text: "Ouvert"
+    timeout: 10000
+
+# Ajouter aux favoris depuis la page detail
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "🤍"
+          - id: "favorite-button"
+    commands:
+      - tapOn:
+          anyOf:
+            - text: "🤍"
+            - id: "favorite-button"
+
+      - takeScreenshot: "12-favorite-from-detail"
+
+# Verifier dans les favoris
+- back
+
+- tapOn:
+    text: "Favoris"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Mes Favoris"
+        - text: "restaurant"
+    timeout: 5000
+
+- takeScreenshot: "12-final-favorites"

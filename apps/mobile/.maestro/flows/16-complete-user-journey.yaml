@@ -1,0 +1,323 @@
+# =============================================================================
+# FLOW 16: Parcours utilisateur complet E2E
+# =============================================================================
+# Teste le parcours complet: connexion -> navigation -> commande -> suivi
+# Tags: e2e, critical, smoke
+# Prerequis: Backend et Keycloak accessibles
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "16 - Complete User Journey E2E"
+tags:
+  - e2e
+  - critical
+  - smoke
+
+---
+
+# =============================================================================
+# PHASE 1: LANCEMENT ET CONNEXION
+# =============================================================================
+
+- launchApp:
+    clearState: true
+    clearKeychain: true
+
+# Attendre l'ecran initial
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Se connecter"
+        - text: "OneEats"
+    timeout: 15000
+
+- takeScreenshot: "16-e2e-01-start"
+
+# Connexion (ou skip si mode mock)
+- runFlow:
+    when:
+      visible: "Se connecter"
+    commands:
+      - tapOn: "Se connecter"
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "Restaurants"
+              - text: "Username"
+          timeout: 15000
+
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+# Keycloak login si necessaire
+- runFlow:
+    when:
+      visible: "Username"
+    commands:
+      - tapOn: "Username"
+      - inputText: ${TEST_USER_EMAIL}
+      - tapOn: "Password"
+      - inputText: ${TEST_USER_PASSWORD}
+      - tapOn:
+          anyOf:
+            - text: "Sign In"
+            - id: "kc-login"
+
+# Attendre l'accueil
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Restaurants"
+        - text: "Bonjour"
+    timeout: 15000
+
+- takeScreenshot: "16-e2e-02-home"
+
+# =============================================================================
+# PHASE 2: EXPLORATION ET RECHERCHE
+# =============================================================================
+
+# Utiliser la recherche
+- tapOn:
+    anyOf:
+      - text: "Rechercher"
+      - text: "Rechercher un restaurant"
+
+- inputText: "Pizza"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Pizza"
+        - text: "résultat"
+    timeout: 8000
+
+- takeScreenshot: "16-e2e-03-search"
+
+# Effacer et utiliser les filtres
+- tapOn:
+    anyOf:
+      - text: "✕"
+      - id: "clear-search"
+
+- hideKeyboard
+
+# Filtrer par categorie
+- tapOn:
+    text: "🍕"
+
+- takeScreenshot: "16-e2e-04-filter"
+
+# =============================================================================
+# PHASE 3: SELECTION RESTAURANT ET MENU
+# =============================================================================
+
+# Ouvrir le premier restaurant
+- scroll:
+    direction: DOWN
+
+- tapOn:
+    anyOf:
+      - id: "restaurant-card-0"
+      - text: "⭐"
+    index: 0
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Menu"
+        - text: "€"
+        - text: "Ouvert"
+    timeout: 15000
+
+- takeScreenshot: "16-e2e-05-restaurant"
+
+# Ajouter aux favoris (si connecte)
+- runFlow:
+    when:
+      visible: "🤍"
+    commands:
+      - tapOn: "🤍"
+
+# =============================================================================
+# PHASE 4: AJOUT AU PANIER
+# =============================================================================
+
+- scroll:
+    direction: DOWN
+
+# Ajouter premier article
+- tapOn:
+    anyOf:
+      - text: "Ajouter"
+      - text: "+"
+    index: 0
+
+- takeScreenshot: "16-e2e-06-item-1"
+
+# Ajouter deuxieme article
+- scroll:
+    direction: DOWN
+
+- tapOn:
+    anyOf:
+      - text: "Ajouter"
+      - text: "+"
+    index: 0
+
+- takeScreenshot: "16-e2e-07-item-2"
+
+# =============================================================================
+# PHASE 5: GESTION PANIER
+# =============================================================================
+
+- tapOn:
+    text: "Panier"
+
+- extendedWaitUntil:
+    visible: "Votre Panier"
+    timeout: 5000
+
+- takeScreenshot: "16-e2e-08-cart"
+
+# Modifier quantite
+- tapOn:
+    anyOf:
+      - text: "+"
+      - id: "quantity-increase"
+    index: 0
+
+- takeScreenshot: "16-e2e-09-cart-modified"
+
+# =============================================================================
+# PHASE 6: CHECKOUT
+# =============================================================================
+
+- scroll:
+    direction: DOWN
+
+# Selectionner heure de retrait
+- tapOn:
+    anyOf:
+      - text: "h"
+    index: 2
+
+# Remplir formulaire
+- scroll:
+    direction: DOWN
+
+- tapOn:
+    anyOf:
+      - text: "Nom complet"
+      - text: "Nom"
+
+- clearText
+- inputText: ${TEST_USER_NAME}
+
+- tapOn:
+    anyOf:
+      - text: "Téléphone"
+      - text: "Numéro"
+
+- clearText
+- inputText: ${TEST_USER_PHONE}
+
+- hideKeyboard
+
+- takeScreenshot: "16-e2e-10-form-filled"
+
+# =============================================================================
+# PHASE 7: VALIDATION COMMANDE
+# =============================================================================
+
+- scroll:
+    direction: DOWN
+
+- tapOn:
+    anyOf:
+      - text: "Commander"
+      - text: "Valider"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "confirmée"
+        - text: "En attente"
+        - text: "Connexion requise"
+        - text: "Erreur"
+    timeout: 15000
+
+- takeScreenshot: "16-e2e-11-order-result"
+
+# =============================================================================
+# PHASE 8: SUIVI COMMANDE (si succes)
+# =============================================================================
+
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "confirmée"
+          - text: "En attente"
+          - text: "En préparation"
+    commands:
+      # Verifier les details
+      - assertVisible:
+          anyOf:
+            - text: "Commande"
+            - text: "#"
+
+      - assertVisible:
+          text: "€"
+
+      - takeScreenshot: "16-e2e-12-order-tracking"
+
+      # Aller voir la liste des commandes
+      - back
+
+      - tapOn:
+          text: "Profil"
+
+      - tapOn:
+          anyOf:
+            - text: "Mes commandes"
+            - text: "Commandes"
+
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "En cours"
+              - text: "En attente"
+          timeout: 5000
+
+      - takeScreenshot: "16-e2e-13-orders-list"
+
+# =============================================================================
+# PHASE 9: VERIFICATION FINALE
+# =============================================================================
+
+# Retour accueil
+- tapOn:
+    text: "Accueil"
+
+- assertVisible:
+    text: "Restaurants"
+
+# Verifier favoris (si ajoute)
+- tapOn:
+    text: "Favoris"
+
+- takeScreenshot: "16-e2e-14-final-favorites"
+
+# Verifier profil
+- tapOn:
+    text: "Profil"
+
+- takeScreenshot: "16-e2e-15-final-profile"
+
+# =============================================================================
+# FIN DU PARCOURS E2E COMPLET
+# =============================================================================

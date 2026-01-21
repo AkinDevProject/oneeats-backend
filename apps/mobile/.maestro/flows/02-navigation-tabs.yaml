@@ -1,0 +1,122 @@
+# =============================================================================
+# FLOW 02: Navigation entre les onglets
+# =============================================================================
+# Verifie que la navigation entre les onglets principaux fonctionne
+# Tags: smoke, navigation
+# Prerequis: App lancee
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "02 - Tab Navigation"
+tags:
+  - smoke
+  - navigation
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Lancement et skip auth si necessaire
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Se connecter"
+        - text: "Restaurants"
+    timeout: 15000
+
+# Skip auth si on est sur l'ecran de connexion
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+# Attendre l'ecran d'accueil
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Restaurants"
+        - text: "Bonjour"
+        - text: "Bonsoir"
+    timeout: 10000
+
+# -----------------------------------------------------------------------------
+# TEST 1: Onglet Accueil (par defaut)
+# -----------------------------------------------------------------------------
+- assertVisible:
+    anyOf:
+      - text: "Restaurants à proximité"
+      - text: "Catégories"
+
+- takeScreenshot: "02-tab-home"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Onglet Panier
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Panier"
+
+- assertVisible:
+    text: "Votre Panier"
+    timeout: 5000
+
+# Verifier l'etat vide ou avec articles
+- assertVisible:
+    anyOf:
+      - text: "Votre panier est vide"
+      - text: "Découvrir les restaurants"
+      - text: "article"
+      - text: "Total"
+
+- takeScreenshot: "02-tab-cart"
+
+# -----------------------------------------------------------------------------
+# TEST 3: Onglet Favoris
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Favoris"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Mes Favoris"
+        - text: "Vos Favoris"
+        - text: "Aucun favori"
+        - text: "Connectez-vous"
+    timeout: 5000
+
+- takeScreenshot: "02-tab-favorites"
+
+# -----------------------------------------------------------------------------
+# TEST 4: Onglet Profil
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Profil"
+
+- assertVisible:
+    anyOf:
+      - text: "Mon Profil"
+      - text: "Mon compte"
+      - text: "Se connecter"
+      - text: "Paramètres"
+    timeout: 5000
+
+- takeScreenshot: "02-tab-profile"
+
+# -----------------------------------------------------------------------------
+# TEST 5: Retour a l'accueil
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Accueil"
+
+- assertVisible:
+    anyOf:
+      - text: "Restaurants"
+      - text: "Catégories"
+    timeout: 5000
+
+- takeScreenshot: "02-tab-home-return"

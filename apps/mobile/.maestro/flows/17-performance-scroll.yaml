@@ -1,0 +1,222 @@
+# =============================================================================
+# FLOW 17: Tests de performance et scroll
+# =============================================================================
+# Teste la fluidite du scroll et la reactivite de l'interface
+# Tags: performance, regression
+# Prerequis: Aucun
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "17 - Performance & Scroll Tests"
+tags:
+  - performance
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Continuer sans compte"
+        - text: "Restaurants"
+    timeout: 15000
+
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
+
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 15000
+
+# -----------------------------------------------------------------------------
+# TEST 1: Scroll vertical sur la liste des restaurants
+# -----------------------------------------------------------------------------
+- scroll:
+    direction: DOWN
+
+- scroll:
+    direction: DOWN
+
+- scroll:
+    direction: DOWN
+
+- takeScreenshot: "17-scroll-down-3x"
+
+# Verifier que le contenu s'affiche toujours
+- assertVisible:
+    anyOf:
+      - text: "⭐"
+      - text: "Restaurant"
+      - text: "min"
+
+# Scroll up
+- scroll:
+    direction: UP
+
+- scroll:
+    direction: UP
+
+- scroll:
+    direction: UP
+
+- takeScreenshot: "17-scroll-up-3x"
+
+# Verifier retour en haut
+- assertVisible:
+    anyOf:
+      - text: "Restaurants"
+      - text: "Catégories"
+      - text: "Bonjour"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Scroll horizontal sur les categories
+# -----------------------------------------------------------------------------
+- swipe:
+    start: 90%, 25%
+    end: 10%, 25%
+    duration: 300
+
+- takeScreenshot: "17-categories-swipe"
+
+# Verifier que les categories restent visibles
+- assertVisible:
+    anyOf:
+      - text: "🍕"
+      - text: "🍔"
+      - text: "🍣"
+
+# Swipe back
+- swipe:
+    start: 10%, 25%
+    end: 90%, 25%
+    duration: 300
+
+# -----------------------------------------------------------------------------
+# TEST 3: Scroll rapide (stress test)
+# -----------------------------------------------------------------------------
+- repeat:
+    times: 5
+    commands:
+      - scroll:
+          direction: DOWN
+
+- takeScreenshot: "17-rapid-scroll-down"
+
+- repeat:
+    times: 5
+    commands:
+      - scroll:
+          direction: UP
+
+- takeScreenshot: "17-rapid-scroll-up"
+
+# App doit rester reactive
+- assertVisible:
+    anyOf:
+      - text: "Restaurants"
+      - text: "Catégories"
+
+# -----------------------------------------------------------------------------
+# TEST 4: Scroll dans le menu d'un restaurant
+# -----------------------------------------------------------------------------
+- scroll:
+    direction: DOWN
+
+- tapOn:
+    anyOf:
+      - id: "restaurant-card-0"
+      - text: "⭐"
+    index: 0
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Menu"
+        - text: "€"
+    timeout: 15000
+
+# Scroll dans le menu
+- scroll:
+    direction: DOWN
+
+- scroll:
+    direction: DOWN
+
+- scroll:
+    direction: DOWN
+
+- takeScreenshot: "17-menu-scroll"
+
+# Verifier que les articles sont visibles
+- assertVisible:
+    text: "€"
+
+# Scroll up dans le menu
+- scroll:
+    direction: UP
+
+- scroll:
+    direction: UP
+
+- takeScreenshot: "17-menu-scroll-up"
+
+# Retour
+- back
+
+# -----------------------------------------------------------------------------
+# TEST 5: Navigation rapide entre onglets
+# -----------------------------------------------------------------------------
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          text: "Panier"
+      - tapOn:
+          text: "Favoris"
+      - tapOn:
+          text: "Profil"
+      - tapOn:
+          text: "Accueil"
+
+- takeScreenshot: "17-rapid-tab-switch"
+
+# Verifier stabilite
+- assertVisible:
+    anyOf:
+      - text: "Restaurants"
+      - text: "Accueil"
+
+# -----------------------------------------------------------------------------
+# TEST 6: Pull-to-refresh multiple
+# -----------------------------------------------------------------------------
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          direction: DOWN
+          duration: 300
+      - extendedWaitUntil:
+          visible: "Restaurants"
+          timeout: 5000
+
+- takeScreenshot: "17-multiple-refresh"
+
+# -----------------------------------------------------------------------------
+# FIN: Verification finale de stabilite
+# -----------------------------------------------------------------------------
+- assertVisible:
+    anyOf:
+      - text: "Restaurants"
+      - text: "Catégories"
+      - text: "Accueil"
+
+- takeScreenshot: "17-final-stable"

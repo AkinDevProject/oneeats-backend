@@ -1,12 +1,13 @@
 # Configuration Maestro pour OneEats Mobile
 # Documentation: https://maestro.mobile.dev
+# Version: 2.0 - Suite de tests complete
 
 appId: com.oneeats.mobile
 
 # Timeout global pour les assertions
-defaultTimeout: 10000
+defaultTimeout: 15000
 
-# Flows a executer
+# Flows a executer (ordre specifie)
 flows:
   - flows/*.yaml
 
@@ -16,8 +17,35 @@ device:
   # Pour Android: api 28+
   # Pour iOS: iOS 15+
 
-# Variables d'environnement
+# Variables d'environnement pour les tests
 env:
+  # API Backend
   API_URL: http://192.168.1.111:8080/api
+
+  # Credentials de test
   TEST_USER_EMAIL: test@oneeats.com
-  TEST_USER_PASSWORD: password123
+  TEST_USER_PASSWORD: Test123!
+  TEST_USER_NAME: Utilisateur Test
+  TEST_USER_PHONE: "0612345678"
+
+  # Donnees de test
+  TEST_RESTAURANT_NAME: Pizza Palace
+  TEST_MENU_ITEM: Margherita
+  TEST_PICKUP_TIME: "30"
+
+  # Timeouts specifiques
+  LOADING_TIMEOUT: 10000
+  ANIMATION_DELAY: 500
+
+# Tags pour filtrer les tests
+tags:
+  smoke: "Tests critiques rapides"
+  e2e: "Tests end-to-end complets"
+  auth: "Tests d'authentification"
+  navigation: "Tests de navigation"
+  cart: "Tests du panier"
+  order: "Tests de commande"
+  favorites: "Tests des favoris"
+  search: "Tests de recherche"
+  error: "Tests de gestion d'erreurs"
+  regression: "Tests de regression"

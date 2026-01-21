@@ -1,0 +1,115 @@
+# =============================================================================
+# FLOW 04: Authentification - Mode Invite (Skip)
+# =============================================================================
+# Teste le parcours "Continuer sans compte" pour naviguer en mode invite
+# Tags: smoke, auth
+# Prerequis: Aucun
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "04 - Authentication Skip (Guest Mode)"
+tags:
+  - smoke
+  - auth
+
+---
+
+# -----------------------------------------------------------------------------
+# SETUP: Lancement avec etat neuf
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+    clearKeychain: true
+
+# -----------------------------------------------------------------------------
+# STEP 1: Arriver sur l'ecran de connexion
+# -----------------------------------------------------------------------------
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Se connecter"
+        - text: "Continuer sans compte"
+        - text: "Restaurants"
+    timeout: 15000
+
+# Si deja sur l'accueil, le test passe
+- runFlow:
+    when:
+      visible: "Restaurants"
+    commands:
+      - assertVisible: "Restaurants"
+
+# -----------------------------------------------------------------------------
+# STEP 2: Cliquer sur "Continuer sans compte"
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn:
+          text: "Continuer sans compte"
+
+      - takeScreenshot: "04-skip-tapped"
+
+# -----------------------------------------------------------------------------
+# STEP 3: Verifier la redirection vers l'accueil
+# -----------------------------------------------------------------------------
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Restaurants"
+        - text: "Bonjour"
+        - text: "Catégories"
+    timeout: 10000
+
+- takeScreenshot: "04-guest-home"
+
+# -----------------------------------------------------------------------------
+# STEP 4: Verifier qu'on peut naviguer normalement
+# -----------------------------------------------------------------------------
+# Onglet Panier
+- tapOn:
+    text: "Panier"
+
+- assertVisible:
+    text: "Votre Panier"
+
+# Onglet Favoris
+- tapOn:
+    text: "Favoris"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Favoris"
+        - text: "Connectez-vous"
+        - text: "Aucun favori"
+    timeout: 5000
+
+# Onglet Profil
+- tapOn:
+    text: "Profil"
+
+# En mode invite, on devrait voir l'option de connexion
+- assertVisible:
+    anyOf:
+      - text: "Se connecter"
+      - text: "Connexion"
+      - text: "Mon Profil"
+
+- takeScreenshot: "04-guest-profile"
+
+# -----------------------------------------------------------------------------
+# STEP 5: Retour a l'accueil et verifier la navigation restaurants
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Accueil"
+
+- assertVisible:
+    text: "Restaurants"
+
+# Verifier qu'on peut voir les restaurants
+- scroll:
+    direction: DOWN
+
+- takeScreenshot: "04-guest-browsing"

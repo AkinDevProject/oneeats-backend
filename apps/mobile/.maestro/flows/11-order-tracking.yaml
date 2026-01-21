@@ -1,0 +1,200 @@
+# =============================================================================
+# FLOW 11: Suivi de commande
+# =============================================================================
+# Teste l'affichage du statut et le suivi d'une commande en cours
+# Tags: order, e2e
+# Prerequis: Commande passee
+# =============================================================================
+
+appId: com.oneeats.mobile
+name: "11 - Order Tracking"
+tags:
+  - order
+  - e2e
+  - regression
+
+---
+
+# -----------------------------------------------------------------------------
+# NOTE: Ce flow suppose qu'une commande existe deja
+# En mode test, on peut naviguer vers l'historique
+# -----------------------------------------------------------------------------
+
+- launchApp:
+    clearState: false
+
+# Aller aux commandes
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Profil"
+        - text: "Restaurants"
+    timeout: 15000
+
+# Naviguer vers le profil puis les commandes
+- tapOn:
+    text: "Profil"
+
+- extendedWaitUntil:
+    visible:
+      anyOf:
+        - text: "Mes commandes"
+        - text: "Commandes"
+        - text: "Historique"
+        - text: "Se connecter"
+    timeout: 5000
+
+# Si connecte, aller aux commandes
+- runFlow:
+    when:
+      visible:
+        anyOf:
+          - text: "Mes commandes"
+          - text: "Commandes"
+    commands:
+      - tapOn:
+          anyOf:
+            - text: "Mes commandes"
+            - text: "Commandes"
+
+      - takeScreenshot: "11-orders-list"
+
+      # -----------------------------------------------------------------------------
+      # TEST 1: Verifier la liste des commandes
+      # -----------------------------------------------------------------------------
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "En cours"
+              - text: "Historique"
+              - text: "Aucune commande"
+              - text: "Commande"
+          timeout: 5000
+
+      # -----------------------------------------------------------------------------
+      # TEST 2: Onglets En cours / Historique
+      # -----------------------------------------------------------------------------
+      - assertVisible:
+          anyOf:
+            - text: "En cours"
+            - text: "Actives"
+
+      - assertVisible:
+          anyOf:
+            - text: "Historique"
+            - text: "Passées"
+
+      # -----------------------------------------------------------------------------
+      # TEST 3: Si commandes en cours, verifier le suivi
+      # -----------------------------------------------------------------------------
+      - runFlow:
+          when:
+            visible:
+              anyOf:
+                - text: "En attente"
+                - text: "En préparation"
+                - text: "Prête"
+          commands:
+            # Ouvrir les details de la commande
+            - tapOn:
+                anyOf:
+                  - text: "En attente"
+                  - text: "En préparation"
+                  - text: "Prête"
+                index: 0
+
+            - takeScreenshot: "11-order-details"
+
+            # Verifier les elements de suivi
+            - assertVisible:
+                anyOf:
+                  - text: "Commande"
+                  - text: "#"
+
+            # Statut
+            - assertVisible:
+                anyOf:
+                  - text: "En attente"
+                  - text: "Confirmée"
+                  - text: "En préparation"
+                  - text: "Prête"
+
+            # Restaurant
+            - assertVisible:
+                anyOf:
+                  - text: "Restaurant"
+                  - text: "Chez"
+
+            # Heure
+            - assertVisible:
+                anyOf:
+                  - text: "Retrait"
+                  - text: "h"
+                  - text: ":"
+
+            # Prix
+            - assertVisible:
+                text: "€"
+
+            - takeScreenshot: "11-order-tracking-details"
+
+            # Retour a la liste
+            - back
+
+      # -----------------------------------------------------------------------------
+      # TEST 4: Verifier l'historique
+      # -----------------------------------------------------------------------------
+      - tapOn:
+          anyOf:
+            - text: "Historique"
+            - text: "Passées"
+
+      - extendedWaitUntil:
+          visible:
+            anyOf:
+              - text: "Récupérée"
+              - text: "Terminée"
+              - text: "Annulée"
+              - text: "Aucune commande"
+          timeout: 5000
+
+      - takeScreenshot: "11-orders-history"
+
+      # -----------------------------------------------------------------------------
+      # TEST 5: Si historique existe, ouvrir une commande passee
+      # -----------------------------------------------------------------------------
+      - runFlow:
+          when:
+            visible:
+              anyOf:
+                - text: "Récupérée"
+                - text: "Terminée"
+          commands:
+            - tapOn:
+                anyOf:
+                  - text: "Récupérée"
+                  - text: "Terminée"
+                index: 0
+
+            - takeScreenshot: "11-past-order-details"
+
+            # Verifier option recommander
+            - assertVisible:
+                anyOf:
+                  - text: "Recommander"
+                  - text: "Commander à nouveau"
+
+            - back
+
+# -----------------------------------------------------------------------------
+# Si non connecte, verifier le message
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible: "Se connecter"
+    commands:
+      - assertVisible:
+          anyOf:
+            - text: "connecter"
+            - text: "Connexion"
+      - takeScreenshot: "11-auth-required-orders"
