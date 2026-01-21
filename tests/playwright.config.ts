@@ -51,9 +51,16 @@ export default defineConfig({
 
   projects: [
     // Setup project - runs authentication before dashboard tests
+    // IMPORTANT: Use Edge channel instead of Chromium bundled (Keycloak incompatible with Chromium)
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
+      use: {
+        channel: 'msedge', // Use installed Edge instead of Chromium (BUG-013 fix)
+        // CRITICAL: Do NOT use JSON headers for form submissions to Keycloak
+        // Keycloak expects application/x-www-form-urlencoded, not application/json
+        extraHTTPHeaders: {}, // Override global JSON headers
+      },
     },
 
     // Tests Web Dashboard - Chrome (requires authentication)
@@ -63,6 +70,7 @@ export default defineConfig({
       dependencies: ['setup'], // Run setup first
       use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome', // Use installed Chrome instead of Chromium
         // Use authenticated session
         storageState: STORAGE_STATE_PATH,
         // Paramètres spécifiques pour les tests restaurant
@@ -75,8 +83,9 @@ export default defineConfig({
     {
       name: 'legacy-tests',
       testMatch: /phase1-dashboard|dashboard-ui/,
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome', // Use installed Chrome instead of Chromium
         actionTimeout: 15000,
         navigationTimeout: 30000,
       },
@@ -98,8 +107,9 @@ export default defineConfig({
     {
       name: 'integration',
       testMatch: /integration-complete/,
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome', // Use installed Chrome instead of Chromium
         actionTimeout: 20000,
         navigationTimeout: 30000,
       },
