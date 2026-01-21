@@ -49,6 +49,7 @@ public class AuthService {
     /**
      * Recupere l'utilisateur courant depuis le token JWT.
      * Si l'utilisateur n'existe pas en base, le cree automatiquement (premier login).
+     * Si l'utilisateur existe deja avec le meme email mais sans keycloak_id, lie le compte.
      */
     @Transactional
     public Optional<UserEntity> getCurrentUser() {
@@ -66,11 +67,24 @@ public class AuthService {
             return Optional.empty();
         }
 
-        // Chercher par keycloak_id
+        // 1. Chercher par keycloak_id (utilisateur deja lie)
         Optional<UserEntity> user = userRepository.findByKeycloakId(keycloakId);
 
         if (user.isEmpty()) {
-            // Premier login - creer l'utilisateur depuis les claims Keycloak
+            // 2. Chercher par email (utilisateur existant non lie)
+            String email = getClaimAsString("email");
+            if (email != null) {
+                user = userRepository.findEntityByEmail(email);
+                if (user.isPresent()) {
+                    // Lier le compte Keycloak a l'utilisateur existant
+                    UserEntity existingUser = user.get();
+                    existingUser.setKeycloakId(keycloakId);
+                    userRepository.persist(existingUser);
+                    return user;
+                }
+            }
+
+            // 3. Premier login - creer l'utilisateur depuis les claims Keycloak
             user = Optional.of(createUserFromKeycloak(keycloakId));
         }
 

@@ -92,6 +92,14 @@ public class JpaUserRepository implements IUserRepository {
     }
 
     /**
+     * Trouve un utilisateur par son email.
+     * Retourne l'entite JPA directement pour l'AuthService (liaison compte Keycloak).
+     */
+    public Optional<UserEntity> findEntityByEmail(String email) {
+        return UserEntity.find("email", email).firstResultOptional();
+    }
+
+    /**
      * Persiste une nouvelle entite utilisateur (pour creation depuis Keycloak)
      */
     public void persist(UserEntity entity) {

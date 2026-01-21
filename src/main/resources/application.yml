@@ -22,23 +22,32 @@ quarkus:
       access-control-max-age: 86400
     # Routes protégées (auth)
     auth:
+      # Définition d'une policy custom basée sur les rôles
+      policy:
+        role-policy:
+          roles-allowed: user,restaurant,admin
       permission:
         # Pages web protégées
         restaurant-pages:
           paths: /restaurant/*
-          policy: authenticated
+          policy: role-policy
         admin-pages:
           paths: /admin/*
-          policy: authenticated
+          policy: role-policy
         # API publiques (lecture seule pour mobile)
         api-public-read:
           paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*,/api/menu-items,/api/menu-items/*
           policy: permit
           methods: GET
-        # API protégées (écriture et utilisateurs)
+        # API écriture menu-items
+        api-menu-items-write:
+          paths: /api/menu-items,/api/menu-items/*
+          methods: POST,PUT,DELETE
+          policy: role-policy
+        # API protégées (écriture et utilisateurs authentifiés)
         api-protected:
           paths: /api/*
-          policy: authenticated
+          policy: role-policy
         # Routes publiques
         public-pages:
           paths: /login,/,/callback,/assets/*,/index.html
@@ -99,6 +108,10 @@ quarkus:
     cors:
       enabled: true
 
+  # Désactiver la protection CSRF pour les API REST (les requêtes viennent de JS, pas de formulaires)
+  csrf:
+    enabled: false
+
   # Sécurité OIDC/Keycloak
   oidc:
     # Tenant par défaut: Web (cookies/session)
@@ -120,6 +133,17 @@ quarkus:
     # Configuration des tokens et session
     token:
       issuer: any  # Accepter l'issuer du token (dev)
+      audience: any  # Accepter n'importe quelle audience (dev)
+      refresh-expired: true  # Rafraîchir automatiquement les tokens expirés
+      refresh-token-time-skew: 60s  # Rafraîchir 60s avant expiration
+      # Forcer la validation locale (pas d'introspection)
+      verify-access-token-with-user-info: false
+      principal-claim: preferred_username  # Utiliser le username comme principal
+    introspection-credentials:
+      # Désactiver l'introspection
+      include-client-id: false
+    token-state-manager:
+      split-tokens: true  # Divise access/refresh/id tokens en cookies séparés
     authentication:
       # Redirection après login réussi vers callback qui gère la logique de rôle
       redirect-path: /callback
@@ -161,6 +185,8 @@ quarkus:
       port: 5173
       # Désactiver le proxy WebSocket de Quinoa (HMR direct vers Vite)
       websocket: false
+      # NE PAS proxyer les requêtes API vers Vite - les laisser à Quarkus
+      ignored-path-prefixes: /api,/q,/health,/metrics,/openapi
 
 # Configuration métier OneEats
 oneeats:

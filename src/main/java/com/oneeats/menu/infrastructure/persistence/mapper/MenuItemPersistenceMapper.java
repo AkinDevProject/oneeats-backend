@@ -57,24 +57,32 @@ public class MenuItemPersistenceMapper {
     }
     
     /**
-     * Convertit un modèle de domaine vers une entité JPA
+     * Convertit un modèle de domaine vers une entité JPA (nouvelle entité)
      */
     public MenuItemEntity toEntity(MenuItem domain) {
         if (domain == null) {
             return null;
         }
-        
+
         MenuItemEntity entity = new MenuItemEntity();
-        updateEntityFromDomain(entity, domain);
-        
+        // Ne PAS copier l'ID pour une nouvelle entité - laisser JPA le générer
+        updateEntityFromDomainWithoutId(entity, domain);
+
         return entity;
     }
     
     /**
-     * Met à jour une entité existante avec les données du domaine
+     * Met à jour une entité existante avec les données du domaine (pour update)
      */
     public void updateEntityFromDomain(MenuItemEntity entity, MenuItem domain) {
-        entity.setId(domain.getId());
+        // L'ID est déjà défini sur l'entité existante, ne pas le modifier
+        updateEntityFromDomainWithoutId(entity, domain);
+    }
+
+    /**
+     * Met à jour une entité avec les données du domaine sans toucher à l'ID
+     */
+    private void updateEntityFromDomainWithoutId(MenuItemEntity entity, MenuItem domain) {
         entity.setRestaurantId(domain.getRestaurantId());
         entity.setName(domain.getName().getValue());
         entity.setDescription(domain.getDescription());
@@ -88,7 +96,7 @@ public class MenuItemPersistenceMapper {
         entity.setAllergens(domain.getAllergens().toCommaSeparatedString());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getLastUpdated());
-        
+
         // Conversion des options
         entity.getOptions().clear();
         if (domain.getOptions() != null) {

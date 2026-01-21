@@ -19,11 +19,13 @@ import com.oneeats.menu.application.query.SearchMenuItemsQuery;
 import com.oneeats.menu.application.query.SearchMenuItemsQueryHandler;
 import com.oneeats.menu.application.dto.MenuItemDTO;
 import com.oneeats.shared.domain.exception.EntityNotFoundException;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,7 +38,12 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MenuController {
-    
+
+    private static final Logger LOG = Logger.getLogger(MenuController.class);
+
+    @Inject
+    SecurityIdentity securityIdentity;
+
     @Inject
     CreateMenuItemCommandHandler createMenuItemCommandHandler;
     
@@ -63,10 +70,21 @@ public class MenuController {
     
     @POST
     public Response createMenuItem(@Valid CreateMenuItemCommand command) {
+        // Debug logs pour diagnostic auth
+        LOG.infof("=== POST /api/menu-items called ===");
+        LOG.infof("User authenticated: %s", !securityIdentity.isAnonymous());
+        LOG.infof("User principal: %s", securityIdentity.getPrincipal() != null ? securityIdentity.getPrincipal().getName() : "null");
+        LOG.infof("User roles: %s", securityIdentity.getRoles());
+        LOG.infof("Command received: restaurantId=%s, name=%s",
+            command != null ? command.restaurantId() : "null",
+            command != null ? command.name() : "null");
+
         try {
             MenuItemDTO menuItem = createMenuItemCommandHandler.handle(command);
+            LOG.infof("MenuItem created successfully: %s", menuItem.id());
             return Response.status(Response.Status.CREATED).entity(menuItem).build();
         } catch (Exception e) {
+            LOG.errorf("Error creating menu item: %s", e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Error creating menu item: " + e.getMessage())
                 .build();
