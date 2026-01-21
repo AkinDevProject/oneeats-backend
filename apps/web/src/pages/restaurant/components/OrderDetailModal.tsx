@@ -11,6 +11,9 @@ import { cn, formatPrice } from '../../../lib/utils';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { TimerBadge, useTimerState } from '../../../components/ui/TimerBadge';
 
+// Date constante pour éviter les re-renders quand order est null
+const FALLBACK_DATE = new Date(0);
+
 interface OrderDetailModalProps {
   order: Order | null;
   isOpen: boolean;
@@ -24,8 +27,8 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   onClose,
   onAction
 }) => {
-  // Hook must be called unconditionally - use a default date when no order
-  const { state: timerState } = useTimerState(order?.createdAt || new Date(), 10, 20, 30000);
+  // Hook must be called unconditionally - use a constant fallback date when no order
+  const { state: timerState } = useTimerState(order?.createdAt || FALLBACK_DATE, 10, 20, 30000);
 
   if (!order) return null;
 

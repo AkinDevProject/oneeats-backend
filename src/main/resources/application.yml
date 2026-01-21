@@ -12,11 +12,13 @@ quarkus:
       origins:
         - http://localhost:3000
         - http://localhost:5173
+        - http://localhost:8080   # Frontend servi par Quinoa (same-origin)
         - http://localhost:8081
         - http://192.168.1.111:8080  # IP réseau pour appareils physiques
         - http://10.0.2.2:8080       # Android émulateur
       methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
       headers: accept,authorization,content-type,x-requested-with
+      access-control-allow-credentials: true
       access-control-max-age: 86400
     # Routes protégées (auth)
     auth:
@@ -141,9 +143,9 @@ quarkus:
       token:
         issuer: any
 
-  # Frontend intégration (Quinoa) - Production
+  # Frontend intégration (Quinoa)
   quinoa:
-    enabled: true  # Désactivé par défaut, activé en dev/prod
+    enabled: true
     package-manager: npm
     package-manager-install: false
     build-dir: dist
@@ -153,6 +155,12 @@ quarkus:
     spa-routing: true
     spa-routing-path: "/"
     spa-routing-ignored-paths: "/api/*,/q/*,/health*,/metrics*,/openapi*,/ws/*"
+
+    # Dev server configuration
+    dev-server:
+      port: 5173
+      # Désactiver le proxy WebSocket de Quinoa (HMR direct vers Vite)
+      websocket: false
 
 # Configuration métier OneEats
 oneeats:
