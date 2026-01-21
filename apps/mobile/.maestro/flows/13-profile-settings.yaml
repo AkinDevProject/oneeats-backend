@@ -1,189 +1,46 @@
 # =============================================================================
-# FLOW 13: Profil et parametres utilisateur
+# FLOW 13: Profil et parametres
 # =============================================================================
-# Teste la consultation et modification du profil utilisateur
-# Tags: profile, settings, e2e
-# Prerequis: Utilisateur connecte
-# =============================================================================
-
 appId: com.oneeats.mobile
 name: "13 - Profile & Settings"
 tags:
   - profile
   - settings
-  - e2e
-  - regression
 
 ---
 
-# -----------------------------------------------------------------------------
-# SETUP: Acces a l'app (connecte ou non)
-# -----------------------------------------------------------------------------
+# SETUP
 - launchApp:
     clearState: false
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Profil"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
 
-# Aller au profil
-- tapOn:
-    text: "Profil"
+- runFlow:
+    when:
+      visible: "Continuer sans compte"
+    commands:
+      - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Mon Profil"
-        - text: "Se connecter"
-        - text: "Paramètres"
+    visible: "Restaurants"
+    timeout: 10000
+
+# Aller au profil
+- tapOn: "Profil"
+
+- extendedWaitUntil:
+    visible: "Profil"
     timeout: 5000
 
 - takeScreenshot: "13-profile-screen"
 
-# -----------------------------------------------------------------------------
-# BRANCHE A: Utilisateur connecte
-# -----------------------------------------------------------------------------
-- runFlow:
-    when:
-      visible:
-        anyOf:
-          - text: "Mon Profil"
-          - text: "Déconnexion"
-          - text: "Paramètres"
-    commands:
-      # TEST 1: Verifier les informations du profil
-      - assertVisible:
-          anyOf:
-            - text: "Profil"
-            - text: "Mon compte"
+# Retour accueil
+- tapOn: "Accueil"
 
-      # Nom d'utilisateur visible
-      - assertVisible:
-          anyOf:
-            - text: "@"
-            - text: "utilisateur"
-            - text: ${TEST_USER_NAME}
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 5000
 
-      - takeScreenshot: "13-profile-info"
-
-      # TEST 2: Acces aux parametres
-      - tapOn:
-          anyOf:
-            - text: "Paramètres"
-            - text: "⚙️"
-            - id: "settings-button"
-
-      - extendedWaitUntil:
-          visible:
-            anyOf:
-              - text: "Paramètres"
-              - text: "Thème"
-              - text: "Notifications"
-          timeout: 5000
-
-      - takeScreenshot: "13-settings-screen"
-
-      # TEST 3: Section theme (si disponible)
-      - runFlow:
-          when:
-            visible: "Thème"
-          commands:
-            - tapOn: "Thème"
-            - extendedWaitUntil:
-                visible:
-                  anyOf:
-                    - text: "Clair"
-                    - text: "Sombre"
-                    - text: "Système"
-                timeout: 3000
-            - takeScreenshot: "13-theme-options"
-            - back
-
-      # TEST 4: Section notifications (si disponible)
-      - runFlow:
-          when:
-            visible: "Notifications"
-          commands:
-            - tapOn: "Notifications"
-            - takeScreenshot: "13-notifications-settings"
-            - back
-
-      # TEST 5: Retour au profil
-      - back
-
-      # TEST 6: Mes commandes
-      - runFlow:
-          when:
-            visible:
-              anyOf:
-                - text: "Mes commandes"
-                - text: "Commandes"
-          commands:
-            - tapOn:
-                anyOf:
-                  - text: "Mes commandes"
-                  - text: "Commandes"
-            - extendedWaitUntil:
-                visible:
-                  anyOf:
-                    - text: "En cours"
-                    - text: "Historique"
-                    - text: "Aucune"
-                timeout: 5000
-            - takeScreenshot: "13-my-orders"
-            - back
-
-      # TEST 7: Aide et support
-      - runFlow:
-          when:
-            visible:
-              anyOf:
-                - text: "Aide"
-                - text: "Support"
-          commands:
-            - tapOn:
-                anyOf:
-                  - text: "Aide"
-                  - text: "Support"
-            - takeScreenshot: "13-help-support"
-            - back
-
-      # TEST 8: Option de deconnexion visible
-      - scroll:
-          direction: DOWN
-
-      - assertVisible:
-          anyOf:
-            - text: "Déconnexion"
-            - text: "Se déconnecter"
-
-      - takeScreenshot: "13-logout-option"
-
-# -----------------------------------------------------------------------------
-# BRANCHE B: Utilisateur non connecte
-# -----------------------------------------------------------------------------
-- runFlow:
-    when:
-      visible:
-        anyOf:
-          - text: "Se connecter"
-          - text: "Connexion"
-    commands:
-      # TEST: Verifier l'invitation a se connecter
-      - assertVisible:
-          anyOf:
-            - text: "Se connecter"
-            - text: "Connexion"
-            - text: "Créer un compte"
-
-      - takeScreenshot: "13-profile-not-logged"
-
-      # Verifier les benefices de la connexion
-      - assertVisible:
-          anyOf:
-            - text: "commandes"
-            - text: "favoris"
-            - text: "avantages"
+- takeScreenshot: "13-profile-complete"

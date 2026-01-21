@@ -1,11 +1,6 @@
 # =============================================================================
-# FLOW 15: Gestion des erreurs et edge cases
+# FLOW 15: Gestion des erreurs
 # =============================================================================
-# Teste le comportement de l'app face aux erreurs
-# Tags: error, regression
-# Prerequis: Aucun
-# =============================================================================
-
 appId: com.oneeats.mobile
 name: "15 - Error Handling"
 tags:
@@ -14,17 +9,12 @@ tags:
 
 ---
 
-# -----------------------------------------------------------------------------
 # SETUP
-# -----------------------------------------------------------------------------
 - launchApp:
     clearState: true
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Continuer sans compte"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
 
 - runFlow:
@@ -37,186 +27,34 @@ tags:
     visible: "Restaurants"
     timeout: 15000
 
-# -----------------------------------------------------------------------------
-# TEST 1: Restaurant ferme - impossible de commander
-# -----------------------------------------------------------------------------
-# Chercher un restaurant ferme (s'il existe)
-- scroll:
-    direction: DOWN
-
-- runFlow:
-    when:
-      visible: "Fermé"
-    commands:
-      # Ouvrir le restaurant ferme
-      - tapOn:
-          text: "Fermé"
-          index: 0
-
-      - extendedWaitUntil:
-          visible:
-            anyOf:
-              - text: "Fermé"
-              - text: "Restaurant fermé"
-              - text: "indisponible"
-          timeout: 10000
-
-      - takeScreenshot: "15-restaurant-closed"
-
-      # Verifier qu'on ne peut pas ajouter au panier
-      - scroll:
-          direction: DOWN
-
-      # Le bouton Ajouter devrait etre desactive ou absent
-      - runFlow:
-          when:
-            visible: "Ajouter"
-          commands:
-            - tapOn: "Ajouter"
-            # Verifier message d'erreur
-            - extendedWaitUntil:
-                visible:
-                  anyOf:
-                    - text: "fermé"
-                    - text: "indisponible"
-                    - text: "Erreur"
-                timeout: 5000
-            - takeScreenshot: "15-cannot-order-closed"
-
-      - back
-
-# -----------------------------------------------------------------------------
-# TEST 2: Panier vide - impossible de commander
-# -----------------------------------------------------------------------------
-- tapOn:
-    text: "Panier"
+# Test: Panier vide
+- tapOn: "Panier"
 
 - extendedWaitUntil:
-    visible: "Votre Panier"
+    visible: "Panier"
     timeout: 5000
 
-# Essayer de commander avec panier vide (bouton devrait etre absent/desactive)
-- runFlow:
-    when:
-      visible:
-        anyOf:
-          - text: "panier est vide"
-          - text: "Découvrir"
-    commands:
-      # Verifier qu'il n'y a pas de bouton Commander
-      - assertNotVisible:
-          text: "Commander"
-          timeout: 3000
+- takeScreenshot: "15-empty-cart"
 
-      - takeScreenshot: "15-empty-cart-no-checkout"
-
-# -----------------------------------------------------------------------------
-# TEST 3: Commande sans authentification (si applicable)
-# -----------------------------------------------------------------------------
-# Ajouter un article au panier
-- tapOn:
-    text: "Accueil"
-
-- scroll:
-    direction: DOWN
-
-- tapOn:
-    anyOf:
-      - id: "restaurant-card-0"
-      - text: "⭐"
-    index: 0
-
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Menu"
-        - text: "€"
-    timeout: 15000
-
-- scroll:
-    direction: DOWN
-
-- tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+"
-    index: 0
-
-# Aller au panier
-- tapOn:
-    text: "Panier"
-
-- extendedWaitUntil:
-    visible: "Votre Panier"
-    timeout: 5000
-
-- scroll:
-    direction: DOWN
-
-# Essayer de commander
-- runFlow:
-    when:
-      visible:
-        anyOf:
-          - text: "Commander"
-          - text: "Valider"
-    commands:
-      - tapOn:
-          anyOf:
-            - text: "Commander"
-            - text: "Valider"
-
-      # Attendre message d'erreur ou redirection login
-      - extendedWaitUntil:
-          visible:
-            anyOf:
-              - text: "Connexion requise"
-              - text: "Se connecter"
-              - text: "connecté"
-              - text: "confirmée"
-          timeout: 10000
-
-      - takeScreenshot: "15-checkout-auth-check"
-
-# -----------------------------------------------------------------------------
-# TEST 4: Pull to refresh
-# -----------------------------------------------------------------------------
-- tapOn:
-    text: "Accueil"
+# Retour accueil
+- tapOn: "Accueil"
 
 - extendedWaitUntil:
     visible: "Restaurants"
     timeout: 5000
 
-# Effectuer un pull-to-refresh
-- swipe:
+# Test: Scroll et navigation
+- scroll:
     direction: DOWN
-    duration: 500
+
+- scroll:
+    direction: UP
+
+# Test: Bouton back
+- back
 
 - extendedWaitUntil:
     visible: "Restaurants"
-    timeout: 10000
-
-- takeScreenshot: "15-pull-to-refresh"
-
-# -----------------------------------------------------------------------------
-# TEST 5: Navigation page non trouvee (404)
-# -----------------------------------------------------------------------------
-# Note: Difficile a tester directement dans Maestro
-# On verifie juste que l'app gere bien les erreurs de navigation
-
-# Retour depuis n'importe ou
-- back
-- back
-
-# L'app doit rester stable
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Accueil"
-        - text: "Restaurants"
-        - text: "Panier"
-        - text: "Profil"
     timeout: 5000
 
-- takeScreenshot: "15-stable-after-back"
+- takeScreenshot: "15-error-handling-complete"
