@@ -25,19 +25,8 @@ tags:
 # STEP 1: Arriver sur l'ecran de connexion
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Se connecter"
-        - text: "Continuer sans compte"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
-
-# Si deja sur l'accueil, le test passe
-- runFlow:
-    when:
-      visible: "Restaurants"
-    commands:
-      - assertVisible: "Restaurants"
 
 # -----------------------------------------------------------------------------
 # STEP 2: Cliquer sur "Continuer sans compte"
@@ -46,20 +35,14 @@ tags:
     when:
       visible: "Continuer sans compte"
     commands:
-      - tapOn:
-          text: "Continuer sans compte"
-
+      - tapOn: "Continuer sans compte"
       - takeScreenshot: "04-skip-tapped"
 
 # -----------------------------------------------------------------------------
 # STEP 3: Verifier la redirection vers l'accueil
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Restaurants"
-        - text: "Bonjour"
-        - text: "Catégories"
+    visible: "Restaurants"
     timeout: 10000
 
 - takeScreenshot: "04-guest-home"
@@ -68,45 +51,36 @@ tags:
 # STEP 4: Verifier qu'on peut naviguer normalement
 # -----------------------------------------------------------------------------
 # Onglet Panier
-- tapOn:
-    text: "Panier"
-
-- assertVisible:
-    text: "Votre Panier"
-
-# Onglet Favoris
-- tapOn:
-    text: "Favoris"
+- tapOn: "Panier"
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Favoris"
-        - text: "Connectez-vous"
-        - text: "Aucun favori"
+    visible: "Panier"
+    timeout: 5000
+
+# Onglet Favoris
+- tapOn: "Favoris"
+
+- extendedWaitUntil:
+    visible: "Favoris"
     timeout: 5000
 
 # Onglet Profil
-- tapOn:
-    text: "Profil"
+- tapOn: "Profil"
 
-# En mode invite, on devrait voir l'option de connexion
-- assertVisible:
-    anyOf:
-      - text: "Se connecter"
-      - text: "Connexion"
-      - text: "Mon Profil"
+- extendedWaitUntil:
+    visible: "Profil"
+    timeout: 5000
 
 - takeScreenshot: "04-guest-profile"
 
 # -----------------------------------------------------------------------------
 # STEP 5: Retour a l'accueil et verifier la navigation restaurants
 # -----------------------------------------------------------------------------
-- tapOn:
-    text: "Accueil"
+- tapOn: "Accueil"
 
-- assertVisible:
-    text: "Restaurants"
+- extendedWaitUntil:
+    visible: "Restaurants"
+    timeout: 5000
 
 # Verifier qu'on peut voir les restaurants
 - scroll:

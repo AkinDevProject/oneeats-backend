@@ -48,10 +48,31 @@ async function globalSetup(config: FullConfig) {
       console.log(`⚠️ Menu items endpoint non accessible (auth requise) - test skipped`);
     }
     
-    // Test dashboard Quinoa
-    console.log('🌐 Test dashboard Quinoa...');
-    await page.goto('http://localhost:8080/restaurant/menu', { waitUntil: 'networkidle' });
-    console.log('✅ Dashboard Quinoa OK (:8080/restaurant)');
+    // Test dashboard Quinoa (SPA routing)
+    // NOTE: /restaurant/* requiert authentification, donc on vérifie simplement
+    // que Quinoa répond avec une page HTML (pas une erreur 404/500)
+    console.log('🌐 Test Quinoa SPA routing...');
+
+    // Tester la page d'accueil publique (Quinoa sert index.html)
+    const homeResponse = await page.goto('http://localhost:8080/', { waitUntil: 'domcontentloaded' });
+
+    if (!homeResponse) {
+      throw new Error('❌ Quinoa ne répond pas sur :8080/\n' +
+                     '   Vérifiez que le frontend est bien buildé');
+    }
+
+    const homeStatus = homeResponse.status();
+    if (homeStatus >= 400) {
+      throw new Error(`❌ Quinoa retourne une erreur ${homeStatus} sur :8080/`);
+    }
+
+    // Vérifier que c'est bien du HTML (pas une erreur JSON ou autre)
+    const contentType = homeResponse.headers()['content-type'] || '';
+    if (!contentType.includes('text/html')) {
+      console.log(`⚠️ Content-Type inattendu: ${contentType}`);
+    }
+
+    console.log(`✅ Quinoa SPA OK (:8080/ - status ${homeStatus})`);
     
   } catch (error) {
     console.error('❌ Erreur lors de la vérification des services:', error);

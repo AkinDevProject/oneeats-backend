@@ -1,0 +1,1085 @@
+﻿­ƒÜÇ D├®marrage des tests OneEats E2E...
+­ƒöä V├®rification via API au lieu de connexion DB directe...
+­ƒîÉ V├®rification Quarkus + Quinoa...
+­ƒöù Test API backend...
+Ô£à API backend OK (:8080/api)
+Ô£à Pizza Palace trouv├® via API
+Ô£à 8 plats trouv├®s pour Pizza Palace via API
+­ƒîÉ Test Quinoa SPA routing...
+Ô£à Quinoa SPA OK (:8080/ - status 200)
+­ƒÄ» Setup termin├® - Pr├¬t pour les tests!
+
+Running 80 tests using 1 worker
+
+­ƒöÉ D├®marrage de l'authentification restaurant...
+Ô£à Session valide (expire: 2026-01-21T16:10:17.906Z)
+Ô£à Session existante valide, skip de l'authentification
+Ô£à Session v├®rifi├®e, pas besoin de r├®-authentifier
+  ok  1 [setup] ÔÇ║ specs\auth.setup.ts:139:6 ÔÇ║ authenticate as restaurant user (2.3s)
+­ƒÅ¬ Test API Restaurants
+API Response: 404 Not Found
+Content-Type: 
+Response body (error): 
+Ôä╣´©Å Response not JSON - may be auth redirect or error page
+Ô£à API Restaurants valid├®e
+  ok  2 [api-backend] ÔÇ║ specs\simple-api-tests.spec.ts:6:7 ÔÇ║ Tests API OneEats - Simplifi├®s ÔÇ║ API Restaurants - GET /restaurants (66ms)
+­ƒöì Test API Restaurant d├®tails
+Ôä╣´©Å Restaurant non trouv├® (normal si DB vide)
+Ô£à Test API Restaurant d├®tails valid├®
+  ok  3 [api-backend] ÔÇ║ specs\simple-api-tests.spec.ts:43:7 ÔÇ║ Tests API OneEats - Simplifi├®s ÔÇ║ API Restaurant d├®tails - GET /restaurants/{id} (6ms)
+­ƒì¢´©Å Test API Menu Items
+Ôä╣´©Å Menu items non trouv├®s (normal si DB vide)
+Ô£à Test API Menu Items valid├®
+  ok  4 [api-backend] ÔÇ║ specs\simple-api-tests.spec.ts:60:7 ÔÇ║ Tests API OneEats - Simplifi├®s ÔÇ║ API Menu Items - GET /menu-items/restaurant/{id} (6ms)
+ÔÜí Test Performance API
+ÔÜí API response time: 3ms
+API Status: 404
+Ô£à API Performance valid├®e
+  ok  5 [api-backend] ÔÇ║ specs\simple-api-tests.spec.ts:78:7 ÔÇ║ Tests API OneEats - Simplifi├®s ÔÇ║ API Performance (8ms)
+­ƒôØ Test API Commande
+Ôä╣´©Å Commande ├®chou├®e (erreur utilisateur/auth)
+Ô£à Test API Commande valid├®
+  ok  6 [api-backend] ÔÇ║ specs\simple-api-tests.spec.ts:96:7 ÔÇ║ Tests API OneEats - Simplifi├®s ÔÇ║ API Commande simple (5ms)
+­ƒöÉ Testing session access to restaurant dashboard
+Ô£à Dashboard accessible at: http://localhost:8080/restaurant
+Ô£à Restaurant dashboard content loaded
+Ô£à 1 navigation elements found
+Ô£à Session access test completed
+  ok  7 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:29:9 ÔÇ║ Restaurant Authentication ÔÇ║ Session Management ÔÇ║ should access restaurant dashboard with stored session (2.9s)
+­ƒöä Testing session persistence across navigation
+Ô£à Initial dashboard access confirmed
+Ô£à Session maintained for Menu: /restaurant/menu
+Ô£à Session maintained for Orders: /restaurant/orders
+Ô£à Session maintained for Settings: /restaurant/settings
+Ô£à Session maintained for Dashboard: /restaurant
+Ô£à Session persistence test completed
+  ok  8 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:58:9 ÔÇ║ Restaurant Authentication ÔÇ║ Session Management ÔÇ║ should maintain session across page navigation (14.2s)
+­ƒæñ Testing user information display
+­ƒôè Found 4 user-related indicators
+Ô£à Logout button found
+Ô£à User information test completed
+  ok  9 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:96:9 ÔÇ║ Restaurant Authentication ÔÇ║ Session Management ÔÇ║ should show user information in dashboard (2.6s)
+­ƒøí´©Å Testing access to restaurant features
+Ô£à Restaurant dashboard access authorized
+Ô£à 3 restaurant-specific navigation elements available
+Ô£à Orders page accessible
+Ô£à Menu page accessible
+Ô£à Access control test completed
+  ok 10 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:148:9 ÔÇ║ Restaurant Authentication ÔÇ║ Access Control ÔÇ║ should have access to restaurant-only features (7.1s)
+­ƒÄ¡ Testing role-based UI display
+Ô£à Order actions: 6 elements found
+­ƒôè 1/3 management features found
+Ô£à Role-based UI test completed
+  ok 11 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:194:9 ÔÇ║ Restaurant Authentication ÔÇ║ Access Control ÔÇ║ should display appropriate UI based on user role (2.6s)
+­ƒöÆ Testing protected route access
+Ô£à Dashboard (/restaurant): Accessible
+Ô£à Menu (/restaurant/menu): Accessible
+Ô£à Orders (/restaurant/orders): Accessible
+Ô£à Settings (/restaurant/settings): Accessible
+Ô£à Protected routes test completed
+  ok 12 [restaurant-dashboard] ÔÇ║ specs\restaurant\authentication.spec.ts:234:9 ÔÇ║ Restaurant Authentication ÔÇ║ Protected Routes ÔÇ║ should access all protected restaurant routes (9.1s)
+­ƒô▒ Testing cross-device navigation functionality
+­ƒôÉ Testing Mobile (375x667)
+  Ô£ô 0 menu items, 2 mobile navigation elements
+  Ô£ô 17 action buttons, first button visible: true
+­ƒôÉ Testing Tablet (768x1024)
+  Ô£ô 0 menu items, 2 mobile navigation elements
+  Ô£ô 17 action buttons, first button visible: true
+­ƒôÉ Testing Desktop (1920x1080)
+  Ô£ô 0 menu items, 2 desktop navigation elements
+  Ô£ô 17 action buttons, first button visible: true
+­ƒôÉ Testing Ultrawide (2560x1440)
+  Ô£ô 0 menu items, 2 desktop navigation elements
+  Ô£ô 17 action buttons, first button visible: true
+Ô£à Cross-device navigation test completed
+  ok 13 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:35:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Cross-Device Navigation ÔÇ║ should maintain navigation functionality across all viewport sizes (11.3s)
+­ƒô▒ Testing mobile-specific interactions
+­ƒô▒ Mobile header elements: 7
+­ƒô▒ 21 order elements in mobile layout
+­ƒô▒ 23 form elements in mobile layout
+Ô£à Mobile-specific interactions test completed
+  ok 14 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:87:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Mobile-Specific Interactions ÔÇ║ should provide optimal mobile experience with touch-friendly interactions (6.3s)
+­ƒô▒ Testing mobile menu creation workflow
+­ƒô▒ 1 add buttons available on mobile
+Ô£à Modal opens correctly on mobile
+  Ô£ô 5 form fields in mobile modal
+Ô£à Mobile menu creation workflow test completed
+  ok 15 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:148:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Mobile-Specific Interactions ÔÇ║ should handle mobile menu creation workflow (4.4s)
+­ƒôƒ Testing tablet layout optimization
+­ƒôƒ Tablet-specific elements: 0
+­ƒôƒ Grid/flex layouts: 197
+  Ô£ô /restaurant/menu: Content loaded (OK)
+    1 responsive elements detected
+  Ô£ô /restaurant/orders: Content loaded (OK)
+    1 responsive elements detected
+  Ô£ô /restaurant/settings: Content loaded (OK)
+    0 responsive elements detected
+Ô£à Tablet layout optimization test completed
+  ok 16 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:205:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Tablet Layout Optimization ÔÇ║ should provide optimized tablet experience with appropriate spacing and navigation (8.4s)
+­ƒûÑ´©Å Testing desktop and ultrawide support
+­ƒûÑ´©Å Testing Desktop (1920x1080)
+  Ô£ô 1 large-screen optimized elements
+  Ô£ô Sidebar visibility: Visible
+  Ô£ô 84 elements with hover effects
+­ƒûÑ´©Å Testing Ultrawide (2560x1440)
+  Ô£ô 1 large-screen optimized elements
+  Ô£ô Sidebar visibility: Visible
+  Ô£ô 84 elements with hover effects
+Ô£à Desktop and ultrawide support test completed
+  ok 17 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:250:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Desktop and Ultrawide Support ÔÇ║ should utilize large screen real estate effectively (4.9s)
+ÔÜí Testing performance across device sizes
+ÔÜí Performance test: Mobile
+  Ô£ô Mobile: 2345ms load time, 78 elements
+ÔÜí Performance test: Tablet
+  Ô£ô Tablet: 2161ms load time, 78 elements
+ÔÜí Performance test: Desktop
+  Ô£ô Desktop: 2118ms load time, 78 elements
+ÔÜí Performance test: Ultrawide
+  Ô£ô Ultrawide: 2196ms load time, 78 elements
+­ƒôè Average load time across all viewports: 2205ms
+­ƒôè Element count variance: 0 (78-78)
+Ô£à Performance across devices test completed
+  ok 18 [restaurant-dashboard] ÔÇ║ specs\restaurant\dashboard-responsive.spec.ts:303:9 ÔÇ║ Restaurant Dashboard Responsive Design ÔÇ║ Performance Across Devices ÔÇ║ should maintain good performance across all device sizes (9.4s)
+Ô£à Restaurant dashboard authentication successful
+  ok 19 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:55:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Authentication and Navigation ÔÇ║ should authenticate and access restaurant dashboard (2.9s)
+­ƒôè Initial menu items: 42
+­ƒÑù Creating appetizers...
+­ƒôØ Creating: "Caesar Salad"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+Ô£à Modal opened for "Caesar Salad"
+  Ô£à "Available" checkbox: checked
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Caesar Salad" - no button found
+­ƒôØ Creating: "Bruschetta"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Bruschetta" - no button found
+­ƒôØ Creating: "Soup of the Day"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Soup of the Day" - no button found
+Ô£à 0/3 appetizers created
+­ƒìØ Creating main courses...
+­ƒôØ Creating: "Margherita Pizza"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Margherita Pizza" - no button found
+­ƒôØ Creating: "Carbonara Pasta"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Carbonara Pasta" - no button found
+­ƒôØ Creating: "Classic Burger"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Classic Burger" - no button found
+­ƒôØ Creating: "Grilled Salmon"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Grilled Salmon" - no button found
+Ô£à 0/4 main courses created
+­ƒì░ Creating desserts...
+­ƒôØ Creating: "Tiramisu"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Tiramisu" - no button found
+­ƒôØ Creating: "Cr├¿me Br├╗l├®e"
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+  ÔÜá´©Å button:has-text("Ajouter"):visible not found or not clickable
+  ÔØî Failed to create "Cr├¿me Br├╗l├®e" - no button found
+Ô£à 0/2 desserts created
+­ƒôè Final menu items: 43 (was 42)
+­ƒÄë Menu creation complete: 0/9 items created
+  ok 20 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:78:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Menu Item Creation ÔÇ║ should create complete menu with appetizers, mains, and desserts (37.8s)
+­ƒöº Testing complex menu item creation...
+  ­ƒû▒´©Å Found and clicking: button:has-text("Ajouter"):visible
+Ô£à Complex item modal opened
+Ô£ô Basic information filled
+­ƒöº Looking for options section...
+Ô£à Options section found
+Ô£ô Found "Ajouter une option" button
+Ô£ô Option "Sauce Choice" configured
+Ôä╣´©Å Modal still visible - form validation may have prevented submission
+Ô£à Complex item test completed
+  ok 21 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:204:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Menu Item Creation ÔÇ║ should create menu item with complex options and configurations (16.0s)
+­ƒæü´©Å Testing menu item availability management...
+­ƒì¢´©Å Found 13 available items
+­ƒôØ Testing availability toggle for: "BEVERAGE1 platDisponibleCoca-C..."
+  ÔÜá´©Å Availability change in progress...
+Ô£à Availability management test completed
+  ok 22 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:338:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Availability Management ÔÇ║ should toggle menu item availability and update UI accordingly (4.7s)
+­ƒöì Testing menu search and filtering...
+­ƒöì Testing search functionality...
+  Ô£ô Using search field: input[placeholder*="Rechercher"]
+­ƒöì Search "pizza": 30 results found
+Ô£à Search and filtering test completed
+  ok 23 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:398:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Search and Filtering ÔÇ║ should filter menu items by category and search terms (5.1s)
+­ƒô▒ Testing responsive design...
+­ƒôÉ Testing Mobile (375x667)
+  Ô£ô 42 menu items visible, 1 responsive elements detected
+  Ô£ô 9 action buttons accessible on mobile
+­ƒôÉ Testing Tablet (768x1024)
+  Ô£ô 42 menu items visible, 1 responsive elements detected
+­ƒôÉ Testing Desktop (1920x1080)
+  Ô£ô 42 menu items visible, 1 responsive elements detected
+Ô£à Responsive design test completed
+  ok 24 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:468:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Responsive Design ÔÇ║ should maintain functionality across mobile, tablet, and desktop viewports (4.2s)
+­ƒöì Testing form validation...
+  ­ƒû▒´©Å Using: button:has-text("Ajouter"):visible
+Ô£à Validation modal opened
+­ƒö© Testing empty form submission...
+  Ô£à Empty form submission prevented
+  Ô£ô Found 0 validation error indicators
+­ƒö© Testing invalid price validation...
+  Ô£à Negative price validation working
+  Ô£à Zero price validation working
+  Ô£à Extreme price validation working
+­ƒö© Testing character limits...
+­ƒö© Testing special character handling...
+Ô£à Form validation test completed
+  ok 25 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:517:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Form Validation ÔÇ║ should validate required fields and show error messages (9.0s)
+­ƒö© Testing partial form submission...
+  ­ƒû▒´©Å Using: button:has-text("Ajouter"):visible
+  Ô£à Incomplete form submission prevented
+Ô£à Partial form validation test completed
+  ok 26 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:660:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Form Validation ÔÇ║ should handle form submission with missing required fields (5.9s)
+­ƒöä Testing data persistence...
+­ƒôè Initial menu items: 42
+­ƒôè After reload: 42 menu items
+Ô£à Data persistence validated
+  ok 27 [restaurant-dashboard] ÔÇ║ specs\restaurant\menu-management.spec.ts:735:9 ÔÇ║ Restaurant Menu Management ÔÇ║ Data Persistence ÔÇ║ should persist menu changes across page reloads (4.8s)
+­ƒôï Testing order display and navigation
+Ô£à Orders page accessible
+­ƒôè Found 4 orders in interface
+Ô£à Orders are displayed
+  Ô£ô Status tab "En attente" found
+  Ô£ô Navigation to "En attente" tested
+  Ô£ô Status tab "En cours" found
+  Ô£ô Status tab "Pr├¬tes" found
+  Ô£ô Status tab "R├®cup├®r├®es" found
+  Ô£ô Status tab "Annul├®es" found
+Ô£à 5 status tabs available
+Ô£à Order search functionality tested
+Ô£à Order display and navigation test completed
+  ok 28 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:27:9 ÔÇ║ Restaurant Order Management ÔÇ║ Order Display and Navigation ÔÇ║ should display orders and provide filtering capabilities (4.8s)
+­ƒÄø´©Å Testing order actions and dashboard customization
+­ƒôè Found 6 order action buttons
+Ô£à Order action buttons are available
+  Ô£ô Testing action button: "En coursCours3"
+  Ô£ô Action button is interactive
+­ƒÄ¿ Testing dashboard design selector...
+Ôä╣´©Å Design selector not found or not accessible
+Ô£à Order actions and customization test completed
+  ok 29 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:100:9 ÔÇ║ Restaurant Order Management ÔÇ║ Order Actions and Status Management ÔÇ║ should provide order action buttons and dashboard customization (2.6s)
+­ƒöº Testing API error handling
+­ƒö© Testing 500 error handling...
+­ƒöº Intercepting API call: http://localhost:8080/api/auth/me
+­ƒöº Intercepting API call: http://localhost:8080/api/auth/me
+­ƒöº Intercepting API call: http://localhost:8080/api/restaurants/11111111-1111-1111-1111-111111111111
+­ƒöº Intercepting API call: http://localhost:8080/api/restaurants/11111111-1111-1111-1111-111111111111
+­ƒöº Intercepting API call: http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111
+­ƒöº Intercepting API call: http://localhost:8080/api/menu-items/restaurant/11111111-1111-1111-1111-111111111111
+  Ô£à Error message displayed to user
+  Ô£à Interface remains functional with 2 navigation options
+­ƒö© Testing error recovery...
+  Ô£à Application recovered successfully
+Ô£à API error handling test completed
+  ok 30 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:171:9 ÔÇ║ Restaurant Order Management ÔÇ║ API Error Handling ÔÇ║ should handle API errors gracefully when backend is disconnected (10.6s)
+ÔÅ│ Testing slow API response handling
+­ƒöº Simulating slow API response...
+­ƒöº Simulating slow API response...
+  Ô£à Loading indicator shown during slow response
+­ƒôè Page loaded in 7311ms with simulated delay
+Ô£à Page functionality maintained after slow API response
+Ô£à Slow API response test completed
+  ok 31 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:250:9 ÔÇ║ Restaurant Order Management ÔÇ║ API Error Handling ÔÇ║ should handle slow API responses and loading states (7.7s)
+­ƒîÉ Testing network disconnection handling
+­ƒö© Simulating network disconnection...
+  Ô£ô Button interaction attempted during disconnection
+  Ô£à Offline state properly handled
+  Ô£à 6 UI elements remain visible offline
+­ƒö© Restoring network connectivity...
+Ô£à Network disconnection test completed
+  ok 32 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:297:9 ÔÇ║ Restaurant Order Management ÔÇ║ API Error Handling ÔÇ║ should handle network disconnection gracefully (10.6s)
+ÔÜí Testing performance and rapid navigation
+  Ô£ô Navigation 1/5: /restaurant/orders
+  Ô£ô Navigation 2/5: /restaurant/menu
+  Ô£ô Navigation 3/5: /restaurant/orders
+  Ô£ô Navigation 4/5: /restaurant/settings
+  Ô£ô Navigation 5/5: /restaurant/orders
+­ƒôè Rapid navigation completed in 10146ms
+­ƒôè 21 order elements rendered after rapid navigation
+  x  33 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:365:9 ÔÇ║ Restaurant Order Management ÔÇ║ Real-time Updates and Performance ÔÇ║ should handle rapid navigation and maintain performance (10.9s)
+­ƒöä Testing real-time order updates
+­ƒôè Initial orders: 0
+­ƒö© Simulating new order arrival...
+­ƒôè Orders after update: 0
+  Ôä╣´©Å Real-time update indicators could be enhanced
+Ô£à Real-time order update test completed
+  ok 34 [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:404:9 ÔÇ║ Restaurant Order Management ÔÇ║ Real-time Updates and Performance ÔÇ║ should update orders in real-time when new orders arrive (5.2s)
+ÔÜÖ´©Å Testing restaurant profile configuration
+Ô£à Settings page accessible
+­ƒôè Found 23 configuration fields
+  Ô£ô Restaurant name field found: "Pizza Palace..."
+  Ô£ô Description field found
+  Ô£ô Phone field found
+Ô£à Found 1 availability toggles
+  Ô£ô Availability toggle is interactive
+  Ô£ô Save button: inactive
+Ô£à Profile configuration interface functional
+Ô£à Profile configuration test completed
+  ok 35 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:27:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Profile Configuration ÔÇ║ should display and allow modification of restaurant profile (2.6s)
+­ƒû╝´©Å Testing restaurant image upload
+Ô£à Image upload interface found
+  Ô£ô Current image preview: http://localhost:8080/api/proxy/image?url=https%3A...
+  Ô£ô File input: enabled
+Ô£à Image upload interface functional
+  ok 36 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:115:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Image Management ÔÇ║ should handle restaurant image upload with preview and validation (2.5s)
+­ƒùæ´©Å Testing restaurant image deletion
+Ô£à Image delete button found
+  Ô£ô Delete button: enabled
+  Ô£ô Delete confirmation mechanism available
+Ô£à Image deletion interface functional
+  ok 37 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:148:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Image Management ÔÇ║ should handle image deletion with confirmation (2.7s)
+­ƒîÉ Testing external image proxy functionality
+  Ô£ô Proxied image found: http://localhost:8080/api/proxy/image?url=https%3A...
+Ô£à Image proxy functionality working
+  ok 38 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:171:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Image Management ÔÇ║ should handle external image proxy for CORS-blocked URLs (2.6s)
+­ƒôà Testing operating hours configuration
+  ­ƒôà Lundi configuration found
+  ­ƒôà Mardi configuration found
+  ­ƒôà Mercredi configuration found
+  ­ƒôà Jeudi configuration found
+  ­ƒôà Vendredi configuration found
+  ­ƒôà Samedi configuration found
+  ­ƒôà Dimanche configuration found
+Ô£à Operating hours configuration test completed
+  ok 39 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:204:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Operating Hours Configuration ÔÇ║ should configure opening hours for each day of the week (2.6s)
+­ƒÆ¥ Testing schedule persistence and data integrity
+­ƒôà Testing Monday schedule persistence
+  Ô£ô Initial Monday state: OUVERT
+  Ô£ô After toggle: FERM├ë
+  Ô£ô Save button enabled: true
+  Ô£ô Save button clicked
+  Ô£ô Monday state after reload: OUVERT
+ÔÜá´©Å Schedule persistence issue - changes not saved
+  ok 40 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:261:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Operating Hours Configuration ÔÇ║ should persist schedule changes and verify data integrity (8.5s)
+­ƒôï Testing data mapping and API integration
+­ƒôï Verifying data mapping...
+  Ô£à cuisineType ÔåÆ category mapping: "PIZZA"
+  Ô£à isOpen ÔåÆ status mapping detected
+  Ô£à Schedule defaults generated automatically
+    Ô£ô 5 fields have default values
+  ­ƒôè 23 form fields detected
+    Ô£ô 6 fields populated from API
+  Ô£à Bidirectional synchronization working
+Ô£à Data mapping and API integration test completed
+  ok 41 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:344:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Data Mapping and API Integration ÔÇ║ should properly map API data to UI fields (3.5s)
+­ƒöä Testing frontend-backend synchronization
+  ­ƒôè Initial status: OUVERT
+Ô£à Status toggle triggered API call
+­ƒôè Total API calls monitored: 1
+Ô£à Frontend-backend synchronization test completed
+  ok 42 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:417:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Data Mapping and API Integration ÔÇ║ should synchronize frontend state with backend responses (4.0s)
+­ƒÄø´©Å Testing smart button behavior
+­ƒöì Testing initial button state (no changes)
+  ­ƒôè Save button initially: disabled - "Enregistrer"
+  ­ƒôè Cancel button initially: disabled - "Annuler"
+­ƒöì Making a change to test button activation
+  ­ƒôè Save button after change: enabled - "Enregistrer"
+  ­ƒôè Cancel button after change: enabled - "Annuler"
+Ô£à Buttons activated when changes detected - text changed to "Enregistrer"
+Ô£à Cancel button successfully reverted changes
+  ­ƒôè Save button after cancel: disabled - "Enregistrer"
+Ô£à Smart button behavior test completed
+  ok 43 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:510:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Smart Button Behavior ÔÇ║ should enable/disable buttons based on form changes (3.6s)
+­ƒøá´©Å Testing error handling and recovery
+ÔÜá´©Å Error state detected, testing recovery
+  Ô£ô Settings interface loaded with 33 interactive elements
+Ô£à Interface degradation handling functional
+Ô£à Error handling and recovery test completed
+  ok 44 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:605:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Error Handling and Recovery ÔÇ║ should handle configuration errors gracefully (2.5s)
+­ƒöÑ Testing hot reload and development stability
+­ƒôè Initial form elements: 23
+  Ô£ô Captured input_0: "Pizza Palace..."
+  Ô£ô Captured input_1: "PIZZA..."
+  Ô£ô Captured input_2: "contact@pizzapalace...."
+  Ô£ô Captured input_3: "0123456789..."
+  Ô£ô Captured input_4: "123 Rue de la Pizza..."
+­ƒö© Simulating development hot reload...
+­ƒôè After hot reload: 23 form elements
+Ô£à 33 functional elements after hot reload
+Ô£à Hot reload stability test completed
+  ok 45 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:656:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Regression Tests ÔÇ║ should handle hot reload and maintain state during development (6.6s)
+­ƒöù Testing URL persistence and navigation state
+­ƒö© Testing route: /restaurant/settings
+  Ô£à URL correctly navigated to /restaurant/settings
+  Ô£à URL persisted after refresh
+­ƒö© Testing route: /restaurant/menu
+  Ô£à URL correctly navigated to /restaurant/menu
+  Ô£ô Back navigation: /settings
+  Ô£à Forward navigation restored
+  Ô£à URL persisted after refresh
+­ƒö© Testing route: /restaurant/orders
+  Ô£à URL correctly navigated to /restaurant/orders
+  Ô£ô Back navigation: /menu
+  Ô£à Forward navigation restored
+  Ô£à URL persisted after refresh
+­ƒö© Testing route: /restaurant/settings#profile
+  Ô£à URL correctly navigated to /restaurant/settings
+  Ô£ô Back navigation: /orders
+  Ô£à Forward navigation restored
+  Ô£à URL persisted after refresh
+  Ô£à Hash fragment handling detected
+­ƒö© Testing route: /restaurant/settings#hours
+  Ô£à URL correctly navigated to /restaurant/settings
+  Ô£ô Back navigation: /settings#profile
+  Ô£à Forward navigation restored
+  Ô£à URL persisted after refresh
+  Ô£à Hash fragment handling detected
+Ô£à URL persistence and navigation test completed
+  ok 46 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:726:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Regression Tests ÔÇ║ should maintain URL persistence and navigation state (24.7s)
+ÔÜí Testing concurrent navigation stability
+­ƒö© Testing rapid navigation sequence...
+­ƒôè Completed rapid navigation in 14049ms
+Ô£à Final state stable: /orders
+Ô£à 28 interactive elements responsive after rapid navigation
+­ƒôè Performance metrics - DOM: 0.10000000149011612ms, Load: 0ms
+Ô£à Performance maintained after stress testing
+Ô£à Concurrent navigation stability test completed
+  ok 47 [restaurant-dashboard] ÔÇ║ specs\restaurant\restaurant-settings.spec.ts:791:9 ÔÇ║ Restaurant Settings Management ÔÇ║ Regression Tests ÔÇ║ should handle concurrent navigation and prevent race conditions (15.0s)
+­ƒîÉ Test UI.1 : Acc├¿s et navigation dashboard
+Ô£à Test UI.1 : Dashboard accessible et charg├®
+  ok 48 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:11:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.1 : Acc├¿s et navigation dashboard (2.8s)
+­ƒì¢´©Å Test UI.2 : Affichage des plats existants
+­ƒôè 13 ├®l├®ments trouv├®s dans l'interface
+Ô£à Test UI.2 : Plats affich├®s dans l'interface
+  ok 49 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:27:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.2 : Affichage des plats existants (2.9s)
+­ƒû▒´©Å Test UI.3 : Interaction basique
+­ƒöÿ 64 ├®l├®ments interactifs trouv├®s
+Ô£à Test UI.3 : Interface interactive et responsive
+  ok 50 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:49:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.3 : Interaction basique avec l'interface (5.9s)
+­ƒô▒ Test UI.4 : Responsive et layout
+Ô£à Layout OK sur 1920x1080
+Ô£à Layout OK sur 1024x768
+Ô£à Layout OK sur 375x667
+Ô£à Test UI.4 : Responsive valid├®
+  ok 51 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:73:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.4 : V├®rification responsive et layout (4.8s)
+ÔÜí Test UI.5 : Performance dashboard
+ÔÅ▒´©Å Temps de chargement: 2706ms
+­ƒÉø 0 erreurs JS critiques d├®tect├®es
+Ô£à Test UI.5 : Performance dashboard valid├®e
+  ok 52 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:100:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.5 : Performance et temps de chargement (9.1s)
+­ƒº¡ Test UI.6 : Navigation dashboard
+Ô£à Page accessible: /restaurant/orders
+Ô£à Page accessible: /restaurant/settings
+Ô£à Page accessible: /restaurant
+Ô£à Test UI.6 : Navigation test├®e
+  ok 53 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:143:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.6 : Navigation entre pages (30.3s)
+­ƒöä Test UI.7 : Transitions statuts commandes
+­ƒôè Statuts trouv├®s:
+  ­ƒôï En attente: 4
+  ­ƒì│ En pr├®paration: 0
+  ­ƒôª Pr├¬te: 2
+  Ô£à R├®cup├®r├®e: 2
+­ƒôê Total commandes: 8
+­ƒöÿ Boutons "Accepter/Pr├®parer" trouv├®s: 3
+­ƒöÿ Boutons "R├®cup├®r├®e/Compl├®t├®" trouv├®s: 1
+­ƒöÿ Boutons "Refuser/Annuler" trouv├®s: 3
+Ô£à Test UI.7 : Pr├®sence des statuts et boutons valid├®e
+  ok 54 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:190:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.7 : Gestion des commandes - Transitions de statuts (12.6s)
+ÔØî Test UI.8 : Annulation de commande
+­ƒôè 21 commandes totales, 2 compl├®t├®es, 19 annulables
+­ƒöÿ 3 boutons d'annulation trouv├®s
+Ô£à Syst├¿me d'annulation pr├®sent et fonctionnel
+Ô£à Test UI.8 : Test d'annulation termin├®
+  ok 55 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:241:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.8 : Annulation de commande (13.3s)
+­ƒôï Test UI.9 : Modal d├®tail commande
+­ƒÄ» Premi├¿re commande trouv├®e - Ouverture du d├®tail
+Ôä╣´©Å Modal/Page de d├®tail non trouv├®e
+Ô£à Test UI.9 : Test modal d├®tail termin├®
+  ok 56 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:274:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.9 : Modal d├®tail commande (16.3s)
+ÔÅ▒´©Å Test UI.10 : Timer et indicateurs d'urgence
+ÔÅ░ Pattern temporel 1 d├®tect├®
+ÔÅ░ Pattern temporel 2 d├®tect├®
+ÔÅ░ Pattern temporel 3 d├®tect├®
+ÔÅ░ Pattern temporel 4 d├®tect├®
+­ƒôè 4 types d'├®l├®ments temporels d├®tect├®s
+­ƒÄ¿ 0 ├®l├®ments color├®s trouv├®s
+­ƒÅÀ´©Å 0 badges/pills trouv├®s
+Ô£à Syst├¿me de timer/urgence d├®tect├® dans l'interface
+Ô£à Test UI.10 : Test timer/urgence termin├®
+  ok 57 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:337:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.10 : Timer et indicateurs d'urgence (15.9s)
+­ƒöÿ Test UI.11 : Boutons d'action selon statut
+­ƒöÿ 24 boutons totaux trouv├®s sur la page
+Ô£à 3 bouton(s) "Accepter/Pr├®parer" trouv├®(s)
+Ô£à 1 bouton(s) "Pr├¬t/Termin├®" trouv├®(s)
+Ô£à 1 bouton(s) "R├®cup├®r├®/Compl├®t├®" trouv├®(s)
+Ô£à 3 bouton(s) "Refuser/Annuler" trouv├®(s)
+Ô£à 3 bouton(s) "Voir d├®tails" trouv├®(s)
+­ƒÅÀ´©Å 0 badges de statut trouv├®s
+­ƒÄ¿ 0 ├®l├®ments color├®s (statuts) trouv├®s
+Ô£à 11 boutons d'action d├®tect├®s - Interface interactive
+Ô£à Test UI.11 : Test boutons d'action termin├®
+  ok 58 [legacy-tests] ÔÇ║ specs\dashboard-ui.spec.ts:383:7 ÔÇ║ Dashboard Restaurant - Interface UI ÔÇ║ Test UI.11 : Boutons d'action selon statut (15.9s)
+­ƒöÉ Test 0.1 : Connexion Dashboard Restaurant
+Ô£à Page de login accessible
+ÔÜá´©Å Redirection non d├®tect├®e, test en mode v├®rification
+  x  59 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:7:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 0.1 : Connexion Dashboard Restaurant (20.5s)
+­ƒìò Test 1.1 : Cr├®ation d'un menu complet
+Ô£à Dashboard menu accessible
+­ƒôè 42 plats existants au d├®but
+­ƒÑù Cr├®ation des 3 entr├®es...
+­ƒôØ Cr├®ation de "Salade C├®sar"...
+Ô£à Modal ouverte pour "Salade C├®sar"
+  Ô£à "Disponible" : coch├®
+Ô£à Modal ouverte pour "Salade C├®sar"
+Ô£à Modal ouverte pour "Salade C├®sar"
+Ô£à Modal ouverte pour "Salade C├®sar"
+  ÔØî ├ëchec cr├®ation "Salade C├®sar" - modal non accessible
+­ƒôØ Cr├®ation de "Bruschetta"...
+  ÔØî ├ëchec cr├®ation "Bruschetta" - modal non accessible
+­ƒôØ Cr├®ation de "Soupe du jour"...
+Ô£à Modal ouverte pour "Soupe du jour"
+  Ô£à "Disponible" : coch├®
+Ô£à Modal ouverte pour "Soupe du jour"
+Ô£à Modal ouverte pour "Soupe du jour"
+Ô£à Modal ouverte pour "Soupe du jour"
+  ÔØî ├ëchec cr├®ation "Soupe du jour" - modal non accessible
+Ô£à 0/3 entr├®es cr├®├®es
+­ƒìØ Cr├®ation des 4 plats principaux...
+­ƒôØ Cr├®ation de "Pizza Margherita"...
+  ÔØî ├ëchec cr├®ation "Pizza Margherita" - modal non accessible
+­ƒôØ Cr├®ation de "Pasta Carbonara"...
+Ô£à Modal ouverte pour "Pasta Carbonara"
+  Ô£à "Disponible" : coch├®
+Ô£à Modal ouverte pour "Pasta Carbonara"
+Ô£à Modal ouverte pour "Pasta Carbonara"
+Ô£à Modal ouverte pour "Pasta Carbonara"
+  ÔØî ├ëchec cr├®ation "Pasta Carbonara" - modal non accessible
+­ƒôØ Cr├®ation de "Burger Classic"...
+  ÔØî ├ëchec cr├®ation "Burger Classic" - modal non accessible
+­ƒôØ Cr├®ation de "Saumon grill├®"...
+Ô£à Modal ouverte pour "Saumon grill├®"
+  Ô£à "Disponible" : coch├®
+Ô£à Modal ouverte pour "Saumon grill├®"
+Ô£à Modal ouverte pour "Saumon grill├®"
+Ô£à Modal ouverte pour "Saumon grill├®"
+  ÔØî ├ëchec cr├®ation "Saumon grill├®" - modal non accessible
+Ô£à 0/4 plats principaux cr├®├®s
+­ƒì░ Cr├®ation des 2 desserts...
+­ƒôØ Cr├®ation de "Tiramisu"...
+  ÔØî ├ëchec cr├®ation "Tiramisu" - modal non accessible
+­ƒôØ Cr├®ation de "Cr├¿me br├╗l├®e"...
+Ô£à Modal ouverte pour "Cr├¿me br├╗l├®e"
+  Ô£à "Disponible" : coch├®
+  x  60 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:76:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.1 : Cr├®ation d'un menu complet (1.0m)
+­ƒæü´©Å Test 1.2 : Gestion de la disponibilit├®
+Ô£à Dashboard menu accessible
+­ƒôè 42 plats dans l'interface
+­ƒöì S├®lection de 2 plats pour tester la disponibilit├®...
+­ƒì¢´©Å 0 plats disponibles trouv├®s
+ÔÜá´©Å Pas assez de plats disponibles pour le test (besoin de 2 minimum)
+Ôä╣´©Å Ex├®cutez d'abord le Test 1.1 pour cr├®er des plats
+­ƒöä 8 boutons de disponibilit├® trouv├®s
+Ô£à Syst├¿me de disponibilit├® d├®tect├®
+  ok 61 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:359:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.2 : Gestion de la disponibilit├® (3.0s)
+­ƒöì Test 1.3 : Filtres et recherche
+­ƒöì 30 r├®sultats pour "pizza"
+Ô£à Test 1.3 : Filtres et recherche valid├®s
+  ok 62 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:557:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.3 : Filtres et recherche (3.4s)
+­ƒöä Test 1.4 : Validation synchronisation BDD
+­ƒîÉ Interface: 42 plats
+Ô£à Pizza d├®tect├®e dans l'interface
+Ô£à Desserts d├®tect├®s dans l'interface
+­ƒôè Interface contient 42 ├®l├®ments menu
+Ô£à Test 1.4 : Synchronisation BDD valid├®e
+  ok 63 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:603:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.4 : Validation donn├®es synchronis├®es (2.9s)
+­ƒöº Test 1.5 : Cr├®ation plat avec options compl├¿tes
+­ƒôØ Cr├®ation plat "Pizza Personnalisable" avec options...
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+Ô£à Modal ouverte pour plat avec options
+Ô£ô Informations de base saisies
+­ƒöº Section options trouv├®e - test des options
+  x  64 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:633:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.5 : Cr├®ation plat avec options compl├¿tes (1.0m)
+­ƒô▒ Test 1.6 : Interface responsive et adaptative
+­ƒôÉ Test Mobile (375x667)
+  Ô£ô 42 plats visibles, 0 boutons d'action
+  Ô£ô 7 ├®l├®ments mobiles d├®tect├®s
+­ƒôÉ Test Tablette (768x1024)
+  Ô£ô 42 plats visibles, 0 boutons d'action
+­ƒôÉ Test Desktop (1920x1080)
+  Ô£ô 42 plats visibles, 0 boutons d'action
+  Ô£ô Hover effects test├®s
+Ô£à Test 1.6 : Interface responsive valid├®e
+  ok 65 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:797:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.6 : Interface responsive et adaptative (7.4s)
+ÔÜí Test 1.7 : Actions rapides et validation
+­ƒôè 42 plats dans l'interface
+­ƒôè 29 badges de statut d├®tect├®s
+Ô£à Badges de statut disponibles
+­ƒôØ Test validation formulaire...
+Ô£à Validation formulaire fonctionne (modal reste ouverte)
+Ô£à Test 1.7 : Actions rapides et validation test├®es
+  ok 66 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:857:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.7 : Actions rapides et validation (4.6s)
+Ô£Å´©Å Test 1.8 : Modification d'un plat existant avec donn├®es pr├®-remplies
+­ƒôØ Modification du plat: "OneEatsRestaurant DashboardCom..."
+ÔÜá´©Å Bouton "Modifier" non trouv├®
+Ô£à Test 1.8 : Modification plat existant test├®
+  ok 67 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:942:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.8 : Modification d'un plat existant avec donn├®es pr├®-remplies (3.1s)
+­ƒôï Test 2.1 : Gestion des commandes - Navigation et filtres
+Ô£à Page commandes accessible
+­ƒôè 4 commandes trouv├®es dans l'interface
+Ô£à Commandes affich├®es
+  Ô£ô Onglet "En attente" trouv├®
+  Ô£ô Navigation vers "En attente" test├®e
+  Ô£ô Onglet "En cours" trouv├®
+  Ô£ô Onglet "Pr├¬tes" trouv├®
+  Ô£ô Onglet "R├®cup├®r├®es" trouv├®
+  Ô£ô Onglet "Annul├®es" trouv├®
+Ô£à 5 onglets de statut disponibles
+Ô£à Recherche commandes test├®e
+Ô£à Test 2.1 : Gestion commandes - Navigation test├®e
+  ok 68 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1075:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 2.1 : Gestion des commandes - Navigation et filtres (5.5s)
+­ƒÄ¿ Test 2.2 : Actions sur commandes et Design Selector
+­ƒÄ¿ Test Design Selector...
+Ôä╣´©Å Design Selector non trouv├® ou non impl├®ment├®
+Ô£à Test 2.2 : Actions commandes et designs test├®s
+  ok 69 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1142:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 2.2 : Actions sur commandes et Design Selector (3.1s)
+ÔÜÖ´©Å Test 3.1 : Param├¿tres restaurant
+  x  70 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1197:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 3.1 : Param├¿tres restaurant (902ms)
+­ƒôà Test 3.2 : Configuration horaires d'ouverture jour par jour
+Ôä╣´©Å Section horaires d'ouverture non trouv├®e
+Ô£à Test 3.2 : Configuration horaires termin├®
+  ok 71 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1272:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 3.2 : Configuration horaires d'ouverture jour par jour (942ms)
+­ƒöä Test 3.3 : Mapping et transformation des donn├®es
+­ƒôï V├®rification mapping des donn├®es...
+  ­ƒôè 5 champs de formulaire d├®tect├®s
+    Ô£à 2 champs synchronis├®s depuis l'API
+  Ô£à Synchronisation bidirectionnelle fonctionnelle
+  Ô£à Aucune perte de donn├®es lors des transformations
+Ô£à Test 3.3 : Mapping et transformation valid├®s
+  ok 72 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1340:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 3.3 : Mapping et transformation des donn├®es (878ms)
+­ƒöä Test 4.1 : Synchronisation temps r├®el avec simulation
+­ƒôè 0 commandes initiales dans l'interface
+­ƒô▒ Simulation d'une nouvelle commande...
+Ôä╣´©Å Pas de nouvelle commande (normal en environnement de test)
+­ƒöä Test actualisation automatique...
+Ô£à Test synchronisation temps r├®el simul├®
+  Ô£à Interface r├®active sans refresh manuel n├®cessaire
+  ok 73 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1421:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 4.1 : Synchronisation temps r├®el avec simulation (5.0s)
+­ƒöä Test 4.1 : Navigation et performance globale
+  x  74 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1489:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 4.2 : Navigation et performance globale (11.0s)
+­ƒÅù´©Å Test 5.1 : Architecture Quinoa + Quarkus int├®gr├®e
+Ô£à Architecture int├®gr├®e sur port 8080: http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=eb651269-ab1c-405c-acab-c803e0ee2c18
+­ƒôè 0 requ├¬tes API d├®tect├®es
+­ƒôè 6 ressources statiques d├®tect├®es
+Ôä╣´©Å Aucune requ├¬te API d├®tect├®e (donn├®es mocks ou cache)
+  x  75 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1527:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 5.1 : Architecture Quinoa + Quarkus int├®gr├®e (12.7s)
+­ƒöî Test 5.2 : Gestion des erreurs API - Backend d├®connect├®
+­ƒöî Simulation d'erreurs backend...
+  Ô£ô Requ├¬tes API bloqu├®es pour simulation
+  Ô£ô Requ├¬tes API r├®tablies
+  Ô£à 0 ├®l├®ments apr├¿s reconnexion
+Ô£à Test 5.2 : Gestion erreurs API valid├®e
+  ok 76 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1579:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 5.2 : Gestion des erreurs API - Backend d├®connect├® (5.8s)
+­ƒÅâÔÇìÔÖé´©Å Test 5.3 : Cas d'usage r├®els - Rush du midi et multi-dispositifs
+­ƒì¢´©Å Simulation rush du midi...
+  Ô£ô Navigation rapide 1/3 termin├®e
+  Ô£ô Navigation rapide 2/3 termin├®e
+  Ô£ô Navigation rapide 3/3 termin├®e
+  ­ƒôè Temps navigation rapide: 12167ms
+­ƒÆ¿ Test gestion sous pression...
+­ƒô▒ Test multi-dispositifs...
+  ­ƒôÉ Test Mobile (rush mobile)...
+  ­ƒôÉ Test Tablette (cuisine)...
+  ­ƒôÉ Test Desktop (back-office)...
+­ƒôè Test performance sous charge...
+  ­ƒôè Temps performance sous charge: 1069ms
+Ô£à Test 5.3 : Cas d'usage r├®els valid├®s
+  ok 77 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1662:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 5.3 : Cas d'usage r├®els - Rush du midi et multi-dispositifs (24.7s)
+­ƒÜ¿ Test R3 : Gestion d'erreurs compl├¿te et r├®cup├®ration
+­ƒöì Test gestion d'erreurs JavaScript...
+  Ô£à Erreur 404 g├®r├®e gracieusement
+  Ô£à R├®cup├®ration apr├¿s erreur 404
+­ƒôØ Test validation stricte...
+  Ô£à Aucune erreur console d├®tect├®e
+­ƒîÉ Test r├®cup├®ration r├®seau...
+  Ô£à R├®cup├®ration apr├¿s probl├¿me r├®seau r├®ussie
+Ô£à Test R3 : Gestion d'erreurs compl├¿te valid├®e
+  ok 78 [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1789:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test R3 : Gestion d'erreurs compl├¿te et r├®cup├®ration (9.8s)
+­ƒÄ» Test Flow Complet OneEats
+­ƒôè PHASE 1: Dashboard Restaurant
+­ƒîÉ Dashboard: 0 plats affich├®s
+­ƒöù PHASE 2: API Backend
+­ƒôí API: 8 plats r├®cup├®r├®s
+­ƒô▒ PHASE 3: Simulation commande mobile
+  x  79 [integration] ÔÇ║ specs\integration-complete.spec.ts:7:7 ÔÇ║ Integration Compl├¿te : Flow OneEats End-to-End ÔÇ║ Flow complet : Dashboard ÔåÆ API ÔåÆ Mobile ÔåÆ BDD (1.3s)
+­ƒöì Test de R├®gression OneEats
+Ô£à API Restaurants: OK
+Ô£à Menu API: 8 items
+Ô£à Dashboard: Accessible
+Ô£à Interface: 0 ├®l├®ments
+Ô£à Interface charg├®e: OK
+Ô£à API Commande: OK
+­ƒÄ» Test de r├®gression termin├® - Toutes les fonctionnalit├®s critiques OK
+  ok 80 [integration] ÔÇ║ specs\integration-complete.spec.ts:80:7 ÔÇ║ Integration Compl├¿te : Flow OneEats End-to-End ÔÇ║ Test de r├®gression : Fonctionnalit├®s critiques (681ms)
+­ƒº╣ Nettoyage apr├¿s tests...
+Ô£à Nettoyage termin├®
+
+
+  1) [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:365:9 ÔÇ║ Restaurant Order Management ÔÇ║ Real-time Updates and Performance ÔÇ║ should handle rapid navigation and maintain performance 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m10000[39m
+    Received:   [31m10146[39m
+
+      396 |       
+      397 |       // Performance validation
+    > 398 |       expect(navigationTime).toBeLessThan(10000); // Should complete within 10 seconds
+          |                              ^
+      399 |       console.log('Ô£à Performance test passed');
+      400 |       
+      401 |       console.log('Ô£à Real-time updates and performance test completed');
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\restaurant\order-management.spec.ts:398:30
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\restaurant-order-managemen-2a47d-on-and-maintain-performance-restaurant-dashboard\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\restaurant-order-managemen-2a47d-on-and-maintain-performance-restaurant-dashboard\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\restaurant-order-managemen-2a47d-on-and-maintain-performance-restaurant-dashboard\error-context.md
+
+  2) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:7:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 0.1 : Connexion Dashboard Restaurant 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/restaurant/[39m
+    Received string:  [31m"http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=1372ce14-233b-450e-b32c-6ced4aaef9c1"[39m
+    Timeout: 10000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 10000ms[22m
+    [2m    13 ├ù unexpected value "http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=1372ce14-233b-450e-b32c-6ced4aaef9c1"[22m
+
+
+      69 |     await page.goto('/restaurant');
+      70 |     await page.waitForLoadState('networkidle');
+    > 71 |     await expect(page).toHaveURL(/restaurant/);
+         |                        ^
+      72 |     
+      73 |     console.log('Ô£à Test 0.1 : Connexion Dashboard Restaurant - TERMIN├ë');
+      74 |   });
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:71:24
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-9ab31-nexion-Dashboard-Restaurant-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-9ab31-nexion-Dashboard-Restaurant-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-9ab31-nexion-Dashboard-Restaurant-legacy-tests\error-context.md
+
+  3) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:76:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.1 : Cr├®ation d'un menu complet 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.count: Target page, context or browser has been closed
+
+       99 |       
+      100 |       // Essayer tous les boutons jusqu'├á ce qu'une modal s'ouvre
+    > 101 |       for (let i = 0; i < await addButtons.count(); i++) {
+          |                                            ^
+      102 |         try {
+      103 |           await addButtons.nth(i).click({ force: true, timeout: 2000 });
+      104 |           await page.waitForTimeout(500);
+        at createDish (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:101:44)
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:252:11
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-4e681--Cr├®ation-d-un-menu-complet-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-4e681--Cr├®ation-d-un-menu-complet-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-4e681--Cr├®ation-d-un-menu-complet-legacy-tests\error-context.md
+
+  4) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:633:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.5 : Cr├®ation plat avec options compl├¿tes 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.count: Target page, context or browser has been closed
+
+      644 |       const addButtons = page.locator('button.btn').filter({ hasText: /Ajouter/ });
+      645 |       
+    > 646 |       for (let i = 0; i < await addButtons.count(); i++) {
+          |                                            ^
+      647 |         try {
+      648 |           await addButtons.nth(i).click({ force: true, timeout: 2000 });
+      649 |           await page.waitForTimeout(500);
+        at createDishWithOptions (C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:646:44)
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:770:21
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-5f334-plat-avec-options-compl├¿tes-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-5f334-plat-avec-options-compl├¿tes-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-5f334-plat-avec-options-compl├¿tes-legacy-tests\error-context.md
+
+  5) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1197:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 3.1 : Param├¿tres restaurant 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      1204 |     const pageContent = await page.content().then(c => c.toLowerCase());
+      1205 |     const hasSettingsContent = pageContent.includes('param├¿tre') || pageContent.includes('setting') || pageContent.includes('config') || pageContent.includes('restaurant');
+    > 1206 |     expect(hasSettingsContent).toBeTruthy();
+           |                                ^
+      1207 |     console.log('Ô£à Page param├¿tres accessible');
+      1208 |     
+      1209 |     // Chercher les champs de configuration
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:1206:32
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-d2fac-t-3-1-Param├¿tres-restaurant-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-d2fac-t-3-1-Param├¿tres-restaurant-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-d2fac-t-3-1-Param├¿tres-restaurant-legacy-tests\error-context.md
+
+  6) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1489:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 4.2 : Navigation et performance globale 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/\/restaurant\/orders/[39m
+    Received string:  [31m"http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=0da666af-19c8-435f-a03f-fe24a7e1020f"[39m
+    Timeout: 10000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 10000ms[22m
+    [2m    13 ├ù unexpected value "http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=0da666af-19c8-435f-a03f-fe24a7e1020f"[22m
+
+
+      1508 |       
+      1509 |       // V├®rifier que chaque section se charge
+    > 1510 |       await expect(page).toHaveURL(new RegExp(section.url));
+           |                          ^
+      1511 |       console.log(`Ô£ô ${section.name}: ${loadTime}ms`);
+      1512 |       
+      1513 |       // V├®rification que la section n'est pas vide
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:1510:26
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-1fe3f-tion-et-performance-globale-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-1fe3f-tion-et-performance-globale-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-1fe3f-tion-et-performance-globale-legacy-tests\error-context.md
+
+  7) [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1527:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 5.1 : Architecture Quinoa + Quarkus int├®gr├®e 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/restaurant\/menu/[39m
+    Received string:  [31m"http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=be018901-1143-4173-9471-06f779e60560"[39m
+    Timeout: 10000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 10000ms[22m
+    [2m    13 ├ù unexpected value "http://192.168.1.111:8580/realms/oneeats/protocol/openid-connect/auth?response_type=code&client_id=oneeats-web&scope=openid&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&state=be018901-1143-4173-9471-06f779e60560"[22m
+
+
+      1569 |     
+      1570 |     // V├®rifier que la page se recharge correctement
+    > 1571 |     await expect(page).toHaveURL(/restaurant\/menu/);
+           |                        ^
+      1572 |     const menuItems = page.locator('[data-testid="menu-item-card"], .card, [class*="bg-white"]').count();
+      1573 |     expect(await menuItems).toBeGreaterThanOrEqual(0);
+      1574 |     
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\phase1-dashboard.spec.ts:1571:24
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-366f5-ure-Quinoa-Quarkus-int├®gr├®e-legacy-tests\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\phase1-dashboard-Phase-1-G-366f5-ure-Quinoa-Quarkus-int├®gr├®e-legacy-tests\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\phase1-dashboard-Phase-1-G-366f5-ure-Quinoa-Quarkus-int├®gr├®e-legacy-tests\error-context.md
+
+  8) [integration] ÔÇ║ specs\integration-complete.spec.ts:7:7 ÔÇ║ Integration Compl├¿te : Flow OneEats End-to-End ÔÇ║ Flow complet : Dashboard ÔåÆ API ÔåÆ Mobile ÔåÆ BDD 
+
+    SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+
+      48 |     
+      49 |     if (orderTestResponse.ok()) {
+    > 50 |       const order = await orderTestResponse.json();
+         |                     ^
+      51 |       console.log(`­ƒøÆ Commande cr├®├®e: ${order.id || 'ID non d├®fini'}`);
+      52 |     } else {
+      53 |       console.log('Ôä╣´©Å Commande ├®chou├®e (normal sans auth/DB compl├¿te)');
+        at C:\Users\akin_\Documents\dev\FoodApp\Quarkus\oneeats-backend\tests\specs\integration-complete.spec.ts:50:21
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\integration-complete-Integ-b879b-hboard-ÔåÆ-API-ÔåÆ-Mobile-ÔåÆ-BDD-integration\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    attachment #2: video (video/webm) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\integration-complete-Integ-b879b-hboard-ÔåÆ-API-ÔåÆ-Mobile-ÔåÆ-BDD-integration\video.webm
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\integration-complete-Integ-b879b-hboard-ÔåÆ-API-ÔåÆ-Mobile-ÔåÆ-BDD-integration\error-context.md
+
+  8 failed
+    [restaurant-dashboard] ÔÇ║ specs\restaurant\order-management.spec.ts:365:9 ÔÇ║ Restaurant Order Management ÔÇ║ Real-time Updates and Performance ÔÇ║ should handle rapid navigation and maintain performance 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:7:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 0.1 : Connexion Dashboard Restaurant 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:76:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.1 : Cr├®ation d'un menu complet 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:633:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 1.5 : Cr├®ation plat avec options compl├¿tes 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1197:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 3.1 : Param├¿tres restaurant 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1489:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 4.2 : Navigation et performance globale 
+    [legacy-tests] ÔÇ║ specs\phase1-dashboard.spec.ts:1527:7 ÔÇ║ Phase 1 : Gestion des Menus - Dashboard Restaurant ÔÇ║ Test 5.1 : Architecture Quinoa + Quarkus int├®gr├®e 
+    [integration] ÔÇ║ specs\integration-complete.spec.ts:7:7 ÔÇ║ Integration Compl├¿te : Flow OneEats End-to-End ÔÇ║ Flow complet : Dashboard ÔåÆ API ÔåÆ Mobile ÔåÆ BDD 
+  72 passed (14.2m)

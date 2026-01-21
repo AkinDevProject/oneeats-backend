@@ -101,6 +101,41 @@ async function clearBruteForceLockout(username: string): Promise<void> {
   }
 }
 
+/**
+ * Check if stored session is still valid
+ */
+async function isSessionValid(): Promise<boolean> {
+  if (!fs.existsSync(STORAGE_STATE_PATH)) {
+    console.log('📋 Pas de session sauvegardée');
+    return false;
+  }
+
+  try {
+    const storageState = JSON.parse(fs.readFileSync(STORAGE_STATE_PATH, 'utf-8'));
+    const cookies = storageState.cookies || [];
+
+    // Check if Quarkus session cookies exist and are not expired
+    const sessionCookie = cookies.find((c: any) => c.name.startsWith('q_session'));
+    if (!sessionCookie) {
+      console.log('📋 Pas de cookie de session Quarkus');
+      return false;
+    }
+
+    // Check expiry (cookies store expiry as Unix timestamp in seconds)
+    const now = Date.now() / 1000;
+    if (sessionCookie.expires > 0 && sessionCookie.expires < now) {
+      console.log(`📋 Session expirée (expire: ${new Date(sessionCookie.expires * 1000).toISOString()})`);
+      return false;
+    }
+
+    console.log(`✅ Session valide (expire: ${new Date(sessionCookie.expires * 1000).toISOString()})`);
+    return true;
+  } catch (error) {
+    console.log(`⚠️ Erreur vérification session: ${error}`);
+    return false;
+  }
+}
+
 setup('authenticate as restaurant user', async ({ page }) => {
   console.log('🔐 Démarrage de l\'authentification restaurant...');
 
@@ -109,6 +144,30 @@ setup('authenticate as restaurant user', async ({ page }) => {
   if (!fs.existsSync(authDir)) {
     fs.mkdirSync(authDir, { recursive: true });
     console.log('📁 Répertoire .auth créé');
+  }
+
+  // Check if existing session is still valid
+  const sessionValid = await isSessionValid();
+  if (sessionValid) {
+    console.log('✅ Session existante valide, skip de l\'authentification');
+    // Verify the session works by testing a protected page
+    try {
+      await page.context().addCookies(JSON.parse(fs.readFileSync(STORAGE_STATE_PATH, 'utf-8')).cookies);
+      const testResponse = await page.goto('http://localhost:8080/restaurant', { waitUntil: 'domcontentloaded', timeout: 10000 });
+      if (testResponse && testResponse.status() < 400 && !page.url().includes('keycloak') && !page.url().includes('8580')) {
+        console.log('✅ Session vérifiée, pas besoin de ré-authentifier');
+        return;
+      }
+      console.log('⚠️ Session invalide côté serveur, ré-authentification...');
+    } catch (e) {
+      console.log('⚠️ Échec vérification session, ré-authentification...');
+    }
+  }
+
+  // Delete old session file to force fresh authentication
+  if (fs.existsSync(STORAGE_STATE_PATH)) {
+    fs.unlinkSync(STORAGE_STATE_PATH);
+    console.log('🗑️ Ancienne session supprimée');
   }
 
   // IMPORTANT: Clear any brute force lockout before attempting login

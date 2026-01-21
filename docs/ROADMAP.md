@@ -317,6 +317,39 @@
 
 ## Notes de Session
 
+### Session 2026-01-21 : Résolution BUG-013 - Auth Playwright/Keycloak
+
+**Objectif** : Résoudre le problème d'authentification Keycloak dans les tests Playwright
+
+**Problème identifié** :
+- Les tests Playwright envoyaient les formulaires avec `Content-Type: application/json`
+- Keycloak attend `Content-Type: application/x-www-form-urlencoded`
+- Résultat : "Invalid username or password" même avec les bons credentials
+
+**Cause racine** :
+Configuration globale dans `playwright.config.ts` :
+```typescript
+extraHTTPHeaders: {
+  'Content-Type': 'application/json', // ← Problème !
+}
+```
+
+**Solution appliquée** :
+1. Override des headers pour le projet `setup` : `extraHTTPHeaders: {}`
+2. Utilisation de Edge (`channel: 'msedge'`) au lieu de Chromium bundled
+
+**Résultats** :
+- ✅ Authentification Keycloak fonctionne
+- ✅ 53 tests passés en 6.8 minutes
+- ✅ BUG-013 résolu
+
+**Fichiers modifiés** :
+- `tests/playwright.config.ts`
+- `tests/specs/auth.setup.ts`
+- `docs/BUGS.md`
+
+---
+
 ### Session 2026-01-20 : Setup UAT Automatisé (Claude Code + Playwright + Maestro)
 
 **Objectif** : Permettre à Claude Code de tester automatiquement l'application web ET mobile, détecter les bugs, et générer des rapports.
@@ -731,7 +764,7 @@ docs/shared/architect/
 
 ## Dernière mise à jour
 
-**Date** : 2026-01-20
+**Date** : 2026-01-21
 **Version** : MVP 0.95
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2026-01-23
+**Prochaine revue** : 2026-01-24

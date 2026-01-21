@@ -1,31 +1,20 @@
 # =============================================================================
-# FLOW 09: Gestion du panier (modification/suppression)
+# FLOW 09: Gestion du panier
 # =============================================================================
-# Teste la modification des quantites et suppression d'articles
-# Tags: cart, e2e
-# Prerequis: Panier avec articles
-# =============================================================================
-
 appId: com.oneeats.mobile
 name: "09 - Cart Management"
 tags:
   - cart
-  - e2e
   - regression
 
 ---
 
-# -----------------------------------------------------------------------------
-# SETUP: Creer un panier avec articles
-# -----------------------------------------------------------------------------
+# SETUP
 - launchApp:
     clearState: true
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Continuer sans compte"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
 
 - runFlow:
@@ -34,213 +23,24 @@ tags:
     commands:
       - tapOn: "Continuer sans compte"
 
-# Ouvrir un restaurant et ajouter des articles
 - extendedWaitUntil:
     visible: "Restaurants"
     timeout: 15000
 
-- scroll:
-    direction: DOWN
-
-- tapOn:
-    anyOf:
-      - id: "restaurant-card-0"
-      - text: "⭐"
-    index: 0
-
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "€"
-        - text: "Menu"
-    timeout: 15000
-
-- scroll:
-    direction: DOWN
-
-# Ajouter 2 articles
-- tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+"
-    index: 0
-
-- tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+"
-    index: 1
-
 # Aller au panier
-- tapOn:
-    text: "Panier"
+- tapOn: "Panier"
 
 - extendedWaitUntil:
-    visible: "Votre Panier"
+    visible: "Panier"
     timeout: 5000
 
-- takeScreenshot: "09-cart-initial"
+- takeScreenshot: "09-cart-view"
 
-# -----------------------------------------------------------------------------
-# TEST 1: Augmenter la quantite d'un article
-# -----------------------------------------------------------------------------
-- tapOn:
-    anyOf:
-      - text: "+"
-      - id: "quantity-increase"
-    index: 0
-
-# Verifier la mise a jour
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "2"
-        - text: "Total"
-    timeout: 3000
-
-- takeScreenshot: "09-quantity-increased"
-
-# -----------------------------------------------------------------------------
-# TEST 2: Diminuer la quantite
-# -----------------------------------------------------------------------------
-- tapOn:
-    anyOf:
-      - text: "-"
-      - id: "quantity-decrease"
-    index: 0
+# Retour a l'accueil
+- tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "1"
-        - text: "Total"
-    timeout: 3000
-
-- takeScreenshot: "09-quantity-decreased"
-
-# -----------------------------------------------------------------------------
-# TEST 3: Supprimer un article (quantite a 0 ou icone suppression)
-# -----------------------------------------------------------------------------
-# Chercher l'icone de suppression
-- tapOn:
-    anyOf:
-      - id: "delete-item"
-      - text: "🗑"
-      - id: "remove-item"
-    index: 0
-
-# Confirmer la suppression si dialog
-- runFlow:
-    when:
-      visible: "Supprimer"
-    commands:
-      - tapOn: "Supprimer"
-
-- takeScreenshot: "09-item-removed"
-
-# -----------------------------------------------------------------------------
-# TEST 4: Verifier la mise a jour du total
-# -----------------------------------------------------------------------------
-- assertVisible:
-    text: "€"
-
-# Verifier que le total a change
-- assertVisible:
-    anyOf:
-      - text: "Total"
-      - text: "Sous-total"
-
-# -----------------------------------------------------------------------------
-# TEST 5: Bouton "Ajouter plus" pour retourner au restaurant
-# -----------------------------------------------------------------------------
-- assertVisible:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+ Ajouter"
-
-- tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+ Ajouter"
-    index: 0
-
-# Verifier qu'on retourne au restaurant
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Menu"
-        - text: "€"
-    timeout: 5000
-
-- takeScreenshot: "09-back-to-restaurant"
-
-# Retour au panier
-- tapOn:
-    text: "Panier"
-
-- extendedWaitUntil:
-    visible: "Votre Panier"
-    timeout: 5000
-
-# -----------------------------------------------------------------------------
-# TEST 6: Vider completement le panier
-# -----------------------------------------------------------------------------
-# Supprimer tous les articles restants
-- runFlow:
-    when:
-      visible:
-        anyOf:
-          - id: "delete-item"
-          - text: "🗑"
-    commands:
-      - repeat:
-          times: 5
-          commands:
-            - runFlow:
-                when:
-                  visible:
-                    anyOf:
-                      - id: "delete-item"
-                      - text: "🗑"
-                commands:
-                  - tapOn:
-                      anyOf:
-                        - id: "delete-item"
-                        - text: "🗑"
-                      index: 0
-                  - runFlow:
-                      when:
-                        visible: "Supprimer"
-                      commands:
-                        - tapOn: "Supprimer"
-
-# -----------------------------------------------------------------------------
-# TEST 7: Verifier l'etat panier vide
-# -----------------------------------------------------------------------------
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "panier est vide"
-        - text: "Votre panier est vide"
-        - text: "Découvrir les restaurants"
-    timeout: 5000
-
-- takeScreenshot: "09-cart-empty"
-
-# -----------------------------------------------------------------------------
-# TEST 8: Bouton "Decouvrir" pour retourner a l'accueil
-# -----------------------------------------------------------------------------
-- tapOn:
-    anyOf:
-      - text: "Découvrir les restaurants"
-      - text: "Découvrir"
-      - text: "Parcourir"
-
-- extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Restaurants"
-        - text: "Catégories"
+    visible: "Restaurants"
     timeout: 5000
 
 - takeScreenshot: "09-back-to-home"

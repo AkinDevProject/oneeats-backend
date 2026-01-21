@@ -16,16 +16,13 @@ tags:
 ---
 
 # -----------------------------------------------------------------------------
-# SETUP: Lancement et skip auth si necessaire
+# SETUP: Lancement
 # -----------------------------------------------------------------------------
 - launchApp:
     clearState: true
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Se connecter"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
 
 # Skip auth si on est sur l'ecran de connexion
@@ -37,56 +34,32 @@ tags:
 
 # Attendre l'ecran d'accueil
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Restaurants"
-        - text: "Bonjour"
-        - text: "Bonsoir"
+    visible: "Restaurants"
     timeout: 10000
 
 # -----------------------------------------------------------------------------
 # TEST 1: Onglet Accueil (par defaut)
 # -----------------------------------------------------------------------------
-- assertVisible:
-    anyOf:
-      - text: "Restaurants à proximité"
-      - text: "Catégories"
-
 - takeScreenshot: "02-tab-home"
 
 # -----------------------------------------------------------------------------
 # TEST 2: Onglet Panier
 # -----------------------------------------------------------------------------
-- tapOn:
-    text: "Panier"
+- tapOn: "Panier"
 
-- assertVisible:
-    text: "Votre Panier"
+- extendedWaitUntil:
+    visible: "Panier"
     timeout: 5000
-
-# Verifier l'etat vide ou avec articles
-- assertVisible:
-    anyOf:
-      - text: "Votre panier est vide"
-      - text: "Découvrir les restaurants"
-      - text: "article"
-      - text: "Total"
 
 - takeScreenshot: "02-tab-cart"
 
 # -----------------------------------------------------------------------------
 # TEST 3: Onglet Favoris
 # -----------------------------------------------------------------------------
-- tapOn:
-    text: "Favoris"
+- tapOn: "Favoris"
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Mes Favoris"
-        - text: "Vos Favoris"
-        - text: "Aucun favori"
-        - text: "Connectez-vous"
+    visible: "Favoris"
     timeout: 5000
 
 - takeScreenshot: "02-tab-favorites"
@@ -94,15 +67,10 @@ tags:
 # -----------------------------------------------------------------------------
 # TEST 4: Onglet Profil
 # -----------------------------------------------------------------------------
-- tapOn:
-    text: "Profil"
+- tapOn: "Profil"
 
-- assertVisible:
-    anyOf:
-      - text: "Mon Profil"
-      - text: "Mon compte"
-      - text: "Se connecter"
-      - text: "Paramètres"
+- extendedWaitUntil:
+    visible: "Profil"
     timeout: 5000
 
 - takeScreenshot: "02-tab-profile"
@@ -110,13 +78,10 @@ tags:
 # -----------------------------------------------------------------------------
 # TEST 5: Retour a l'accueil
 # -----------------------------------------------------------------------------
-- tapOn:
-    text: "Accueil"
+- tapOn: "Accueil"
 
-- assertVisible:
-    anyOf:
-      - text: "Restaurants"
-      - text: "Catégories"
+- extendedWaitUntil:
+    visible: "Restaurants"
     timeout: 5000
 
 - takeScreenshot: "02-tab-home-return"

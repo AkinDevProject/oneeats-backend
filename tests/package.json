@@ -10,12 +10,22 @@
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
     "install": "playwright install",
-    "setup": "npm install && playwright install chromium"
+    "setup": "npm install && playwright install chromium",
+    "orchestrator": "npx ts-node orchestrator/index.ts",
+    "orchestrator:order": "npx ts-node orchestrator/index.ts --flow=order",
+    "orchestrator:order:maestro": "npx ts-node orchestrator/index.ts --flow=order --maestro",
+    "orchestrator:menu": "npx ts-node orchestrator/index.ts --flow=menu",
+    "orchestrator:menu:create": "npx ts-node orchestrator/index.ts --flow=menu --action=create",
+    "orchestrator:menu:update": "npx ts-node orchestrator/index.ts --flow=menu --action=update",
+    "orchestrator:help": "npx ts-node orchestrator/index.ts --help"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.0.0",
-    "pg": "^8.11.0"
+    "pg": "^8.11.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0",
+    "playwright": "^1.40.0"
   },
   "dependencies": {
     "dotenv": "^16.3.1"

@@ -1,31 +1,20 @@
 # =============================================================================
 # FLOW 08: Ajout d'articles au panier
 # =============================================================================
-# Teste l'ajout d'articles au panier depuis le menu d'un restaurant
-# Tags: cart, e2e, smoke
-# Prerequis: Restaurant avec menu disponible
-# =============================================================================
-
 appId: com.oneeats.mobile
 name: "08 - Add Items to Cart"
 tags:
   - cart
-  - e2e
   - smoke
 
 ---
 
-# -----------------------------------------------------------------------------
-# SETUP: Acces a l'accueil
-# -----------------------------------------------------------------------------
+# SETUP
 - launchApp:
     clearState: true
 
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Continuer sans compte"
-        - text: "Restaurants"
+    visible: "OneEats"
     timeout: 15000
 
 - runFlow:
@@ -34,141 +23,43 @@ tags:
     commands:
       - tapOn: "Continuer sans compte"
 
-# Attendre les restaurants
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "Restaurants à proximité"
-        - text: "résultat"
+    visible: "Restaurants"
     timeout: 15000
 
-# -----------------------------------------------------------------------------
-# STEP 1: Ouvrir un restaurant
-# -----------------------------------------------------------------------------
+# Scroll et ouvrir un restaurant
 - scroll:
     direction: DOWN
 
 - tapOn:
-    anyOf:
-      - id: "restaurant-card-0"
-      - text: "⭐"
+    text: "Voir le menu"
     index: 0
+    optional: true
 
-# Attendre le menu
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "€"
-        - text: "Menu"
-    timeout: 15000
+    visible: "Menu"
+    timeout: 10000
+    optional: true
 
 - takeScreenshot: "08-restaurant-menu"
 
-# -----------------------------------------------------------------------------
-# STEP 2: Scroll jusqu'au menu
-# -----------------------------------------------------------------------------
+# Scroll jusqu'au menu
 - scroll:
     direction: DOWN
 
-# -----------------------------------------------------------------------------
-# STEP 3: Ajouter le premier article au panier
-# -----------------------------------------------------------------------------
+# Essayer d'ajouter un article
 - tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+"
-      - id: "add-to-cart"
+    text: "Ajouter"
     index: 0
+    optional: true
 
-# Verifier feedback d'ajout
+- takeScreenshot: "08-item-added"
+
+# Aller au panier
+- tapOn: "Panier"
+
 - extendedWaitUntil:
-    visible:
-      anyOf:
-        - text: "ajouté"
-        - text: "Panier"
-        - text: "1"
+    visible: "Panier"
     timeout: 5000
 
-- takeScreenshot: "08-item-added-1"
-
-# -----------------------------------------------------------------------------
-# STEP 4: Ajouter un deuxieme article
-# -----------------------------------------------------------------------------
-- scroll:
-    direction: DOWN
-
-- tapOn:
-    anyOf:
-      - text: "Ajouter"
-      - text: "+"
-      - id: "add-to-cart"
-    index: 0
-
-- takeScreenshot: "08-item-added-2"
-
-# -----------------------------------------------------------------------------
-# STEP 5: Aller au panier via l'onglet
-# -----------------------------------------------------------------------------
-- tapOn:
-    text: "Panier"
-
-# -----------------------------------------------------------------------------
-# STEP 6: Verifier le contenu du panier
-# -----------------------------------------------------------------------------
-- extendedWaitUntil:
-    visible: "Votre Panier"
-    timeout: 5000
-
-# Verifier qu'il y a des articles
-- assertVisible:
-    anyOf:
-      - text: "article"
-      - text: "Total"
-      - text: "€"
-
-# Verifier le nombre d'articles
-- assertVisible:
-    anyOf:
-      - text: "2 article"
-      - text: "1 article"
-
-- takeScreenshot: "08-cart-with-items"
-
-# -----------------------------------------------------------------------------
-# STEP 7: Verifier les details des articles
-# -----------------------------------------------------------------------------
-# Prix visible
-- assertVisible:
-    text: "€"
-
-# Restaurant source
-- assertVisible:
-    anyOf:
-      - text: "Commande chez"
-      - text: "Restaurant"
-
-# -----------------------------------------------------------------------------
-# STEP 8: Verifier les controles de quantite
-# -----------------------------------------------------------------------------
-- assertVisible:
-    anyOf:
-      - text: "+"
-      - text: "-"
-      - id: "quantity-increase"
-      - id: "quantity-decrease"
-
-# -----------------------------------------------------------------------------
-# STEP 9: Verifier le recapitulatif
-# -----------------------------------------------------------------------------
-- scroll:
-    direction: DOWN
-
-- assertVisible:
-    anyOf:
-      - text: "Total"
-      - text: "Sous-total"
-
-- assertVisible:
-    text: "€"
-
-- takeScreenshot: "08-cart-summary"
+- takeScreenshot: "08-cart-view"

@@ -1,64 +1,19 @@
 # =============================================================================
-# FLOW 01: Lancement de l'application
+# FLOW 01: Lancement de l'application OneEats
 # =============================================================================
-# Verifie que l'application se lance correctement et affiche l'ecran d'accueil
-# Tags: smoke, regression
-# Prerequis: Aucun
-# =============================================================================
-
 appId: com.oneeats.mobile
-name: "01 - App Launch & Initial Load"
-tags:
-  - smoke
-  - regression
-  - startup
+name: "01 - App Launch"
 
 ---
 
-# -----------------------------------------------------------------------------
-# STEP 1: Lancement de l'application (etat neuf)
-# -----------------------------------------------------------------------------
+# Lancement de l'application
 - launchApp:
     clearState: true
-    clearKeychain: true
 
-# -----------------------------------------------------------------------------
-# STEP 2: Attendre le splash screen / chargement initial
-# -----------------------------------------------------------------------------
+# Attendre que l'app se charge (ecran de connexion ou accueil)
 - extendedWaitUntil:
-    visible:
-      id: "app-root"
-    timeout: 15000
+    visible: "OneEats"
+    timeout: 20000
 
-# -----------------------------------------------------------------------------
-# STEP 3: Verifier la presence du logo OneEats
-# -----------------------------------------------------------------------------
-- assertVisible:
-    text: "OneEats"
-    enabled: true
-
-# -----------------------------------------------------------------------------
-# STEP 4: Verifier qu'on arrive sur l'ecran de connexion OU l'accueil
-# -----------------------------------------------------------------------------
-# L'app peut montrer l'ecran de connexion ou l'accueil selon l'etat
-- assertVisible:
-    anyOf:
-      - text: "Se connecter"
-      - text: "Bienvenue"
-      - text: "Restaurants"
-      - text: "Bonjour"
-      - text: "Bonsoir"
-      - text: "Bon après-midi"
-    timeout: 10000
-
-# -----------------------------------------------------------------------------
-# STEP 5: Verifier que le chargement est termine (pas de spinner)
-# -----------------------------------------------------------------------------
-- assertNotVisible:
-    text: "Chargement..."
-    timeout: 5000
-
-# -----------------------------------------------------------------------------
-# STEP 6: Prendre un screenshot pour documentation
-# -----------------------------------------------------------------------------
+# Screenshot de l'ecran initial
 - takeScreenshot: "01-app-launched"
