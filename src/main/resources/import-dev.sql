@@ -60,12 +60,23 @@ INSERT INTO opening_hours (id, restaurant_id, day_of_week, open_time, close_time
     (gen_random_uuid(), '55555555-5555-5555-5555-555555555555', 'SUNDAY', '12:00', '02:00');
 
 -- Utilisateurs (table 'user_account')
+-- Inclut les utilisateurs Keycloak de test (admin, restaurant, client)
 INSERT INTO user_account (id, email, password_hash, first_name, last_name, phone, address, created_at, updated_at, status, version) VALUES
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'user1@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean2', 'Dupont', '0612345678', '10 Rue de la Paix', NOW(), NOW(), 'ACTIVE', 0),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'marie@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Marie', 'Martin', '0623456789', '20 Avenue des Fleurs', NOW(), NOW(), 'ACTIVE', 0),
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'paul@test.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Paul', 'Durand', '0634567890', '30 Place du Marché', NOW(), NOW(), 'ACTIVE', 0),
 ('12345678-1234-1234-1234-123456789012', 'mobile@oneeats.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Utilisateur', 'Mobile', '0645678901', '40 Boulevard Mobile', NOW(), NOW(), 'ACTIVE', 0),
-('4ffe5398-4599-4c33-98ec-18a96fd9e200', 'jean.dupont@oneats.dev', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '+33 6 12 34 56 78', '123 Rue de la Paix, 75001 Paris', NOW(), NOW(), 'ACTIVE', 0);
+('4ffe5398-4599-4c33-98ec-18a96fd9e200', 'jean.dupont@oneats.dev', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Jean', 'Dupont', '+33 6 12 34 56 78', '123 Rue de la Paix, 75001 Paris', NOW(), NOW(), 'ACTIVE', 0),
+-- Utilisateurs Keycloak de test (UUIDs valides avec caracteres hex uniquement)
+('ad000000-0000-0000-0000-000000000001', 'admin@oneeats.com', 'keycloak_managed', 'Admin', 'OneEats', '0600000001', 'OneEats HQ', NOW(), NOW(), 'ACTIVE', 0),
+('ae000000-0000-0000-0000-000000000001', 'restaurant@oneeats.com', 'keycloak_managed', 'Restaurant', 'Manager', '0600000002', 'Pizza Palace', NOW(), NOW(), 'ACTIVE', 0),
+('cf000000-0000-0000-0000-000000000001', 'client@oneeats.com', 'keycloak_managed', 'Client', 'Mobile', '0600000003', '10 Rue du Client', NOW(), NOW(), 'ACTIVE', 0);
+
+-- Association Restaurant Staff (lie les utilisateurs aux restaurants qu'ils gerent)
+-- Le restaurant manager gere Pizza Palace (OWNER) et Burger House (MANAGER)
+INSERT INTO restaurant_staff (id, user_id, restaurant_id, staff_role, permissions, created_at, updated_at) VALUES
+('a5000000-0000-0000-0000-000000000001', 'ae000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'OWNER', '{"view_orders":true,"update_orders":true,"view_menu":true,"update_menu":true,"view_stats":true,"manage_staff":true,"manage_settings":true,"delete_restaurant":true}', NOW(), NOW()),
+('a5000000-0000-0000-0000-000000000002', 'ae000000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 'MANAGER', '{"view_orders":true,"update_orders":true,"view_menu":true,"update_menu":true,"view_stats":true,"manage_staff":false,"manage_settings":false,"delete_restaurant":false}', NOW(), NOW());
 
 -- Menu items pour Pizza Palace
 INSERT INTO menu_item (id, restaurant_id, name, description, price, category, image_url, is_available, is_vegetarian, is_vegan, preparation_time_minutes, allergens, created_at, updated_at, version) VALUES

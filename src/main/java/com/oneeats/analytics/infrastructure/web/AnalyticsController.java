@@ -38,8 +38,15 @@ public class AnalyticsController {
     @Path("/dashboard")
     @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
     public Response getDashboardStats() {
-        // Alias pour la compatibilité avec l'API service frontend
-        return getPlatformStats();
+        // Retourne les mêmes stats que /platform pour la compatibilité avec le frontend
+        try {
+            PlatformStatsDTO stats = analyticsService.getPlatformStats();
+            return Response.ok(stats).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Erreur lors du calcul des statistiques: " + e.getMessage())
+                    .build();
+        }
     }
 
     @GET

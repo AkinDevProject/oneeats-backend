@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Path("/api/users/{userId}/favorites")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RolesAllowed(Roles.USER)
+@RolesAllowed({Roles.USER, Roles.ADMIN})
 public class UserFavoriteController {
 
     @Inject
