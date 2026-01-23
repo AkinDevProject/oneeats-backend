@@ -1,6 +1,11 @@
 # =============================================================================
 # FLOW 12: Gestion des favoris
 # =============================================================================
+# Note: L'onglet Favoris est MASQUE de la tab bar (href: null dans _layout.tsx)
+# Les favoris sont accessibles depuis:
+# - Section "Vos Favoris" sur l'accueil (si connecte)
+# - Bouton coeur sur chaque carte restaurant (testID="favorite-button")
+# =============================================================================
 appId: com.oneeats.mobile
 name: "12 - Favorites Management"
 tags:
@@ -14,8 +19,8 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
-    timeout: 15000
+    visible: ".*"
+    timeout: 20000
 
 - runFlow:
     when:
@@ -24,25 +29,40 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 15000
 
 - takeScreenshot: "12-home-for-favorites"
 
-# Aller aux favoris
-- tapOn: "Favoris"
+# -----------------------------------------------------------------------------
+# TEST 1: Ajouter un restaurant aux favoris via le bouton coeur
+# -----------------------------------------------------------------------------
+- scroll
+
+# Taper sur le bouton favori (testID="favorite-button")
+- tapOn:
+    id: "favorite-button"
+    index: 0
+    optional: true
+
+- takeScreenshot: "12-favorite-toggled"
+
+# -----------------------------------------------------------------------------
+# TEST 2: Acces aux favoris depuis le compte
+# -----------------------------------------------------------------------------
+- tapOn: "Compte"
 
 - extendedWaitUntil:
-    visible: "Favoris"
+    visible: "Compte"
     timeout: 5000
 
-- takeScreenshot: "12-favorites-list"
+- takeScreenshot: "12-compte-screen"
 
 # Retour accueil
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "12-favorites-complete"

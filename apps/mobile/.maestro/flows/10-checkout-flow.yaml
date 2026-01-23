@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: "proximité"
     timeout: 15000
 
 # Aller au panier pour voir l'etat
@@ -42,7 +42,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: "proximité"
     timeout: 5000
 
 - takeScreenshot: "10-checkout-complete"

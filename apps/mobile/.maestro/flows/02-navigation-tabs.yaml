@@ -34,7 +34,7 @@ tags:
 
 # Attendre l'ecran d'accueil
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 10000
 
 # -----------------------------------------------------------------------------
@@ -54,26 +54,16 @@ tags:
 - takeScreenshot: "02-tab-cart"
 
 # -----------------------------------------------------------------------------
-# TEST 3: Onglet Favoris
+# TEST 3: Onglet Compte (anciennement Profil)
+# Note: L'onglet Favoris est masque de la tab bar (accessible depuis Accueil)
 # -----------------------------------------------------------------------------
-- tapOn: "Favoris"
+- tapOn: "Compte"
 
 - extendedWaitUntil:
-    visible: "Favoris"
+    visible: "Compte"
     timeout: 5000
 
-- takeScreenshot: "02-tab-favorites"
-
-# -----------------------------------------------------------------------------
-# TEST 4: Onglet Profil
-# -----------------------------------------------------------------------------
-- tapOn: "Profil"
-
-- extendedWaitUntil:
-    visible: "Profil"
-    timeout: 5000
-
-- takeScreenshot: "02-tab-profile"
+- takeScreenshot: "02-tab-compte"
 
 # -----------------------------------------------------------------------------
 # TEST 5: Retour a l'accueil
@@ -81,7 +71,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "02-tab-home-return"

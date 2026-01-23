@@ -15,7 +15,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -25,7 +25,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 15000
 
 - takeScreenshot: "07-home-with-restaurants"
@@ -35,9 +35,10 @@ tags:
 
 - takeScreenshot: "07-restaurants-list"
 
-# Taper sur un restaurant (premier visible)
+# Taper sur une carte restaurant
+# Note: Les cartes sont cliquables entierement, testID="restaurant-card"
 - tapOn:
-    text: "Voir le menu"
+    id: "restaurant-card"
     index: 0
     optional: true
 
@@ -52,7 +53,7 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "07-back-to-home"

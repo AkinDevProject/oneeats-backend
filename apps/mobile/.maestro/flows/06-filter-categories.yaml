@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 10000
 
 # TEST: Section categories visible

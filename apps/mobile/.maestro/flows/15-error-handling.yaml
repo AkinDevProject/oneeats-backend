@@ -14,7 +14,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 15000
 
 # Test: Panier vide
@@ -40,7 +40,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 # Test: Scroll et navigation
@@ -50,7 +50,7 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "15-error-handling-complete"

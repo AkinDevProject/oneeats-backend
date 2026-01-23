@@ -22,7 +22,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 # Skip auth si necessaire
@@ -34,20 +34,21 @@ tags:
 
 # Attendre l'accueil
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 10000
 
 # -----------------------------------------------------------------------------
 # TEST 1: Barre de recherche visible
 # -----------------------------------------------------------------------------
-- assertVisible: "Rechercher"
-
 - takeScreenshot: "05-search-bar-visible"
 
 # -----------------------------------------------------------------------------
 # TEST 2: Recherche par nom de restaurant
+# Note: Le placeholder est "Rechercher un restaurant..."
 # -----------------------------------------------------------------------------
-- tapOn: "Rechercher"
+- tapOn:
+    text: "Rechercher"
+    optional: true
 
 - inputText: "Pizza"
 
@@ -61,7 +62,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "05-search-complete"

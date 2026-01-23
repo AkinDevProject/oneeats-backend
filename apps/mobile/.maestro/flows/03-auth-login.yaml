@@ -81,7 +81,7 @@ tags:
 # STEP 7: Verifier le succes de connexion
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: "proximité"
     timeout: 15000
 
 - takeScreenshot: "03-login-success"

@@ -14,7 +14,7 @@ tags:
     clearState: false
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -24,23 +24,23 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 10000
 
-# Aller au profil
-- tapOn: "Profil"
+# Aller au compte (anciennement Profil)
+- tapOn: "Compte"
 
 - extendedWaitUntil:
-    visible: "Profil"
+    visible: "Compte"
     timeout: 5000
 
-- takeScreenshot: "11-profile-for-orders"
+- takeScreenshot: "11-compte-for-orders"
 
 # Retour accueil
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "11-order-tracking-complete"

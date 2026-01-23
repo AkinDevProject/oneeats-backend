@@ -88,3 +88,21 @@ apps/web/dist/
 apps/web/build/
 apps/mobile/dist/
 apps/mobile/.expo/
+apps/web/.expo/
+apps/mobile/.maestro/
+
+# Test output files
+tests/test-output*.txt
+tests/test-run-output.txt
+tests/test-results.json
+tests/.auth/
+
+# Sensitive files
+cookies.txt
+*.class
+
+# Root scripts (should be in scripts/)
+/init.sql
+
+# Expo cache
+.expo/

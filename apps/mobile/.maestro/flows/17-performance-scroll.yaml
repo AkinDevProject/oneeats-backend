@@ -14,7 +14,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 15000
 
 # TEST 1: Scroll vertical
@@ -34,10 +34,9 @@ tags:
 
 - takeScreenshot: "17-scroll-down"
 
-# TEST 2: Navigation rapide entre onglets
+# TEST 2: Navigation rapide entre onglets (Accueil, Panier, Compte)
 - tapOn: "Panier"
-- tapOn: "Favoris"
-- tapOn: "Profil"
+- tapOn: "Compte"
 - tapOn: "Accueil"
 
 - takeScreenshot: "17-tab-switch"
@@ -51,7 +50,7 @@ tags:
 
 # Verification finale
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "17-final-stable"

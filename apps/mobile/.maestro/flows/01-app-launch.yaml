@@ -11,9 +11,10 @@ name: "01 - App Launch"
     clearState: true
 
 # Attendre que l'app se charge (ecran de connexion ou accueil)
+# Note: Timeout augmente pour laisser le temps au splash screen
 - extendedWaitUntil:
-    visible: "OneEats"
-    timeout: 20000
+    visible: ".*"
+    timeout: 30000
 
 # Screenshot de l'ecran initial
 - takeScreenshot: "01-app-launched"

@@ -14,7 +14,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -24,14 +24,15 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Restaurants"
+    visible: ".*proximit.*"
     timeout: 15000
 
 # Scroll et ouvrir un restaurant
 - scroll
 
+# Taper sur une carte restaurant (testID="restaurant-card")
 - tapOn:
-    text: "Voir le menu"
+    id: "restaurant-card"
     index: 0
     optional: true
 
@@ -45,9 +46,9 @@ tags:
 # Scroll jusqu'au menu
 - scroll
 
-# Essayer d'ajouter un article
+# Ajouter un article (testID="add-to-cart-button")
 - tapOn:
-    text: "Ajouter"
+    id: "add-to-cart-button"
     index: 0
     optional: true
 

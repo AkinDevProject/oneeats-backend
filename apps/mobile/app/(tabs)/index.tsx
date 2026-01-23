@@ -82,6 +82,8 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
       onPress={handlePress}
       borderless
       style={[cardStyles.card, { backgroundColor: theme.colors.surface }]}
+      testID="restaurant-card"
+      accessibilityLabel={`Restaurant ${restaurant.name}`}
     >
       <View>
         {/* Grande image en haut */}
@@ -117,6 +119,8 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
             disabled={isLoading}
             borderless
             style={cardStyles.favoriteButton}
+            testID="favorite-button"
+            accessibilityLabel={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
             <View style={[
               cardStyles.favoriteCircle,

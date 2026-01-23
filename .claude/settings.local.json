@@ -168,7 +168,8 @@
       "Bash(C:Usersakin_apache-maven-3.9.9binmvn.cmd --version)",
       "Bash(C:Usersakin_.maestrobinmaestrobinmaestro.bat --version)",
       "Bash(cmd.exe /c \"maestro --version\")",
-      "Bash(cmd.exe /c \"maestro -v\")"
+      "Bash(cmd.exe /c \"maestro -v\")",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []
