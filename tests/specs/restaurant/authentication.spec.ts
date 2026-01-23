@@ -31,7 +31,9 @@ test.describe('Restaurant Authentication', () => {
 
       // Navigate to restaurant dashboard (session from storageState)
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      // Wait for page to be interactive instead of networkidle (more reliable)
+      await page.waitForTimeout(2000);
 
       // Verify we're on the restaurant dashboard (not redirected to Keycloak)
       const currentUrl = page.url();
@@ -60,7 +62,8 @@ test.describe('Restaurant Authentication', () => {
 
       // Access restaurant dashboard
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1500);
 
       // Verify initial access
       expect(page.url()).toContain('/restaurant');
@@ -76,7 +79,8 @@ test.describe('Restaurant Authentication', () => {
 
       for (const section of sections) {
         await page.goto(section.path);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
 
         // Verify still in restaurant context (not redirected to Keycloak)
         const currentUrl = page.url();
@@ -97,7 +101,7 @@ test.describe('Restaurant Authentication', () => {
       console.log('👤 Testing user information display');
 
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for user-related content in the UI
       const pageContent = await page.content();
@@ -150,7 +154,7 @@ test.describe('Restaurant Authentication', () => {
 
       // Access restaurant dashboard
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Verify restaurant interface is accessible (not error page)
       const pageContent = await page.content();
@@ -174,7 +178,7 @@ test.describe('Restaurant Authentication', () => {
 
       // Test access to orders page
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const ordersUrl = page.url();
       expect(ordersUrl).toContain('/restaurant');
@@ -182,7 +186,7 @@ test.describe('Restaurant Authentication', () => {
 
       // Test access to menu page
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const menuUrl = page.url();
       expect(menuUrl).toContain('/restaurant');
@@ -195,7 +199,7 @@ test.describe('Restaurant Authentication', () => {
       console.log('🎭 Testing role-based UI display');
 
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Restaurant users should see management features
       const managementFeatures = [
@@ -243,7 +247,7 @@ test.describe('Restaurant Authentication', () => {
 
       for (const route of protectedRoutes) {
         await page.goto(route.path);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
 
         const currentUrl = page.url();
 

@@ -28,7 +28,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('⚙️ Testing restaurant profile configuration');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Verify settings page accessibility
       const pageContent = await page.content();
@@ -92,7 +92,7 @@ test.describe('Restaurant Settings Management', () => {
         
         // Try alternative navigation
         await page.goto('/restaurant');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         
         const settingsLink = page.locator('a, button').filter({ hasText: /paramètre|settings/i });
         if (await settingsLink.count() > 0) {
@@ -116,7 +116,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🖼️ Testing restaurant image upload');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Look for image upload section
       const uploadSection = page.locator('div:has-text("Image de profil"), div:has-text("Profile Image"), input[type="file"]');
@@ -149,7 +149,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🗑️ Testing restaurant image deletion');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Look for delete button
       const deleteButton = page.locator('button:has-text("Supprimer"), button:has-text("Delete"), button[aria-label*="delete"], button[title*="supprimer"]');
@@ -172,7 +172,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🌐 Testing external image proxy functionality');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Check for external images (like Unsplash) being proxied
       const images = page.locator('img');
@@ -205,7 +205,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('📅 Testing operating hours configuration');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test day-by-day schedule configuration
       const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
@@ -262,7 +262,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('💾 Testing schedule persistence and data integrity');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Find Monday day card - looking for the correct structure from source code
       const mondayCard = page.locator('div:has(span:has-text("Lundi"))');
@@ -304,7 +304,7 @@ test.describe('Restaurant Settings Management', () => {
               
               // Refresh page to verify persistence
               await page.reload();
-              await page.waitForLoadState('networkidle');
+              await page.waitForLoadState('domcontentloaded');
               
               // Check if change was persisted
               const mondayCardAfterReload = page.locator('div:has(span:has-text("Lundi"))');
@@ -345,7 +345,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('📋 Testing data mapping and API integration');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test field mapping validation
       console.log('📋 Verifying data mapping...');
@@ -418,7 +418,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🔄 Testing frontend-backend synchronization');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Monitor network requests
       let apiCalls = 0;
@@ -511,7 +511,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🎛️ Testing smart button behavior');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Find save and cancel buttons - according to source code they can show "Enregistrer" or "Aucune modification"
       const saveButton = page.locator('button:has-text("Enregistrer"), button:has-text("Aucune modification")').first();
@@ -606,7 +606,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🛠️ Testing error handling and recovery');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test page load error recovery
       const pageContent = await page.content();
@@ -657,7 +657,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log('🔥 Testing hot reload and development stability');
       
       await page.goto('/restaurant/settings');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Record initial state
       const initialInputs = page.locator('input, textarea, select');
@@ -684,7 +684,7 @@ test.describe('Restaurant Settings Management', () => {
       
       // Simulate hot reload by refreshing and checking state persistence
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(2000);
       
       // Verify state after reload
@@ -739,7 +739,7 @@ test.describe('Restaurant Settings Management', () => {
         
         // Navigate to route
         await page.goto(route);
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         
         // Verify URL is correct
         const currentUrl = page.url();
@@ -766,7 +766,7 @@ test.describe('Restaurant Settings Management', () => {
         
         // Test page refresh maintains URL
         await page.reload();
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         
         const refreshedUrl = page.url();
         expect(refreshedUrl).toContain(baseRoute);
@@ -813,7 +813,7 @@ test.describe('Restaurant Settings Management', () => {
       console.log(`📊 Completed rapid navigation in ${navigationTime}ms`);
       
       // Verify final state is stable
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       const finalUrl = page.url();
       
       expect(finalUrl).toContain('/restaurant/');

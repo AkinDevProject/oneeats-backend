@@ -29,7 +29,7 @@ test.describe('Restaurant Order Management', () => {
       
       // Navigate to orders page
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Verify page accessibility
       const pageContent = await page.content();
@@ -101,7 +101,7 @@ test.describe('Restaurant Order Management', () => {
       console.log('🎛️ Testing order actions and dashboard customization');
       
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Count available action buttons
       const actionButtons = page.locator('button').filter({ 
@@ -151,7 +151,7 @@ test.describe('Restaurant Order Management', () => {
           
           // Return to orders page
           await page.goto('/restaurant/orders');
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('domcontentloaded');
           console.log('✅ Returned to orders page after design testing');
         }
       } else {
@@ -173,7 +173,7 @@ test.describe('Restaurant Order Management', () => {
       
       // First, load the page normally
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Intercept API calls and simulate server errors
       await page.route('**/api/**', async route => {
@@ -299,7 +299,7 @@ test.describe('Restaurant Order Management', () => {
       
       // Load page normally first
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('🔸 Simulating network disconnection...');
       
@@ -350,7 +350,7 @@ test.describe('Restaurant Order Management', () => {
       console.log('🔸 Restoring network connectivity...');
       
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('✅ Network disconnection test completed');
     });
@@ -386,7 +386,8 @@ test.describe('Restaurant Order Management', () => {
       console.log(`📊 Rapid navigation completed in ${navigationTime}ms`);
       
       // Verify final state
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1000);
       expect(page.url()).toContain('/restaurant/orders');
       
       // Check for interface responsiveness
@@ -405,7 +406,7 @@ test.describe('Restaurant Order Management', () => {
       console.log('🔄 Testing real-time order updates');
       
       await page.goto('/restaurant/orders');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Get initial order count
       const initialOrders = await page.locator('[data-testid="order-card"], .card').count();
@@ -442,7 +443,7 @@ test.describe('Restaurant Order Management', () => {
       
       // Refresh to trigger update (in real app this would be automatic)
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Check if orders updated
       const updatedOrders = await page.locator('[data-testid="order-card"], .card').count();

@@ -11,7 +11,7 @@ test.describe('Integration Complète : Flow OneEats End-to-End', () => {
     console.log('📊 PHASE 1: Dashboard Restaurant');
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que le dashboard affiche les bons plats (vrais sélecteurs)
     const dashboardItemCount = await page.locator('.card, [class*="bg-white"]').count();
@@ -62,7 +62,7 @@ test.describe('Integration Complète : Flow OneEats End-to-End', () => {
     
     // Test navigation dashboard commandes
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que le dashboard commandes fonctionne
     const orderElements = await page.locator('.card, [class*="bg-white"]').count();

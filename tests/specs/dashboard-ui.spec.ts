@@ -5,7 +5,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
   test.beforeEach(async ({ page }) => {
     // Navigation vers le dashboard
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('Test UI.1 : Accès et navigation dashboard', async ({ page }) => {
@@ -103,7 +103,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     const startTime = Date.now();
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     const loadTime = Date.now() - startTime;
     console.log(`⏱️ Temps de chargement: ${loadTime}ms`);
@@ -120,7 +120,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     });
     
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier qu'il n'y a pas d'erreurs critiques
     const criticalErrors = jsErrors.filter(error => 
@@ -145,7 +145,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
 
     // Page menu
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveURL(/restaurant/);
 
     // Essayer d'accéder aux autres pages du dashboard si elles existent
@@ -181,7 +181,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
 
     // Retour à la page menu
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await expect(page).toHaveURL(/restaurant/);
 
     console.log('✅ Test UI.6 : Navigation testée');
@@ -192,7 +192,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     
     // Aller sur la page des commandes
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Attendre que les commandes se chargent (utiliser les vraies classes CSS)
     await page.waitForSelector('.card, [class*="bg-white"], [role="button"]', { timeout: 10000 });
@@ -242,7 +242,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     console.log('❌ Test UI.8 : Annulation de commande');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Attendre les commandes
     await page.waitForSelector('.card, [class*="bg-white"], [role="button"]', { timeout: 10000 });
@@ -275,7 +275,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     console.log('📋 Test UI.9 : Modal détail commande');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Attendre les commandes
     await page.waitForSelector('.card, [class*="bg-white"], [role="button"]', { timeout: 10000 });
@@ -338,7 +338,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     console.log('⏱️ Test UI.10 : Timer et indicateurs d\'urgence');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Test simple : vérifier si la page contient des éléments temporels
     const pageContent = await page.content();
@@ -384,7 +384,7 @@ test.describe('Dashboard Restaurant - Interface UI', () => {
     console.log('🔘 Test UI.11 : Boutons d\'action selon statut');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Test global des boutons d'action sur la page
     const allButtons = await page.locator('button').count();

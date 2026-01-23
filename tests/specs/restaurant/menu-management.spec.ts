@@ -55,7 +55,7 @@ test.describe('Restaurant Menu Management', () => {
     test('should authenticate and access restaurant dashboard', async ({ page }) => {
       // Navigate to restaurant dashboard
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Verify dashboard accessibility
       await expect(page).toHaveURL(/restaurant/);
@@ -77,7 +77,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Menu Item Creation', () => {
     test('should create complete menu with appetizers, mains, and desserts', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Get initial menu count
       const initialItems = await page.locator('.card, [class*="bg-white"]').count();
@@ -203,7 +203,7 @@ test.describe('Restaurant Menu Management', () => {
 
     test('should create menu item with complex options and configurations', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       const complexItem = {
         name: 'Customizable Pizza',
@@ -337,7 +337,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Availability Management', () => {
     test('should toggle menu item availability and update UI accordingly', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('👁️ Testing menu item availability management...');
       
@@ -397,7 +397,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Search and Filtering', () => {
     test('should filter menu items by category and search terms', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('🔍 Testing menu search and filtering...');
       
@@ -467,7 +467,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Responsive Design', () => {
     test('should maintain functionality across mobile, tablet, and desktop viewports', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('📱 Testing responsive design...');
       
@@ -516,7 +516,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Form Validation', () => {
     test('should validate required fields and show error messages', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('🔍 Testing form validation...');
       
@@ -659,7 +659,7 @@ test.describe('Restaurant Menu Management', () => {
 
     test('should handle form submission with missing required fields', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('🔸 Testing partial form submission...');
       
@@ -734,7 +734,7 @@ test.describe('Restaurant Menu Management', () => {
   test.describe('Data Persistence', () => {
     test('should persist menu changes across page reloads', async ({ page }) => {
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       console.log('🔄 Testing data persistence...');
       
@@ -744,7 +744,7 @@ test.describe('Restaurant Menu Management', () => {
       
       // Reload page
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Verify count remains consistent
       const reloadedCount = await page.locator('.card, [class*="bg-white"]').count();

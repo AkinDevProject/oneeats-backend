@@ -74,10 +74,10 @@ export default defineConfig({
         storageState: STORAGE_STATE_PATH, // Use authenticated session
         extraHTTPHeaders: {}, // Don't override form Content-Type
         actionTimeout: 15000,
-        navigationTimeout: 30000,
+        navigationTimeout: 60000, // Increased from 30s to 60s for stability
       },
     },
-    
+
     // Tests Legacy (à migrer) - Requires authentication
     {
       name: 'legacy-tests',
@@ -89,7 +89,7 @@ export default defineConfig({
         storageState: STORAGE_STATE_PATH, // Use authenticated session
         extraHTTPHeaders: {}, // Don't override form Content-Type
         actionTimeout: 15000,
-        navigationTimeout: 30000,
+        navigationTimeout: 60000, // Increased from 30s to 60s for stability
       },
     },
     

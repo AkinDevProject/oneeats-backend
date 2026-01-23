@@ -40,7 +40,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
         
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         await page.goto('/restaurant/menu');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         await page.waitForTimeout(500);
         
         // Test menu navigation
@@ -90,7 +90,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
       // Set mobile viewport
       await page.setViewportSize(VIEWPORTS.mobile);
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test mobile header
       const mobileHeader = page.locator('.sm\\:hidden, [class*="mobile"]');
@@ -150,7 +150,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
       
       await page.setViewportSize(VIEWPORTS.mobile);
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test mobile add button
       const addButtons = page.locator('button').filter({ hasText: /Ajouter/ });
@@ -207,7 +207,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
       
       await page.setViewportSize(VIEWPORTS.tablet);
       await page.goto('/restaurant/menu');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       
       // Test tablet header layout
       const tabletHeader = page.locator('.hidden.sm\\:block.lg\\:hidden, .sm\\:flex, .md\\:grid');
@@ -255,7 +255,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
         
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         await page.goto('/restaurant/menu');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         
         // Test large screen layouts
         const desktopElements = page.locator('.lg\\:block, .lg\\:flex, .lg\\:grid, .xl\\:grid');
@@ -312,7 +312,7 @@ test.describe('Restaurant Dashboard Responsive Design', () => {
         
         const startTime = Date.now();
         await page.goto('/restaurant/menu');
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
         const loadTime = Date.now() - startTime;
         
         // Count rendered elements

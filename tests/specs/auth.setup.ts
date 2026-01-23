@@ -318,7 +318,7 @@ setup('authenticate as restaurant user', async ({ page }) => {
   }
 
   // Wait for page to be fully loaded
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
   // Verify we're on the dashboard
   const finalUrl = page.url();

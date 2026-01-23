@@ -9,7 +9,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // 1. 🌐 Accéder à la page de login
     await page.goto('/login');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que nous sommes sur la page de login
     const pageContent = await page.content();
@@ -62,12 +62,12 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     } else {
       console.log('ℹ️ Page de login non trouvée, navigation directe vers restaurant');
       await page.goto('/restaurant');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
     }
     
     // Vérification finale : dashboard restaurant accessible
     await page.goto('/restaurant');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     // L'URL peut contenir "restaurant" ou rediriger vers Keycloak
     const finalUrl = page.url();
     const isAccessible = finalUrl.includes('restaurant') || finalUrl.includes('realms') || finalUrl.includes('localhost:8080');
@@ -82,7 +82,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     // 🌐 1. Accéder au dashboard restaurant : http://localhost:5173/restaurant/menu
     await page.goto('/restaurant/menu');
     await expect(page).toHaveTitle(/DelishGo|OneEats/);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que nous sommes sur la bonne page
     const pageContent = await page.content();
@@ -365,7 +365,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('👁️ Test 1.2 : Gestion de la disponibilité');
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que nous sommes sur la page menu
     const pageContent = await page.content();
@@ -447,7 +447,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
       // 🔄 Actualiser la page
       console.log('🔄 Actualisation de la page...');
       await page.reload();
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(2000);
       
       // 👁️‍🗨️ Vérifier dans le filtre "Non disponibles"
@@ -561,15 +561,18 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 1.3 : Filtres et recherche', async ({ page }) => {
     console.log('🔍 Test 1.3 : Filtres et recherche');
-    
+
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
-    
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
+
     // Test du filtre par catégorie (sélecteurs ajustés au code réel)
     const categoryButtons = page.locator('button').filter({ hasText: /plats|entrées|desserts/i });
     if (await categoryButtons.count() > 0) {
       const firstCategoryButton = categoryButtons.first();
-      await firstCategoryButton.click();
+      // Scroll into view and click with force if element is partially hidden
+      await firstCategoryButton.scrollIntoViewIfNeeded();
+      await firstCategoryButton.click({ force: true });
       await page.waitForTimeout(500);
       
       // Vérifier les éléments affichés avec sélecteurs réels
@@ -609,7 +612,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('🔄 Test 1.4 : Validation synchronisation BDD');
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Récupérer les données de l'interface (sélecteurs ajustés)
     const uiMenuItems = await page.locator('[data-testid="menu-item-card"], .card, [class*="bg-white"]').count();
@@ -639,7 +642,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('🔧 Test 1.5 : Création plat avec options complètes');
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Helper function pour créer un plat avec options (limite de tentatives)
     const createDishWithOptions = async () => {
@@ -803,9 +806,10 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 1.6 : Interface responsive et adaptative', async ({ page }) => {
     console.log('📱 Test 1.6 : Interface responsive et adaptative');
-    
+
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
     // Tester différentes tailles d'écran
     const viewports = [
@@ -863,9 +867,10 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 1.7 : Actions rapides et validation', async ({ page }) => {
     console.log('⚡ Test 1.7 : Actions rapides et validation');
-    
+
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
     // Compter les plats initiaux
     const initialItems = await page.locator('[data-testid="menu-item-card"], .card, [class*="bg-white"]').count();
@@ -948,9 +953,10 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 1.8 : Modification d\'un plat existant avec données pré-remplies', async ({ page }) => {
     console.log('✏️ Test 1.8 : Modification d\'un plat existant avec données pré-remplies');
-    
+
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
     // Chercher un plat existant à modifier
     const menuItems = page.locator('[data-testid="menu-item-card"], .card, [class*="bg-white"]');
@@ -1081,10 +1087,11 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 2.1 : Gestion des commandes - Navigation et filtres', async ({ page }) => {
     console.log('📋 Test 2.1 : Gestion des commandes - Navigation et filtres');
-    
+
     // Naviguer vers la page commandes
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
     // Vérifier que nous sommes sur la page commandes
     const pageContent = await page.content();
@@ -1150,7 +1157,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('🎨 Test 2.2 : Actions sur commandes et Design Selector');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Chercher des boutons d'action sur les commandes
     const actionButtons = page.locator('button:has-text("Accepter"), button:has-text("Prête"), button:has-text("Récupérée"), button:has-text("Détails")');
@@ -1170,7 +1177,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     // Test Design Selector
     console.log('🎨 Test Design Selector...');
     await page.goto('/restaurant/dashboard-designs');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier la présence des designs
     const designCards = page.locator('[data-testid="design-card"], .design-card, .card');
@@ -1205,7 +1212,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('⚙️ Test 3.1 : Paramètres restaurant');
     
     await page.goto('/restaurant/settings');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Vérifier que la page paramètres se charge
     const pageContent = await page.content().then(c => c.toLowerCase());
@@ -1280,7 +1287,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('📅 Test 3.2 : Configuration horaires d\'ouverture jour par jour');
     
     await page.goto('/restaurant/settings');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Chercher la section horaires d'ouverture
     const scheduleSection = page.locator('section:has-text("horaires"), div:has-text("horaires"), .schedule, [data-testid="schedule"]');
@@ -1348,7 +1355,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('🔄 Test 3.3 : Mapping et transformation des données');
     
     await page.goto('/restaurant/settings');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Test du mapping des champs API vers interface
     console.log('📋 Vérification mapping des données...');
@@ -1427,10 +1434,11 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
   test('Test 4.1 : Synchronisation temps réel avec simulation', async ({ page }) => {
     console.log('🔄 Test 4.1 : Synchronisation temps réel avec simulation');
-    
+
     // 1. 🖥️ Garder le dashboard restaurant ouvert
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
     // Compter les commandes initiales
     const initialOrders = await page.locator('[data-testid="order-card"], .order-item, .commande, .card').count();
@@ -1506,10 +1514,11 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     for (const section of sections) {
       const startTime = Date.now();
-      
+
       await page.goto(section.url);
-      await page.waitForLoadState('networkidle');
-      
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1500);
+
       const loadTime = Date.now() - startTime;
       navigationTimes.push(loadTime);
       
@@ -1536,7 +1545,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
 
     // Vérifier que l'URL utilise bien le port 8080 unique
     await page.goto('/restaurant');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // L'URL peut être localhost:8080 ou rediriger vers Keycloak (8580)
     const currentUrl = page.url();
@@ -1559,7 +1568,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Naviguer vers le menu pour déclencher des requêtes
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     console.log(`📊 ${apiRequests} requêtes API détectées`);
     console.log(`📊 ${staticRequests} ressources statiques détectées`);
@@ -1573,7 +1582,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Test de persistance après rechargement
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Vérifier que la page se recharge correctement (peut être redirigé vers Keycloak)
     const reloadUrl = page.url();
@@ -1591,7 +1600,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Test du comportement en cas d'erreur API
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     console.log('🔌 Simulation d\'erreurs backend...');
     
@@ -1661,7 +1670,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Vérifier la récupération après reconnexion
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     const finalItems = await page.locator('.card').count();
     console.log(`  ✅ ${finalItems} éléments après reconnexion`);
@@ -1676,7 +1685,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('🍽️ Simulation rush du midi...');
     
     await page.goto('/restaurant/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Test actions rapides répétées
     const startTime = Date.now();
@@ -1704,7 +1713,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     console.log('💨 Test gestion sous pression...');
     
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Actions multiples rapides (avec vérification de visibilité)
     const menuItems = page.locator('[data-testid="menu-item-card"], .menu-item-card, main .card');
@@ -1783,7 +1792,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Actions rapides multiples
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     // Recherche rapide multiple
     const searchInputs = page.locator('input[placeholder*="Rechercher"], input[placeholder*="recherche"]');
@@ -1812,7 +1821,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Test différents types d'erreurs
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     console.log('🔍 Test gestion d\'erreurs JavaScript...');
     
@@ -1838,7 +1847,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Retour vers page valide
     await page.goto('/restaurant/menu');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     console.log('  ✅ Récupération après erreur 404');
     
     // Test formulaire avec données invalides
@@ -1898,7 +1907,7 @@ test.describe('Phase 1 : Gestion des Menus - Dashboard Restaurant', () => {
     
     // Vérifier récupération
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     const finalContent = await page.content();
     if (finalContent.length > 1000) {

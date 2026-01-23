@@ -161,7 +161,8 @@
       "Bash(mvnw.cmd:*)",
       "Skill(bmad:bmm:workflows:document-project)",
       "Bash(npx --version)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": [],
     "ask": []
