@@ -165,7 +165,10 @@
       "Bash(npm ls:*)",
       "Bash(cd:*)",
       "Bash(./node_modules/.bin/playwright test:*)",
-      "Bash(C:Usersakin_apache-maven-3.9.9binmvn.cmd --version)"
+      "Bash(C:Usersakin_apache-maven-3.9.9binmvn.cmd --version)",
+      "Bash(C:Usersakin_.maestrobinmaestrobinmaestro.bat --version)",
+      "Bash(cmd.exe /c \"maestro --version\")",
+      "Bash(cmd.exe /c \"maestro -v\")"
     ],
     "deny": [],
     "ask": []
