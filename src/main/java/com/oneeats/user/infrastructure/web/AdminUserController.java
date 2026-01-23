@@ -14,8 +14,8 @@ import com.oneeats.user.domain.model.UserStatus;
 import com.oneeats.user.domain.repository.IUserRepository;
 import com.oneeats.user.domain.specification.UniqueEmailSpecification;
 import com.oneeats.user.infrastructure.entity.UserEntity;
-// import com.oneeats.security.Roles;
-// import jakarta.annotation.security.RolesAllowed;
+import com.oneeats.security.Roles;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -35,7 +35,7 @@ import java.util.UUID;
 @Path("/api/admin/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-// @RolesAllowed(Roles.ADMIN) // TODO: Uncomment when Epic 1 (Auth) is implemented
+@RolesAllowed(Roles.ADMIN)
 public class AdminUserController {
 
     @Inject

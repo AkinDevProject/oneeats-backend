@@ -2,6 +2,8 @@ package com.oneeats.analytics.infrastructure.web;
 
 import com.oneeats.analytics.application.dto.PlatformStatsDTO;
 import com.oneeats.analytics.application.service.AnalyticsService;
+import com.oneeats.security.Roles;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,6 +22,7 @@ public class AnalyticsController {
 
     @GET
     @Path("/platform")
+    @RolesAllowed(Roles.ADMIN)
     public Response getPlatformStats() {
         try {
             PlatformStatsDTO stats = analyticsService.getPlatformStats();
@@ -33,6 +36,7 @@ public class AnalyticsController {
 
     @GET
     @Path("/dashboard")
+    @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
     public Response getDashboardStats() {
         // Alias pour la compatibilité avec l'API service frontend
         return getPlatformStats();
@@ -40,6 +44,7 @@ public class AnalyticsController {
 
     @GET
     @Path("/revenue")
+    @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
     public Response getRevenueStats(@QueryParam("period") @DefaultValue("month") String period) {
         try {
             PlatformStatsDTO stats = analyticsService.getPlatformStats();
@@ -68,6 +73,7 @@ public class AnalyticsController {
 
     @GET
     @Path("/trends")
+    @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
     public Response getTrendsStats() {
         try {
             PlatformStatsDTO stats = analyticsService.getPlatformStats();

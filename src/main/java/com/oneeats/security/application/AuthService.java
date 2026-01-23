@@ -11,6 +11,9 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotAuthorizedException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -140,6 +143,55 @@ public class AuthService {
         return getCurrentUser()
             .map(user -> staffRepository.hasAccessToRestaurant(user.getId(), restaurantId))
             .orElse(false);
+    }
+
+    /**
+     * Exige que l'utilisateur courant ait acces au restaurant.
+     * Lance ForbiddenException si l'acces est refuse.
+     *
+     * @param restaurantId ID du restaurant
+     * @throws ForbiddenException si l'utilisateur n'a pas acces
+     */
+    public void requireRestaurantAccess(UUID restaurantId) {
+        if (!hasAccessToRestaurant(restaurantId)) {
+            throw new ForbiddenException("Acces refuse a ce restaurant");
+        }
+    }
+
+    /**
+     * Exige un utilisateur authentifie et retourne son entite.
+     * Lance NotAuthorizedException si non authentifie.
+     *
+     * @return UserEntity de l'utilisateur courant
+     * @throws NotAuthorizedException si l'utilisateur n'est pas authentifie
+     */
+    public UserEntity requireCurrentUser() {
+        return getCurrentUser()
+            .orElseThrow(() -> new NotAuthorizedException("Authentification requise"));
+    }
+
+    /**
+     * Verifie si l'utilisateur courant est le proprietaire de la ressource.
+     *
+     * @param userId ID de l'utilisateur proprietaire
+     * @return true si l'utilisateur courant est le proprietaire
+     */
+    public boolean isCurrentUser(UUID userId) {
+        return getCurrentUser()
+            .map(user -> user.getId().equals(userId))
+            .orElse(false);
+    }
+
+    /**
+     * Exige que l'utilisateur courant soit le proprietaire de la ressource.
+     *
+     * @param userId ID de l'utilisateur proprietaire
+     * @throws ForbiddenException si l'utilisateur n'est pas le proprietaire
+     */
+    public void requireCurrentUser(UUID userId) {
+        if (!isCurrentUser(userId)) {
+            throw new ForbiddenException("Acces refuse a cette ressource");
+        }
     }
 
     /**
