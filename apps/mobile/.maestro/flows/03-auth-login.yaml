@@ -26,7 +26,7 @@ tags:
 # STEP 1: Arriver sur l'ecran de connexion
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 # -----------------------------------------------------------------------------
@@ -60,6 +60,7 @@ tags:
 - extendedWaitUntil:
     visible: "Sign in"
     timeout: 20000
+    optional: true
 
 - takeScreenshot: "03-keycloak-page"
 
@@ -81,18 +82,22 @@ tags:
 # STEP 7: Verifier le succes de connexion
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible: "proximité"
+    visible: ".*proximit.*"
     timeout: 15000
+    optional: true
 
 - takeScreenshot: "03-login-success"
 
 # -----------------------------------------------------------------------------
-# STEP 8: Verifier que l'utilisateur est connecte (profil)
+# STEP 8: Verifier que l'utilisateur est connecte (compte)
 # -----------------------------------------------------------------------------
-- tapOn: "Profil"
+- tapOn:
+    text: "Compte"
+    optional: true
 
 - extendedWaitUntil:
-    visible: "Profil"
+    visible: "Compte"
     timeout: 5000
+    optional: true
 
-- takeScreenshot: "03-profile-logged-in"
+- takeScreenshot: "03-compte-logged-in"

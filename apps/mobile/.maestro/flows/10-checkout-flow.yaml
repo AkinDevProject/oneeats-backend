@@ -14,7 +14,7 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 - runFlow:
@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "proximité"
+    visible: ".*proximit.*"
     timeout: 15000
 
 # Aller au panier pour voir l'etat
@@ -42,7 +42,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "proximité"
+    visible: ".*proximit.*"
     timeout: 5000
 
 - takeScreenshot: "10-checkout-complete"

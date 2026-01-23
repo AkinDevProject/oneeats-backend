@@ -329,7 +329,6 @@ export default function RestaurantScreen() {
                         handleAddToCart(item);
                       }
                     }}
-                    testID="add-to-cart-button"
                     accessibilityLabel={`Ajouter ${item.name} au panier`}
                   >
                     <MaterialIcons name="add" size={20} color={currentTheme.colors.onPrimary} />

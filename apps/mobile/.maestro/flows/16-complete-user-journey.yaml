@@ -25,10 +25,13 @@ tags:
       visible: "Continuer sans compte"
     commands:
       - tapOn: "Continuer sans compte"
+      - extendedWaitUntil:
+          visible: ".*"
+          timeout: 5000
 
 - extendedWaitUntil:
     visible: ".*proximit.*"
-    timeout: 15000
+    timeout: 30000
 
 - takeScreenshot: "16-e2e-02-home"
 

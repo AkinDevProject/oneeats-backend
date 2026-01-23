@@ -66,33 +66,38 @@ const performanceStore = new PerformanceStore();
 
 // Hook pour mesurer le temps de rendu des composants
 export const useRenderTime = (componentName: string, enabled = __DEV__) => {
-  const renderStartTime = useRef<number>(0);
-  const [renderTime, setRenderTime] = useState<number>(0);
+  const renderStartTime = useRef<number>(performance.now());
+  const renderCount = useRef<number>(0);
+  const lastRenderTime = useRef<number>(0);
+
+  // Marquer le début du render (s'exécute à chaque render, avant useEffect)
+  renderStartTime.current = performance.now();
+  renderCount.current += 1;
 
   useEffect(() => {
     if (!enabled) return;
 
-    renderStartTime.current = performance.now();
-    
     const endTime = performance.now();
     const duration = endTime - renderStartTime.current;
-    
-    setRenderTime(duration);
-    
+
+    // Stocker dans ref au lieu de state pour éviter la boucle infinie
+    lastRenderTime.current = duration;
+
     performanceStore.addEntry({
       name: componentName,
       startTime: renderStartTime.current,
       duration,
       type: 'render',
-      metadata: { component: componentName }
+      metadata: { component: componentName, renderCount: renderCount.current }
     });
 
     if (duration > 16) { // Plus de 16ms = problème potentiel à 60fps
       console.warn(`⚠️ Slow render detected: ${componentName} took ${duration.toFixed(2)}ms`);
     }
-  });
+  }); // Pas de dépendances pour mesurer chaque render, mais pas de setState
 
-  return renderTime;
+  // Retourne une fonction pour obtenir le dernier temps de rendu
+  return lastRenderTime.current;
 };
 
 // Hook pour mesurer les interactions utilisateur
