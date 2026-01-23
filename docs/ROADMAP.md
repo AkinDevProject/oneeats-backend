@@ -128,7 +128,7 @@
 
 ---
 
-## Phase 3 - Authentification et Sécurité (En cours 90%)
+## Phase 3 - Authentification et Sécurité (En cours 95%)
 
 ### Authentification Keycloak + OIDC
 - [x] Configuration Keycloak documentée
@@ -142,7 +142,18 @@
 - [x] Entité RestaurantStaffEntity (rôles par restaurant)
 - [x] **Intégration frontend web (login page avec SSO)**
 - [x] **Intégration mobile (expo-auth-session + PKCE)**
-- [ ] Tests d'authentification
+- [x] **Tests d'authentification RBAC (RbacSecurityIT.java)**
+
+### RBAC - Role-Based Access Control ✅ IMPLÉMENTÉ
+- [x] **ADR-006 - RBAC MVP** (3 rôles : ADMIN, RESTAURANT, USER)
+- [x] Annotations @RolesAllowed sur AdminUserController
+- [x] Annotations @RolesAllowed/@PermitAll sur RestaurantController
+- [x] Annotations @RolesAllowed/@PermitAll sur MenuController
+- [x] Annotations @RolesAllowed/@Authenticated sur OrderController
+- [x] Annotations @RolesAllowed sur AnalyticsController
+- [x] Annotations @RolesAllowed sur UserFavoriteController
+- [x] AuthService helpers: requireRestaurantAccess(), requireCurrentUser()
+- [x] Tests d'intégration RBAC (50+ tests)
 
 ### Frontend Web Authentication ✅ COMPLET
 - [x] Page login avec SSO Keycloak
@@ -316,6 +327,68 @@
 ---
 
 ## Notes de Session
+
+### Session 2026-01-23 : Implémentation RBAC MVP (Phase 3)
+
+**Objectif** : Ajouter les annotations de sécurité @RolesAllowed sur tous les endpoints backend
+
+**Travail effectué** :
+
+**1. Documentation Architecture**
+- ✅ Création ADR-006-rbac-mvp.md avec décision architecturale complète
+- ✅ Matrice des permissions par endpoint documentée
+- ✅ Stratégie d'évolution post-MVP définie
+
+**2. Implémentation AuthService**
+- ✅ Ajout méthode `requireRestaurantAccess(UUID)` - lance ForbiddenException si pas d'accès
+- ✅ Ajout méthode `requireCurrentUser()` - retourne UserEntity ou lance NotAuthorizedException
+- ✅ Ajout méthode `isCurrentUser(UUID)` - vérifie si l'utilisateur courant est le propriétaire
+
+**3. Annotations Sécurité sur Controllers**
+- ✅ `AdminUserController` : @RolesAllowed(ADMIN) sur la classe
+- ✅ `RestaurantController` :
+  - @PermitAll sur GET (liste, détail, active)
+  - @RolesAllowed(RESTAURANT, ADMIN) sur POST, PUT, PATCH + vérification accès restaurant
+  - @RolesAllowed(ADMIN) sur DELETE et PUT /status
+- ✅ `MenuController` :
+  - @PermitAll sur GET (recherche, détail, menu restaurant)
+  - @RolesAllowed(RESTAURANT, ADMIN) sur POST, PUT, DELETE + vérification accès restaurant
+- ✅ `OrderController` :
+  - @RolesAllowed(USER) sur POST (création commande)
+  - @Authenticated sur GET (avec vérification ownership)
+  - @RolesAllowed(RESTAURANT, ADMIN) sur PUT /status
+- ✅ `AnalyticsController` :
+  - @RolesAllowed(ADMIN) sur /platform
+  - @RolesAllowed(RESTAURANT, ADMIN) sur /dashboard, /revenue, /trends
+- ✅ `UserFavoriteController` :
+  - @RolesAllowed(USER) sur la classe
+  - Vérification que l'utilisateur accède à ses propres favoris
+
+**4. Tests d'Intégration**
+- ✅ Création `RbacSecurityIT.java` avec 50+ tests
+- ✅ Tests par controller (AdminUser, Restaurant, Menu, Order, Analytics, Favorites)
+- ✅ Tests cross-cutting (endpoints publics vs protégés)
+- ✅ Tests par rôle (ADMIN, RESTAURANT, USER, anonymous)
+
+**Fichiers créés** :
+- `docs/shared/architect/adr/ADR-006-rbac-mvp.md`
+- `src/test/java/com/oneeats/integration/security/RbacSecurityIT.java`
+
+**Fichiers modifiés** :
+- `AuthService.java` (+50 lignes)
+- `AdminUserController.java`
+- `RestaurantController.java`
+- `MenuController.java`
+- `OrderController.java`
+- `AnalyticsController.java`
+- `UserFavoriteController.java`
+
+**Prochaines étapes** :
+- Configurer les rôles dans Keycloak (admin, restaurant, user)
+- Tester avec un vrai login Keycloak
+- Ajouter vérification restaurant sur OrderController.updateOrderStatus()
+
+---
 
 ### Session 2026-01-21 : Résolution BUG-013 - Auth Playwright/Keycloak
 
@@ -570,8 +643,8 @@ Claude Code
 - **Architecture** : ✅ 100% (Complet)
 - **APIs Domaines** : ✅ 95% (Order, User, Restaurant, Menu complets)
 - **WebSocket** : ✅ 100% (NotificationWebSocket, RestaurantWebSocket implémentés)
-- **Tests** : ⚠️ 75% (Unit tests OK, tests WebSocket manquants)
-- **Sécurité** : ✅ 90% (Keycloak complet, tests auth limités)
+- **Tests** : ✅ 85% (Unit tests OK, RBAC tests OK, tests WebSocket manquants)
+- **Sécurité** : ✅ 95% (Keycloak + RBAC complet, ADR-006 implémenté)
 
 ### Frontend Web
 - **UI/UX** : ✅ 95% (Interface complète avec améliorations admin)
@@ -764,7 +837,7 @@ docs/shared/architect/
 
 ## Dernière mise à jour
 
-**Date** : 2026-01-21
-**Version** : MVP 0.95
+**Date** : 2026-01-23
+**Version** : MVP 0.97
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2026-01-24
+**Prochaine revue** : 2026-01-27
