@@ -89,6 +89,16 @@ docs/
 |---------|-------------|
 | **[ROADMAP.md](ROADMAP.md)** | Progression projet, taches en cours |
 | **[BUGS.md](BUGS.md)** | Bugs connus et suivi |
+| **[project-overview.md](project-overview.md)** | Vue d'ensemble du projet (genere) |
+| **[source-tree-analysis.md](source-tree-analysis.md)** | Analyse arbre source (genere) |
+
+### Documentation Generee (BMAD document-project)
+
+| Fichier | Description |
+|---------|-------------|
+| **[project-overview.md](project-overview.md)** | Resume executif, stack tech, statistiques |
+| **[source-tree-analysis.md](source-tree-analysis.md)** | Structure complete du monorepo |
+| **[project-scan-report.json](project-scan-report.json)** | Etat du workflow de scan |
 
 ---
 
@@ -273,4 +283,16 @@ PHASE 4: IMPLEMENTATION (par plateforme)
 
 ---
 
-**Derniere mise a jour** : 2026-01-20
+### Documentation UAT (User Acceptance Testing)
+
+| Fichier | Description |
+|---------|-------------|
+| **[UAT_SETUP.md](UAT_SETUP.md)** | Configuration de l'environnement UAT |
+| **[UAT_GUIDE_RESTAURANT.md](UAT_GUIDE_RESTAURANT.md)** | Guide UAT dashboard restaurant |
+| **[UAT_GUIDE_ADMIN.md](UAT_GUIDE_ADMIN.md)** | Guide UAT dashboard admin |
+| **[UAT_GUIDE_MOBILE.md](UAT_GUIDE_MOBILE.md)** | Guide UAT application mobile |
+| **[reports/UAT_REPORT_2026-01-20.md](reports/UAT_REPORT_2026-01-20.md)** | Rapport UAT du 2026-01-20 |
+
+---
+
+**Derniere mise a jour** : 2026-01-21

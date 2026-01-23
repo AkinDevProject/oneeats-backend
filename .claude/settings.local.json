@@ -158,7 +158,10 @@
       "Bash(wsl maestro:*)",
       "Bash(wsl bash -c \"~/.maestro/bin/maestro --version\")",
       "Bash(wsl bash:*)",
-      "Bash(mvnw.cmd:*)"
+      "Bash(mvnw.cmd:*)",
+      "Skill(bmad:bmm:workflows:document-project)",
+      "Bash(npx --version)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,65 +1,66 @@
 {
   "workflow_version": "1.2.0",
   "timestamps": {
-    "started": "2026-01-14T21:05:00Z",
-    "last_updated": "2026-01-14T21:25:00Z",
-    "completed": "2026-01-14T21:25:00Z"
+    "started": "2026-01-21T22:00:00Z",
+    "last_updated": "2026-01-21T22:15:00Z",
+    "completed": "2026-01-21T22:15:00Z"
   },
-  "mode": "initial_scan",
+  "mode": "full_rescan",
   "scan_level": "quick",
   "project_root": "C:\\Users\\akin_\\Documents\\dev\\FoodApp\\Quarkus\\oneeats-backend",
   "output_folder": "docs",
   "completed_steps": [
-    {"step": "step_1", "status": "completed", "timestamp": "2026-01-14T21:12:00Z", "summary": "Classified as monorepo with 3 parts"},
-    {"step": "step_2", "status": "completed", "timestamp": "2026-01-14T21:15:00Z", "summary": "Found 32 existing docs"},
-    {"step": "step_3", "status": "completed", "timestamp": "2026-01-14T21:18:00Z", "summary": "Tech stack analyzed"},
-    {"step": "step_4", "status": "completed", "timestamp": "2026-01-14T21:20:00Z", "summary": "Conditional analysis: 12 controllers, 24 models, 19 repos"},
-    {"step": "step_5", "status": "completed", "timestamp": "2026-01-14T21:22:00Z", "summary": "Source tree documented"},
-    {"step": "step_9", "status": "completed", "timestamp": "2026-01-14T21:24:00Z", "summary": "Supporting docs generated"},
-    {"step": "step_10", "status": "completed", "timestamp": "2026-01-14T21:25:00Z", "summary": "Master index generated"},
-    {"step": "step_12", "status": "completed", "timestamp": "2026-01-14T21:25:00Z", "summary": "Workflow complete"}
+    {"step": "step_1", "status": "completed", "timestamp": "2026-01-21T22:00:00Z", "summary": "Classified as monorepo with 3 parts (backend, web, mobile)"},
+    {"step": "step_2", "status": "completed", "timestamp": "2026-01-21T22:02:00Z", "summary": "Found 51 existing docs"},
+    {"step": "step_3", "status": "completed", "timestamp": "2026-01-21T22:04:00Z", "summary": "Tech stack: Java 21/Quarkus 3.24.2 + React 18/Vite + React Native 0.81/Expo 54"},
+    {"step": "step_4", "status": "completed", "timestamp": "2026-01-21T22:06:00Z", "summary": "Conditional analysis: 13 controllers, 19 repos, 24 models"},
+    {"step": "step_5", "status": "completed", "timestamp": "2026-01-21T22:08:00Z", "summary": "Source tree documented"},
+    {"step": "step_6", "status": "completed", "timestamp": "2026-01-21T22:09:00Z", "summary": "Dev/deployment guides found"},
+    {"step": "step_9", "status": "completed", "timestamp": "2026-01-21T22:12:00Z", "summary": "Supporting docs: project-overview.md, source-tree-analysis.md"},
+    {"step": "step_10", "status": "completed", "timestamp": "2026-01-21T22:14:00Z", "summary": "README.md updated with new docs"},
+    {"step": "step_12", "status": "completed", "timestamp": "2026-01-21T22:15:00Z", "summary": "Workflow complete"}
   ],
   "current_step": "completed",
   "findings": {
     "project_classification": {
       "repository_type": "monorepo",
       "parts_count": 3,
-      "primary_tech": "Java/Quarkus + React + React Native"
+      "primary_tech": "Java/Quarkus + React + React Native/Expo"
     },
-    "existing_docs_count": 32,
+    "existing_docs_count": 51,
     "technology_stack": {
-      "backend": "Java 21, Quarkus 3.24.2, PostgreSQL, Keycloak",
-      "web": "React 18, TypeScript, Vite, Tailwind CSS",
-      "mobile": "React Native 0.81, Expo 54, TypeScript"
+      "backend": "Java 21, Quarkus 3.24.2, PostgreSQL, Keycloak, Hibernate ORM Panache",
+      "web": "React 18.3.1, TypeScript 5.5.3, Vite 5.4.2, Tailwind CSS 3.4.1",
+      "mobile": "React Native 0.81.4, Expo 54.0.7, TypeScript 5.9.2, React Query 5.85.5"
     },
     "api_analysis": {
-      "controllers": 12,
+      "controllers": 13,
       "endpoints_estimated": 50
     },
     "data_models": {
       "domain_models": 24,
-      "repositories": 19,
-      "dtos": 19
+      "repositories": 19
     },
     "ui_components": {
-      "web_components": 22,
-      "web_pages": 22,
-      "mobile_screens": 16
+      "web_components": 60,
+      "mobile_screens": 22
     },
     "tests": {
-      "unit_tests": 16
-    }
+      "backend_unit_tests": 16,
+      "web_e2e_tests": 80,
+      "mobile_jest_tests": "configured"
+    },
+    "bugs_critical": ["BUG-017", "BUG-018"]
   },
   "project_types": [
-    {"part_id": "backend", "project_type_id": "backend", "display_name": "Java Quarkus API", "root_path": "/"},
-    {"part_id": "web", "project_type_id": "web", "display_name": "React Dashboard", "root_path": "apps/web/"},
-    {"part_id": "mobile", "project_type_id": "mobile", "display_name": "React Native App", "root_path": "apps/mobile/"}
+    {"part_id": "backend", "project_type_id": "backend", "display_name": "Java Quarkus API (Hexagonal)", "root_path": "/"},
+    {"part_id": "web", "project_type_id": "web", "display_name": "React Dashboard (Vite)", "root_path": "apps/web/"},
+    {"part_id": "mobile", "project_type_id": "mobile", "display_name": "React Native App (Expo)", "root_path": "apps/mobile/"}
   ],
   "outputs_generated": [
     "project-scan-report.json",
     "project-overview.md",
-    "source-tree-analysis.md",
-    "index.md"
+    "source-tree-analysis.md"
   ],
   "resume_instructions": "Workflow completed successfully"
 }

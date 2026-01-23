@@ -7,7 +7,7 @@
 | 🔴 Critique | 1 | Bloquant pour le MVP |
 | 🟠 Important | 5 | Impact significatif sur l'expérience |
 | 🟡 Moyen | 0 | Problème mineur |
-| 🟢 Résolu | 19 | Bugs corrigés |
+| 🟢 Résolu | 20 | Bugs corrigés |
 
 ---
 
@@ -574,6 +574,67 @@ Remplacement des URLs hardcodées par une fonction `getApiBaseUrl()` qui :
 
 ## 🟢 Bugs Résolus
 
+### ✅ BUG-018 : Policy `authenticated` de Quarkus échoue avec OIDC web-app mode
+**Priorité** : 🔴 Critique
+**Status** : ✅ Résolu (workaround)
+**Affecte** : Backend (Quarkus OIDC)
+**Date création** : 2026-01-21
+**Date résolution** : 2026-01-21
+
+**Description** :
+Les requêtes POST/PUT/DELETE sur `/api/menu-items` retournaient 403 Forbidden alors que l'utilisateur était authentifié correctement. L'authentification fonctionnait (utilisateur reconnu avec ses rôles), mais l'autorisation échouait.
+
+**Symptômes** :
+- L'utilisateur `restaurant@oneeats.com` était correctement authentifié (non-anonymous)
+- Les rôles `[restaurant, user]` étaient correctement extraits du token Keycloak
+- Malgré cela, la policy `authenticated` retournait `ForbiddenException`
+- La même requête avec `policy: permit` fonctionnait
+
+**Cause racine** :
+Incompatibilité ou bug entre la policy built-in `authenticated` de Quarkus et le mode OIDC `web-app` avec `split-tokens: true`. La policy `authenticated` devrait simplement vérifier `!securityIdentity.isAnonymous()`, mais elle échouait malgré un utilisateur authentifié.
+
+**Configuration problématique** :
+```yaml
+quarkus:
+  http:
+    auth:
+      permission:
+        api-protected:
+          paths: /api/*
+          policy: authenticated  # ❌ NE FONCTIONNE PAS
+```
+
+**Solution appliquée (workaround)** :
+Utiliser une policy custom basée sur les rôles au lieu de `authenticated` :
+```yaml
+quarkus:
+  http:
+    auth:
+      policy:
+        role-policy:
+          roles-allowed: user,restaurant,admin
+      permission:
+        api-menu-items-write:
+          paths: /api/menu-items,/api/menu-items/*
+          methods: POST,PUT,DELETE
+          policy: role-policy  # ✅ FONCTIONNE
+        api-protected:
+          paths: /api/*
+          policy: role-policy  # ✅ FONCTIONNE
+```
+
+**Important** : La règle spécifique `api-menu-items-write` est NÉCESSAIRE en plus de `api-protected`. Sans elle, le problème revient. Cela semble être dû à un conflit avec la règle `api-public-read` qui autorise GET sur les mêmes paths.
+
+**Fichiers modifiés** :
+- `src/main/resources/application.yml` - Configuration des permissions HTTP
+
+**Leçon apprise** :
+1. La policy `authenticated` de Quarkus peut ne pas fonctionner correctement avec OIDC web-app mode
+2. Utiliser des policies explicites basées sur les rôles est plus fiable
+3. Quand un path a des règles différentes pour GET vs POST/PUT/DELETE, définir des règles séparées explicites
+
+---
+
 ### ✅ BUG-001 : Mock data utilisé dans frontend web et mobile
 **Priorité** : 🔴 Critique
 **Status** : ✅ Résolu
@@ -765,7 +826,7 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 ## 📊 Statistiques
 
 ### Bugs par priorité
-- 🔴 Critique : 0 actifs, 5 résolus
+- 🔴 Critique : 0 actifs, 6 résolus
 - 🟠 Important : 1 actif (offline partiel), 6 résolus
 - 🟡 Moyen : 0 actifs, 6 résolus
 
@@ -775,9 +836,9 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 - Moyen : 2 jours
 
 ### Bugs créés vs résolus (Total)
-- Créés : 18
-- Résolus : 17
-- Taux de résolution : 94%
+- Créés : 19
+- Résolus : 18
+- Taux de résolution : 95%
 
 ---
 
@@ -835,4 +896,4 @@ Ajout de validation : un utilisateur ne peut pas modifier son propre statut `is_
 **Version** : MVP 0.95
 **Responsable** : Équipe OneEats
 **Prochaine revue** : 2026-01-28
-**Derniers bugs** : BUG-017 (Tests E2E Dashboard - HTTP 404), corrections global-setup.ts et auth.setup.ts
+**Derniers bugs** : BUG-018 (Policy `authenticated` Quarkus OIDC - workaround avec role-policy)
