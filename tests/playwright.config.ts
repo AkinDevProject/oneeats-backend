@@ -123,7 +123,8 @@ export default defineConfig({
     // Tests Admin Dashboard E2E - 16 scénarios UAT
     {
       name: 'admin-dashboard',
-      testMatch: /e2e\/web\/admin\.spec\.ts/,
+      testDir: './e2e/web',
+      testMatch: /admin\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         channel: 'msedge', // Use Edge for Keycloak compatibility
@@ -131,6 +132,8 @@ export default defineConfig({
         actionTimeout: 15000,
         navigationTimeout: 60000,
       },
+      // Skip global setup for admin tests (they have their own login)
+      metadata: { skipGlobalSetup: true },
     },
   ],
 

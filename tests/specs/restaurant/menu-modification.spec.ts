@@ -73,7 +73,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await page.waitForTimeout(1000);
 
         // THEN: La modal de modification doit s'afficher
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
         await expect(modal).toBeVisible();
 
         // Vérifier le titre de la modal
@@ -107,7 +107,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // THEN: Les champs doivent être pré-remplis
@@ -152,7 +152,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Modifier le nom
@@ -183,7 +183,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Chercher le champ prix
@@ -217,7 +217,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Chercher le champ description
@@ -251,7 +251,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Chercher le champ catégorie
@@ -280,7 +280,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // THEN: Vérifier la présence de la section options
@@ -316,7 +316,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // THEN: Vérifier la présence de la section image
@@ -349,7 +349,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // THEN: Vérifier le bouton de sauvegarde
@@ -390,7 +390,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Vider les champs obligatoires
@@ -436,7 +436,7 @@ test.describe('Restaurant Menu Item Modification', () => {
         await editButtons.first().click();
         await page.waitForTimeout(1000);
 
-        const modal = page.locator('div[role="dialog"], .modal, .fixed.inset-0');
+        const modal = page.locator('.fixed.inset-0.z-50').first();
 
         if (await modal.isVisible()) {
           // WHEN: Saisir un prix invalide

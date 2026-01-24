@@ -178,7 +178,12 @@
       "Bash(cmd.exe /c \"dir C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
       "Bash(cmd.exe /c \"rd /s /q \\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
       "Bash(cmd.exe /c \"dir /a C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul* 2>&1\")",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(C:/Users/akin_/.maestro/bin/maestro/bin/maestro.bat test:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm.cmd install:*)",
+      "Bash(npm view:*)",
+      "Bash(npm.cmd view:*)"
     ],
     "deny": [],
     "ask": []
