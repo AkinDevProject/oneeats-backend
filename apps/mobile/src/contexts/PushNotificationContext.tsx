@@ -2,9 +2,11 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { Platform, AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+
+// Check if running in Expo Go (no native modules available)
+const isExpoGo = Constants.appOwnership === 'expo';
 
 // Configuration des notifications en foreground
 Notifications.setNotificationHandler({
