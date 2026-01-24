@@ -1,6 +1,7 @@
 package com.oneeats.admin.infrastructure.web;
 
 import com.oneeats.admin.application.service.ExportService;
+import com.oneeats.admin.application.service.PdfReportService;
 import com.oneeats.order.domain.model.OrderStatus;
 import com.oneeats.restaurant.domain.model.RestaurantStatus;
 import com.oneeats.security.Roles;
@@ -11,6 +12,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -26,6 +28,9 @@ public class ExportController {
 
     @Inject
     ExportService exportService;
+
+    @Inject
+    PdfReportService pdfReportService;
 
     // ==================== RESTAURANTS ====================
 
@@ -170,6 +175,41 @@ public class ExportController {
         }
     }
 
+    // ==================== PDF REPORT ====================
+
+    /**
+     * GET /api/admin/export/report - Génère un rapport PDF avec statistiques
+     *
+     * @param from Date de début optionnelle (format: yyyy-MM-dd)
+     * @param to Date de fin optionnelle (format: yyyy-MM-dd)
+     */
+    @GET
+    @Path("/report")
+    public Response exportPdfReport(
+        @QueryParam("from") String from,
+        @QueryParam("to") String to
+    ) {
+        try {
+            LocalDate fromDate = parseDateAsLocalDate(from);
+            LocalDate toDate = parseDateAsLocalDate(to);
+
+            byte[] pdfData = pdfReportService.generatePlatformReport(fromDate, toDate);
+
+            String filename = "rapport_oneeats_" + getTimestamp() + ".pdf";
+
+            return Response.ok(pdfData)
+                .type("application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("PDF report generation failed: " + e.getMessage())
+                .type(MediaType.TEXT_PLAIN)
+                .build();
+        }
+    }
+
     // ==================== HELPERS ====================
 
     private RestaurantStatus parseRestaurantStatus(String status) {
@@ -203,6 +243,15 @@ public class ExportController {
         if (dateStr == null || dateStr.isEmpty()) return null;
         try {
             return LocalDateTime.parse(dateStr + "T00:00:00");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private LocalDate parseDateAsLocalDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return null;
+        try {
+            return LocalDate.parse(dateStr);
         } catch (Exception e) {
             return null;
         }

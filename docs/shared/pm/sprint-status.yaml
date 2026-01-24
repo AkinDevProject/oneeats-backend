@@ -214,12 +214,13 @@ development_status:
   # Bloque: Scénario UAT #11 (export)
   # Complété: 2026-01-24 - 3 endpoints export avec filtres CSV/XLSX
 
-  10-10-export-pdf: backlog
+  10-10-export-pdf: done
   # Description: Endpoint export rapport PDF avec statistiques
-  # Fichiers: ExportService.java, templates PDF
-  # Dépendances: iText ou JasperReports (pom.xml)
+  # Fichiers: PdfReportService.java, ExportController.java
+  # Dépendances: iText 7.2.5 (pom.xml)
   # Effort: 4h
   # Améliore: Scénario UAT #11 (export PDF)
+  # Complété: 2026-01-24 - Rapport PDF pro avec stats, graphiques, mise en page
 
   epic-10-retrospective: optional
 
