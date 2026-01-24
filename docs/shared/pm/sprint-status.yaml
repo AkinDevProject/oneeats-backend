@@ -168,11 +168,12 @@ development_status:
   # Bloque: Scénarios UAT #14, #15
 
   # P0 - BLOQUANT UAT (UC-202: Blocage avec raison)
-  10-4-raison-blocage-restaurant: backlog
+  10-4-raison-blocage-restaurant: done
   # Description: Ajouter champs blockingReason, blockedAt dans RestaurantEntity
-  # Fichiers: RestaurantEntity.java, Restaurant.java
+  # Fichiers: RestaurantEntity.java, Restaurant.java, RestaurantController.java
   # Effort: 1h
   # Bloque: Scénario UAT #5 (raison blocage)
+  # Complété: 2026-01-24 - Endpoint POST /api/restaurants/{id}/block + migration V4
 
   10-5-gestion-commandes-blocage: backlog
   # Description: Annuler/gérer commandes en cours lors du blocage restaurant

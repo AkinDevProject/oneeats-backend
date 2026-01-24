@@ -66,6 +66,12 @@ public class RestaurantEntity extends PanacheEntityBase {
     @Column(name = "rejected_at")
     private LocalDateTime rejectedAt;
 
+    @Column(name = "blocking_reason")
+    private String blockingReason;
+
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OpeningHoursEntity> openingHours;
 
@@ -244,5 +250,21 @@ public class RestaurantEntity extends PanacheEntityBase {
 
     public void setRejectedAt(LocalDateTime rejectedAt) {
         this.rejectedAt = rejectedAt;
+    }
+
+    public String getBlockingReason() {
+        return blockingReason;
+    }
+
+    public void setBlockingReason(String blockingReason) {
+        this.blockingReason = blockingReason;
+    }
+
+    public LocalDateTime getBlockedAt() {
+        return blockedAt;
+    }
+
+    public void setBlockedAt(LocalDateTime blockedAt) {
+        this.blockedAt = blockedAt;
     }
 }

@@ -16,6 +16,8 @@ import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommand;
 import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommandHandler;
 import com.oneeats.restaurant.application.command.RejectRestaurantCommand;
 import com.oneeats.restaurant.application.command.RejectRestaurantCommandHandler;
+import com.oneeats.restaurant.application.command.BlockRestaurantCommand;
+import com.oneeats.restaurant.application.command.BlockRestaurantCommandHandler;
 import com.oneeats.restaurant.application.dto.RestaurantDTO;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQuery;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQueryHandler;
@@ -80,6 +82,9 @@ public class RestaurantController {
 
     @Inject
     RejectRestaurantCommandHandler rejectRestaurantCommandHandler;
+
+    @Inject
+    BlockRestaurantCommandHandler blockRestaurantCommandHandler;
 
     @Inject
     GetActiveRestaurantsQueryHandler getActiveRestaurantsQueryHandler;
@@ -311,6 +316,35 @@ public class RestaurantController {
 
     // DTO pour la requête de rejet
     public record RejectRestaurantRequest(String reason) {}
+
+    @POST
+    @Path("/{id}/block")
+    @RolesAllowed(Roles.ADMIN)
+    public Response blockRestaurant(@PathParam("id") UUID id, BlockRestaurantRequest request) {
+        try {
+            if (request == null || request.reason() == null || request.reason().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Blocking reason is required")
+                    .build();
+            }
+
+            BlockRestaurantCommand command = new BlockRestaurantCommand(id, request.reason());
+            RestaurantDTO restaurant = blockRestaurantCommandHandler.handle(command);
+            return Response.ok(restaurant).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to block restaurant: " + e.getMessage())
+                .build();
+        }
+    }
+
+    // DTO pour la requête de blocage
+    public record BlockRestaurantRequest(String reason) {}
 
     @GET
     @Path("/active")

@@ -24,6 +24,8 @@ public class Restaurant extends BaseEntity {
     private WeeklySchedule schedule;
     private String rejectionReason;
     private LocalDateTime rejectedAt;
+    private String blockingReason;
+    private LocalDateTime blockedAt;
 
     protected Restaurant() {}
 
@@ -87,8 +89,13 @@ public class Restaurant extends BaseEntity {
         this.addDomainEvent(new RestaurantApprovedEvent(this.getId(), this.getName()));
     }
 
-    public void block() {
+    public void block(String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Blocking reason is required");
+        }
         this.status = RestaurantStatus.BLOCKED;
+        this.blockingReason = reason.trim();
+        this.blockedAt = LocalDateTime.now();
         this.markAsModified();
     }
 
@@ -168,6 +175,8 @@ public class Restaurant extends BaseEntity {
     public WeeklySchedule getSchedule() { return schedule; }
     public String getRejectionReason() { return rejectionReason; }
     public LocalDateTime getRejectedAt() { return rejectedAt; }
+    public String getBlockingReason() { return blockingReason; }
+    public LocalDateTime getBlockedAt() { return blockedAt; }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
@@ -186,5 +195,13 @@ public class Restaurant extends BaseEntity {
 
     public void setRejectedAt(LocalDateTime rejectedAt) {
         this.rejectedAt = rejectedAt;
+    }
+
+    public void setBlockingReason(String blockingReason) {
+        this.blockingReason = blockingReason;
+    }
+
+    public void setBlockedAt(LocalDateTime blockedAt) {
+        this.blockedAt = blockedAt;
     }
 }

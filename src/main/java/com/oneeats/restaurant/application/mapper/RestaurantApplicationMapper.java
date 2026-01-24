@@ -32,7 +32,9 @@ public class RestaurantApplicationMapper {
             restaurant.getCreatedAt(),
             restaurant.getUpdatedAt(),
             restaurant.getRejectionReason(),
-            restaurant.getRejectedAt()
+            restaurant.getRejectedAt(),
+            restaurant.getBlockingReason(),
+            restaurant.getBlockedAt()
         );
     }
     

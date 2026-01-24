@@ -24,5 +24,7 @@ public record RestaurantDTO(
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     String rejectionReason,    // Raison du rejet (si statut REJECTED)
-    LocalDateTime rejectedAt   // Date du rejet (si statut REJECTED)
+    LocalDateTime rejectedAt,  // Date du rejet (si statut REJECTED)
+    String blockingReason,     // Raison du blocage (si statut BLOCKED)
+    LocalDateTime blockedAt    // Date du blocage (si statut BLOCKED)
 ) {}

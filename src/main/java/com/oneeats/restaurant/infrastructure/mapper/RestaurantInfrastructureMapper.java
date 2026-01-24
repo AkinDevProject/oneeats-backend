@@ -37,6 +37,8 @@ public class RestaurantInfrastructureMapper {
         restaurant.setIsOpen(entity.getIsOpen());
         restaurant.setRejectionReason(entity.getRejectionReason());
         restaurant.setRejectedAt(entity.getRejectedAt());
+        restaurant.setBlockingReason(entity.getBlockingReason());
+        restaurant.setBlockedAt(entity.getBlockedAt());
 
         // Convertir les horaires d'ouverture
         if (entity.getOpeningHours() != null && !entity.getOpeningHours().isEmpty()) {
@@ -71,6 +73,10 @@ public class RestaurantInfrastructureMapper {
         // Mapper les champs de rejet
         entity.setRejectionReason(restaurant.getRejectionReason());
         entity.setRejectedAt(restaurant.getRejectedAt());
+
+        // Mapper les champs de blocage
+        entity.setBlockingReason(restaurant.getBlockingReason());
+        entity.setBlockedAt(restaurant.getBlockedAt());
 
         // Convertir les horaires d'ouverture
         if (restaurant.getSchedule() != null) {
