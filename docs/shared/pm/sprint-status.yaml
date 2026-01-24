@@ -198,11 +198,12 @@ development_status:
   # Complété: 2026-01-24 - SuspendUserModal avec durées, raison, réactivation
 
   # P1 - IMPORTANT (UC-204: Alertes admin)
-  10-8-endpoint-alertes-admin: backlog
+  10-8-endpoint-alertes-admin: done
   # Description: Créer endpoint GET /api/admin/alerts avec alertes temps réel
   # Fichiers: AlertsController.java (nouveau), AlertsService.java (nouveau)
   # Effort: 3h
   # Améliore: Scénario UAT #12 (alertes)
+  # Complété: 2026-01-24 - AlertsController + AlertsService avec pagination
 
   # P2 - AMÉLIORATION (UC-205: Export données)
   10-9-export-csv-excel: backlog
