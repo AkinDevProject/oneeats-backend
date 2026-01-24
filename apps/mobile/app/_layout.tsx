@@ -23,6 +23,8 @@ import { WebSocketProvider } from '../src/contexts/WebSocketContext';
 import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/ThemeContext';
 import { SettingsProvider } from '../src/contexts/SettingsContext';
 import { FavoritesProvider } from '../src/contexts/FavoritesContext';
+import { NetworkProvider } from '../src/contexts/NetworkContext';
+import { OfflineBanner } from '../src/components/OfflineBanner';
 
 // Create a client for React Query - Optimisé pour de meilleures performances
 const queryClient = new QueryClient({
@@ -44,38 +46,41 @@ function AppContent() {
 
   return (
     <PaperProvider theme={currentTheme} key={selectedTheme}>
-      <SettingsProvider>
-        <AuthProvider>
-          <FavoritesProvider>
-            <PushNotificationProvider>
-              <NotificationProvider>
-                <CartProvider>
-                  <OrderProvider>
-                    <WebSocketProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                  <Stack>
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-                    <Stack.Screen name="auth/debug" options={{ headerShown: false }} />
-                    <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-                    <Stack.Screen name="designs" options={{ headerShown: false }} />
-                    <Stack.Screen name="account" options={{ headerShown: false }} />
-                    <Stack.Screen name="orders" options={{ headerShown: false }} />
-                    <Stack.Screen name="settings" options={{ headerShown: false }} />
-                    <Stack.Screen name="aide-support" options={{ headerShown: false }} />
-                    <Stack.Screen name="order" options={{ headerShown: false }} />
-                    <Stack.Screen name="+not-found" />
-                  </Stack>
-                  <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
-                </ThemeProvider>
-                    </WebSocketProvider>
-                  </OrderProvider>
-                </CartProvider>
-              </NotificationProvider>
-            </PushNotificationProvider>
-          </FavoritesProvider>
-        </AuthProvider>
-      </SettingsProvider>
+      <NetworkProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <FavoritesProvider>
+              <PushNotificationProvider>
+                <NotificationProvider>
+                  <CartProvider>
+                    <OrderProvider>
+                      <WebSocketProvider>
+                        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                          <OfflineBanner position="top" />
+                          <Stack>
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+                            <Stack.Screen name="auth/debug" options={{ headerShown: false }} />
+                            <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+                            <Stack.Screen name="designs" options={{ headerShown: false }} />
+                            <Stack.Screen name="account" options={{ headerShown: false }} />
+                            <Stack.Screen name="orders" options={{ headerShown: false }} />
+                            <Stack.Screen name="settings" options={{ headerShown: false }} />
+                            <Stack.Screen name="aide-support" options={{ headerShown: false }} />
+                            <Stack.Screen name="order" options={{ headerShown: false }} />
+                            <Stack.Screen name="+not-found" />
+                          </Stack>
+                          <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
+                        </ThemeProvider>
+                      </WebSocketProvider>
+                    </OrderProvider>
+                  </CartProvider>
+                </NotificationProvider>
+              </PushNotificationProvider>
+            </FavoritesProvider>
+          </AuthProvider>
+        </SettingsProvider>
+      </NetworkProvider>
     </PaperProvider>
   );
 }
