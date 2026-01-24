@@ -1,5 +1,6 @@
 # Sprint Status - OneEats Backend
 # Format BMAD standard pour le suivi de sprint
+# Derniere mise a jour: 2026-01-24
 
 # STATUS DEFINITIONS:
 # ==================
@@ -19,65 +20,75 @@
 #   - optional: Can be completed but not required
 #   - done: Retrospective has been completed
 
-generated: 2026-01-15 09:30
+generated: 2026-01-24 10:00
 project: OneEats Backend
 project_key: ONEEATS
 tracking_system: file-system
 story_location: docs/shared/pm/epics-and-stories.md
 
-# Current Sprint: Integration Frontend-Backend
-# Sprint 2 - Focus on connecting frontends to real APIs
+# Current Sprint: Sprint 3 - Finalisation MVP
+# Focus: Tests WebSocket, finalisation auth, preparation production
 
 development_status:
-  # Epic 1: Auth & Securite (P0) - NOT STARTED
-  epic-1: backlog
-  1-1-login-jwt-keycloak: backlog
-  1-2-protection-routes-role: backlog
-  1-3-refresh-logout: backlog
+  # Epic 1: Auth & Securite (P0) - DONE (95%)
+  # Keycloak + OIDC + RBAC implemente (ADR-005, ADR-006)
+  epic-1: done
+  1-1-login-jwt-keycloak: done
+  1-2-protection-routes-role: done
+  1-3-refresh-logout: done
   epic-1-retrospective: optional
+  # Note: Tests auth backend a completer
 
-  # Epic 2: Restaurants (P0) - IN PROGRESS (API done, integration in progress)
-  epic-2: in-progress
+  # Epic 2: Restaurants (P0) - DONE
+  # API complete, integration frontend terminee
+  epic-2: done
   2-1-crud-restaurant: done
   2-2-statut-approbation: done
   2-3-stats-jour-restaurant: done
   2-4-upload-logo: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
-  # Epic 3: Menu (P0) - IN PROGRESS (API done, integration in progress)
-  epic-3: in-progress
+  # Epic 3: Menu (P0) - DONE
+  # API complete, integration frontend terminee
+  epic-3: done
   3-1-crud-menu-items: done
   3-2-disponibilite-options-dietetiques: done
   3-3-upload-image-item: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
-  # Epic 4: Commandes (P0) - IN PROGRESS (API done, frontend integration needed)
-  epic-4: in-progress
+  # Epic 4: Commandes (P0) - DONE
+  # API complete, state machine, integration frontend terminee
+  epic-4: done
   4-1-passage-commande: done
   4-2-cycle-vie-commande: done
   4-3-historique-listing: done
   4-4-regles-annulation: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
 
-  # Epic 5: Notifications (P1) - NOT STARTED
-  epic-5: backlog
-  5-1-websocket-notifications: backlog
+  # Epic 5: Notifications (P1) - DONE (90%)
+  # WebSocket implemente, push mobile ok, tests manquants
+  epic-5: done
+  5-1-websocket-notifications: done
   5-2-rest-notifications-unread: backlog
-  5-3-push-mobile: backlog
+  5-3-push-mobile: done
   epic-5-retrospective: optional
+  # Note: Tests WebSocket a ecrire (BUG #06)
 
-  # Epic 6: Analytics & Dashboard (P1) - PARTIAL
+  # Epic 6: Analytics & Dashboard (P1) - IN PROGRESS
+  # Stats restaurant ok, stats plateforme a completer
   epic-6: in-progress
   6-1-stats-restaurant: done
   6-2-stats-plateforme: backlog
   epic-6-retrospective: optional
 
-  # Epic 7: Admin Users (P1) - IN PROGRESS
-  epic-7: in-progress
-  7-1-crud-utilisateurs: review
-  epic-7-retrospective: optional
+  # Epic 7: Admin Users (P1) - DONE
+  # CRUD utilisateurs avec RBAC
+  epic-7: done
+  7-1-crud-utilisateurs: done
+  epic-7-retrospective: done
 
-  # Epic 8: Observabilite & Qualite (P1) - PARTIAL
+  # Epic 8: Observabilite & Qualite (P1) - IN PROGRESS
+  # Logs/metriques ok, tests integration en cours
   epic-8: in-progress
   8-1-logs-metriques: done
   8-2-tests-integration: in-progress
@@ -85,20 +96,36 @@ development_status:
 
 # Progress Summary
 # ================
-# P0 Epics: 3/4 in-progress, 1/4 backlog (Auth)
-# P1 Epics: 2/4 in-progress, 2/4 backlog
+# P0 Epics: 4/4 done (Auth, Restaurants, Menu, Commandes)
+# P1 Epics: 2/4 done, 2/4 in-progress
 # Backend APIs: 95% complete
-# Frontend Integration: 40% complete
-# Overall MVP: 65%
+# Frontend Integration: 100% complete (web + mobile)
+# Tests E2E: 90% (Playwright 11 specs, Maestro 6 flows)
+# Overall MVP: 95%
 
 # Current Focus
 # =============
-# - Integrate frontend web dashboard with real APIs
-# - Integrate mobile app with real APIs
-# - Next: Implement Epic 1 (Auth JWT)
+# - Ecrire tests WebSocket (backend + mobile)
+# - Completer tests Auth backend
+# - Implementer Story 5.2 (REST Notifications unread count)
+# - Implementer Story 6.2 (Stats plateforme admin)
 
-# Risks
-# =====
-# - R1: Auth JWT not implemented (HIGH) - blocks secure deployment
-# - R2: Frontend using mock data (HIGH) - integration needed
-# - R3: WebSocket not delivered (MEDIUM) - fallback polling planned
+# Remaining Tasks for 100% MVP
+# ============================
+# 1. Tests WebSocket (1-2 jours) - Priorite haute
+# 2. Tests Auth Backend complets (1 jour) - Priorite moyenne
+# 3. Mode offline mobile complet (2-3 jours) - Optionnel
+# 4. Biometrie mobile (1 jour) - Optionnel
+
+# Risks (Updated)
+# ===============
+# - R1: Auth JWT - RESOLVED (Keycloak + RBAC implemente)
+# - R2: Frontend mock data - RESOLVED (APIs connectees)
+# - R3: WebSocket - RESOLVED (implemente, tests manquants)
+# - R4: Tests WebSocket manquants (LOW) - a ecrire avant prod
+
+# Completed Sprints
+# =================
+# Sprint 1: Architecture Backend - DONE
+# Sprint 2: Integration Frontend-Backend - DONE
+# Sprint 3: Authentification et Securite - DONE (2026-01-23)
