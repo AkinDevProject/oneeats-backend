@@ -119,6 +119,19 @@ export default defineConfig({
         navigationTimeout: 30000,
       },
     },
+
+    // Tests Admin Dashboard E2E - 16 scénarios UAT
+    {
+      name: 'admin-dashboard',
+      testMatch: /e2e\/web\/admin\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'msedge', // Use Edge for Keycloak compatibility
+        extraHTTPHeaders: {}, // Don't override form Content-Type
+        actionTimeout: 15000,
+        navigationTimeout: 60000,
+      },
+    },
   ],
 
   // Global setup/teardown

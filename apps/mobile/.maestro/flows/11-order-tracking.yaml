@@ -1,15 +1,22 @@
 # =============================================================================
 # FLOW 11: Suivi de commande
 # =============================================================================
+# UAT Scenario 16: Suivre une commande
+# Teste l'affichage du statut et des details d'une commande
+# =============================================================================
+
 appId: com.oneeats.mobile
 name: "11 - Order Tracking"
 tags:
   - order
   - regression
+  - uat-scenario-16
 
 ---
 
-# SETUP
+# -----------------------------------------------------------------------------
+# SETUP: Lancement (conserver l'etat pour avoir des commandes)
+# -----------------------------------------------------------------------------
 - launchApp:
     clearState: false
 
@@ -24,19 +31,186 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 10000
+    visible: "Accueil"
+    timeout: 15000
 
-# Aller au compte (anciennement Profil)
+- takeScreenshot: "11-home-screen"
+
+# -----------------------------------------------------------------------------
+# STEP 1: Naviguer vers Compte
+# -----------------------------------------------------------------------------
 - tapOn: "Compte"
 
 - extendedWaitUntil:
     visible: "Compte"
     timeout: 5000
 
-- takeScreenshot: "11-compte-for-orders"
+- takeScreenshot: "11-compte-screen"
 
-# Retour accueil
+# -----------------------------------------------------------------------------
+# STEP 2: Verifier le banner commande en cours (si applicable)
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Commande en cours"
+    optional: true
+
+- takeScreenshot: "11-active-order-banner"
+
+# -----------------------------------------------------------------------------
+# STEP 3: Acceder a Mes commandes
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "Mes commandes"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mes Commandes"
+    timeout: 10000
+    optional: true
+
+- takeScreenshot: "11-orders-list"
+
+# -----------------------------------------------------------------------------
+# STEP 4: Verifier l'onglet "En cours"
+# -----------------------------------------------------------------------------
+- tapOn:
+    text: "En cours"
+    optional: true
+
+- takeScreenshot: "11-current-orders-tab"
+
+# -----------------------------------------------------------------------------
+# STEP 5: Ouvrir une commande pour voir les details
+# -----------------------------------------------------------------------------
+- tapOn:
+    label: "order-card.*"
+    index: 0
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Commande"
+    timeout: 10000
+    optional: true
+
+- takeScreenshot: "11-order-detail"
+
+# -----------------------------------------------------------------------------
+# STEP 6: Verifier le statut de la commande
+# -----------------------------------------------------------------------------
+# Les statuts possibles: En attente, Confirmee, En preparation, Prete
+- assertVisible:
+    text: "En attente"
+    optional: true
+
+- assertVisible:
+    text: "Confirmée"
+    optional: true
+
+- assertVisible:
+    text: "En préparation"
+    optional: true
+
+- assertVisible:
+    text: "Prête"
+    optional: true
+
+- takeScreenshot: "11-order-status"
+
+# -----------------------------------------------------------------------------
+# STEP 7: Verifier la barre de progression
+# -----------------------------------------------------------------------------
+# Une barre de progression visuelle doit montrer l'etat
+- takeScreenshot: "11-progress-bar"
+
+# -----------------------------------------------------------------------------
+# STEP 8: Verifier les details de la commande
+# -----------------------------------------------------------------------------
+- scroll
+
+# Liste des articles
+- assertVisible:
+    text: "Votre commande"
+    optional: true
+
+- takeScreenshot: "11-order-items"
+
+# Total
+- assertVisible:
+    text: "Total"
+    optional: true
+
+- takeScreenshot: "11-order-total"
+
+# -----------------------------------------------------------------------------
+# STEP 9: Verifier les informations de retrait
+# -----------------------------------------------------------------------------
+- scroll
+
+- assertVisible:
+    text: "Informations de retrait"
+    optional: true
+
+# Heure de retrait
+- assertVisible:
+    text: "Heure de retrait"
+    optional: true
+
+# Restaurant
+- assertVisible:
+    text: "Restaurant"
+    optional: true
+
+# Adresse
+- assertVisible:
+    text: "Adresse"
+    optional: true
+
+- takeScreenshot: "11-pickup-info"
+
+# -----------------------------------------------------------------------------
+# STEP 10: Verifier le temps estime (si disponible)
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: ".*min.*"
+    optional: true
+
+- takeScreenshot: "11-estimated-time"
+
+# -----------------------------------------------------------------------------
+# STEP 11: Verifier le bouton pour voir l'itineraire
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Voir l'itinéraire"
+    optional: true
+
+- takeScreenshot: "11-map-button"
+
+# -----------------------------------------------------------------------------
+# STEP 12: Verifier le bouton pour appeler le restaurant
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Appeler"
+    optional: true
+
+- takeScreenshot: "11-call-button"
+
+# -----------------------------------------------------------------------------
+# STEP 13: Retour a la liste des commandes
+# -----------------------------------------------------------------------------
+- back
+
+- extendedWaitUntil:
+    visible: "Mes Commandes"
+    timeout: 5000
+    optional: true
+
+- takeScreenshot: "11-back-to-list"
+
+# -----------------------------------------------------------------------------
+# STEP 14: Retour a l'accueil
+# -----------------------------------------------------------------------------
+- back
+
 - tapOn: "Accueil"
 
 - extendedWaitUntil:

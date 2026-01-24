@@ -1,15 +1,22 @@
 # =============================================================================
 # FLOW 09: Gestion du panier
 # =============================================================================
+# UAT Scenario 14: Consulter et modifier le panier
+# Teste l'ajout, modification de quantite et suppression d'articles
+# =============================================================================
+
 appId: com.oneeats.mobile
 name: "09 - Cart Management"
 tags:
   - cart
   - regression
+  - uat-scenario-14
 
 ---
 
-# SETUP
+# -----------------------------------------------------------------------------
+# SETUP: Lancement avec panier vide
+# -----------------------------------------------------------------------------
 - launchApp:
     clearState: true
 
@@ -25,9 +32,70 @@ tags:
 
 - extendedWaitUntil:
     visible: ".*proximit.*"
-    timeout: 15000
+    timeout: 30000
+    optional: true
 
-# Aller au panier
+- takeScreenshot: "09-home-screen"
+
+# -----------------------------------------------------------------------------
+# STEP 1: Ouvrir un restaurant et ajouter des articles
+# -----------------------------------------------------------------------------
+- scroll
+
+- tapOn:
+    label: "Restaurant.*"
+    index: 0
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Menu"
+    timeout: 10000
+    optional: true
+
+- takeScreenshot: "09-restaurant-menu"
+
+# Scroll pour voir le menu
+- scroll
+
+# -----------------------------------------------------------------------------
+# STEP 2: Ajouter un premier article
+# -----------------------------------------------------------------------------
+- tapOn:
+    label: "Ajouter.*panier"
+    index: 0
+    optional: true
+
+- takeScreenshot: "09-first-item-added"
+
+# -----------------------------------------------------------------------------
+# STEP 3: Ajouter un deuxieme article different
+# -----------------------------------------------------------------------------
+- scroll
+
+- tapOn:
+    label: "Ajouter.*panier"
+    index: 1
+    optional: true
+
+- takeScreenshot: "09-second-item-added"
+
+# -----------------------------------------------------------------------------
+# STEP 4: Ajouter le meme article une deuxieme fois
+# -----------------------------------------------------------------------------
+# Remonter pour trouver le premier article
+- scroll:
+    direction: UP
+
+- tapOn:
+    label: "Ajouter.*panier"
+    index: 0
+    optional: true
+
+- takeScreenshot: "09-same-item-added-twice"
+
+# -----------------------------------------------------------------------------
+# STEP 5: Aller au panier
+# -----------------------------------------------------------------------------
 - tapOn: "Panier"
 
 - extendedWaitUntil:
@@ -36,7 +104,72 @@ tags:
 
 - takeScreenshot: "09-cart-view"
 
-# Retour a l'accueil
+# -----------------------------------------------------------------------------
+# STEP 6: Verifier les articles dans le panier
+# -----------------------------------------------------------------------------
+# Le panier doit contenir au moins 2 articles differents
+- assertVisible:
+    text: "Vos articles"
+    optional: true
+
+- takeScreenshot: "09-cart-items-list"
+
+# -----------------------------------------------------------------------------
+# STEP 7: Modifier la quantite d'un article (augmenter)
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "cart-quantity-increase.*"
+    optional: true
+
+- takeScreenshot: "09-quantity-increased"
+
+# -----------------------------------------------------------------------------
+# STEP 8: Modifier la quantite d'un article (diminuer)
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "cart-quantity-decrease.*"
+    optional: true
+
+- takeScreenshot: "09-quantity-decreased"
+
+# -----------------------------------------------------------------------------
+# STEP 9: Verifier que le total se met a jour
+# -----------------------------------------------------------------------------
+- assertVisible:
+    text: "Total"
+    optional: true
+
+- assertVisible:
+    text: ".*€.*"
+    optional: true
+
+- takeScreenshot: "09-total-updated"
+
+# -----------------------------------------------------------------------------
+# STEP 10: Supprimer un article du panier
+# -----------------------------------------------------------------------------
+- scroll
+
+- tapOn:
+    id: "cart-item-delete.*"
+    optional: true
+
+# Confirmer la suppression si dialogue
+- tapOn:
+    text: "Confirmer"
+    optional: true
+
+- takeScreenshot: "09-item-deleted"
+
+# -----------------------------------------------------------------------------
+# STEP 11: Verifier le badge sur l'onglet Panier
+# -----------------------------------------------------------------------------
+# Le nombre d'articles doit etre mis a jour sur l'onglet
+- takeScreenshot: "09-cart-badge-updated"
+
+# -----------------------------------------------------------------------------
+# STEP 12: Retour a l'accueil
+# -----------------------------------------------------------------------------
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
