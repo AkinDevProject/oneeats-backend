@@ -206,12 +206,13 @@ development_status:
   # Complété: 2026-01-24 - AlertsController + AlertsService avec pagination
 
   # P2 - AMÉLIORATION (UC-205: Export données)
-  10-9-export-csv-excel: backlog
+  10-9-export-csv-excel: done
   # Description: Endpoint export restaurants/users/orders en CSV/Excel
   # Fichiers: ExportController.java (nouveau), ExportService.java (nouveau)
   # Dépendances: Apache POI, OpenCSV (pom.xml)
   # Effort: 4h
   # Bloque: Scénario UAT #11 (export)
+  # Complété: 2026-01-24 - 3 endpoints export avec filtres CSV/XLSX
 
   10-10-export-pdf: backlog
   # Description: Endpoint export rapport PDF avec statistiques
