@@ -20,6 +20,11 @@ public class User extends BaseEntity {
     private boolean emailVerified = true;
     private String emailVerificationToken;
     private LocalDateTime updatedAt;
+
+    // Suspension fields
+    private String suspensionReason;
+    private LocalDateTime suspendedAt;
+    private LocalDateTime suspendedUntil;
     
     // Constructeur privé - utiliser les factory methods (avec password hash)
     private User(UUID id, String firstName, String lastName, Email email, String hashedPassword, UserStatus status) {
@@ -58,6 +63,20 @@ public class User extends BaseEntity {
         User user = new User(id, firstName, lastName, new Email(email), hashedPassword, status);
         user.setCreatedAt(createdAt);
         user.updatedAt = updatedAt;
+        return user;
+    }
+
+    // Factory method avec champs de suspension
+    public static User fromPersistenceWithSuspension(UUID id, String firstName, String lastName, String email,
+                                                     String hashedPassword, UserStatus status,
+                                                     LocalDateTime createdAt, LocalDateTime updatedAt,
+                                                     String suspensionReason, LocalDateTime suspendedAt, LocalDateTime suspendedUntil) {
+        User user = new User(id, firstName, lastName, new Email(email), hashedPassword, status);
+        user.setCreatedAt(createdAt);
+        user.updatedAt = updatedAt;
+        user.suspensionReason = suspensionReason;
+        user.suspendedAt = suspendedAt;
+        user.suspendedUntil = suspendedUntil;
         return user;
     }
     
@@ -106,6 +125,54 @@ public class User extends BaseEntity {
         this.status = UserStatus.SUSPENDED;
         this.updatedAt = LocalDateTime.now();
         addDomainEvent(new UserUpdatedEvent(getId(), getEmail()));
+    }
+
+    /**
+     * Suspend user with reason and optional duration
+     * @param reason Mandatory suspension reason
+     * @param durationDays Number of days (null for indefinite)
+     */
+    public void suspendWithReason(String reason, Integer durationDays) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new ValidationException("Suspension reason is required");
+        }
+        if (durationDays != null && durationDays <= 0) {
+            throw new ValidationException("Duration must be positive");
+        }
+
+        this.status = UserStatus.SUSPENDED;
+        this.suspensionReason = reason.trim();
+        this.suspendedAt = LocalDateTime.now();
+        this.suspendedUntil = durationDays != null
+            ? LocalDateTime.now().plusDays(durationDays)
+            : null; // null = indéfinie
+        this.updatedAt = LocalDateTime.now();
+        addDomainEvent(new UserUpdatedEvent(getId(), getEmail()));
+    }
+
+    /**
+     * Check if suspension has expired and auto-reactivate if needed
+     * @return true if user was reactivated
+     */
+    public boolean checkAndReactivateIfExpired() {
+        if (this.status == UserStatus.SUSPENDED
+            && this.suspendedUntil != null
+            && LocalDateTime.now().isAfter(this.suspendedUntil)) {
+            this.status = UserStatus.ACTIVE;
+            this.updatedAt = LocalDateTime.now();
+            addDomainEvent(new UserUpdatedEvent(getId(), getEmail()));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Clear suspension data when reactivating
+     */
+    public void clearSuspension() {
+        this.suspensionReason = null;
+        this.suspendedAt = null;
+        this.suspendedUntil = null;
     }
 
     public void reactivate() {
@@ -211,6 +278,21 @@ public class User extends BaseEntity {
     public String getHashedPassword() { return hashedPassword; }
     public UserStatus getStatus() { return status; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    // Suspension getters
+    public String getSuspensionReason() { return suspensionReason; }
+    public LocalDateTime getSuspendedAt() { return suspendedAt; }
+    public LocalDateTime getSuspendedUntil() { return suspendedUntil; }
+
+    public boolean isSuspensionIndefinite() {
+        return status == UserStatus.SUSPENDED && suspendedUntil == null;
+    }
+
+    public boolean isSuspensionExpired() {
+        return status == UserStatus.SUSPENDED
+            && suspendedUntil != null
+            && LocalDateTime.now().isAfter(suspendedUntil);
+    }
     
     @Override
     public boolean equals(Object o) {

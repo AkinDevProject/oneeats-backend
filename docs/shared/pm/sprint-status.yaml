@@ -183,11 +183,12 @@ development_status:
   # Complété: 2026-01-24 - Option cancelPendingOrders + migration V5
 
   # P1 - IMPORTANT (UC-203: Suspension utilisateurs)
-  10-6-duree-raison-suspension-user: backlog
+  10-6-duree-raison-suspension-user: done
   # Description: Ajouter champs suspensionReason, suspendedUntil dans UserEntity
   # Fichiers: UserEntity.java, User.java, AdminUserController.java
   # Effort: 2h
   # Bloque: Scénario UAT #16 (durée suspension)
+  # Complété: 2026-01-24 - Endpoints POST /suspend et /reactivate + migration V6
 
   10-7-ui-suspension-user-duree: backlog
   # Description: Modale suspension avec sélection durée (1j, 7j, 30j, indéfinie)

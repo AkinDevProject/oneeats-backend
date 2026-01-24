@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class UserInfrastructureMapper {
 
     public User toDomain(UserEntity entity) {
-        return User.fromPersistence(
+        return User.fromPersistenceWithSuspension(
             entity.getId(),
             entity.getFirstName(),
             entity.getLastName(),
@@ -17,7 +17,10 @@ public class UserInfrastructureMapper {
             entity.getPasswordHash(),
             entity.getStatus(),
             entity.getCreatedAt(),
-            entity.getUpdatedAt()
+            entity.getUpdatedAt(),
+            entity.getSuspensionReason(),
+            entity.getSuspendedAt(),
+            entity.getSuspendedUntil()
         );
     }
 

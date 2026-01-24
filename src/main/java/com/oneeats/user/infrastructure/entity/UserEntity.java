@@ -48,7 +48,16 @@ public class UserEntity extends PanacheEntityBase {
     
     @Column(name = "address")
     private String address;
-    
+
+    // Suspension fields
+    @Column(name = "suspension_reason")
+    private String suspensionReason;
+
+    @Column(name = "suspended_at")
+    private LocalDateTime suspendedAt;
+
+    @Column(name = "suspended_until")
+    private LocalDateTime suspendedUntil;
 
     public UserEntity() {}
 
@@ -156,8 +165,33 @@ public class UserEntity extends PanacheEntityBase {
     public Integer getVersion() {
         return version;
     }
-    
+
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    // Suspension getters and setters
+    public String getSuspensionReason() {
+        return suspensionReason;
+    }
+
+    public void setSuspensionReason(String suspensionReason) {
+        this.suspensionReason = suspensionReason;
+    }
+
+    public LocalDateTime getSuspendedAt() {
+        return suspendedAt;
+    }
+
+    public void setSuspendedAt(LocalDateTime suspendedAt) {
+        this.suspendedAt = suspendedAt;
+    }
+
+    public LocalDateTime getSuspendedUntil() {
+        return suspendedUntil;
+    }
+
+    public void setSuspendedUntil(LocalDateTime suspendedUntil) {
+        this.suspendedUntil = suspendedUntil;
     }
 }

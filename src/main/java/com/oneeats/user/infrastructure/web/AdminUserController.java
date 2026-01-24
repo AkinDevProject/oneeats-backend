@@ -7,6 +7,8 @@ import com.oneeats.user.application.dto.AdminUserDTO;
 import com.oneeats.user.application.dto.AdminUserListDTO;
 import com.oneeats.user.application.dto.PagedResponse;
 import com.oneeats.user.application.dto.UpdateAdminUserRequest;
+import com.oneeats.user.application.command.SuspendUserCommand;
+import com.oneeats.user.application.command.SuspendUserCommandHandler;
 import com.oneeats.user.application.query.AdminUserQuery;
 import com.oneeats.user.application.query.AdminUserQueryHandler;
 import com.oneeats.user.domain.model.User;
@@ -46,6 +48,9 @@ public class AdminUserController {
 
     @Inject
     UniqueEmailSpecification uniqueEmailSpec;
+
+    @Inject
+    SuspendUserCommandHandler suspendUserCommandHandler;
 
     /**
      * GET /api/admin/users - List users with pagination, search, and filters
@@ -105,7 +110,11 @@ public class AdminUserController {
             user.getCreatedAt(),
             user.getUpdatedAt(),
             orderCount,
-            lastOrderDate
+            lastOrderDate,
+            // Suspension info
+            entity != null ? entity.getSuspensionReason() : null,
+            entity != null ? entity.getSuspendedAt() : null,
+            entity != null ? entity.getSuspendedUntil() : null
         );
 
         return Response.ok(dto).build();
@@ -178,6 +187,97 @@ public class AdminUserController {
 
         // Return updated user details
         return getUserById(id);
+    }
+
+    /**
+     * POST /api/admin/users/{id}/suspend - Suspend user with reason and duration
+     * AC: Suspension with mandatory reason and optional duration (1d, 7d, 30d, indefinite)
+     */
+    @POST
+    @Path("/{id}/suspend")
+    @Transactional
+    public Response suspendUser(@PathParam("id") UUID id, SuspendUserRequest request) {
+        try {
+            if (request == null || request.reason() == null || request.reason().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Suspension reason is required")
+                    .build();
+            }
+
+            // Validate duration if provided
+            if (request.durationDays() != null && request.durationDays() <= 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Duration must be positive")
+                    .build();
+            }
+
+            SuspendUserCommand command = new SuspendUserCommand(id, request.reason(), request.durationDays());
+            suspendUserCommandHandler.handle(command);
+
+            // Return updated user details
+            return getUserById(id);
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to suspend user: " + e.getMessage())
+                .build();
+        }
+    }
+
+    /**
+     * Request DTO for user suspension
+     */
+    public record SuspendUserRequest(
+        String reason,
+        Integer durationDays  // null = indefinite, or 1, 7, 30
+    ) {}
+
+    /**
+     * POST /api/admin/users/{id}/reactivate - Reactivate a suspended user
+     */
+    @POST
+    @Path("/{id}/reactivate")
+    @Transactional
+    public Response reactivateUser(@PathParam("id") UUID id) {
+        try {
+            User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found: " + id));
+
+            if (user.getStatus() != UserStatus.SUSPENDED) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("User is not suspended")
+                    .build();
+            }
+
+            // Clear suspension and reactivate
+            user.clearSuspension();
+            user.activate();
+            userRepository.save(user);
+
+            // Clear suspension fields in entity
+            UserEntity entity = UserEntity.findById(id);
+            if (entity != null) {
+                entity.setSuspensionReason(null);
+                entity.setSuspendedAt(null);
+                entity.setSuspendedUntil(null);
+                entity.setUpdatedAt(LocalDateTime.now());
+            }
+
+            return getUserById(id);
+
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to reactivate user: " + e.getMessage())
+                .build();
+        }
     }
 
     /**

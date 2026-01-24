@@ -7,7 +7,7 @@ import java.util.UUID;
 
 /**
  * Full user DTO for admin detail view
- * Includes order statistics
+ * Includes order statistics and suspension info
  */
 public record AdminUserDTO(
     UUID id,
@@ -22,5 +22,9 @@ public record AdminUserDTO(
     LocalDateTime updatedAt,
     // Order statistics
     long orderCount,
-    LocalDateTime lastOrderDate
+    LocalDateTime lastOrderDate,
+    // Suspension info
+    String suspensionReason,
+    LocalDateTime suspendedAt,
+    LocalDateTime suspendedUntil
 ) {}
