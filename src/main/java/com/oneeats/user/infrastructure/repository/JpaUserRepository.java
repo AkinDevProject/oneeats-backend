@@ -92,11 +92,14 @@ public class JpaUserRepository implements IUserRepository {
     }
 
     /**
-     * Trouve un utilisateur par son email.
+     * Trouve un utilisateur par son email (recherche insensible a la casse).
      * Retourne l'entite JPA directement pour l'AuthService (liaison compte Keycloak).
      */
     public Optional<UserEntity> findEntityByEmail(String email) {
-        return UserEntity.find("email", email).firstResultOptional();
+        if (email == null) {
+            return Optional.empty();
+        }
+        return UserEntity.find("LOWER(email) = LOWER(?1)", email.trim()).firstResultOptional();
     }
 
     /**

@@ -74,10 +74,10 @@ public class AuthService {
         Optional<UserEntity> user = userRepository.findByKeycloakId(keycloakId);
 
         if (user.isEmpty()) {
-            // 2. Chercher par email (utilisateur existant non lie)
+            // 2. Chercher par email (utilisateur existant non lie) - case insensitive
             String email = getClaimAsString("email");
             if (email != null) {
-                user = userRepository.findEntityByEmail(email);
+                user = userRepository.findEntityByEmail(email.toLowerCase().trim());
                 if (user.isPresent()) {
                     // Lier le compte Keycloak a l'utilisateur existant
                     UserEntity existingUser = user.get();
@@ -95,14 +95,30 @@ public class AuthService {
     }
 
     /**
-     * Cree un nouvel utilisateur en base depuis les informations Keycloak
+     * Cree un nouvel utilisateur en base depuis les informations Keycloak.
+     * Si l'email existe deja, lie le compte Keycloak a l'utilisateur existant.
      */
     @Transactional
     public UserEntity createUserFromKeycloak(String keycloakId) {
+        String email = getClaimAsString("email");
+
+        // Verifier une derniere fois si l'utilisateur existe par email (case insensitive)
+        if (email != null) {
+            Optional<UserEntity> existingUser = userRepository.findEntityByEmail(email.toLowerCase().trim());
+            if (existingUser.isPresent()) {
+                // Lier le compte Keycloak a l'utilisateur existant
+                UserEntity user = existingUser.get();
+                user.setKeycloakId(keycloakId);
+                userRepository.persist(user);
+                return user;
+            }
+        }
+
+        // Creer un nouvel utilisateur
         UserEntity user = new UserEntity();
         user.setId(UUID.randomUUID());
         user.setKeycloakId(keycloakId);
-        user.setEmail(getClaimAsString("email"));
+        user.setEmail(email != null ? email.toLowerCase().trim() : null);
         user.setFirstName(getClaimAsString("given_name", "Utilisateur"));
         user.setLastName(getClaimAsString("family_name", ""));
         user.setPasswordHash("keycloak_managed"); // Mot de passe gere par Keycloak
@@ -172,24 +188,98 @@ public class AuthService {
 
     /**
      * Verifie si l'utilisateur courant est le proprietaire de la ressource.
+     * Accepte soit l'ID de base de données, soit le Keycloak ID (si c'est un UUID).
      *
-     * @param userId ID de l'utilisateur proprietaire
+     * @param userId ID de l'utilisateur proprietaire (DB ID ou Keycloak ID)
      * @return true si l'utilisateur courant est le proprietaire
      */
     public boolean isCurrentUser(UUID userId) {
-        return getCurrentUser()
-            .map(user -> user.getId().equals(userId))
-            .orElse(false);
+        if (userId == null) {
+            return false;
+        }
+
+        Optional<UserEntity> currentUser = getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return false;
+        }
+
+        UserEntity user = currentUser.get();
+
+        // 1. Verifier si c'est l'ID de base de données
+        if (user.getId().equals(userId)) {
+            return true;
+        }
+
+        // 2. Verifier si c'est le Keycloak ID (converti en UUID)
+        String keycloakId = user.getKeycloakId();
+        if (keycloakId != null) {
+            try {
+                UUID keycloakUuid = UUID.fromString(keycloakId);
+                return keycloakUuid.equals(userId);
+            } catch (IllegalArgumentException e) {
+                // Le Keycloak ID n'est pas un UUID valide
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifie si l'utilisateur courant correspond a l'identifiant fourni.
+     * Accepte soit l'ID de base de données (UUID), soit le Keycloak ID (String).
+     *
+     * @param userIdentifier ID utilisateur (peut etre DB UUID ou Keycloak ID)
+     * @return true si l'utilisateur courant correspond
+     */
+    public boolean isCurrentUser(String userIdentifier) {
+        if (userIdentifier == null || userIdentifier.isBlank()) {
+            return false;
+        }
+
+        Optional<UserEntity> currentUser = getCurrentUser();
+        if (currentUser.isEmpty()) {
+            return false;
+        }
+
+        UserEntity user = currentUser.get();
+
+        // 1. Verifier si c'est le Keycloak ID
+        if (userIdentifier.equals(user.getKeycloakId())) {
+            return true;
+        }
+
+        // 2. Verifier si c'est l'ID de base de données (UUID)
+        try {
+            UUID dbId = UUID.fromString(userIdentifier);
+            return user.getId().equals(dbId);
+        } catch (IllegalArgumentException e) {
+            // Ce n'est pas un UUID valide, donc pas un match
+            return false;
+        }
     }
 
     /**
      * Exige que l'utilisateur courant soit le proprietaire de la ressource.
+     * Accepte soit l'ID de base de données, soit le Keycloak ID.
      *
-     * @param userId ID de l'utilisateur proprietaire
+     * @param userId ID de l'utilisateur proprietaire (DB ID ou Keycloak ID)
      * @throws ForbiddenException si l'utilisateur n'est pas le proprietaire
      */
     public void requireCurrentUser(UUID userId) {
         if (!isCurrentUser(userId)) {
+            throw new ForbiddenException("Acces refuse a cette ressource");
+        }
+    }
+
+    /**
+     * Exige que l'utilisateur courant corresponde a l'identifiant fourni.
+     *
+     * @param userIdentifier ID utilisateur (peut etre DB UUID ou Keycloak ID)
+     * @throws ForbiddenException si l'utilisateur ne correspond pas
+     */
+    public void requireCurrentUser(String userIdentifier) {
+        if (!isCurrentUser(userIdentifier)) {
             throw new ForbiddenException("Acces refuse a cette ressource");
         }
     }
