@@ -1,6 +1,7 @@
 /**
  * Service d'authentification Keycloak pour React Native
  * Utilise le flow Authorization Code avec PKCE
+ * Supporte également l'inscription directe via API backend
  */
 import * as AuthSession from 'expo-auth-session';
 import * as SecureStore from 'expo-secure-store';
@@ -39,6 +40,27 @@ export interface KeycloakUserInfo {
   realm_access?: {
     roles: string[];
   };
+}
+
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  token_type: string;
+  user_id: string;
+}
+
+export interface AuthError {
+  error: string;
+  message: string;
+  details?: Record<string, string>;
 }
 
 // Configuration OIDC Keycloak
@@ -391,6 +413,123 @@ class AuthService {
     const clientRoles = resourceAccess?.[ENV.KEYCLOAK_CLIENT_ID]?.roles || [];
 
     return [...new Set([...realmRoles, ...clientRoles])];
+  }
+
+  /**
+   * Inscription d'un nouvel utilisateur via l'API backend
+   * Le backend crée l'utilisateur dans Keycloak et retourne des tokens
+   */
+  async registerWithCredentials(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ): Promise<KeycloakTokens | null> {
+    try {
+      console.log('📝 Starting registration for:', email);
+
+      const response = await fetch(`${ENV.API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+        } as RegisterRequest),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json() as AuthError;
+        console.error('❌ Registration failed:', response.status, errorData);
+
+        // Throw error with specific message for handling
+        if (response.status === 409) {
+          throw new Error('email_exists');
+        }
+        if (response.status === 400 && errorData.details) {
+          throw new Error(JSON.stringify(errorData.details));
+        }
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      const data = await response.json() as RegisterResponse;
+      console.log('✅ Registration successful');
+
+      // Convert to KeycloakTokens format
+      const tokens: KeycloakTokens = {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_in: data.expires_in,
+        refresh_expires_in: 604800, // 7 days default
+        token_type: data.token_type,
+      };
+
+      // Save tokens
+      await this.saveTokens(tokens);
+
+      return tokens;
+    } catch (error) {
+      console.error('❌ Registration error:', error);
+      throw error; // Re-throw to let caller handle specific errors
+    }
+  }
+
+  /**
+   * Connexion avec email et mot de passe via l'API backend
+   * Le backend authentifie via Keycloak et retourne des tokens
+   */
+  async loginWithCredentials(email: string, password: string): Promise<KeycloakTokens | null> {
+    try {
+      console.log('🔐 Starting credential login for:', email);
+
+      const response = await fetch(`${ENV.API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json() as AuthError;
+        console.error('❌ Login failed:', response.status, errorData);
+
+        if (response.status === 401) {
+          throw new Error('invalid_credentials');
+        }
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const data = await response.json() as RegisterResponse;
+      console.log('✅ Credential login successful');
+
+      // Convert to KeycloakTokens format
+      const tokens: KeycloakTokens = {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_in: data.expires_in,
+        refresh_expires_in: 604800,
+        token_type: data.token_type,
+      };
+
+      // Save tokens
+      await this.saveTokens(tokens);
+
+      return tokens;
+    } catch (error) {
+      console.error('❌ Credential login error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Expose saveTokens for external use
+   */
+  async saveTokensPublic(tokens: KeycloakTokens): Promise<void> {
+    await this.saveTokens(tokens);
   }
 }
 

@@ -2,11 +2,23 @@ package com.oneeats.security.infrastructure.controller;
 
 import com.oneeats.security.application.AuthService;
 import com.oneeats.security.application.AuthService.CurrentUserDTO;
+import com.oneeats.security.application.dto.RegisterRequestDTO;
+import com.oneeats.security.application.dto.RegisterResponseDTO;
+import com.oneeats.security.infrastructure.keycloak.KeycloakAdminService;
+import com.oneeats.user.domain.model.UserStatus;
+import com.oneeats.user.infrastructure.entity.UserEntity;
+import com.oneeats.user.infrastructure.repository.JpaUserRepository;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Controller REST pour l'authentification.
@@ -20,8 +32,138 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthController {
 
+    private static final Logger LOG = Logger.getLogger(AuthController.class);
+
     @Inject
     AuthService authService;
+
+    @Inject
+    KeycloakAdminService keycloakAdminService;
+
+    @Inject
+    JpaUserRepository userRepository;
+
+    /**
+     * Inscription d'un nouvel utilisateur.
+     * Cree l'utilisateur dans Keycloak et dans la base locale.
+     * Retourne des tokens JWT pour authentification immediate.
+     *
+     * @param request Donnees d'inscription (firstName, lastName, email, password)
+     * @return RegisterResponseDTO avec tokens JWT
+     */
+    @POST
+    @Path("/register")
+    @Transactional
+    public Response register(@Valid RegisterRequestDTO request) {
+        LOG.info("Registration attempt for: " + request.email());
+
+        try {
+            // Verifier si l'email existe deja en base locale
+            if (userRepository.findEntityByEmail(request.email()).isPresent()) {
+                LOG.warn("Email already exists in local DB: " + request.email());
+                return Response.status(Response.Status.CONFLICT)
+                    .entity(new ErrorResponse("email_exists", "Cet email est deja utilise"))
+                    .build();
+            }
+
+            // Creer l'utilisateur dans Keycloak
+            String keycloakUserId = keycloakAdminService.createUser(request);
+
+            // Creer l'utilisateur en base locale
+            UserEntity user = new UserEntity();
+            user.setId(UUID.randomUUID());
+            user.setKeycloakId(keycloakUserId);
+            user.setEmail(request.email().toLowerCase().trim());
+            user.setFirstName(request.firstName().trim());
+            user.setLastName(request.lastName() != null ? request.lastName().trim() : "");
+            user.setPasswordHash("keycloak_managed"); // Mot de passe gere par Keycloak
+            user.setStatus(UserStatus.ACTIVE);
+            user.setCreatedAt(LocalDateTime.now());
+            userRepository.persist(user);
+
+            LOG.info("User created successfully: " + user.getId());
+
+            // Obtenir des tokens pour l'utilisateur nouvellement cree
+            KeycloakAdminService.TokenResponse tokens = keycloakAdminService.getTokensForUser(
+                request.email(),
+                request.password()
+            );
+
+            return Response.status(Response.Status.CREATED)
+                .entity(RegisterResponseDTO.of(
+                    tokens.accessToken(),
+                    tokens.refreshToken(),
+                    tokens.expiresIn(),
+                    user.getId().toString()
+                ))
+                .build();
+
+        } catch (WebApplicationException e) {
+            if (e.getMessage().equals("email_exists")) {
+                return Response.status(Response.Status.CONFLICT)
+                    .entity(new ErrorResponse("email_exists", "Cet email est deja utilise"))
+                    .build();
+            }
+            LOG.error("Registration failed", e);
+            return Response.status(e.getResponse().getStatus())
+                .entity(new ErrorResponse("registration_failed", e.getMessage()))
+                .build();
+        } catch (Exception e) {
+            LOG.error("Registration error", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("server_error", "Une erreur est survenue lors de l'inscription"))
+                .build();
+        }
+    }
+
+    /**
+     * Connexion avec email et mot de passe.
+     * Authentifie via Keycloak et retourne des tokens JWT.
+     *
+     * @param request Donnees de connexion (email, password)
+     * @return RegisterResponseDTO avec tokens JWT
+     */
+    @POST
+    @Path("/login")
+    public Response login(LoginRequestDTO request) {
+        LOG.info("Login attempt for: " + request.email());
+
+        try {
+            // Obtenir des tokens depuis Keycloak
+            KeycloakAdminService.TokenResponse tokens = keycloakAdminService.getTokensForUser(
+                request.email(),
+                request.password()
+            );
+
+            // Trouver l'utilisateur en base locale
+            String userId = userRepository.findEntityByEmail(request.email())
+                .map(user -> user.getId().toString())
+                .orElse("");
+
+            return Response.ok(RegisterResponseDTO.of(
+                tokens.accessToken(),
+                tokens.refreshToken(),
+                tokens.expiresIn(),
+                userId
+            )).build();
+
+        } catch (WebApplicationException e) {
+            if (e.getMessage().equals("invalid_credentials")) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("invalid_credentials", "Email ou mot de passe incorrect"))
+                    .build();
+            }
+            LOG.error("Login failed", e);
+            return Response.status(e.getResponse().getStatus())
+                .entity(new ErrorResponse("login_failed", e.getMessage()))
+                .build();
+        } catch (Exception e) {
+            LOG.error("Login error", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("server_error", "Une erreur est survenue lors de la connexion"))
+                .build();
+        }
+    }
 
     /**
      * Recupere les informations de l'utilisateur connecte.
@@ -105,7 +247,13 @@ public class AuthController {
 
     // DTOs pour les reponses
 
-    public record ErrorResponse(String message) {}
+    public record ErrorResponse(String error, String message) {
+        public ErrorResponse(String message) {
+            this("error", message);
+        }
+    }
+
+    public record LoginRequestDTO(String email, String password) {}
 
     public record AuthStatusResponse(boolean authenticated, String email) {}
 

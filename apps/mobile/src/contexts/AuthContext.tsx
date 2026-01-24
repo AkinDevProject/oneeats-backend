@@ -139,25 +139,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   /**
-   * Login avec email/password (mode mock uniquement)
+   * Login avec email/password via API backend → Keycloak
    */
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      // Si auth desactivee, login automatique reussi
+      // Si auth desactivee, login automatique reussi (mode mock)
       if (!ENV.AUTH_ENABLED || ENV.MOCK_AUTH) {
         await new Promise(resolve => setTimeout(resolve, 500)); // Simule delai reseau
-        return true; // Login toujours reussi en mode test
+        const mockUser: User = {
+          id: Math.random().toString(36).substring(7),
+          name: 'Mock User',
+          email,
+          favoriteRestaurants: [],
+          orders: [],
+          isGuest: false,
+        };
+        await saveUser(mockUser);
+        return true;
       }
 
-      // En mode Keycloak, on ne supporte pas le login direct
-      // L'utilisateur doit utiliser loginWithSSO()
-      console.warn('Direct login not supported in Keycloak mode, use loginWithSSO()');
+      // Mode Keycloak - utiliser l'API backend pour authentifier
+      console.log('🔐 Starting credential login for:', email);
+      const tokens = await authService.loginWithCredentials(email, password);
+
+      if (tokens) {
+        // Recuperer les infos utilisateur apres login
+        const keycloakUser = await authService.getUserInfo();
+
+        if (keycloakUser) {
+          const mobileUser = mapKeycloakUserToMobileUser(keycloakUser);
+          await saveUser(mobileUser);
+          console.log('✅ Credential login successful');
+          return true;
+        }
+
+        // Fallback: creer un user local avec l'email
+        const newUser: User = {
+          id: Math.random().toString(36).substring(7),
+          name: email.split('@')[0],
+          email,
+          favoriteRestaurants: [],
+          orders: [],
+          isGuest: false,
+        };
+        await saveUser(newUser);
+        return true;
+      }
+
       return false;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      throw error; // Re-throw pour permettre au composant de gerer l'erreur specifique
     }
-  }, []);
+  }, [saveUser]);
 
   /**
    * Login via Keycloak SSO
@@ -236,13 +270,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
 
-      // En mode Keycloak, la registration se fait via le portail Keycloak
-      // ou via une API backend dediee
-      console.warn('Registration in Keycloak mode should be done via SSO portal');
+      // En mode Keycloak, utiliser l'API backend pour creer l'utilisateur
+      console.log('📝 Registering user via backend API...');
+
+      // Separer le nom en prenom et nom de famille
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0] || name;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const tokens = await authService.registerWithCredentials(
+        firstName,
+        lastName,
+        email,
+        password
+      );
+
+      if (tokens) {
+        // Recuperer les infos utilisateur apres inscription
+        const keycloakUser = await authService.getUserInfo();
+
+        if (keycloakUser) {
+          const mobileUser = mapKeycloakUserToMobileUser(keycloakUser);
+          await saveUser(mobileUser);
+          console.log('✅ Registration successful');
+          return true;
+        }
+
+        // Fallback: creer un user local avec les infos fournies
+        const newUser: User = {
+          id: Math.random().toString(36).substring(7),
+          name,
+          email,
+          favoriteRestaurants: [],
+          orders: [],
+          isGuest: false,
+        };
+        await saveUser(newUser);
+        return true;
+      }
+
       return false;
     } catch (error) {
       console.error('Registration error:', error);
-      return false;
+      throw error; // Re-throw pour permettre au composant de gerer l'erreur specifique
     }
   }, [saveUser]);
 

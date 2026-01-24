@@ -170,7 +170,15 @@
       "Bash(cmd.exe /c \"maestro --version\")",
       "Bash(cmd.exe /c \"maestro -v\")",
       "Bash(xargs:*)",
-      "Skill(bmad:bmm:agents:pm)"
+      "Skill(bmad:bmm:agents:pm)",
+      "Bash(git -C \"C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\" log --oneline -10)",
+      "Bash(del \"\\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
+      "Bash(cmd.exe /c 'del \"\"\\\\\\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\"\"')",
+      "Bash(cmd.exe /c \"del /f /q \\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
+      "Bash(cmd.exe /c \"dir C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
+      "Bash(cmd.exe /c \"rd /s /q \\\\?\\\\C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul\")",
+      "Bash(cmd.exe /c \"dir /a C:\\\\Users\\\\akin_\\\\Documents\\\\dev\\\\FoodApp\\\\Quarkus\\\\oneeats-backend\\\\nul* 2>&1\")",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

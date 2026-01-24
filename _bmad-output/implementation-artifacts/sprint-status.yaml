@@ -227,16 +227,95 @@ development_status:
     name: "Retrospective Epic 4 - Tests"
     status: optional
 
+  # ===================
+  # EPIC 9: Mobile UAT Gap
+  # ===================
+  epic-9:
+    name: "Mobile UAT Gap - Fonctionnalités manquantes pour validation UAT"
+    status: in-progress
+
+  9-1-formulaire-inscription-utilisateur:
+    epic: 9
+    name: "Formulaire inscription utilisateur"
+    description: "Permettre aux utilisateurs de créer un compte avec email/password sans SSO"
+    status: done
+    priority: P0
+    completed: "2026-01-24"
+    tasks:
+      - "Créer l'écran d'inscription register.tsx ✅"
+      - "Ajouter navigation depuis login ✅"
+      - "Implémenter validation côté client ✅"
+      - "Créer endpoint API backend POST /api/auth/register ✅"
+      - "Créer endpoint API backend POST /api/auth/login ✅"
+      - "Intégrer API dans mobile ✅"
+    acceptance_criteria:
+      - "Formulaire avec nom, email, password, confirmPassword, CGU"
+      - "Validation temps réel des champs"
+      - "Création compte via API Keycloak Admin"
+      - "Gestion erreur email déjà utilisé"
+      - "Redirection vers home après inscription réussie"
+
+  9-2-login-email-password:
+    epic: 9
+    name: "Connexion email/password directe"
+    description: "Permettre aux utilisateurs de se connecter avec email/password sans passer par SSO"
+    status: done
+    priority: P0
+    depends_on: ["9-1-formulaire-inscription-utilisateur"]
+    completed: "2026-01-24"
+    tasks:
+      - "Ajouter formulaire email/password sur login.tsx ✅"
+      - "Connecter AuthContext.login() à authService.loginWithCredentials() ✅"
+      - "Gestion des erreurs (invalid credentials, network) ✅"
+      - "Lien Forgot Password vers Keycloak ✅"
+    acceptance_criteria:
+      - "Formulaire email + password sur écran login ✅"
+      - "Login réussi redirige vers home ✅"
+      - "Erreur 401 affiche 'Email ou mot de passe incorrect' ✅"
+      - "Lien forgot password disponible ✅"
+
+  9-3-mode-hors-connexion:
+    epic: 9
+    name: "Mode hors connexion"
+    description: "Afficher bannière offline et permettre consultation cache"
+    status: backlog
+    priority: P1
+
+  9-4-affichage-allergenes:
+    epic: 9
+    name: "Affichage allergènes et infos diététiques"
+    description: "Afficher les informations allergènes sur les plats"
+    status: backlog
+    priority: P2
+
+  9-5-message-restaurant-ferme:
+    epic: 9
+    name: "Message restaurant fermé amélioré"
+    description: "Afficher horaires de réouverture quand restaurant fermé"
+    status: backlog
+    priority: P2
+
+  9-6-notifications-push-reelles:
+    epic: 9
+    name: "Notifications push réelles"
+    description: "Intégrer vraies notifications push via Expo + backend"
+    status: backlog
+    priority: P3
+
+  epic-9-retrospective:
+    name: "Retrospective Epic 9 - Mobile UAT Gap"
+    status: optional
+
 # Summary counts (auto-calculated)
 summary:
-  total_epics: 4
-  total_stories: 10
+  total_epics: 5
+  total_stories: 16
   epics_done: 0
-  epics_in_progress: 1
+  epics_in_progress: 2
   stories_done: 0
   stories_in_progress: 0
-  stories_ready: 1
-  stories_backlog: 9
+  stories_ready: 2
+  stories_backlog: 14
 
 # Notes
 notes:

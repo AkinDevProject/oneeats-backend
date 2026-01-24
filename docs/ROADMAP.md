@@ -334,8 +334,8 @@
 ### Epic 9 : Mobile UAT Gap (~20h)
 
 **P0 - Bloquant UAT** :
-- [ ] **9.1** Formulaire inscription (nom, email, password, CGU) - 4h
-- [ ] **9.2** Login email/password direct (+ gestion erreurs) - 3h
+- [x] **9.1** Formulaire inscription (nom, email, password, CGU) - 4h ✅
+- [x] **9.2** Login email/password direct (+ gestion erreurs) - 3h ✅
 
 **P1 - Important** :
 - [ ] **9.3** Mode hors connexion (détection réseau, bannière, cache) - 6h
@@ -366,10 +366,10 @@
 - [ ] **10.10** Export PDF rapport statistiques - 4h
 
 ### Progression Phase 8
-- **Epic 9** : 0/6 stories (0%)
+- **Epic 9** : 2/6 stories (33%) - P0 Mobile complété ✅
 - **Epic 10** : 0/10 stories (0%)
-- **Total P0** : 0/7 stories bloquantes
-- **Effort restant** : ~44h
+- **Total P0** : 2/7 stories bloquantes
+- **Effort restant** : ~37h
 
 ---
 

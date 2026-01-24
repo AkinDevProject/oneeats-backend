@@ -34,6 +34,11 @@ quarkus:
         admin-pages:
           paths: /admin/*
           policy: role-policy
+        # API auth publiques (register/login sans token)
+        api-auth-public:
+          paths: /api/auth/register,/api/auth/login,/api/auth/status
+          policy: permit
+          methods: POST,GET
         # API publiques (lecture seule pour mobile)
         api-public-read:
           paths: /api/restaurants,/api/restaurants/*,/api/menus,/api/menus/*,/api/menu-items,/api/menu-items/*
@@ -108,6 +113,11 @@ quarkus:
     cors:
       enabled: true
 
+  # Disable Dev UI completely to avoid Windows NUL device scan issue
+  vertx-http:
+    devui:
+      enabled: false
+
   # Désactiver la protection CSRF pour les API REST (les requêtes viennent de JS, pas de formulaires)
   csrf:
     enabled: false
@@ -166,6 +176,18 @@ quarkus:
         role-claim-path: realm_access/roles
       token:
         issuer: any
+
+# Configuration Keycloak Admin API (pour créer des utilisateurs)
+keycloak:
+  admin:
+    # Credentials pour l'API Admin Keycloak
+    # Option 1: Service Account (recommandé en production)
+    # client-id: oneeats-backend
+    # client-secret: ${KEYCLOAK_ADMIN_SECRET:your-secret}
+    # Option 2: Resource Owner Password Grant (dev)
+    client-id: admin-cli
+    username: ${KEYCLOAK_ADMIN_USER:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
 
   # Frontend intégration (Quinoa)
   quinoa:

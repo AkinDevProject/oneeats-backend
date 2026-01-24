@@ -4,6 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -22,12 +27,88 @@ import { ENV } from '../../src/config/env';
 export default function AuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
-  const { loginWithSSO } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const { login, loginWithSSO } = useAuth();
   const { currentTheme } = useAppTheme();
 
+  // Validation email
+  const validateEmail = (value: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value.trim()) {
+      setEmailError('Email requis');
+      return false;
+    }
+    if (!emailRegex.test(value)) {
+      setEmailError('Format email invalide');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  // Validation password
+  const validatePassword = (value: string): boolean => {
+    if (!value) {
+      setPasswordError('Mot de passe requis');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  // Login avec email/password
+  const handleCredentialLogin = async () => {
+    setLoginError('');
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
+
+    setIsLoading(true);
+    setLoadingProvider('credentials');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+      const success = await login(email.trim().toLowerCase(), password);
+      if (success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        router.replace('/(tabs)');
+      } else {
+        setLoginError('Connexion échouée. Veuillez réessayer.');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (error: unknown) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (error instanceof Error) {
+        if (error.message === 'invalid_credentials') {
+          setLoginError('Email ou mot de passe incorrect');
+        } else if (error.message.includes('Network')) {
+          setLoginError('Erreur réseau. Vérifiez votre connexion.');
+        } else {
+          setLoginError('Une erreur est survenue. Veuillez réessayer.');
+        }
+      } else {
+        setLoginError('Une erreur est survenue. Veuillez réessayer.');
+      }
+    } finally {
+      setIsLoading(false);
+      setLoadingProvider(null);
+    }
+  };
+
+  // Login avec SSO
   const handleLogin = async (provider?: string) => {
     setIsLoading(true);
     setLoadingProvider(provider || 'main');
+    setLoginError('');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
@@ -44,6 +125,28 @@ export default function AuthScreen() {
       setIsLoading(false);
       setLoadingProvider(null);
     }
+  };
+
+  // Forgot password - ouvre Keycloak dans le navigateur
+  const handleForgotPassword = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const resetUrl = `${ENV.KEYCLOAK_URL}/realms/${ENV.KEYCLOAK_REALM}/login-actions/reset-credentials?client_id=${ENV.KEYCLOAK_CLIENT_ID}`;
+    Alert.alert(
+      'Mot de passe oublié',
+      'Vous allez être redirigé vers la page de récupération de mot de passe.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Continuer',
+          onPress: () => {
+            // Ouvrir dans le navigateur externe
+            import('expo-web-browser').then(WebBrowser => {
+              WebBrowser.openBrowserAsync(resetUrl);
+            });
+          },
+        },
+      ]
+    );
   };
 
   const handleSkip = () => {
@@ -148,121 +251,254 @@ export default function AuthScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
       <StatusBar style="auto" />
-
-      <View style={styles.content}>
-        {/* Header avec Logo */}
-        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-          <View style={[styles.logoContainer, { backgroundColor: currentTheme.colors.primaryContainer }]}>
-            <Text style={styles.logoEmoji}>🍔</Text>
-          </View>
-          <Text style={[styles.appName, { color: currentTheme.colors.onSurface }]}>
-            OneEats
-          </Text>
-          <Text style={[styles.tagline, { color: currentTheme.colors.onSurfaceVariant }]}>
-            Commandez, récupérez, savourez
-          </Text>
-        </Animated.View>
-
-        {/* Section principale */}
-        <View style={styles.buttonsSection}>
-          {/* Titre */}
-          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-            <Text style={[styles.title, { color: currentTheme.colors.onSurface }]}>
-              Bienvenue !
-            </Text>
-            <Text style={[styles.subtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Connectez-vous pour commander vos plats préférés
-            </Text>
-          </Animated.View>
-
-          {/* Bouton principal - Se connecter */}
-          <MainButton
-            emoji="🔐"
-            label="Se connecter"
-            onPress={() => handleLogin()}
-            bgColor={currentTheme.colors.primary}
-            textColor={currentTheme.colors.onPrimary}
-            delay={200}
-          />
-
-          {/* Divider */}
-          <Animated.View
-            entering={FadeInDown.delay(300).duration(400)}
-            style={styles.dividerContainer}
-          >
-            <View style={[styles.dividerLine, { backgroundColor: currentTheme.colors.outlineVariant }]} />
-            <Text style={[styles.dividerText, { color: currentTheme.colors.onSurfaceVariant }]}>
-              ou continuer avec
-            </Text>
-            <View style={[styles.dividerLine, { backgroundColor: currentTheme.colors.outlineVariant }]} />
-          </Animated.View>
-
-          {/* Boutons Social Login */}
-          <View style={styles.socialRow}>
-            <SocialButton
-              emoji="G"
-              label="Google"
-              onPress={() => handleLogin('google')}
-              bgColor="#FFFFFF"
-              textColor="#000000"
-              delay={400}
-              provider="google"
-            />
-            <SocialButton
-              emoji="🍎"
-              label="Apple"
-              onPress={() => handleLogin('apple')}
-              bgColor="#000000"
-              textColor="#FFFFFF"
-              delay={500}
-              provider="apple"
-            />
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          {/* Skip - Continuer sans compte */}
-          <Animated.View entering={FadeIn.delay(600).duration(400)}>
-            <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
-              <Text style={[styles.skipText, { color: currentTheme.colors.onSurfaceVariant }]}>
-                Continuer sans compte
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            {/* Header avec Logo */}
+            <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+              <View style={[styles.logoContainer, { backgroundColor: currentTheme.colors.primaryContainer }]}>
+                <Text style={styles.logoEmoji}>🍔</Text>
+              </View>
+              <Text style={[styles.appName, { color: currentTheme.colors.onSurface }]}>
+                OneEats
               </Text>
-              <Text style={[styles.skipArrow, { color: currentTheme.colors.primary }]}>→</Text>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Info */}
-          <Animated.View entering={FadeIn.delay(700).duration(400)}>
-            <Text style={[styles.infoText, { color: currentTheme.colors.onSurfaceVariant }]}>
-              Vous pourrez vous connecter plus tard pour passer commande
-            </Text>
-          </Animated.View>
-
-          {/* Mode dev indicator */}
-          {ENV.MOCK_AUTH && (
-            <Animated.View entering={FadeIn.delay(800)} style={styles.devModeIndicator}>
-              <Text style={styles.devModeText}>
-                🛠️ Mode développement
+              <Text style={[styles.tagline, { color: currentTheme.colors.onSurfaceVariant }]}>
+                Commandez, récupérez, savourez
               </Text>
             </Animated.View>
-          )}
 
-          {/* Debug link - visible in dev */}
-          {__DEV__ && (
-            <Animated.View entering={FadeIn.delay(900)}>
-              <TouchableOpacity
-                onPress={() => router.push('/auth/debug')}
-                style={styles.debugLink}
-              >
-                <Text style={[styles.debugLinkText, { color: currentTheme.colors.outline }]}>
-                  🔧 Debug Auth
+            {/* Section principale */}
+            <View style={styles.buttonsSection}>
+              {/* Titre */}
+              <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+                <Text style={[styles.title, { color: currentTheme.colors.onSurface }]}>
+                  Bienvenue !
                 </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-        </View>
-      </View>
+                <Text style={[styles.subtitle, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  Connectez-vous pour commander vos plats préférés
+                </Text>
+              </Animated.View>
+
+              {/* Formulaire Email/Password */}
+              <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.formContainer}>
+                {/* Email Input */}
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.inputLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    Email
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: currentTheme.colors.surfaceVariant,
+                        color: currentTheme.colors.onSurface,
+                        borderColor: emailError ? currentTheme.colors.error : currentTheme.colors.outline,
+                      },
+                    ]}
+                    placeholder="votre@email.com"
+                    placeholderTextColor={currentTheme.colors.onSurfaceVariant}
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (emailError) validateEmail(text);
+                      setLoginError('');
+                    }}
+                    onBlur={() => validateEmail(email)}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!isLoading}
+                    testID="login-email-input"
+                  />
+                  {emailError ? (
+                    <Text style={[styles.errorText, { color: currentTheme.colors.error }]}>
+                      {emailError}
+                    </Text>
+                  ) : null}
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.inputContainer}>
+                  <Text style={[styles.inputLabel, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    Mot de passe
+                  </Text>
+                  <View style={styles.passwordContainer}>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        styles.passwordInput,
+                        {
+                          backgroundColor: currentTheme.colors.surfaceVariant,
+                          color: currentTheme.colors.onSurface,
+                          borderColor: passwordError ? currentTheme.colors.error : currentTheme.colors.outline,
+                        },
+                      ]}
+                      placeholder="••••••••"
+                      placeholderTextColor={currentTheme.colors.onSurfaceVariant}
+                      value={password}
+                      onChangeText={(text) => {
+                        setPassword(text);
+                        if (passwordError) validatePassword(text);
+                        setLoginError('');
+                      }}
+                      onBlur={() => validatePassword(password)}
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoading}
+                      testID="login-password-input"
+                    />
+                    <TouchableOpacity
+                      style={styles.showPasswordButton}
+                      onPress={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      <Text style={{ fontSize: 18 }}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {passwordError ? (
+                    <Text style={[styles.errorText, { color: currentTheme.colors.error }]}>
+                      {passwordError}
+                    </Text>
+                  ) : null}
+                </View>
+
+                {/* Forgot Password */}
+                <TouchableOpacity
+                  onPress={handleForgotPassword}
+                  style={styles.forgotPasswordButton}
+                  disabled={isLoading}
+                >
+                  <Text style={[styles.forgotPasswordText, { color: currentTheme.colors.primary }]}>
+                    Mot de passe oublié ?
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Login Error Message */}
+                {loginError ? (
+                  <Animated.View entering={FadeIn.duration(300)} style={styles.loginErrorContainer}>
+                    <Text style={[styles.loginErrorText, { color: currentTheme.colors.error }]}>
+                      ⚠️ {loginError}
+                    </Text>
+                  </Animated.View>
+                ) : null}
+
+                {/* Login Button */}
+                <MainButton
+                  emoji="🔐"
+                  label="Se connecter"
+                  onPress={handleCredentialLogin}
+                  bgColor={currentTheme.colors.primary}
+                  textColor={currentTheme.colors.onPrimary}
+                  delay={0}
+                  provider="credentials"
+                />
+              </Animated.View>
+
+              {/* Divider */}
+              <Animated.View
+                entering={FadeInDown.delay(300).duration(400)}
+                style={styles.dividerContainer}
+              >
+                <View style={[styles.dividerLine, { backgroundColor: currentTheme.colors.outlineVariant }]} />
+                <Text style={[styles.dividerText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  ou continuer avec
+                </Text>
+                <View style={[styles.dividerLine, { backgroundColor: currentTheme.colors.outlineVariant }]} />
+              </Animated.View>
+
+              {/* Boutons Social Login */}
+              <View style={styles.socialRow}>
+                <SocialButton
+                  emoji="G"
+                  label="Google"
+                  onPress={() => handleLogin('google')}
+                  bgColor="#FFFFFF"
+                  textColor="#000000"
+                  delay={400}
+                  provider="google"
+                />
+                <SocialButton
+                  emoji="🍎"
+                  label="Apple"
+                  onPress={() => handleLogin('apple')}
+                  bgColor="#000000"
+                  textColor="#FFFFFF"
+                  delay={500}
+                  provider="apple"
+                />
+              </View>
+            </View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              {/* Create Account Button */}
+              <Animated.View entering={FadeIn.delay(600).duration(400)}>
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/auth/register');
+                  }}
+                  style={styles.createAccountButton}
+                  disabled={isLoading}
+                  testID="login-create-account-button"
+                >
+                  <Text style={[styles.createAccountText, { color: currentTheme.colors.primary }]}>
+                    Créer un compte
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
+
+              {/* Skip - Continuer sans compte */}
+              <Animated.View entering={FadeIn.delay(650).duration(400)}>
+                <TouchableOpacity onPress={handleSkip} style={styles.skipButton} disabled={isLoading}>
+                  <Text style={[styles.skipText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                    Continuer sans compte
+                  </Text>
+                  <Text style={[styles.skipArrow, { color: currentTheme.colors.primary }]}>→</Text>
+                </TouchableOpacity>
+              </Animated.View>
+
+              {/* Info */}
+              <Animated.View entering={FadeIn.delay(700).duration(400)}>
+                <Text style={[styles.infoText, { color: currentTheme.colors.onSurfaceVariant }]}>
+                  Vous pourrez vous connecter plus tard pour passer commande
+                </Text>
+              </Animated.View>
+
+              {/* Mode dev indicator */}
+              {ENV.MOCK_AUTH && (
+                <Animated.View entering={FadeIn.delay(800)} style={styles.devModeIndicator}>
+                  <Text style={styles.devModeText}>
+                    🛠️ Mode développement
+                  </Text>
+                </Animated.View>
+              )}
+
+              {/* Debug link - visible in dev */}
+              {__DEV__ && (
+                <Animated.View entering={FadeIn.delay(900)}>
+                  <TouchableOpacity
+                    onPress={() => router.push('/auth/debug')}
+                    style={styles.debugLink}
+                  >
+                    <Text style={[styles.debugLinkText, { color: currentTheme.colors.outline }]}>
+                      🔧 Debug Auth
+                    </Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -271,10 +507,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingTop: 20,
     paddingBottom: 24,
     justifyContent: 'space-between',
   },
@@ -307,7 +549,62 @@ const styles = StyleSheet.create({
   buttonsSection: {
     flex: 1,
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingVertical: 10,
+  },
+  // Form styles
+  formContainer: {
+    marginTop: 16,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  input: {
+    height: 52,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  showPasswordButton: {
+    position: 'absolute',
+    right: 12,
+    top: 14,
+    padding: 4,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  forgotPasswordButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+    paddingVertical: 4,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  loginErrorContainer: {
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  loginErrorText: {
+    fontSize: 14,
+    textAlign: 'center',
   },
   title: {
     fontSize: 26,
@@ -402,6 +699,14 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: 'center',
     gap: 12,
+  },
+  createAccountButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  createAccountText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   skipButton: {
     flexDirection: 'row',
