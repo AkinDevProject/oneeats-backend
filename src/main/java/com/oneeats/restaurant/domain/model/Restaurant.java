@@ -7,6 +7,7 @@ import com.oneeats.restaurant.domain.event.RestaurantOpenedEvent;
 import com.oneeats.restaurant.domain.event.RestaurantClosedEvent;
 import com.oneeats.restaurant.domain.event.RestaurantApprovedEvent;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Restaurant extends BaseEntity {
@@ -21,6 +22,8 @@ public class Restaurant extends BaseEntity {
     private String imageUrl;
     private RestaurantStatus status;
     private WeeklySchedule schedule;
+    private String rejectionReason;
+    private LocalDateTime rejectedAt;
 
     protected Restaurant() {}
 
@@ -89,6 +92,19 @@ public class Restaurant extends BaseEntity {
         this.markAsModified();
     }
 
+    public void reject(String reason) {
+        if (this.status != RestaurantStatus.PENDING) {
+            throw new IllegalStateException("Only pending restaurants can be rejected");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Rejection reason is required");
+        }
+        this.status = RestaurantStatus.REJECTED;
+        this.rejectionReason = reason.trim();
+        this.rejectedAt = LocalDateTime.now();
+        this.markAsModified();
+    }
+
     private boolean isOpen = false;
 
     public void open() {
@@ -150,6 +166,8 @@ public class Restaurant extends BaseEntity {
     public String getImageUrl() { return imageUrl; }
     public RestaurantStatus getStatus() { return status; }
     public WeeklySchedule getSchedule() { return schedule; }
+    public String getRejectionReason() { return rejectionReason; }
+    public LocalDateTime getRejectedAt() { return rejectedAt; }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
@@ -159,5 +177,14 @@ public class Restaurant extends BaseEntity {
     public void setIsOpen(boolean isOpen) {
         this.isOpen = isOpen;
         this.markAsModified();
+    }
+
+    // Setters pour la reconstitution depuis la base de données (utilisés par le mapper)
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public void setRejectedAt(LocalDateTime rejectedAt) {
+        this.rejectedAt = rejectedAt;
     }
 }

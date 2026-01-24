@@ -22,5 +22,7 @@ public record RestaurantDTO(
     ScheduleDTO schedule,
     LocalDateTime registrationDate,  // Mapping depuis createdAt pour frontend
     LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    LocalDateTime updatedAt,
+    String rejectionReason,    // Raison du rejet (si statut REJECTED)
+    LocalDateTime rejectedAt   // Date du rejet (si statut REJECTED)
 ) {}

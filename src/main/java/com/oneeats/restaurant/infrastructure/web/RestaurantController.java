@@ -14,6 +14,8 @@ import com.oneeats.restaurant.application.command.DeleteRestaurantCommand;
 import com.oneeats.restaurant.application.command.DeleteRestaurantCommandHandler;
 import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommand;
 import com.oneeats.restaurant.application.command.UpdateRestaurantStatusCommandHandler;
+import com.oneeats.restaurant.application.command.RejectRestaurantCommand;
+import com.oneeats.restaurant.application.command.RejectRestaurantCommandHandler;
 import com.oneeats.restaurant.application.dto.RestaurantDTO;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQuery;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQueryHandler;
@@ -75,6 +77,9 @@ public class RestaurantController {
 
     @Inject
     UpdateRestaurantStatusCommandHandler updateRestaurantStatusCommandHandler;
+
+    @Inject
+    RejectRestaurantCommandHandler rejectRestaurantCommandHandler;
 
     @Inject
     GetActiveRestaurantsQueryHandler getActiveRestaurantsQueryHandler;
@@ -273,6 +278,39 @@ public class RestaurantController {
                 .build();
         }
     }
+
+    @POST
+    @Path("/{id}/reject")
+    @RolesAllowed(Roles.ADMIN)
+    public Response rejectRestaurant(@PathParam("id") UUID id, RejectRestaurantRequest request) {
+        try {
+            if (request == null || request.reason() == null || request.reason().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Rejection reason is required")
+                    .build();
+            }
+
+            RejectRestaurantCommand command = new RejectRestaurantCommand(id, request.reason());
+            RestaurantDTO restaurant = rejectRestaurantCommandHandler.handle(command);
+            return Response.ok(restaurant).build();
+
+        } catch (IllegalStateException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(e.getMessage())
+                .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(e.getMessage())
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("Failed to reject restaurant: " + e.getMessage())
+                .build();
+        }
+    }
+
+    // DTO pour la requête de rejet
+    public record RejectRestaurantRequest(String reason) {}
 
     @GET
     @Path("/active")

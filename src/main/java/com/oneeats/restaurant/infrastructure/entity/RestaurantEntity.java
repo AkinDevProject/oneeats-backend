@@ -60,6 +60,12 @@ public class RestaurantEntity extends PanacheEntityBase {
     @Column(name = "status", nullable = false)
     private RestaurantStatus status = RestaurantStatus.PENDING;
 
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
+
+    @Column(name = "rejected_at")
+    private LocalDateTime rejectedAt;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OpeningHoursEntity> openingHours;
 
@@ -222,5 +228,21 @@ public class RestaurantEntity extends PanacheEntityBase {
 
     public void setStatus(RestaurantStatus status) {
         this.status = status;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
+    public LocalDateTime getRejectedAt() {
+        return rejectedAt;
+    }
+
+    public void setRejectedAt(LocalDateTime rejectedAt) {
+        this.rejectedAt = rejectedAt;
     }
 }

@@ -30,7 +30,9 @@ public class RestaurantApplicationMapper {
             scheduleDTO,
             restaurant.getCreatedAt(),    // registrationDate = createdAt
             restaurant.getCreatedAt(),
-            restaurant.getUpdatedAt()
+            restaurant.getUpdatedAt(),
+            restaurant.getRejectionReason(),
+            restaurant.getRejectedAt()
         );
     }
     

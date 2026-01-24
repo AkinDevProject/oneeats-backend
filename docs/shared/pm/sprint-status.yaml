@@ -89,21 +89,23 @@ development_status:
 # Identifiées lors de l'analyse UAT du 2026-01-24
 # Ces tâches sont requises pour valider le guide UAT Mobile
 
-  # Epic 9: Mobile UAT Gap (P0) - NEW
-  epic-9: backlog
+  # Epic 9: Mobile UAT Gap (P0) - IN PROGRESS
+  epic-9: in-progress
 
-  # P0 - BLOQUANT UAT (à faire en priorité)
-  9-1-formulaire-inscription: backlog
+  # P0 - BLOQUANT UAT - COMPLÉTÉ
+  9-1-formulaire-inscription: done
   # Description: Créer app/auth/register.tsx avec formulaire (nom, email, password, CGU)
   # Fichiers: app/auth/register.tsx, AuthContext.tsx
   # Effort: 4h
   # Bloque: Scénario UAT #2
+  # Complété: 2026-01-24 - Déjà implémenté
 
-  9-2-login-email-password: backlog
+  9-2-login-email-password: done
   # Description: Ajouter formulaire email/password dans login.tsx (en plus du SSO)
   # Fichiers: app/auth/login.tsx, AuthContext.tsx (loginWithCredentials)
   # Effort: 3h
   # Bloque: Scénarios UAT #3, #4
+  # Complété: 2026-01-24 - Déjà implémenté
 
   # P1 - IMPORTANT
   9-3-mode-hors-connexion: backlog
@@ -145,17 +147,19 @@ development_status:
   epic-10: backlog
 
   # P0 - BLOQUANT UAT (UC-201: Validation restaurants)
-  10-1-statut-rejected-restaurant: backlog
+  10-1-statut-rejected-restaurant: done
   # Description: Ajouter statut REJECTED à l'enum RestaurantStatus
-  # Fichiers: RestaurantStatus.java, RestaurantEntity.java
+  # Fichiers: RestaurantStatus.java, Restaurant.java
   # Effort: 1h
   # Bloque: Scénario UAT #15 (Rejeter restaurant)
+  # Complété: 2026-01-24 - Ajout REJECTED + méthode reject()
 
-  10-2-raison-rejet-restaurant: backlog
+  10-2-raison-rejet-restaurant: done
   # Description: Ajouter champ rejectionReason + endpoint rejet avec raison
   # Fichiers: RestaurantEntity.java, Restaurant.java, RestaurantController.java
   # Effort: 2h
   # Bloque: Scénario UAT #15 (Rejeter restaurant)
+  # Complété: 2026-01-24 - Endpoint POST /api/restaurants/{id}/reject + migration V4
 
   10-3-ui-validation-rejet-restaurant: backlog
   # Description: Ajouter modales validation/rejet dans RestaurantsManagementPage

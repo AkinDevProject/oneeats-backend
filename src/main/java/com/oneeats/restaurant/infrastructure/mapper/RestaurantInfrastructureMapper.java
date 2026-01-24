@@ -35,7 +35,9 @@ public class RestaurantInfrastructureMapper {
         restaurant.setImageUrl(entity.getImageUrl());
         restaurant.updateRating(entity.getRating());
         restaurant.setIsOpen(entity.getIsOpen());
-        
+        restaurant.setRejectionReason(entity.getRejectionReason());
+        restaurant.setRejectedAt(entity.getRejectedAt());
+
         // Convertir les horaires d'ouverture
         if (entity.getOpeningHours() != null && !entity.getOpeningHours().isEmpty()) {
             WeeklySchedule schedule = convertToWeeklySchedule(entity.getOpeningHours());
@@ -65,7 +67,11 @@ public class RestaurantInfrastructureMapper {
             restaurant.getCreatedAt(),
             restaurant.getUpdatedAt()
         );
-        
+
+        // Mapper les champs de rejet
+        entity.setRejectionReason(restaurant.getRejectionReason());
+        entity.setRejectedAt(restaurant.getRejectedAt());
+
         // Convertir les horaires d'ouverture
         if (restaurant.getSchedule() != null) {
             List<OpeningHoursEntity> openingHours = convertToOpeningHoursEntities(restaurant.getSchedule(), entity);
