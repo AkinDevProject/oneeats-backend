@@ -52,6 +52,12 @@ public class OrderEntity extends PanacheEntityBase {
     @Column(name = "actual_pickup_time")
     private LocalDateTime actualPickupTime;
 
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
@@ -176,5 +182,21 @@ public class OrderEntity extends PanacheEntityBase {
     
     public void setVersion(Integer version) {
         this.version = version;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 }

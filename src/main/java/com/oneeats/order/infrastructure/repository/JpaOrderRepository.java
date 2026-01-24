@@ -68,6 +68,19 @@ public class JpaOrderRepository implements IOrderRepository {
 
     @Override
     @Transactional
+    public List<Order> findActiveByRestaurantId(UUID restaurantId) {
+        // Commandes actives = ni COMPLETED ni CANCELLED
+        return OrderEntity.<OrderEntity>find(
+            "restaurantId = ?1 and status not in ?2",
+            restaurantId,
+            List.of(OrderStatus.COMPLETED, OrderStatus.CANCELLED)
+        ).list().stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public Order save(Order order) {
         if (order.getId() == null) {
             // Nouvelle entité sans ID
@@ -81,6 +94,8 @@ public class JpaOrderRepository implements IOrderRepository {
                 // Entité existante - mettre à jour
                 existingEntity.setStatus(order.getStatus());
                 existingEntity.setUpdatedAt(order.getUpdatedAt());
+                existingEntity.setCancellationReason(order.getCancellationReason());
+                existingEntity.setCancelledAt(order.getCancelledAt());
                 return mapper.toDomain(existingEntity);
             } else {
                 // Nouvelle entité avec ID pré-assigné

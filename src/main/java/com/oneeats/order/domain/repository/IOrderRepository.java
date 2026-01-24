@@ -20,7 +20,9 @@ public interface IOrderRepository {
     List<Order> findByRestaurantId(UUID restaurantId);
     
     List<Order> findByStatus(OrderStatus status);
-    
+
+    List<Order> findActiveByRestaurantId(UUID restaurantId);
+
     Order save(Order order);
     
     void delete(Order order);

@@ -175,11 +175,12 @@ development_status:
   # Bloque: Scénario UAT #5 (raison blocage)
   # Complété: 2026-01-24 - Endpoint POST /api/restaurants/{id}/block + migration V4
 
-  10-5-gestion-commandes-blocage: backlog
+  10-5-gestion-commandes-blocage: done
   # Description: Annuler/gérer commandes en cours lors du blocage restaurant
-  # Fichiers: RestaurantService.java, OrderService.java
+  # Fichiers: BlockRestaurantCommandHandler.java, Order.java, JpaOrderRepository.java
   # Effort: 3h
   # Bloque: Scénario UAT #5 (commandes en cours)
+  # Complété: 2026-01-24 - Option cancelPendingOrders + migration V5
 
   # P1 - IMPORTANT (UC-203: Suspension utilisateurs)
   10-6-duree-raison-suspension-user: backlog

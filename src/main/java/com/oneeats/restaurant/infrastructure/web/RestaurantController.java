@@ -18,6 +18,7 @@ import com.oneeats.restaurant.application.command.RejectRestaurantCommand;
 import com.oneeats.restaurant.application.command.RejectRestaurantCommandHandler;
 import com.oneeats.restaurant.application.command.BlockRestaurantCommand;
 import com.oneeats.restaurant.application.command.BlockRestaurantCommandHandler;
+import com.oneeats.restaurant.application.dto.BlockRestaurantResultDTO;
 import com.oneeats.restaurant.application.dto.RestaurantDTO;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQuery;
 import com.oneeats.restaurant.application.query.GetAllRestaurantsQueryHandler;
@@ -328,9 +329,18 @@ public class RestaurantController {
                     .build();
             }
 
-            BlockRestaurantCommand command = new BlockRestaurantCommand(id, request.reason());
-            RestaurantDTO restaurant = blockRestaurantCommandHandler.handle(command);
-            return Response.ok(restaurant).build();
+            boolean cancelOrders = request.cancelPendingOrders() != null && request.cancelPendingOrders();
+            BlockRestaurantCommand command = new BlockRestaurantCommand(id, request.reason(), cancelOrders);
+            BlockRestaurantResultDTO result = blockRestaurantCommandHandler.handle(command);
+
+            // Ajouter un warning dans la réponse si des commandes actives existent
+            if (result.activeOrdersCount() > 0 && !cancelOrders) {
+                return Response.ok(result)
+                    .header("X-Warning", "Restaurant has " + result.activeOrdersCount() + " active orders")
+                    .build();
+            }
+
+            return Response.ok(result).build();
 
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -344,7 +354,12 @@ public class RestaurantController {
     }
 
     // DTO pour la requête de blocage
-    public record BlockRestaurantRequest(String reason) {}
+    public record BlockRestaurantRequest(String reason, Boolean cancelPendingOrders) {
+        // Constructeur pour compatibilité
+        public BlockRestaurantRequest(String reason) {
+            this(reason, false);
+        }
+    }
 
     @GET
     @Path("/active")

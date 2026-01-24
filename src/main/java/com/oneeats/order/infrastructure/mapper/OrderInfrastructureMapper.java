@@ -36,7 +36,11 @@ public class OrderInfrastructureMapper {
         for (OrderItem item : items) {
             order.addItem(item);
         }
-        
+
+        // Set cancellation fields
+        order.setCancellationReason(entity.getCancellationReason());
+        order.setCancelledAt(entity.getCancelledAt());
+
         return order;
     }
 
@@ -59,9 +63,13 @@ public class OrderInfrastructureMapper {
         List<OrderItemEntity> itemEntities = order.getItems().stream()
             .map(item -> toItemEntity(item, entity))
             .collect(Collectors.toList());
-            
+
         entity.setItems(itemEntities);
-        
+
+        // Set cancellation fields
+        entity.setCancellationReason(order.getCancellationReason());
+        entity.setCancelledAt(order.getCancelledAt());
+
         return entity;
     }
     

@@ -22,6 +22,8 @@ public class Order extends BaseEntity {
     private String specialInstructions;
     private LocalDateTime estimatedPickupTime;
     private LocalDateTime actualPickupTime;
+    private String cancellationReason;
+    private LocalDateTime cancelledAt;
     private List<OrderItem> items = new ArrayList<>();
     
     // Constructeurs
@@ -128,6 +130,19 @@ public class Order extends BaseEntity {
         }
         changeStatus(OrderStatus.CANCELLED);
     }
+
+    /**
+     * Annuler une commande de force avec une raison (utilisé lors du blocage restaurant)
+     * Cette méthode peut annuler une commande même si elle est en préparation ou prête
+     */
+    public void cancelWithReason(String reason) {
+        if (this.status == OrderStatus.COMPLETED || this.status == OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot cancel a completed or already cancelled order");
+        }
+        this.cancellationReason = reason;
+        this.cancelledAt = LocalDateTime.now();
+        changeStatus(OrderStatus.CANCELLED);
+    }
     
     /**
      * Vérifie si la commande est en cours (ni annulée, ni récupérée)
@@ -179,6 +194,14 @@ public class Order extends BaseEntity {
     public List<OrderItem> getItems() {
         return List.copyOf(items); // Immutable view
     }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
     
     // Setters pour JPA
     public void setSpecialInstructions(String specialInstructions) {
@@ -192,7 +215,15 @@ public class Order extends BaseEntity {
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
-    
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
     // Méthodes métier
     
     /**
