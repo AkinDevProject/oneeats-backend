@@ -51,7 +51,7 @@ public class ExportService {
                     r.getAddress(),
                     r.getCuisineType(),
                     r.getStatus().name(),
-                    r.isOpen() ? "Oui" : "Non",
+                    Boolean.TRUE.equals(r.getIsOpen()) ? "Oui" : "Non",
                     formatDate(r.getCreatedAt())
                 });
             }
@@ -91,7 +91,7 @@ public class ExportService {
                 row.createCell(4).setCellValue(r.getAddress());
                 row.createCell(5).setCellValue(r.getCuisineType());
                 row.createCell(6).setCellValue(r.getStatus().name());
-                row.createCell(7).setCellValue(r.isOpen() ? "Oui" : "Non");
+                row.createCell(7).setCellValue(Boolean.TRUE.equals(r.getIsOpen()) ? "Oui" : "Non");
                 row.createCell(8).setCellValue(formatDate(r.getCreatedAt()));
             }
 

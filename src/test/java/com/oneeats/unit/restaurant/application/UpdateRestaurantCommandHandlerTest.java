@@ -90,10 +90,14 @@ class UpdateRestaurantCommandHandlerTest {
             RestaurantStatus.APPROVED,
             false,
             true,  // isActive field
-            null,
+            null,  // schedule
             null,  // registrationDate
-            null,
-            null
+            null,  // createdAt
+            null,  // updatedAt
+            null,  // rejectionReason
+            null,  // rejectedAt
+            null,  // blockingReason
+            null   // blockedAt
         );
     }
     

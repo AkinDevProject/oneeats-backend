@@ -211,10 +211,10 @@ public class PdfReportService {
         table.addHeaderCell(createHeaderCell("Revenus"));
 
         for (TopRestaurantDTO restaurant : stats.getTopRestaurants()) {
-            table.addCell(createCell(restaurant.name()));
-            table.addCell(createCell(restaurant.cuisineType()));
-            table.addCell(createCell(formatNumber(restaurant.totalOrders())));
-            table.addCell(createCell(formatCurrency(restaurant.totalRevenue())));
+            table.addCell(createCell(restaurant.getName()));
+            table.addCell(createCell(restaurant.getCuisineType()));
+            table.addCell(createCell(formatNumber(restaurant.getTotalOrders())));
+            table.addCell(createCell(formatCurrency(restaurant.getTotalRevenue())));
         }
 
         document.add(table);

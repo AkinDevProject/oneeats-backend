@@ -98,7 +98,7 @@ class RestaurantTest {
             assertTrue(restaurant.canAcceptOrders());
 
             // When - Admin blocks the restaurant
-            restaurant.block();
+            restaurant.block("Violation des conditions d'utilisation");
 
             // Then - Restaurant is blocked and cannot accept orders
             assertEquals(RestaurantStatus.BLOCKED, restaurant.getStatus());
@@ -201,7 +201,7 @@ class RestaurantTest {
             assertTrue(restaurant.isActive());
 
             // When - Restaurant is blocked
-            restaurant.block();
+            restaurant.block("Test de blocage");
             // Then - Restaurant is no longer active
             assertFalse(restaurant.isActive());
         }

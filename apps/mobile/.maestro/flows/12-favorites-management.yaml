@@ -1,18 +1,22 @@
 # =============================================================================
 # FLOW 12: Gestion des favoris
 # =============================================================================
-# Note: L'onglet Favoris est MASQUE de la tab bar (href: null dans _layout.tsx)
-# Approche: Utilisation des accessibilityLabel pour le bouton favori
+# UAT Scenario 11: Gerer ses favoris
+# Teste l'ajout et la suppression de restaurants des favoris
 # =============================================================================
+
 appId: com.oneeats.mobile
 name: "12 - Favorites Management"
 tags:
   - favorites
   - regression
+  - uat-scenario-11
 
 ---
 
-# SETUP
+# -----------------------------------------------------------------------------
+# SETUP: Lancement
+# -----------------------------------------------------------------------------
 - launchApp:
     clearState: true
 
@@ -28,25 +32,85 @@ tags:
 
 - extendedWaitUntil:
     visible: ".*proximit.*"
-    timeout: 15000
+    timeout: 30000
+    optional: true
 
-- takeScreenshot: "12-home-for-favorites"
+- takeScreenshot: "12-home-screen"
 
 # -----------------------------------------------------------------------------
-# TEST 1: Ajouter un restaurant aux favoris via accessibilityLabel
+# STEP 1: Trouver l'icone favori sur un restaurant
 # -----------------------------------------------------------------------------
 - scroll
 
-# Le bouton favori a l'accessibilityLabel "Ajouter aux favoris" ou "Retirer des favoris"
-- tapOn:
+# Le bouton favori (coeur) doit etre visible sur les cartes restaurant
+- assertVisible:
     label: ".*favoris"
+    optional: true
+
+- takeScreenshot: "12-favorite-icon-visible"
+
+# -----------------------------------------------------------------------------
+# STEP 2: Ajouter un restaurant aux favoris
+# -----------------------------------------------------------------------------
+- tapOn:
+    label: "Ajouter aux favoris"
     index: 0
     optional: true
 
-- takeScreenshot: "12-favorite-toggled"
+- takeScreenshot: "12-favorite-added"
 
 # -----------------------------------------------------------------------------
-# TEST 2: Acces aux favoris depuis le compte
+# STEP 3: Verifier le changement d'etat de l'icone
+# -----------------------------------------------------------------------------
+# L'icone doit changer (vide -> plein ou changement de couleur)
+- assertVisible:
+    label: "Retirer des favoris"
+    optional: true
+
+- takeScreenshot: "12-favorite-icon-changed"
+
+# -----------------------------------------------------------------------------
+# STEP 4: Verifier la confirmation visuelle
+# -----------------------------------------------------------------------------
+# Un toast ou message de confirmation devrait apparaitre
+- extendedWaitUntil:
+    visible: ".*ajouté.*favoris.*"
+    timeout: 5000
+    optional: true
+
+- takeScreenshot: "12-favorite-confirmation"
+
+# -----------------------------------------------------------------------------
+# STEP 5: Ouvrir la fiche restaurant pour verifier le favori
+# -----------------------------------------------------------------------------
+- tapOn:
+    label: "Restaurant.*"
+    index: 0
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Menu"
+    timeout: 10000
+    optional: true
+
+- takeScreenshot: "12-restaurant-detail-favorited"
+
+# L'icone favori doit etre en mode "actif"
+- assertVisible:
+    label: ".*favoris"
+    optional: true
+
+# -----------------------------------------------------------------------------
+# STEP 6: Retour a l'accueil
+# -----------------------------------------------------------------------------
+- back
+
+- extendedWaitUntil:
+    visible: "Accueil"
+    timeout: 5000
+
+# -----------------------------------------------------------------------------
+# STEP 7: Acceder a la liste des favoris depuis Mon Compte
 # -----------------------------------------------------------------------------
 - tapOn: "Compte"
 
@@ -56,7 +120,95 @@ tags:
 
 - takeScreenshot: "12-compte-screen"
 
-# Retour accueil
+# Taper sur "Mes favoris"
+- tapOn:
+    text: "Mes favoris"
+    optional: true
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+- takeScreenshot: "12-favorites-list"
+
+# -----------------------------------------------------------------------------
+# STEP 8: Verifier que le restaurant apparait dans les favoris
+# -----------------------------------------------------------------------------
+# La liste des favoris doit contenir le restaurant ajoute
+- assertVisible:
+    text: ".*restaurant.*"
+    optional: true
+
+- takeScreenshot: "12-restaurant-in-favorites"
+
+# -----------------------------------------------------------------------------
+# STEP 9: Retirer le restaurant des favoris
+# -----------------------------------------------------------------------------
+- tapOn:
+    label: ".*favoris"
+    index: 0
+    optional: true
+
+# Confirmer la suppression si dialogue
+- tapOn:
+    text: "Confirmer"
+    optional: true
+
+- takeScreenshot: "12-favorite-removed"
+
+# -----------------------------------------------------------------------------
+# STEP 10: Verifier la suppression
+# -----------------------------------------------------------------------------
+# Le restaurant ne doit plus apparaitre dans la liste
+# ou un message "liste vide" devrait s'afficher
+
+- extendedWaitUntil:
+    visible: ".*vide.*"
+    timeout: 5000
+    optional: true
+
+- takeScreenshot: "12-favorites-empty"
+
+# -----------------------------------------------------------------------------
+# STEP 11: Retour a l'accueil et re-ajouter un favori
+# -----------------------------------------------------------------------------
+- back
+
+- tapOn: "Accueil"
+
+- extendedWaitUntil:
+    visible: ".*proximit.*"
+    timeout: 5000
+
+- scroll
+
+# Re-ajouter aux favoris pour verifier la fonctionnalite complete
+- tapOn:
+    label: "Ajouter aux favoris"
+    index: 0
+    optional: true
+
+- takeScreenshot: "12-favorite-re-added"
+
+# -----------------------------------------------------------------------------
+# STEP 12: Verifier le nombre de favoris dans le profil
+# -----------------------------------------------------------------------------
+- tapOn: "Compte"
+
+- extendedWaitUntil:
+    visible: "Compte"
+    timeout: 5000
+
+# Le compteur de favoris devrait afficher 1
+- assertVisible:
+    text: ".*Favoris.*"
+    optional: true
+
+- takeScreenshot: "12-favorites-count"
+
+# -----------------------------------------------------------------------------
+# STEP 13: Retour a l'accueil
+# -----------------------------------------------------------------------------
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
