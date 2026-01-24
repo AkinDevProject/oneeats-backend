@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiService from '../../services/api';
-import { User, UserStatus, CreateUserRequest, UpdateUserRequest } from '../../types';
+import { User, UserStatus, CreateUserRequest, UpdateUserRequest, SuspendUserRequest } from '../../types';
 
 interface UseUsersResult {
   users: User[];
@@ -11,6 +11,8 @@ interface UseUsersResult {
   updateUser: (id: string, userData: UpdateUserRequest) => Promise<void>;
   updateUserStatus: (id: string, status: UserStatus) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+  suspendUser: (id: string, data: SuspendUserRequest) => Promise<void>;
+  reactivateUser: (id: string) => Promise<void>;
 }
 
 export const useUsers = (): UseUsersResult => {
@@ -106,6 +108,51 @@ export const useUsers = (): UseUsersResult => {
     }
   };
 
+  const suspendUser = async (id: string, data: SuspendUserRequest) => {
+    try {
+      const updatedUser = await apiService.users.suspend(id, data);
+      const userWithDates = {
+        ...updatedUser,
+        createdAt: new Date(updatedUser.createdAt),
+        updatedAt: new Date(updatedUser.updatedAt),
+        suspendedAt: updatedUser.suspendedAt ? new Date(updatedUser.suspendedAt) : undefined,
+        suspendedUntil: updatedUser.suspendedUntil ? new Date(updatedUser.suspendedUntil) : undefined,
+      };
+
+      setUsers(prev =>
+        prev.map(user =>
+          user.id === id ? userWithDates : user
+        )
+      );
+    } catch (err) {
+      console.error('Error suspending user:', err);
+      throw err;
+    }
+  };
+
+  const reactivateUser = async (id: string) => {
+    try {
+      const updatedUser = await apiService.users.reactivate(id);
+      const userWithDates = {
+        ...updatedUser,
+        createdAt: new Date(updatedUser.createdAt),
+        updatedAt: new Date(updatedUser.updatedAt),
+        suspendedAt: undefined,
+        suspendedUntil: undefined,
+        suspensionReason: undefined,
+      };
+
+      setUsers(prev =>
+        prev.map(user =>
+          user.id === id ? userWithDates : user
+        )
+      );
+    } catch (err) {
+      console.error('Error reactivating user:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -119,5 +166,7 @@ export const useUsers = (): UseUsersResult => {
     updateUser,
     updateUserStatus,
     deleteUser,
+    suspendUser,
+    reactivateUser,
   };
 };

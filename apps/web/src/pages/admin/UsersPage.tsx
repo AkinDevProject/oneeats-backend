@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Ban, Eye, Users, UserPlus, Activity, Calendar, Mail, EyeOff, RefreshCcw } from 'lucide-react';
+import { Ban, Eye, Users, UserPlus, Activity, Calendar, Mail, EyeOff, RefreshCcw, UserCheck } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -18,8 +18,9 @@ import {
 import type { AdminAlert, QuickAction } from '../../components/admin';
 import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import { useUsers } from '../../hooks/data/useUsers';
-import { User, UserStatus, CreateUserRequest, UpdateUserRequest } from '../../types';
+import { User, UserStatus, CreateUserRequest, UpdateUserRequest, SuspendUserRequest } from '../../types';
 import { UserModal } from '../../components/modals/UserModal';
+import { SuspendUserModal } from '../../components/modals/SuspendUserModal';
 
 // Skeleton for user card
 function UserCardSkeleton() {
@@ -51,12 +52,16 @@ function UserCardSkeleton() {
 }
 
 const UsersPage: React.FC = () => {
-  const { users, loading, error, updateUserStatus, createUser, updateUser, refetch } = useUsers();
+  const { users, loading, error, updateUserStatus, createUser, updateUser, suspendUser, reactivateUser, refetch } = useUsers();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'ALL'>('ALL');
   const [modalState, setModalState] = useState<{ isOpen: boolean; mode: 'create' | 'edit' | 'view'; user?: User | null }>({
     isOpen: false,
     mode: 'create',
+    user: null,
+  });
+  const [suspendModalState, setSuspendModalState] = useState<{ isOpen: boolean; user: User | null }>({
+    isOpen: false,
     user: null,
   });
 
@@ -131,6 +136,29 @@ const UsersPage: React.FC = () => {
     else if (modalState.mode === 'edit' && modalState.user) await updateUser(modalState.user.id, data as UpdateUserRequest);
   }, [modalState, createUser, updateUser]);
 
+  // Suspend modal handlers
+  const handleOpenSuspendModal = useCallback((user: User) => {
+    setSuspendModalState({ isOpen: true, user });
+  }, []);
+
+  const handleCloseSuspendModal = useCallback(() => {
+    setSuspendModalState({ isOpen: false, user: null });
+  }, []);
+
+  const handleSuspendUser = useCallback(async (data: SuspendUserRequest) => {
+    if (suspendModalState.user) {
+      await suspendUser(suspendModalState.user.id, data);
+    }
+  }, [suspendModalState.user, suspendUser]);
+
+  const handleReactivateUser = useCallback(async (userId: string) => {
+    try {
+      await reactivateUser(userId);
+    } catch (e) {
+      console.error('Erreur lors de la réactivation:', e);
+    }
+  }, [reactivateUser]);
+
   const handleExportCSV = useCallback(() => {
     const safeFormatDate = (date: Date | string | null | undefined) => {
       if (!date) return 'N/A';
@@ -170,7 +198,7 @@ const UsersPage: React.FC = () => {
     { key: '?', description: 'Aide raccourcis', action: toggleShortcuts, category: 'Navigation' },
   ], [handleRefresh, handleExportCSV, handleOpenModal, toggleShortcuts]);
 
-  useKeyboardShortcuts(shortcuts, { enabled: !modalState.isOpen && !showShortcuts });
+  useKeyboardShortcuts(shortcuts, { enabled: !modalState.isOpen && !showShortcuts && !suspendModalState.isOpen });
 
   // Quick actions
   const quickActions: QuickAction[] = useMemo(() => [
@@ -329,12 +357,24 @@ const UsersPage: React.FC = () => {
                 index={index}
                 onViewProfile={() => handleOpenModal('view', user)}
                 onToggleStatus={() => handleToggleStatus(user.id)}
+                onSuspend={() => handleOpenSuspendModal(user)}
+                onReactivate={() => handleReactivateUser(user.id)}
               />
             ))}
           </div>
         )}
 
         <UserModal isOpen={modalState.isOpen} onClose={handleCloseModal} onSubmit={handleModalSubmit} user={modalState.user} mode={modalState.mode} />
+
+        {/* Suspend User Modal */}
+        {suspendModalState.user && (
+          <SuspendUserModal
+            isOpen={suspendModalState.isOpen}
+            onClose={handleCloseSuspendModal}
+            onSubmit={handleSuspendUser}
+            user={suspendModalState.user}
+          />
+        )}
       </div>
 
       {/* Quick Actions FAB */}
@@ -366,7 +406,16 @@ function formatDate(date: Date | string | null | undefined): string {
 }
 
 // Sub-components
-function UserCard({ user, index, onViewProfile, onToggleStatus }: { user: User; index: number; onViewProfile: () => void; onToggleStatus: () => void }) {
+interface UserCardProps {
+  user: User;
+  index: number;
+  onViewProfile: () => void;
+  onToggleStatus: () => void;
+  onSuspend: () => void;
+  onReactivate: () => void;
+}
+
+function UserCard({ user, index, onViewProfile, onToggleStatus, onSuspend, onReactivate }: UserCardProps) {
   const cardBg = user.status === 'INACTIVE' ? 'border-warning-200 bg-gradient-to-br from-warning-50 to-warning-100' :
                  user.status === 'SUSPENDED' ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' : 'border-gray-200';
 
@@ -407,22 +456,52 @@ function UserCard({ user, index, onViewProfile, onToggleStatus }: { user: User; 
             <span className="text-gray-600">Statut:</span>
             <Badge variant={statusVariant} size="sm">{user.status}</Badge>
           </div>
+          {/* Suspension info */}
+          {user.status === 'SUSPENDED' && user.suspensionReason && (
+            <div className="pt-2 border-t border-gray-200">
+              <div className="text-xs text-red-600">
+                <span className="font-medium">Raison:</span> {user.suspensionReason}
+              </div>
+              {user.suspendedUntil && (
+                <div className="text-xs text-red-600 mt-1">
+                  <span className="font-medium">Fin:</span> {formatDate(user.suspendedUntil)}
+                </div>
+              )}
+              {!user.suspendedUntil && (
+                <div className="text-xs text-red-600 mt-1">
+                  <span className="font-medium">Durée:</span> Indéfinie
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Actions */}
         <div className="flex gap-2">
           <Button size="sm" variant="outline" icon={<Eye className="h-4 w-4" />} className="flex-1" onClick={onViewProfile}>
-            Voir profil
+            Voir
           </Button>
-          <Button
-            size="sm"
-            variant={user.status === 'ACTIVE' ? 'warning' : 'success'}
-            icon={<Ban className="h-4 w-4" />}
-            onClick={onToggleStatus}
-            className="flex-1"
-          >
-            {user.status === 'ACTIVE' ? 'Désactiver' : 'Activer'}
-          </Button>
+          {user.status === 'SUSPENDED' ? (
+            <Button
+              size="sm"
+              variant="success"
+              icon={<UserCheck className="h-4 w-4" />}
+              onClick={onReactivate}
+              className="flex-1"
+            >
+              Réactiver
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="danger"
+              icon={<Ban className="h-4 w-4" />}
+              onClick={onSuspend}
+              className="flex-1"
+            >
+              Suspendre
+            </Button>
+          )}
         </div>
       </div>
     </Card>

@@ -8,6 +8,15 @@ export interface User {
   status: UserStatus;
   createdAt: Date;
   updatedAt: Date;
+  // Suspension info
+  suspensionReason?: string;
+  suspendedAt?: Date;
+  suspendedUntil?: Date;
+}
+
+export interface SuspendUserRequest {
+  reason: string;
+  durationDays?: number; // null = indefinite
 }
 
 export interface CreateUserRequest {

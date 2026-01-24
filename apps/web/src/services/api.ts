@@ -1,4 +1,4 @@
-import { Restaurant, MenuItem, Order, User, CreateUserRequest, UpdateUserRequest } from '../types';
+import { Restaurant, MenuItem, Order, User, CreateUserRequest, UpdateUserRequest, SuspendUserRequest } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -252,6 +252,17 @@ class ApiService {
     delete: (id: string): Promise<void> =>
       this.request(`/api/users/${id}`, {
         method: 'DELETE',
+      }),
+
+    suspend: (id: string, data: SuspendUserRequest): Promise<User> =>
+      this.request(`/api/admin/users/${id}/suspend`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    reactivate: (id: string): Promise<User> =>
+      this.request(`/api/admin/users/${id}/reactivate`, {
+        method: 'POST',
       }),
   };
 

@@ -190,11 +190,12 @@ development_status:
   # Bloque: Scénario UAT #16 (durée suspension)
   # Complété: 2026-01-24 - Endpoints POST /suspend et /reactivate + migration V6
 
-  10-7-ui-suspension-user-duree: backlog
+  10-7-ui-suspension-user-duree: done
   # Description: Modale suspension avec sélection durée (1j, 7j, 30j, indéfinie)
   # Fichiers: apps/web/src/pages/UsersPage.tsx
   # Effort: 2h
   # Bloque: Scénario UAT #16
+  # Complété: 2026-01-24 - SuspendUserModal avec durées, raison, réactivation
 
   # P1 - IMPORTANT (UC-204: Alertes admin)
   10-8-endpoint-alertes-admin: backlog
