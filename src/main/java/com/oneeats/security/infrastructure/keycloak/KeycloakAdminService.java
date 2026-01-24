@@ -153,6 +153,9 @@ public class KeycloakAdminService {
                 String userId = location.substring(location.lastIndexOf("/") + 1);
                 LOG.info("Created Keycloak user: " + userId);
 
+                // Definir le mot de passe explicitement (parfois les credentials inline ne fonctionnent pas)
+                setUserPassword(adminToken, baseUrl, realm, userId, request.password());
+
                 // Supprimer toutes les required actions de l'utilisateur
                 clearRequiredActions(adminToken, baseUrl, realm, userId);
 
@@ -183,6 +186,9 @@ public class KeycloakAdminService {
     public TokenResponse getTokensForUser(String email, String password) {
         try {
             String tokenUrl = keycloakUrl + "/protocol/openid-connect/token";
+
+            // Essayer d'abord avec le client mobile
+            LOG.infof("Attempting to get tokens with client: %s for user: %s", mobileClientId, email);
 
             // Utiliser le client mobile pour l'authentification (depuis config)
             String body = String.format(
@@ -228,12 +234,58 @@ public class KeycloakAdminService {
     }
 
     /**
+     * Definit le mot de passe d'un utilisateur via l'API Admin
+     * Utilise l'endpoint reset-password pour s'assurer que le password est bien defini
+     */
+    private void setUserPassword(String adminToken, String baseUrl, String realm, String userId, String password) {
+        try {
+            String resetPasswordUrl = baseUrl + "/admin/realms/" + realm + "/users/" + userId + "/reset-password";
+
+            String credentialJson = String.format("""
+                {
+                    "type": "password",
+                    "value": "%s",
+                    "temporary": false
+                }
+                """, escapeJson(password));
+
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(resetPasswordUrl))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + adminToken)
+                .PUT(HttpRequest.BodyPublishers.ofString(credentialJson))
+                .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 204) {
+                LOG.info("Password set successfully for user: " + userId);
+            } else {
+                LOG.errorf("Failed to set password for user %s: %d - %s",
+                    userId, response.statusCode(), response.body());
+            }
+        } catch (Exception e) {
+            LOG.error("Error setting password for user: " + userId, e);
+        }
+    }
+
+    /**
      * Supprime toutes les required actions d'un utilisateur Keycloak
      * Necessaire car les default actions du realm sont appliquees meme avec requiredActions: []
      */
     private void clearRequiredActions(String adminToken, String baseUrl, String realm, String userId) {
         try {
             String userUrl = baseUrl + "/admin/realms/" + realm + "/users/" + userId;
+
+            // D'abord, recuperer l'etat actuel de l'utilisateur
+            HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(URI.create(userUrl))
+                .header("Authorization", "Bearer " + adminToken)
+                .GET()
+                .build();
+
+            HttpResponse<String> getResponse = httpClient.send(getRequest, HttpResponse.BodyHandlers.ofString());
+            LOG.infof("User state before update: %s", getResponse.body());
 
             // Mettre a jour l'utilisateur pour supprimer les required actions
             String updateJson = """
@@ -253,6 +305,10 @@ public class KeycloakAdminService {
 
             if (updateResponse.statusCode() == 204) {
                 LOG.info("Cleared required actions for user: " + userId);
+
+                // Verifier l'etat apres update
+                HttpResponse<String> verifyResponse = httpClient.send(getRequest, HttpResponse.BodyHandlers.ofString());
+                LOG.infof("User state after update: %s", verifyResponse.body());
             } else {
                 LOG.warnf("Failed to clear required actions for user %s: %d - %s",
                     userId, updateResponse.statusCode(), updateResponse.body());
