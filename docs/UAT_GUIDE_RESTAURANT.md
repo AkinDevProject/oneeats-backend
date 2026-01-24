@@ -80,9 +80,9 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 
 ---
 
-## Scénario 3 : Changer le statut d'une commande
+## Scénario 3 : Accepter et faire avancer une commande
 
-**Objectif :** Faire avancer une commande dans son cycle de vie
+**Objectif :** Faire avancer une commande dans son cycle de vie (happy path)
 
 ### Étapes à suivre :
 1. Trouvez une commande "En attente"
@@ -95,6 +95,70 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 - [ ] Le bouton "Marquer prête" change le statut vers "Prête"
 - [ ] Le bouton "Marquer récupérée" change le statut vers "Récupérée"
 - [ ] La commande se déplace dans l'onglet correspondant
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 3bis : Refuser une commande en attente
+
+**Objectif :** Refuser une commande que vous ne pouvez pas honorer
+
+**Priorité :** CRITIQUE - Ce scénario teste une fonctionnalité essentielle
+
+### Étapes à suivre :
+1. Dans la liste des commandes, trouvez une commande "En attente"
+2. Cliquez sur le bouton "Refuser" ou l'icône correspondante
+3. Sélectionnez une raison de refus :
+   - Ingrédient indisponible
+   - Restaurant sur le point de fermer
+   - Commande trop importante
+   - Autre (précisez)
+4. Confirmez le refus
+
+### Résultat attendu :
+- [ ] Le bouton "Refuser" est visible sur les commandes en attente
+- [ ] Une fenêtre de confirmation demande la raison du refus
+- [ ] La commande passe au statut "Annulée"
+- [ ] La commande disparaît de l'onglet "En attente"
+- [ ] Un message confirme que le client sera notifié
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 3ter : Annuler une commande en cours de préparation
+
+**Objectif :** Signaler un problème empêchant de terminer la préparation
+
+**Priorité :** CRITIQUE - Ce scénario teste une fonctionnalité essentielle
+
+### Étapes à suivre :
+1. Dans la liste des commandes, trouvez une commande "En préparation"
+2. Cliquez sur "Signaler un problème" ou "Annuler la commande"
+3. Indiquez la raison :
+   - Problème en cuisine
+   - Ingrédient manquant découvert pendant la préparation
+   - Équipement défaillant
+   - Autre (précisez)
+4. Confirmez l'annulation
+
+### Résultat attendu :
+- [ ] Un bouton pour signaler un problème est accessible
+- [ ] Une fenêtre demande la raison de l'annulation
+- [ ] La commande passe au statut "Annulée"
+- [ ] La commande disparaît de l'onglet "En cours"
+- [ ] Un message confirme que le client sera notifié
 
 ### Observations :
 ```
@@ -156,7 +220,7 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 
 ## Scénario 6 : Ajouter un nouveau plat
 
-**Objectif :** Créer un nouveau plat dans votre menu
+**Objectif :** Créer un nouveau plat dans votre menu avec toutes ses caractéristiques
 
 ### Étapes à suivre :
 1. Dans la section Menu, cliquez sur "Ajouter un plat"
@@ -165,14 +229,23 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
    - Prix : 12.90
    - Catégorie : "plats"
    - Description : "Une délicieuse pizza pour tester"
-3. Cochez "Disponible"
-4. Cliquez sur "Ajouter"
+3. Configurez les options diététiques :
+   - Cochez "Végétarien" si applicable
+   - Cochez "Végan" si applicable
+   - Ajoutez les allergènes présents (gluten, lactose, etc.)
+4. Ajoutez une image du plat (optionnel mais recommandé)
+5. Cochez "Disponible"
+6. Cliquez sur "Ajouter"
 
 ### Résultat attendu :
 - [ ] Le formulaire s'affiche correctement
 - [ ] Tous les champs sont faciles à remplir
+- [ ] Les options végétarien/végan sont disponibles
+- [ ] Une liste d'allergènes est proposée
+- [ ] L'upload d'image fonctionne
 - [ ] Un message de confirmation apparaît après l'ajout
 - [ ] Le nouveau plat apparaît dans la liste du menu
+- [ ] Les options diététiques sont visibles sur le plat créé
 
 ### Observations :
 ```
@@ -191,11 +264,13 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 1. Trouvez un plat dans votre menu
 2. Cliquez sur "Modifier"
 3. Changez le prix ou la description
-4. Sauvegardez les modifications
+4. Modifiez l'image si souhaité
+5. Sauvegardez les modifications
 
 ### Résultat attendu :
 - [ ] Le formulaire s'ouvre avec les informations actuelles du plat
 - [ ] Vous pouvez modifier facilement les champs
+- [ ] Vous pouvez changer ou supprimer l'image
 - [ ] Un message de confirmation apparaît après la sauvegarde
 - [ ] Les modifications sont visibles immédiatement
 
@@ -234,19 +309,24 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 
 ## Scénario 9 : Modifier les paramètres du restaurant
 
-**Objectif :** Changer les informations de votre restaurant
+**Objectif :** Changer les informations et horaires de votre restaurant
 
 ### Étapes à suivre :
 1. Depuis le menu, cliquez sur "Paramètres"
 2. Modifiez la description de votre restaurant
-3. Vérifiez vos horaires d'ouverture
-4. Sauvegardez les modifications
+3. Vérifiez et modifiez le téléphone et l'email de contact
+4. Configurez vos horaires d'ouverture par jour :
+   - Définissez l'heure d'ouverture et de fermeture pour chaque jour
+   - Marquez les jours de fermeture (ex: dimanche)
+5. Sauvegardez les modifications
 
 ### Résultat attendu :
 - [ ] Vos informations actuelles sont affichées
 - [ ] Vous pouvez modifier la description, téléphone, email
-- [ ] Les horaires d'ouverture sont configurables par jour
+- [ ] Les horaires sont configurables pour chaque jour de la semaine
+- [ ] Vous pouvez indiquer un jour de fermeture
 - [ ] Un message confirme la sauvegarde
+- [ ] Les nouveaux horaires sont immédiatement visibles
 
 ### Observations :
 ```
@@ -331,6 +411,55 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 
 ---
 
+## Scénario 13 : Consulter les statistiques du restaurant
+
+**Objectif :** Voir les performances et métriques de votre restaurant
+
+### Étapes à suivre :
+1. Depuis le menu, cliquez sur "Statistiques" ou "Tableau de bord"
+2. Observez les métriques affichées
+3. Changez la période (aujourd'hui, cette semaine, ce mois)
+4. Parcourez les différentes sections de statistiques
+
+### Résultat attendu :
+- [ ] Le nombre total de commandes est affiché
+- [ ] Le montant total des ventes est visible
+- [ ] Le nombre de commandes par statut est indiqué
+- [ ] Les plats les plus commandés sont listés
+- [ ] Vous pouvez filtrer par période
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 14 : Se déconnecter du dashboard
+
+**Objectif :** Quitter votre session de manière sécurisée
+
+### Étapes à suivre :
+1. Cliquez sur votre nom ou profil en haut à droite
+2. Cliquez sur "Déconnexion" ou "Se déconnecter"
+3. Confirmez si demandé
+
+### Résultat attendu :
+- [ ] Un bouton de déconnexion est facilement accessible
+- [ ] Après déconnexion, vous êtes redirigé vers la page de connexion
+- [ ] Vous ne pouvez plus accéder au dashboard sans vous reconnecter
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
 # Résumé des Tests
 
 ## Récapitulatif
@@ -339,16 +468,20 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 |----------|--------|-------|-----------|
 | 1. Connexion | [ ] | [ ] | [ ] |
 | 2. Consulter commandes | [ ] | [ ] | [ ] |
-| 3. Changer statut | [ ] | [ ] | [ ] |
+| 3. Accepter et avancer commande | [ ] | [ ] | [ ] |
+| 3bis. Refuser commande | [ ] | [ ] | [ ] |
+| 3ter. Annuler en préparation | [ ] | [ ] | [ ] |
 | 4. Détails commande | [ ] | [ ] | [ ] |
 | 5. Consulter menu | [ ] | [ ] | [ ] |
-| 6. Ajouter plat | [ ] | [ ] | [ ] |
+| 6. Ajouter plat (+ options) | [ ] | [ ] | [ ] |
 | 7. Modifier plat | [ ] | [ ] | [ ] |
 | 8. Masquer plat | [ ] | [ ] | [ ] |
-| 9. Paramètres restaurant | [ ] | [ ] | [ ] |
+| 9. Paramètres (+ horaires) | [ ] | [ ] | [ ] |
 | 10. Ouvrir/Fermer | [ ] | [ ] | [ ] |
 | 11. Vues commandes | [ ] | [ ] | [ ] |
 | 12. Mobile/Tablette | [ ] | [ ] | [ ] |
+| 13. Statistiques | [ ] | [ ] | [ ] |
+| 14. Déconnexion | [ ] | [ ] | [ ] |
 
 ## Impression générale
 
@@ -387,3 +520,12 @@ Ce guide est destiné aux **restaurateurs** ou personnes testant le tableau de b
 
 *Merci pour votre participation aux tests !*
 *Vos retours sont précieux pour améliorer l'application.*
+
+---
+
+## Historique des modifications
+
+| Date | Version | Modifications |
+|------|---------|---------------|
+| 2026-01-24 | 2.0 | Ajout scénarios 3bis, 3ter, 13, 14. Enrichissement scénarios 6 et 9 (options diététiques, horaires). Revue BMAD TEA. |
+| 2026-01-20 | 1.0 | Version initiale avec 12 scénarios |

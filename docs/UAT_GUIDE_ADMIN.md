@@ -357,6 +357,100 @@ Ce guide est destiné aux **administrateurs** de la plateforme OneEats qui super
 
 ---
 
+## Scénario 14 : Valider un nouveau restaurant
+
+**Objectif :** Approuver un restaurant en attente de validation
+
+### Étapes à suivre :
+1. Cliquez sur "Restaurants" dans le menu
+2. Filtrez par statut "En attente"
+3. Identifiez un restaurant avec le badge "En attente de validation"
+4. Cliquez sur ce restaurant pour voir ses détails
+5. Vérifiez les informations complètes :
+   - Nom, description, catégorie
+   - Adresse, téléphone, email
+   - Horaires d'ouverture
+   - Informations du propriétaire
+6. Cliquez sur "Valider le restaurant"
+7. Confirmez la validation
+
+### Résultat attendu :
+- [ ] Le filtre "En attente" affiche uniquement les restaurants PENDING
+- [ ] Le badge "En attente de validation" est visible
+- [ ] Toutes les informations du restaurant sont affichées
+- [ ] Une confirmation est demandée avant validation
+- [ ] Le restaurant passe au statut "Actif" après validation
+- [ ] Le restaurant disparaît de la liste "En attente"
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 15 : Rejeter un restaurant
+
+**Objectif :** Refuser un restaurant non conforme aux critères
+
+### Étapes à suivre :
+1. Filtrez les restaurants par "En attente"
+2. Cliquez sur un restaurant à rejeter (informations incomplètes ou non conformes)
+3. Cliquez sur "Rejeter le restaurant"
+4. Dans la modale, saisissez une raison de rejet claire
+5. Confirmez le rejet
+
+### Résultat attendu :
+- [ ] Le bouton "Rejeter" est disponible pour les restaurants en attente
+- [ ] La raison de rejet est obligatoire (impossible de confirmer sans)
+- [ ] Une confirmation est demandée avant rejet
+- [ ] Le restaurant passe au statut "Rejeté"
+- [ ] Le restaurant apparaît dans la liste "Rejetés"
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 16 : Suspendre et réactiver un utilisateur
+
+**Objectif :** Gérer un utilisateur problématique (suspension temporaire)
+
+### Étapes à suivre :
+1. Cliquez sur "Utilisateurs" dans le menu
+2. Trouvez un utilisateur de test dans la liste
+3. Cliquez sur "Voir profil"
+4. Cliquez sur "Suspendre l'utilisateur"
+5. Sélectionnez une durée de suspension (ex: 7 jours)
+6. Saisissez une raison de suspension
+7. Confirmez la suspension
+8. Vérifiez que le statut passe à "Suspendu"
+9. Cliquez sur "Réactiver l'utilisateur"
+10. Confirmez la réactivation
+
+### Résultat attendu :
+- [ ] Le bouton "Suspendre" est disponible sur le profil utilisateur
+- [ ] La durée de suspension est demandée (1 jour, 7 jours, 30 jours, indéfinie)
+- [ ] La raison de suspension est obligatoire
+- [ ] L'utilisateur passe au statut "Suspendu"
+- [ ] Le bouton "Réactiver" apparaît pour les utilisateurs suspendus
+- [ ] La réactivation remet le statut à "Actif"
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
 # Résumé des Tests
 
 ## Récapitulatif
@@ -367,7 +461,7 @@ Ce guide est destiné aux **administrateurs** de la plateforme OneEats qui super
 | 2. Tableau de bord | [ ] | [ ] | [ ] |
 | 3. Liste restaurants | [ ] | [ ] | [ ] |
 | 4. Détails restaurant | [ ] | [ ] | [ ] |
-| 5. Suspendre/Réactiver | [ ] | [ ] | [ ] |
+| 5. Suspendre/Réactiver restaurant | [ ] | [ ] | [ ] |
 | 6. Liste utilisateurs | [ ] | [ ] | [ ] |
 | 7. Profil utilisateur | [ ] | [ ] | [ ] |
 | 8. Supervision commandes | [ ] | [ ] | [ ] |
@@ -376,6 +470,9 @@ Ce guide est destiné aux **administrateurs** de la plateforme OneEats qui super
 | 11. Export données | [ ] | [ ] | [ ] |
 | 12. Alertes | [ ] | [ ] | [ ] |
 | 13. Sécurité accès | [ ] | [ ] | [ ] |
+| 14. Valider restaurant | [ ] | [ ] | [ ] |
+| 15. Rejeter restaurant | [ ] | [ ] | [ ] |
+| 16. Suspendre/Réactiver utilisateur | [ ] | [ ] | [ ] |
 
 ## Impression générale
 

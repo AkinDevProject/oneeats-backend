@@ -90,6 +90,8 @@ This document provides the complete epic and story breakdown for OneEats Backend
 - Epic 6: Analytics & Dashboard (P1)
 - Epic 7: Admin Users (P1)
 - Epic 8: Observabilite & Qualite (P1)
+- Epic 9: Mobile UAT Gap (P0/P1/P2) - **NEW 2026-01-24**
+- Epic 10: Admin UAT Gap (P0/P1/P2) - **NEW 2026-01-24**
 
 ---
 
@@ -510,6 +512,435 @@ So that I can ensure system reliability.
 
 ---
 
+## Epic 9: Mobile UAT Gap
+
+**Goal:** Combler les lacunes identifiées lors de l'analyse UAT Mobile pour permettre la validation complète du guide de test utilisateur.
+
+**Dependencies:** Epic 1 (Auth) pour inscription/login.
+
+**Priority:** P0 (bloquant UAT) / P1-P2 (améliorations)
+
+**Source:** Analyse UAT du 2026-01-24 - Comparaison guide UAT vs code mobile
+
+### Story 9.1: Formulaire Inscription Utilisateur
+
+As a new user,
+I want to create an account with email and password,
+So that I can use the app without SSO providers.
+
+**Priority:** P0 - Bloquant UAT Scénario #2
+
+**Acceptance Criteria:**
+
+**Given** I am on the login screen
+**When** I tap "Create Account" or "Sign Up"
+**Then** a registration form is displayed with name, email, password, confirm password, and terms checkbox
+
+**Given** I fill the registration form with valid data
+**When** I submit the form
+**Then** my account is created and I am redirected to home
+
+**Given** I enter an invalid email format
+**When** I try to submit
+**Then** I see an error message "Invalid email format"
+
+**Given** I enter a password less than 8 characters
+**When** I try to submit
+**Then** I see an error message "Password must be at least 8 characters"
+
+**Given** I enter mismatched passwords
+**When** I try to submit
+**Then** I see an error message "Passwords do not match"
+
+**Given** I enter an email already in use
+**When** I submit the form
+**Then** I see an error message "Email already in use"
+
+**Files:** `app/auth/register.tsx`, `src/contexts/AuthContext.tsx`
+**Effort:** 4h
+
+---
+
+### Story 9.2: Connexion Email/Password
+
+As a registered user,
+I want to login with my email and password,
+So that I can access my account without SSO.
+
+**Priority:** P0 - Bloquant UAT Scénarios #3, #4
+
+**Acceptance Criteria:**
+
+**Given** I am on the login screen
+**When** I enter valid email and password and tap "Login"
+**Then** I am authenticated and redirected to home
+
+**Given** I enter invalid credentials
+**When** I tap "Login"
+**Then** I see an error message "Invalid email or password"
+
+**Given** I have forgotten my password
+**When** I tap "Forgot Password"
+**Then** I see a password recovery option
+
+**Files:** `app/auth/login.tsx`, `src/contexts/AuthContext.tsx` (add `loginWithCredentials()`)
+**Effort:** 3h
+
+---
+
+### Story 9.3: Mode Hors Connexion
+
+As a user with unstable internet,
+I want to see a clear message when I'm offline,
+So that I understand why actions are failing.
+
+**Priority:** P1 - Bloquant UAT Scénario #23
+
+**Acceptance Criteria:**
+
+**Given** my device loses internet connection
+**When** I use the app
+**Then** I see a banner "You are offline"
+
+**Given** I am offline
+**When** I try to place an order
+**Then** I see a message explaining the action requires internet
+
+**Given** I am offline
+**When** I browse the app
+**Then** cached restaurant data is still visible
+
+**Given** my connection is restored
+**When** the app detects connectivity
+**Then** the offline banner disappears automatically
+
+**Files:** `src/contexts/NetworkContext.tsx`, layout components
+**Packages:** `@react-native-community/netinfo`
+**Effort:** 6h
+
+---
+
+### Story 9.4: Affichage Allergènes et Infos Diététiques
+
+As a user with dietary restrictions,
+I want to see allergens and dietary info on menu items,
+So that I can make safe food choices.
+
+**Priority:** P2 - Améliore UAT Scénario #10
+
+**Acceptance Criteria:**
+
+**Given** I view a menu item detail
+**When** the item has dietary info (vegetarian, vegan)
+**Then** I see corresponding icons/badges
+
+**Given** I view a menu item with allergens
+**When** I open the detail
+**Then** I see a list of allergens (gluten, nuts, dairy, etc.)
+
+**Files:** `app/menu/[id].tsx`
+**Effort:** 2h
+
+---
+
+### Story 9.5: Message Restaurant Fermé Amélioré
+
+As a user browsing restaurants,
+I want to see opening hours when a restaurant is closed,
+So that I know when I can order.
+
+**Priority:** P2 - Améliore UAT Scénario #8
+
+**Acceptance Criteria:**
+
+**Given** a restaurant is closed
+**When** I view its detail page
+**Then** I see "Currently closed" with next opening time
+
+**Given** a restaurant is closed
+**When** I try to add items to cart
+**Then** I see a message explaining I cannot order from a closed restaurant
+
+**Files:** `app/restaurant/[id].tsx`, `app/(tabs)/index.tsx`
+**Effort:** 1h
+
+---
+
+### Story 9.6: Notifications Push Réelles
+
+As a user with an active order,
+I want to receive real push notifications,
+So that I'm alerted when my order status changes.
+
+**Priority:** P3 - Améliore UAT Scénario #22
+
+**Acceptance Criteria:**
+
+**Given** I have placed an order
+**When** the restaurant changes the order status
+**Then** I receive a push notification on my device
+
+**Given** the app is in background
+**When** I receive a notification
+**Then** tapping it opens the order detail
+
+**Files:** `src/contexts/PushNotificationContext.tsx`, backend integration
+**Effort:** 4h (+ backend work)
+
+---
+
+## Epic 10: Admin UAT Gap
+
+**Goal:** Combler les lacunes identifiées lors de l'analyse UAT Admin pour permettre la validation complète du guide de test administrateur (UAT_GUIDE_ADMIN.md).
+
+**Dependencies:** Epic 1 (Auth), Epic 2 (Restaurants), Epic 7 (Admin Users).
+
+**Priority:** P0 (bloquant UAT) / P1-P2 (améliorations)
+
+**Source:** Analyse UAT Admin du 2026-01-24 - Comparaison guide UAT vs code backend/web
+
+### Story 10.1: Statut REJECTED pour Restaurants
+
+As an administrator,
+I want to reject a restaurant application with a specific status,
+So that pending restaurants can be formally rejected.
+
+**Priority:** P0 - Bloquant UAT Scénario #15
+
+**Acceptance Criteria:**
+
+**Given** a restaurant has status PENDING
+**When** I reject it
+**Then** the status changes to REJECTED
+
+**Given** a restaurant is REJECTED
+**When** I view the restaurants list
+**Then** I can filter by REJECTED status
+
+**Files:** `RestaurantStatus.java`, `RestaurantEntity.java`
+**Effort:** 1h
+
+---
+
+### Story 10.2: Raison de Rejet Restaurant
+
+As an administrator,
+I want to provide a reason when rejecting a restaurant,
+So that the restaurant owner understands why their application was rejected.
+
+**Priority:** P0 - Bloquant UAT Scénario #15
+
+**Acceptance Criteria:**
+
+**Given** I am rejecting a restaurant
+**When** I submit the rejection
+**Then** I must provide a rejection reason
+
+**Given** a restaurant was rejected
+**When** I view its details
+**Then** I see the rejection reason and rejection date
+
+**Files:** `RestaurantEntity.java`, `Restaurant.java`, `RestaurantController.java`
+**Effort:** 2h
+
+---
+
+### Story 10.3: UI Validation/Rejet Restaurant
+
+As an administrator,
+I want modal dialogs for validating and rejecting restaurants,
+So that I can easily manage restaurant applications.
+
+**Priority:** P0 - Bloquant UAT Scénarios #14, #15
+
+**Acceptance Criteria:**
+
+**Given** I click "Validate" on a pending restaurant
+**When** the modal appears
+**Then** I can confirm validation
+
+**Given** I click "Reject" on a pending restaurant
+**When** the modal appears
+**Then** I must enter a rejection reason before confirming
+
+**Given** I confirm validation or rejection
+**When** the action completes
+**Then** I see a success message and the list refreshes
+
+**Files:** `apps/web/src/pages/RestaurantsManagementPage.tsx`
+**Effort:** 2h
+
+---
+
+### Story 10.4: Raison de Blocage Restaurant
+
+As an administrator,
+I want to provide a reason when blocking a restaurant,
+So that there is an audit trail for blocking decisions.
+
+**Priority:** P0 - Bloquant UAT Scénario #5
+
+**Acceptance Criteria:**
+
+**Given** I am blocking an active restaurant
+**When** I submit the block action
+**Then** I must provide a blocking reason
+
+**Given** a restaurant was blocked
+**When** I view its details
+**Then** I see the blocking reason and blocked date
+
+**Files:** `RestaurantEntity.java`, `Restaurant.java`
+**Effort:** 1h
+
+---
+
+### Story 10.5: Gestion Commandes lors Blocage
+
+As an administrator,
+I want pending orders to be handled when I block a restaurant,
+So that customers are not left with unfulfilled orders.
+
+**Priority:** P0 - Bloquant UAT Scénario #5
+
+**Acceptance Criteria:**
+
+**Given** a restaurant has pending orders
+**When** I block the restaurant
+**Then** I see a warning showing the number of pending orders
+
+**Given** I confirm blocking with pending orders
+**When** the block completes
+**Then** pending orders are cancelled with reason "Restaurant blocked"
+**And** customers are notified
+
+**Files:** `RestaurantService.java`, `OrderService.java`
+**Effort:** 3h
+
+---
+
+### Story 10.6: Durée et Raison Suspension Utilisateur
+
+As an administrator,
+I want to specify duration and reason when suspending a user,
+So that suspensions are documented and time-limited.
+
+**Priority:** P1 - Bloquant UAT Scénario #16
+
+**Acceptance Criteria:**
+
+**Given** I am suspending a user
+**When** I submit the suspension
+**Then** I must provide a reason and select a duration
+
+**Given** a user was suspended with duration
+**When** the duration expires
+**Then** the user is automatically reactivated
+
+**Given** a user is suspended
+**When** I view their profile
+**Then** I see suspension reason, start date, and end date
+
+**Files:** `UserEntity.java`, `User.java`, `AdminUserController.java`
+**Effort:** 2h
+
+---
+
+### Story 10.7: UI Suspension Utilisateur avec Durée
+
+As an administrator,
+I want a modal to suspend users with duration selection,
+So that I can easily manage user suspensions.
+
+**Priority:** P1 - Bloquant UAT Scénario #16
+
+**Acceptance Criteria:**
+
+**Given** I click "Suspend" on an active user
+**When** the modal appears
+**Then** I can select duration (1 day, 7 days, 30 days, indefinite)
+**And** I must enter a suspension reason
+
+**Given** I confirm suspension
+**When** the action completes
+**Then** I see a success message with the suspension end date
+
+**Files:** `apps/web/src/pages/UsersPage.tsx`
+**Effort:** 2h
+
+---
+
+### Story 10.8: Endpoint Alertes Admin
+
+As an administrator,
+I want to see real-time alerts on the dashboard,
+So that I can quickly respond to important events.
+
+**Priority:** P1 - Améliore UAT Scénario #12
+
+**Acceptance Criteria:**
+
+**Given** I am on the admin dashboard
+**When** alerts are available
+**Then** I see a list of recent alerts (new restaurants, reported orders, etc.)
+
+**Given** new events occur
+**When** I refresh the dashboard
+**Then** I see updated alerts
+
+**Files:** `AlertsController.java` (new), `AlertsService.java` (new)
+**Effort:** 3h
+
+---
+
+### Story 10.9: Export CSV/Excel
+
+As an administrator,
+I want to export data to CSV or Excel format,
+So that I can analyze data in spreadsheet applications.
+
+**Priority:** P2 - Bloquant UAT Scénario #11
+
+**Acceptance Criteria:**
+
+**Given** I am on the restaurants, users, or orders page
+**When** I click "Export CSV" or "Export Excel"
+**Then** a file is downloaded with the filtered data
+
+**Given** I have applied filters
+**When** I export
+**Then** only filtered data is included in the export
+
+**Files:** `ExportController.java` (new), `ExportService.java` (new)
+**Dependencies:** Apache POI, OpenCSV (pom.xml)
+**Effort:** 4h
+
+---
+
+### Story 10.10: Export PDF Rapport
+
+As an administrator,
+I want to export statistics as a PDF report,
+So that I can share formatted reports with stakeholders.
+
+**Priority:** P2 - Améliore UAT Scénario #11
+
+**Acceptance Criteria:**
+
+**Given** I am on the analytics page
+**When** I click "Export PDF"
+**Then** a formatted PDF report is generated with charts and statistics
+
+**Given** I select a date range
+**When** I export PDF
+**Then** the report includes only data from that period
+
+**Files:** `ExportService.java`, PDF templates
+**Dependencies:** iText or JasperReports (pom.xml)
+**Effort:** 4h
+
+---
+
 ## Dependencies Summary
 
 | Epic | Depends On | Notes |
@@ -522,6 +953,8 @@ So that I can ensure system reliability.
 | Epic 6: Analytics | Epic 4 | Stats computed from orders |
 | Epic 7: Admin Users | Epic 1 | Admin role required |
 | Epic 8: Observabilite | - | Can be implemented independently |
+| Epic 9: Mobile UAT Gap | Epic 1 | Auth for login/register stories |
+| Epic 10: Admin UAT Gap | Epic 1, Epic 2, Epic 7 | Admin features for UAT validation |
 
 ## Next Actions
 

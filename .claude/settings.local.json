@@ -169,7 +169,8 @@
       "Bash(C:Usersakin_.maestrobinmaestrobinmaestro.bat --version)",
       "Bash(cmd.exe /c \"maestro --version\")",
       "Bash(cmd.exe /c \"maestro -v\")",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Skill(bmad:bmm:agents:pm)"
     ],
     "deny": [],
     "ask": []

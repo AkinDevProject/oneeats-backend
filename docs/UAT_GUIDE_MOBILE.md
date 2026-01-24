@@ -30,6 +30,8 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 # Scénarios de Test
 
+---
+
 ## Scénario 1 : Lancement de l'application
 
 **Objectif :** Vérifier que l'application démarre correctement
@@ -54,7 +56,94 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 2 : Découvrir les restaurants
+## Scénario 2 : Créer un compte (Inscription)
+
+**Objectif :** Vérifier le processus d'inscription d'un nouvel utilisateur
+
+### Étapes à suivre :
+1. Sur l'écran de connexion, appuyez sur "Créer un compte" ou "S'inscrire"
+2. Remplissez le formulaire :
+   - Nom complet : `Test Utilisateur`
+   - Email : `nouveau@test.com`
+   - Mot de passe : `Password123`
+   - Confirmation : `Password123`
+3. Acceptez les Conditions Générales d'Utilisation (CGU)
+4. Appuyez sur "S'inscrire" ou "Créer mon compte"
+
+### Résultat attendu :
+- [ ] Le formulaire d'inscription est accessible et clair
+- [ ] Validation en temps réel des champs (email format, mot de passe 8 caractères min)
+- [ ] La case CGU est obligatoire pour valider
+- [ ] Message de confirmation affiché après inscription
+- [ ] Redirection automatique vers la page d'accueil
+
+### Tests d'erreur à vérifier :
+- [ ] Email invalide → message "Format d'email invalide"
+- [ ] Mot de passe trop court → message "8 caractères minimum"
+- [ ] Mots de passe différents → message "Les mots de passe ne correspondent pas"
+- [ ] Email déjà utilisé → message "Cet email est déjà utilisé"
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 3 : Se connecter à l'application
+
+**Objectif :** Vérifier le processus de connexion utilisateur
+
+### Étapes à suivre :
+1. Sur l'écran d'accueil, appuyez sur "Se connecter"
+2. Saisissez l'email : `user@test.com`
+3. Saisissez le mot de passe : `password123`
+4. Appuyez sur le bouton "Connexion"
+
+### Résultat attendu :
+- [ ] Le formulaire de connexion est clair et accessible
+- [ ] La connexion s'effectue en moins de 3 secondes
+- [ ] Redirection vers la page d'accueil après connexion
+- [ ] Le nom ou email de l'utilisateur est visible dans "Mon Compte"
+- [ ] L'application reste connectée après fermeture/réouverture
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 4 : Connexion avec erreur
+
+**Objectif :** Vérifier la gestion des erreurs de connexion
+
+### Étapes à suivre :
+1. Sur l'écran de connexion, saisissez un email incorrect
+2. Saisissez un mot de passe quelconque
+3. Appuyez sur "Connexion"
+4. Recommencez avec le bon email mais un mauvais mot de passe
+
+### Résultat attendu :
+- [ ] Message d'erreur clair : "Email ou mot de passe incorrect"
+- [ ] L'application ne bloque pas après plusieurs tentatives
+- [ ] Un lien "Mot de passe oublié ?" est visible
+- [ ] Possibilité de réessayer sans relancer l'application
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 5 : Découvrir les restaurants
 
 **Objectif :** Parcourir la liste des restaurants disponibles
 
@@ -67,7 +156,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 ### Résultat attendu :
 - [ ] Une liste de restaurants s'affiche
 - [ ] Chaque restaurant montre : image, nom, type de cuisine
-- [ ] Les restaurants ouverts sont distingués des fermés
+- [ ] Les restaurants ouverts sont distingués des fermés (badge, couleur, icône)
 - [ ] Le défilement est fluide et sans saccade
 
 ### Observations :
@@ -79,7 +168,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 3 : Rechercher un restaurant
+## Scénario 6 : Rechercher un restaurant
 
 **Objectif :** Trouver un restaurant spécifique
 
@@ -104,12 +193,12 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 4 : Consulter un restaurant
+## Scénario 7 : Consulter un restaurant ouvert
 
 **Objectif :** Voir les détails d'un restaurant
 
 ### Étapes à suivre :
-1. Appuyez sur un restaurant (ex: Pizza Palace)
+1. Appuyez sur un restaurant OUVERT (ex: Pizza Palace)
 2. Consultez les informations affichées
 3. Trouvez les horaires d'ouverture
 4. Cherchez le bouton pour voir le menu
@@ -118,7 +207,8 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 - [ ] La page du restaurant s'ouvre
 - [ ] Le nom, la description et l'adresse sont visibles
 - [ ] Les horaires d'ouverture sont affichés
-- [ ] Un bouton "Voir le menu" est disponible
+- [ ] Un bouton "Voir le menu" ou accès direct au menu est disponible
+- [ ] Possibilité d'ajouter aux favoris (icône cœur)
 
 ### Observations :
 ```
@@ -129,12 +219,38 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 5 : Consulter le menu
+## Scénario 8 : Tenter de commander sur un restaurant fermé
+
+**Objectif :** Vérifier le comportement quand un restaurant est fermé
+
+### Étapes à suivre :
+1. Identifiez un restaurant marqué "Fermé" dans la liste
+2. Appuyez sur ce restaurant pour voir sa fiche
+3. Essayez d'accéder au menu
+4. Essayez d'ajouter un article au panier (si possible)
+
+### Résultat attendu :
+- [ ] Le restaurant fermé est clairement identifiable (badge, couleur grisée)
+- [ ] La fiche du restaurant affiche les horaires d'ouverture
+- [ ] Message explicatif : "Ce restaurant est actuellement fermé"
+- [ ] Impossible d'ajouter des articles au panier OU message d'avertissement
+- [ ] Suggestion des horaires de réouverture
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 9 : Consulter le menu
 
 **Objectif :** Parcourir les plats disponibles
 
 ### Étapes à suivre :
-1. Depuis un restaurant, accédez au menu
+1. Depuis un restaurant ouvert, accédez au menu
 2. Parcourez les différentes catégories (entrées, plats, desserts)
 3. Observez les informations de chaque plat
 4. Utilisez les filtres par catégorie si disponibles
@@ -143,7 +259,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 - [ ] Le menu s'affiche correctement
 - [ ] Les plats sont organisés par catégorie
 - [ ] Chaque plat montre : nom, description, prix, image
-- [ ] Les plats indisponibles sont clairement indiqués
+- [ ] Les plats indisponibles sont clairement indiqués (grisés, badge "Indisponible")
 
 ### Observations :
 ```
@@ -154,21 +270,22 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 6 : Voir les détails d'un plat
+## Scénario 10 : Voir les détails d'un plat
 
 **Objectif :** Consulter les informations complètes d'un plat
 
 ### Étapes à suivre :
-1. Appuyez sur un plat (ex: Pizza Margherita)
+1. Appuyez sur un plat disponible (ex: Pizza Margherita)
 2. Consultez la description complète
 3. Vérifiez le prix
 4. Observez les informations diététiques (végétarien, sans gluten, etc.)
 
 ### Résultat attendu :
-- [ ] Une fenêtre de détails s'ouvre
+- [ ] Une fenêtre ou page de détails s'ouvre
 - [ ] La description complète est visible
 - [ ] Le prix est affiché clairement
-- [ ] Les informations diététiques sont présentes si applicables
+- [ ] Les informations diététiques sont présentes si applicables (icônes végétarien, vegan)
+- [ ] Les allergènes sont listés si présents
 
 ### Observations :
 ```
@@ -179,15 +296,42 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 7 : Ajouter des articles au panier
+## Scénario 11 : Gérer ses favoris
+
+**Objectif :** Ajouter et retirer des restaurants de ses favoris
+
+### Étapes à suivre :
+1. Depuis la fiche d'un restaurant, trouvez l'icône "cœur" (favoris)
+2. Appuyez sur l'icône pour ajouter aux favoris
+3. Allez dans "Mon Compte" > "Mes Favoris" ou section équivalente
+4. Vérifiez que le restaurant apparaît dans la liste
+5. Retirez le restaurant des favoris
+
+### Résultat attendu :
+- [ ] L'icône cœur est visible sur la fiche restaurant
+- [ ] L'icône change d'état au clic (vide → plein ou changement de couleur)
+- [ ] Une confirmation visuelle s'affiche ("Ajouté aux favoris")
+- [ ] Le restaurant apparaît dans la liste des favoris
+- [ ] Le retrait des favoris fonctionne correctement
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 12 : Ajouter des articles au panier
 
 **Objectif :** Construire une commande
 
 ### Étapes à suivre :
-1. Depuis un plat, appuyez sur "Ajouter au panier"
+1. Depuis un plat disponible, appuyez sur "Ajouter au panier"
 2. Ajoutez un deuxième plat différent
 3. Essayez d'ajouter le même plat une deuxième fois
-4. Vérifiez le badge sur l'onglet "Mes Commandes"
+4. Vérifiez le badge sur l'onglet panier ou "Mes Commandes"
 
 ### Résultat attendu :
 - [ ] Le plat s'ajoute au panier avec une confirmation visuelle
@@ -204,12 +348,36 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 8 : Consulter et modifier le panier
+## Scénario 13 : Tenter d'ajouter un article indisponible
+
+**Objectif :** Vérifier qu'on ne peut pas commander un article indisponible
+
+### Étapes à suivre :
+1. Dans le menu d'un restaurant, identifiez un article marqué "Indisponible"
+2. Appuyez sur cet article
+3. Essayez de l'ajouter au panier
+
+### Résultat attendu :
+- [ ] L'article indisponible est visuellement distinct (grisé, barré, badge)
+- [ ] Le bouton "Ajouter au panier" est désactivé OU
+- [ ] Un message explique que l'article n'est pas disponible
+- [ ] Impossible d'ajouter l'article au panier
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 14 : Consulter et modifier le panier
 
 **Objectif :** Gérer le contenu de sa commande
 
 ### Étapes à suivre :
-1. Allez sur l'onglet "Mes Commandes"
+1. Allez sur l'onglet panier ou "Mes Commandes"
 2. Consultez la liste des articles dans le panier
 3. Modifiez la quantité d'un article (+ ou -)
 4. Supprimez un article du panier
@@ -231,7 +399,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 9 : Passer une commande
+## Scénario 15 : Passer une commande
 
 **Objectif :** Finaliser et envoyer une commande
 
@@ -242,10 +410,11 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 4. Confirmez la commande
 
 ### Résultat attendu :
-- [ ] Un écran de confirmation s'affiche
+- [ ] Un écran de confirmation/récapitulatif s'affiche
 - [ ] Vous pouvez ajouter des instructions spéciales
 - [ ] Le récapitulatif montre tous les articles et le total
-- [ ] Un message de confirmation apparaît après la commande
+- [ ] Un message de confirmation apparaît après validation
+- [ ] Un numéro de commande est attribué
 
 ### Observations :
 ```
@@ -256,7 +425,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 10 : Suivre une commande
+## Scénario 16 : Suivre une commande
 
 **Objectif :** Voir l'évolution du statut de sa commande
 
@@ -268,7 +437,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ### Résultat attendu :
 - [ ] Le statut de la commande est clairement affiché
-- [ ] Une progression visuelle montre les étapes
+- [ ] Une progression visuelle montre les étapes (timeline, badges)
 - [ ] Les détails de la commande restent accessibles
 - [ ] Le statut se met à jour quand le restaurant change l'état
 
@@ -281,7 +450,34 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 11 : Consulter l'historique des commandes
+## Scénario 17 : Annuler une commande
+
+**Objectif :** Vérifier qu'on peut annuler une commande en attente
+
+### Étapes à suivre :
+1. Allez dans "Mes Commandes" ou l'historique
+2. Sélectionnez une commande avec le statut "En attente"
+3. Cherchez le bouton "Annuler la commande"
+4. Confirmez l'annulation
+5. Vérifiez le nouveau statut de la commande
+
+### Résultat attendu :
+- [ ] Le bouton "Annuler" est visible pour les commandes "En attente"
+- [ ] Le bouton "Annuler" est ABSENT ou désactivé pour les commandes "En préparation" ou après
+- [ ] Une confirmation est demandée avant l'annulation
+- [ ] Le statut passe à "Annulée" après confirmation
+- [ ] Un message de confirmation s'affiche
+
+### Observations :
+```
+(Notez ici tout problème rencontré)
+
+
+```
+
+---
+
+## Scénario 18 : Consulter l'historique des commandes
 
 **Objectif :** Voir ses commandes passées
 
@@ -306,7 +502,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 12 : Gérer son compte
+## Scénario 19 : Gérer son compte
 
 **Objectif :** Accéder aux paramètres de son profil
 
@@ -319,8 +515,9 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 ### Résultat attendu :
 - [ ] La page "Mon Compte" affiche votre profil
 - [ ] Si non connecté, un bouton de connexion est visible
-- [ ] Après connexion, vos informations sont affichées
+- [ ] Après connexion, vos informations sont affichées (nom, email)
 - [ ] Un accès aux paramètres est disponible
+- [ ] Accès à vos favoris disponible
 
 ### Observations :
 ```
@@ -331,7 +528,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 13 : Modifier les paramètres
+## Scénario 20 : Modifier les paramètres
 
 **Objectif :** Personnaliser l'application
 
@@ -356,7 +553,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 14 : Test du thème sombre
+## Scénario 21 : Test du thème sombre
 
 **Objectif :** Vérifier le mode sombre de l'application
 
@@ -381,7 +578,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 15 : Tester les notifications (si disponible)
+## Scénario 22 : Tester les notifications (si disponible)
 
 **Objectif :** Vérifier le système de notifications
 
@@ -406,7 +603,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 16 : Test hors connexion
+## Scénario 23 : Test hors connexion
 
 **Objectif :** Vérifier le comportement sans internet
 
@@ -431,7 +628,7 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ---
 
-## Scénario 17 : Déconnexion
+## Scénario 24 : Déconnexion
 
 **Objectif :** Se déconnecter de l'application
 
@@ -460,25 +657,32 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 
 ## Récapitulatif
 
-| Scénario | Réussi | Échec | Non testé |
-|----------|--------|-------|-----------|
-| 1. Lancement app | [ ] | [ ] | [ ] |
-| 2. Liste restaurants | [ ] | [ ] | [ ] |
-| 3. Recherche | [ ] | [ ] | [ ] |
-| 4. Détails restaurant | [ ] | [ ] | [ ] |
-| 5. Consultation menu | [ ] | [ ] | [ ] |
-| 6. Détails plat | [ ] | [ ] | [ ] |
-| 7. Ajout au panier | [ ] | [ ] | [ ] |
-| 8. Gestion panier | [ ] | [ ] | [ ] |
-| 9. Passer commande | [ ] | [ ] | [ ] |
-| 10. Suivi commande | [ ] | [ ] | [ ] |
-| 11. Historique | [ ] | [ ] | [ ] |
-| 12. Mon compte | [ ] | [ ] | [ ] |
-| 13. Paramètres | [ ] | [ ] | [ ] |
-| 14. Thème sombre | [ ] | [ ] | [ ] |
-| 15. Notifications | [ ] | [ ] | [ ] |
-| 16. Hors connexion | [ ] | [ ] | [ ] |
-| 17. Déconnexion | [ ] | [ ] | [ ] |
+| # | Scénario | Réussi | Échec | Non testé |
+|---|----------|--------|-------|-----------|
+| 1 | Lancement app | [ ] | [ ] | [ ] |
+| 2 | Créer un compte (Inscription) | [ ] | [ ] | [ ] |
+| 3 | Se connecter | [ ] | [ ] | [ ] |
+| 4 | Connexion avec erreur | [ ] | [ ] | [ ] |
+| 5 | Liste restaurants | [ ] | [ ] | [ ] |
+| 6 | Recherche restaurant | [ ] | [ ] | [ ] |
+| 7 | Consulter restaurant ouvert | [ ] | [ ] | [ ] |
+| 8 | Restaurant fermé | [ ] | [ ] | [ ] |
+| 9 | Consultation menu | [ ] | [ ] | [ ] |
+| 10 | Détails plat | [ ] | [ ] | [ ] |
+| 11 | Gérer ses favoris | [ ] | [ ] | [ ] |
+| 12 | Ajout au panier | [ ] | [ ] | [ ] |
+| 13 | Article indisponible | [ ] | [ ] | [ ] |
+| 14 | Gestion panier | [ ] | [ ] | [ ] |
+| 15 | Passer commande | [ ] | [ ] | [ ] |
+| 16 | Suivi commande | [ ] | [ ] | [ ] |
+| 17 | Annuler commande | [ ] | [ ] | [ ] |
+| 18 | Historique commandes | [ ] | [ ] | [ ] |
+| 19 | Mon compte | [ ] | [ ] | [ ] |
+| 20 | Paramètres | [ ] | [ ] | [ ] |
+| 21 | Thème sombre | [ ] | [ ] | [ ] |
+| 22 | Notifications | [ ] | [ ] | [ ] |
+| 23 | Hors connexion | [ ] | [ ] | [ ] |
+| 24 | Déconnexion | [ ] | [ ] | [ ] |
 
 ## Impression générale
 
@@ -543,6 +747,37 @@ Ce guide est destiné aux **utilisateurs clients** testant l'application mobile 
 **Modèle du téléphone :** _______________
 
 **Version du système :** _______________
+
+---
+
+## Traçabilité Use Cases MVP
+
+Ce guide couvre les 8 Use Cases Client de l'application mobile :
+
+| Use Case | Description | Scénarios UAT |
+|----------|-------------|---------------|
+| UC-001 | Créer un compte client | ✅ Scénario 2 |
+| UC-002 | Se connecter à l'application | ✅ Scénarios 3, 4 |
+| UC-003 | Rechercher un restaurant | ✅ Scénarios 5, 6 |
+| UC-004 | Commander un repas | ✅ Scénarios 7-15 |
+| UC-005 | Suivre une commande | ✅ Scénario 16 |
+| UC-006 | Annuler une commande | ✅ Scénario 17 |
+| UC-007 | Historique des commandes | ✅ Scénario 18 |
+| UC-008 | Gérer son profil | ✅ Scénarios 19, 20 |
+
+**Couverture MVP** : 100% des Use Cases Client
+
+**Règles métier testées** :
+- ✅ Restaurant fermé → impossible de commander
+- ✅ Article indisponible → impossible d'ajouter au panier
+- ✅ Annulation → uniquement pour commandes "En attente"
+- ✅ Authentification → validation email/mot de passe
+- ✅ Favoris → ajout/suppression
+
+---
+
+**Dernière mise à jour** : 2026-01-24
+**Version** : 2.0 (24 scénarios)
 
 ---
 

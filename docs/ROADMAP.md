@@ -10,29 +10,38 @@
 - [Phase 5 - Fonctionnalités Avancées](#phase-5--fonctionnalités-avancées-à-venir)
 - [Phase 6 - Administration et Analytics](#phase-6--administration-et-analytics-à-venir)
 - [Phase 7 - Optimisations et Production](#phase-7--optimisations-et-production-à-venir)
+- [Phase 8 - Validation UAT](#phase-8--validation-uat-en-cours)
 - [Bugs Connus](#bugs-connus)
+- [Backlog Post-UAT](#backlog-post-uat)
 - [Métriques de Progression](#métriques-de-progression)
 
 ---
 
 ## Tâche en cours
 
-> **Sprint 2 — Intégration Frontend-Backend** ✅ **TERMINÉ**
+> **Sprint 3 — Validation UAT & Fonctionnalités Manquantes** 🔄 **EN COURS**
 >
-> L'intégration API est complète pour le dashboard web ET l'application mobile :
+> Suite à l'analyse UAT du 2026-01-24, des lacunes ont été identifiées :
 >
-> **Dashboard Web** :
-> - ✅ Toutes les pages connectées aux vraies APIs backend
-> - ✅ Hooks personnalisés (useRestaurantData, useOrders, useUsers, etc.)
-> - ✅ Nettoyage du code obsolète (mockData.ts supprimé)
+> **Epic 9 - Mobile UAT Gap** (6 stories, ~20h) :
+> - [ ] Formulaire inscription utilisateur (P0)
+> - [ ] Login email/password direct (P0)
+> - [ ] Mode hors connexion (P1)
+> - [ ] Affichage allergènes/diététique (P2)
+> - [ ] Message restaurant fermé amélioré (P2)
+> - [ ] Notifications push réelles (P3)
 >
-> **Application Mobile** :
-> - ✅ Restaurants, menus, commandes, favoris connectés aux APIs
-> - ✅ Cache de restaurants dans OrderContext
-> - ✅ Types extraits dans src/types/index.ts
-> - ✅ Nettoyage du code obsolète (mockData.ts supprimé - 650+ lignes)
+> **Epic 10 - Admin UAT Gap** (10 stories, ~24h) :
+> - [ ] Statut REJECTED + raison rejet restaurant (P0)
+> - [ ] UI validation/rejet restaurant (P0)
+> - [ ] Raison blocage + gestion commandes (P0)
+> - [ ] Suspension utilisateur avec durée (P1)
+> - [ ] Alertes admin temps réel (P1)
+> - [ ] Export CSV/Excel/PDF (P2)
 >
-> **Prochaine étape** : Phase 3 - Authentification JWT
+> **Référence** : `docs/shared/pm/sprint-status.yaml` et `docs/shared/pm/epics-and-stories.md`
+>
+> **Prochaine étape** : Implémenter les tâches P0 pour débloquer les tests UAT
 
 ---
 
@@ -312,6 +321,58 @@
 
 ---
 
+## Phase 8 - Validation UAT (En cours)
+
+> **Objectif** : Combler les lacunes identifiées lors de l'analyse des guides UAT pour permettre la validation complète avant release.
+>
+> **Documents de référence** :
+> - `docs/UAT_GUIDE_MOBILE.md` (24 scénarios)
+> - `docs/UAT_GUIDE_RESTAURANT.md`
+> - `docs/shared/pm/epics-and-stories.md` (Epics 9 et 10)
+> - `docs/shared/pm/sprint-status.yaml`
+
+### Epic 9 : Mobile UAT Gap (~20h)
+
+**P0 - Bloquant UAT** :
+- [ ] **9.1** Formulaire inscription (nom, email, password, CGU) - 4h
+- [ ] **9.2** Login email/password direct (+ gestion erreurs) - 3h
+
+**P1 - Important** :
+- [ ] **9.3** Mode hors connexion (détection réseau, bannière, cache) - 6h
+
+**P2 - Amélioration** :
+- [ ] **9.4** Affichage allergènes et infos diététiques sur plats - 2h
+- [ ] **9.5** Message restaurant fermé avec horaires réouverture - 1h
+
+**P3 - Optionnel** :
+- [ ] **9.6** Notifications push réelles (Expo + backend) - 4h
+
+### Epic 10 : Admin UAT Gap (~24h)
+
+**P0 - Bloquant UAT** :
+- [ ] **10.1** Statut REJECTED pour restaurants - 1h
+- [ ] **10.2** Raison de rejet restaurant (champ + endpoint) - 2h
+- [ ] **10.3** UI modales validation/rejet restaurant - 2h
+- [ ] **10.4** Raison de blocage restaurant - 1h
+- [ ] **10.5** Gestion commandes lors blocage restaurant - 3h
+
+**P1 - Important** :
+- [ ] **10.6** Durée et raison suspension utilisateur - 2h
+- [ ] **10.7** UI suspension utilisateur avec sélection durée - 2h
+- [ ] **10.8** Endpoint alertes admin temps réel - 3h
+
+**P2 - Amélioration** :
+- [ ] **10.9** Export CSV/Excel (restaurants, users, orders) - 4h
+- [ ] **10.10** Export PDF rapport statistiques - 4h
+
+### Progression Phase 8
+- **Epic 9** : 0/6 stories (0%)
+- **Epic 10** : 0/10 stories (0%)
+- **Total P0** : 0/7 stories bloquantes
+- **Effort restant** : ~44h
+
+---
+
 ## Bugs Connus
 
 | ID  | Description                              | Priorité | Status       | Assigné à |
@@ -326,7 +387,63 @@
 
 ---
 
+## Backlog Post-UAT
+
+> Tâches identifiées lors de la revue UAT du 2026-01-24 (Agent BMAD TEA)
+> Ces améliorations ne sont **pas bloquantes** pour le MVP mais améliorent l'UX.
+
+| ID | Tâche | Fichier(s) | Priorité | Effort | Status |
+|----|-------|------------|----------|--------|--------|
+| DEV-01 | **Bouton "Annuler" sur OrderCard** - Ajouter le bouton "Annuler" directement sur les cartes de commandes EN_PREPARATION (actuellement visible uniquement dans la modal de détails) | `OrderCard.tsx` | P1 - UX | ~1h | 📋 À faire |
+| DEV-02 | **Présets options diététiques** - Ajouter des présets Végétarien, Végan, Allergènes dans le formulaire d'ajout/modification de plat | `MenuItemOptionsForm.tsx` | P2 - Feature | ~2h | 📋 À faire |
+| DEV-03 | **Connecter Analytics API** - Remplacer les données mockées par les vraies données API dans la page statistiques restaurant | `AnalyticsPage.tsx` | P2 - Feature | ~3h | 📋 À faire |
+
+**Origine** : Analyse de traçabilité UAT_GUIDE_RESTAURANT.md vs Code (session 2026-01-24)
+
+---
+
 ## Notes de Session
+
+### Session 2026-01-24 : Analyse UAT et Planification Dev (Phase 8)
+
+**Objectif** : Analyser les guides UAT et identifier les développements manquants
+
+**Travail effectué** :
+
+**1. Analyse Guide UAT Mobile avec Agent BMAD TEA**
+- ✅ Évaluation complétude guide UAT Mobile vs Use Cases MVP
+- ✅ Identification 7 scénarios manquants (inscription, login, annulation, favoris, etc.)
+- ✅ Enrichissement `docs/UAT_GUIDE_MOBILE.md` : 17 → 24 scénarios
+- ✅ Couverture Use Cases : 62.5% → 100%
+
+**2. Analyse Code Mobile vs UAT**
+- ✅ Audit complet code `apps/mobile/` vs 24 scénarios UAT
+- ✅ Identification 6 fonctionnalités manquantes (Epic 9)
+- ✅ Priorisation P0-P3 avec effort estimé (~20h)
+
+**3. Identification Lacunes Admin (Epic 10)**
+- ✅ Analyse guide UAT Restaurant/Admin
+- ✅ Identification 10 fonctionnalités manquantes
+- ✅ Priorisation P0-P2 avec effort estimé (~24h)
+
+**4. Documentation et Planification**
+- ✅ Création Epic 9 et 10 dans `sprint-status.yaml`
+- ✅ Ajout 16 User Stories détaillées dans `epics-and-stories.md`
+- ✅ Création Phase 8 dans ROADMAP.md
+- ✅ Mise à jour métriques de progression
+
+**Fichiers créés/modifiés** :
+- `docs/UAT_GUIDE_MOBILE.md` (+7 scénarios, total 24)
+- `docs/shared/pm/sprint-status.yaml` (Epic 9 et 10 ajoutés)
+- `docs/shared/pm/epics-and-stories.md` (16 stories ajoutées)
+- `docs/ROADMAP.md` (Phase 8, métriques, cette note)
+
+**Prochaines étapes** :
+- Implémenter Epic 9.1 : Formulaire inscription (P0)
+- Implémenter Epic 9.2 : Login email/password (P0)
+- Implémenter Epic 10.1-10.3 : Validation/rejet restaurants (P0)
+
+---
 
 ### Session 2026-01-23 : Implémentation RBAC MVP (Phase 3)
 
@@ -658,13 +775,21 @@ Claude Code
 - **Performance** : ✅ 85% (Optimisations avancées implémentées)
 - **Tests** : ✅ 85% (134 tests Jest + 6 flows Maestro E2E)
 
+### Validation UAT
+- **Guide UAT Mobile** : ✅ 100% (24 scénarios documentés)
+- **Guide UAT Restaurant** : ✅ 100% (documenté)
+- **Code Mobile vs UAT** : ⚠️ 71% (6 fonctionnalités manquantes - Epic 9)
+- **Code Admin vs UAT** : ⚠️ 60% (10 fonctionnalités manquantes - Epic 10)
+
 ### Global MVP
-**Progression globale** : ✅ **95%**
+**Progression globale** : ⚠️ **88%** (bloqué par validation UAT)
 
 ### Reste à faire pour 100%
+- [ ] **Epic 9** : Mobile UAT Gap (7 stories P0-P1) - ~13h
+- [ ] **Epic 10** : Admin UAT Gap (7 stories P0-P1) - ~14h
 - [ ] Tests WebSocket (backend + mobile) - 1-2 jours
 - [ ] Tests Auth Backend complets - 1 jour
-- [ ] Mode offline complet (optionnel) - 2-3 jours
+- [ ] Mode offline complet (Epic 9.3) - inclus ci-dessus
 - [ ] Biométrie mobile (optionnel) - 1 jour
 
 ---
@@ -837,7 +962,7 @@ docs/shared/architect/
 
 ## Dernière mise à jour
 
-**Date** : 2026-01-23
+**Date** : 2026-01-24
 **Version** : MVP 0.97
 **Responsable** : Équipe OneEats
-**Prochaine revue** : 2026-01-27
+**Prochaine revue** : 2026-01-28

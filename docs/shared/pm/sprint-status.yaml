@@ -83,22 +83,159 @@ development_status:
   8-2-tests-integration: in-progress
   epic-8-retrospective: optional
 
+# ============================================================
+# Epic 9: Mobile UAT Gap - Fonctionnalités manquantes (P0-P2)
+# ============================================================
+# Identifiées lors de l'analyse UAT du 2026-01-24
+# Ces tâches sont requises pour valider le guide UAT Mobile
+
+  # Epic 9: Mobile UAT Gap (P0) - NEW
+  epic-9: backlog
+
+  # P0 - BLOQUANT UAT (à faire en priorité)
+  9-1-formulaire-inscription: backlog
+  # Description: Créer app/auth/register.tsx avec formulaire (nom, email, password, CGU)
+  # Fichiers: app/auth/register.tsx, AuthContext.tsx
+  # Effort: 4h
+  # Bloque: Scénario UAT #2
+
+  9-2-login-email-password: backlog
+  # Description: Ajouter formulaire email/password dans login.tsx (en plus du SSO)
+  # Fichiers: app/auth/login.tsx, AuthContext.tsx (loginWithCredentials)
+  # Effort: 3h
+  # Bloque: Scénarios UAT #3, #4
+
+  # P1 - IMPORTANT
+  9-3-mode-hors-connexion: backlog
+  # Description: Détection réseau, bannière offline, cache basique
+  # Packages: @react-native-community/netinfo
+  # Fichiers: NetworkContext.tsx, layout avec bannière
+  # Effort: 6h
+  # Bloque: Scénario UAT #23
+
+  # P2 - AMÉLIORATION
+  9-4-affichage-allergenes: backlog
+  # Description: Afficher isVegetarian, isVegan, allergens sur page détail plat
+  # Fichiers: app/menu/[id].tsx
+  # Effort: 2h
+  # Améliore: Scénario UAT #10
+
+  9-5-message-restaurant-ferme: backlog
+  # Description: Message explicatif avec horaires de réouverture quand restaurant fermé
+  # Fichiers: app/restaurant/[id].tsx, app/(tabs)/index.tsx
+  # Effort: 1h
+  # Améliore: Scénario UAT #8
+
+  # P3 - OPTIONNEL
+  9-6-notifications-push-reelles: backlog
+  # Description: Intégrer Expo Push Notifications avec backend (remplacer simulation)
+  # Fichiers: PushNotificationContext.tsx, backend NotificationService
+  # Effort: 4h (+ backend)
+  # Améliore: Scénario UAT #22
+
+  epic-9-retrospective: optional
+
+# ============================================================
+# Epic 10: Admin UAT Gap - Fonctionnalités manquantes (P0-P2)
+# ============================================================
+# Identifiées lors de l'analyse UAT Admin du 2026-01-24
+# Ces tâches sont requises pour valider le guide UAT_GUIDE_ADMIN.md
+
+  # Epic 10: Admin UAT Gap (P0) - NEW
+  epic-10: backlog
+
+  # P0 - BLOQUANT UAT (UC-201: Validation restaurants)
+  10-1-statut-rejected-restaurant: backlog
+  # Description: Ajouter statut REJECTED à l'enum RestaurantStatus
+  # Fichiers: RestaurantStatus.java, RestaurantEntity.java
+  # Effort: 1h
+  # Bloque: Scénario UAT #15 (Rejeter restaurant)
+
+  10-2-raison-rejet-restaurant: backlog
+  # Description: Ajouter champ rejectionReason + endpoint rejet avec raison
+  # Fichiers: RestaurantEntity.java, Restaurant.java, RestaurantController.java
+  # Effort: 2h
+  # Bloque: Scénario UAT #15 (Rejeter restaurant)
+
+  10-3-ui-validation-rejet-restaurant: backlog
+  # Description: Ajouter modales validation/rejet dans RestaurantsManagementPage
+  # Fichiers: apps/web/src/pages/RestaurantsManagementPage.tsx
+  # Effort: 2h
+  # Bloque: Scénarios UAT #14, #15
+
+  # P0 - BLOQUANT UAT (UC-202: Blocage avec raison)
+  10-4-raison-blocage-restaurant: backlog
+  # Description: Ajouter champs blockingReason, blockedAt dans RestaurantEntity
+  # Fichiers: RestaurantEntity.java, Restaurant.java
+  # Effort: 1h
+  # Bloque: Scénario UAT #5 (raison blocage)
+
+  10-5-gestion-commandes-blocage: backlog
+  # Description: Annuler/gérer commandes en cours lors du blocage restaurant
+  # Fichiers: RestaurantService.java, OrderService.java
+  # Effort: 3h
+  # Bloque: Scénario UAT #5 (commandes en cours)
+
+  # P1 - IMPORTANT (UC-203: Suspension utilisateurs)
+  10-6-duree-raison-suspension-user: backlog
+  # Description: Ajouter champs suspensionReason, suspendedUntil dans UserEntity
+  # Fichiers: UserEntity.java, User.java, AdminUserController.java
+  # Effort: 2h
+  # Bloque: Scénario UAT #16 (durée suspension)
+
+  10-7-ui-suspension-user-duree: backlog
+  # Description: Modale suspension avec sélection durée (1j, 7j, 30j, indéfinie)
+  # Fichiers: apps/web/src/pages/UsersPage.tsx
+  # Effort: 2h
+  # Bloque: Scénario UAT #16
+
+  # P1 - IMPORTANT (UC-204: Alertes admin)
+  10-8-endpoint-alertes-admin: backlog
+  # Description: Créer endpoint GET /api/admin/alerts avec alertes temps réel
+  # Fichiers: AlertsController.java (nouveau), AlertsService.java (nouveau)
+  # Effort: 3h
+  # Améliore: Scénario UAT #12 (alertes)
+
+  # P2 - AMÉLIORATION (UC-205: Export données)
+  10-9-export-csv-excel: backlog
+  # Description: Endpoint export restaurants/users/orders en CSV/Excel
+  # Fichiers: ExportController.java (nouveau), ExportService.java (nouveau)
+  # Dépendances: Apache POI, OpenCSV (pom.xml)
+  # Effort: 4h
+  # Bloque: Scénario UAT #11 (export)
+
+  10-10-export-pdf: backlog
+  # Description: Endpoint export rapport PDF avec statistiques
+  # Fichiers: ExportService.java, templates PDF
+  # Dépendances: iText ou JasperReports (pom.xml)
+  # Effort: 4h
+  # Améliore: Scénario UAT #11 (export PDF)
+
+  epic-10-retrospective: optional
+
 # Progress Summary
 # ================
-# P0 Epics: 3/4 in-progress, 1/4 backlog (Auth)
+# P0 Epics: 3/5 in-progress, 2/5 backlog (Auth, Mobile UAT Gap)
 # P1 Epics: 2/4 in-progress, 2/4 backlog
 # Backend APIs: 95% complete
-# Frontend Integration: 40% complete
-# Overall MVP: 65%
+# Frontend Integration: 100% complete
+# Mobile UAT Ready: 71% (manque inscription, login direct, offline)
+# Admin UAT Ready: 70% (manque validation/rejet resto, suspension user, export)
+# Overall MVP: 85%
 
 # Current Focus
 # =============
-# - Integrate frontend web dashboard with real APIs
-# - Integrate mobile app with real APIs
-# - Next: Implement Epic 1 (Auth JWT)
+# - [DONE] Integrate frontend web dashboard with real APIs
+# - [DONE] Integrate mobile app with real APIs
+# - [DONE] Implement RBAC on all endpoints
+# - [TODO] Epic 9: Mobile UAT Gap (inscription, login, offline)
+# - [TODO] Epic 10: Admin UAT Gap (validation resto, suspension user, export)
+# - [TODO] Epic 1: Auth JWT production-ready
 
 # Risks
 # =====
 # - R1: Auth JWT not implemented (HIGH) - blocks secure deployment
-# - R2: Frontend using mock data (HIGH) - integration needed
-# - R3: WebSocket not delivered (MEDIUM) - fallback polling planned
+# - R2: Frontend using mock data (RESOLVED) - integration done
+# - R3: WebSocket not delivered (RESOLVED) - implemented
+# - R4: Mobile UAT incomplete (MEDIUM) - 3 fonctionnalités manquantes pour UAT
+# - R5: Admin UAT incomplete (MEDIUM) - 10 fonctionnalités manquantes pour UAT
