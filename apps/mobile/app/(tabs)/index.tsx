@@ -40,6 +40,7 @@ import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { OptimizedFlatListMemo } from '../../src/components/VirtualizedList';
 import { useRenderTime, useOptimizedCallback } from '../../src/hooks/usePerformanceMonitor';
+import { ClosedRestaurantOverlay } from '../../src/components/ClosedRestaurantBanner';
 
 const { width } = Dimensions.get('window');
 
@@ -93,11 +94,12 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
             resizeMode="cover"
           />
 
-          {/* Overlay fermé */}
+          {/* Overlay fermé amélioré */}
           {!restaurant.isOpen && (
-            <View style={cardStyles.closedOverlay}>
-              <Text style={cardStyles.closedText}>Fermé</Text>
-            </View>
+            <ClosedRestaurantOverlay
+              nextOpenTime={restaurant.nextOpenTime}
+              compact={false}
+            />
           )}
 
           {/* Badge note en haut à gauche */}
@@ -738,9 +740,10 @@ function HomeIndex() {
                   resizeMode="cover"
                 />
                 {!restaurant.isOpen && (
-                  <View style={baseStyles.favoriteClosedOverlay}>
-                    <Text style={baseStyles.favoriteClosedText}>Fermé</Text>
-                  </View>
+                  <ClosedRestaurantOverlay
+                    nextOpenTime={restaurant.nextOpenTime}
+                    compact={true}
+                  />
                 )}
                 <View style={baseStyles.favoriteCardContent}>
                   <Text style={[baseStyles.favoriteCardName, { color: globalTheme.colors.onSurface }]} numberOfLines={1}>

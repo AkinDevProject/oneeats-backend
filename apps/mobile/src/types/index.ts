@@ -1,5 +1,20 @@
 // Types pour l'application mobile OneEats
 
+export interface DaySchedule {
+  openTime: string;  // Format "HH:mm"
+  closeTime: string; // Format "HH:mm"
+}
+
+export interface RestaurantSchedule {
+  monday?: DaySchedule | null;
+  tuesday?: DaySchedule | null;
+  wednesday?: DaySchedule | null;
+  thursday?: DaySchedule | null;
+  friday?: DaySchedule | null;
+  saturday?: DaySchedule | null;
+  sunday?: DaySchedule | null;
+}
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -12,6 +27,9 @@ export interface Restaurant {
   featured: boolean;
   isOpen: boolean;
   description: string;
+  // Horaires optionnels
+  schedule?: RestaurantSchedule;
+  nextOpenTime?: string; // Prochaine ouverture calculée
 }
 
 export interface MenuItemOption {

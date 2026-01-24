@@ -31,10 +31,11 @@ import Animated, {
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { MenuItem, Restaurant, AllergenType } from '../../src/types';
+import { MenuItem, Restaurant, AllergenType, RestaurantSchedule } from '../../src/types';
 import apiService from '../../src/services/api';
 import { buildRestaurantImageUrl, buildMenuItemImageUrl } from '../../src/utils/imageUtils';
 import { DietaryIndicators } from '../../src/components/DietaryBadges';
+import { ClosedRestaurantBanner, ClosedRestaurantModal, getNextOpenTime } from '../../src/components/ClosedRestaurantBanner';
 
 const { width } = Dimensions.get('window');
 const HEADER_HEIGHT = 280;
@@ -48,6 +49,7 @@ export default function RestaurantScreen() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [showClosedModal, setShowClosedModal] = useState(false);
 
   useEffect(() => {
     loadRestaurantData();
@@ -64,6 +66,17 @@ export default function RestaurantScreen() {
       const restaurantData = await apiService.restaurants.getById(id);
       console.log('🏪 Restaurant data:', restaurantData);
       
+      // Mapper les horaires si disponibles
+      const schedule: RestaurantSchedule | undefined = restaurantData.schedule ? {
+        monday: restaurantData.schedule.monday,
+        tuesday: restaurantData.schedule.tuesday,
+        wednesday: restaurantData.schedule.wednesday,
+        thursday: restaurantData.schedule.thursday,
+        friday: restaurantData.schedule.friday,
+        saturday: restaurantData.schedule.saturday,
+        sunday: restaurantData.schedule.sunday,
+      } : undefined;
+
       // Mapper les données restaurant au format attendu
       const mappedRestaurant: Restaurant = {
         id: restaurantData.id,
@@ -77,6 +90,8 @@ export default function RestaurantScreen() {
         featured: false,
         isOpen: restaurantData.isOpen,
         description: restaurantData.description || 'Délicieux restaurant',
+        schedule,
+        nextOpenTime: getNextOpenTime(schedule) || undefined,
       };
       
       setRestaurant(mappedRestaurant);
@@ -155,11 +170,23 @@ export default function RestaurantScreen() {
     : menuItems.filter(item => item.category === selectedCategory);
 
   const handleAddToCart = (item: MenuItem) => {
+    // Vérifier si le restaurant est ouvert
+    if (!restaurant?.isOpen) {
+      setShowClosedModal(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
     addItem(item);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handleItemPress = (item: MenuItem) => {
+    // Vérifier si le restaurant est ouvert
+    if (!restaurant?.isOpen) {
+      setShowClosedModal(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      return;
+    }
     if (item.options && item.options.length > 0) {
       router.push(`/menu/${item.id}` as any);
     } else {
@@ -380,6 +407,15 @@ export default function RestaurantScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {renderHeader()}
+
+        {/* Bannière restaurant fermé */}
+        {!restaurant.isOpen && (
+          <ClosedRestaurantBanner
+            restaurantName={restaurant.name}
+            nextOpenTime={restaurant.nextOpenTime}
+            schedule={restaurant.schedule}
+          />
+        )}
         
         <View style={[styles.menuContainer, { backgroundColor: currentTheme.colors.background }]}>
           <View style={styles.menuHeader}>
@@ -413,6 +449,15 @@ export default function RestaurantScreen() {
           }}
         />
       )}
+
+      {/* Modal restaurant fermé */}
+      <ClosedRestaurantModal
+        visible={showClosedModal}
+        onClose={() => setShowClosedModal(false)}
+        restaurantName={restaurant.name}
+        nextOpenTime={restaurant.nextOpenTime}
+        schedule={restaurant.schedule}
+      />
     </View>
     </>
   );

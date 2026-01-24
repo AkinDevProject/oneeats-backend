@@ -17,6 +17,7 @@ import { router } from 'expo-router';
 import { useFavorites } from '../../src/hooks/useFavorites';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import EmptyState from '../../src/components/ui/EmptyState';
+import { ClosedRestaurantOverlay } from '../../src/components/ClosedRestaurantBanner';
 
 // Interface pour un restaurant
 interface Restaurant {
@@ -103,9 +104,7 @@ export default function Favorites() {
               </View>
             )}
             {!restaurant.isOpen && (
-              <View style={styles.closedOverlay}>
-                <Text style={styles.closedText}>Fermé</Text>
-              </View>
+              <ClosedRestaurantOverlay compact={true} />
             )}
           </View>
 
