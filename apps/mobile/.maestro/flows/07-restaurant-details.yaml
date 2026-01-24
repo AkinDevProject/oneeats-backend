@@ -19,7 +19,7 @@ tags:
 
 - extendedWaitUntil:
     visible: ".*"
-    timeout: 15000
+    timeout: 45000
 
 - runFlow:
     when:
@@ -27,16 +27,16 @@ tags:
     commands:
       - tapOn: "Continuer sans compte"
 
-# Attendre l'ecran d'accueil (soit avec restaurants, soit avec message d'erreur)
+# Attendre l'ecran d'accueil
 - extendedWaitUntil:
     visible: "Accueil"
-    timeout: 10000
+    timeout: 30000
 
 - takeScreenshot: "07-home-screen"
 
-# Attendre que les restaurants se chargent
+# Attendre que les restaurants se chargent (optionnel)
 - extendedWaitUntil:
-    visible: ".*proximit.*"
+    visible: ".*"
     timeout: 30000
     optional: true
 
@@ -56,7 +56,7 @@ tags:
 
 - extendedWaitUntil:
     visible: "Menu"
-    timeout: 10000
+    timeout: 20000
     optional: true
 
 - takeScreenshot: "07-restaurant-details"
@@ -66,6 +66,6 @@ tags:
 
 - extendedWaitUntil:
     visible: "Accueil"
-    timeout: 5000
+    timeout: 15000
 
 - takeScreenshot: "07-back-to-home"

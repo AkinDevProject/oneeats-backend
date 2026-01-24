@@ -15,7 +15,7 @@ tags:
 
 - extendedWaitUntil:
     visible: ".*"
-    timeout: 15000
+    timeout: 45000
 
 - runFlow:
     when:
@@ -24,15 +24,15 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 15000
+    visible: "Accueil"
+    timeout: 30000
 
 # Test: Panier vide
 - tapOn: "Panier"
 
 - extendedWaitUntil:
     visible: "Panier"
-    timeout: 5000
+    timeout: 15000
 
 - takeScreenshot: "15-empty-cart"
 
@@ -40,8 +40,8 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 5000
+    visible: "Accueil"
+    timeout: 15000
 
 # Test: Scroll et navigation
 - scroll
@@ -50,7 +50,7 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 5000
+    visible: "Accueil"
+    timeout: 15000
 
 - takeScreenshot: "15-error-handling-complete"

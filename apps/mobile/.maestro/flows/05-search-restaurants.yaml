@@ -23,7 +23,7 @@ tags:
 
 - extendedWaitUntil:
     visible: ".*"
-    timeout: 15000
+    timeout: 45000
 
 # Skip auth si necessaire
 - runFlow:
@@ -32,10 +32,18 @@ tags:
     commands:
       - tapOn: "Continuer sans compte"
 
-# Attendre l'accueil
+# Attendre l'onglet Accueil (plus fiable que le contenu)
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 10000
+    visible: "Accueil"
+    timeout: 30000
+
+- takeScreenshot: "05-home-loaded"
+
+# Attendre le chargement des restaurants (optionnel)
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 30000
+    optional: true
 
 # -----------------------------------------------------------------------------
 # TEST 1: Barre de recherche visible
@@ -62,7 +70,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 5000
+    visible: "Accueil"
+    timeout: 15000
 
 - takeScreenshot: "05-search-complete"

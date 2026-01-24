@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Platform } from 'react-native';
 import { WifiOff, RefreshCw, Cloud, CloudOff } from 'lucide-react-native';
 import { useNetwork } from '../contexts/NetworkContext';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface OfflineBannerProps {
   /** Position de la bannière */
@@ -16,7 +15,6 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
   showOnline = false,
 }) => {
   const { isOnline, isChecking, checkNetwork } = useNetwork();
-  const { colors } = useTheme();
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 

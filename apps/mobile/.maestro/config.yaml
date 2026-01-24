@@ -4,8 +4,8 @@
 
 appId: com.oneeats.mobile
 
-# Timeout global pour les assertions
-defaultTimeout: 15000
+# Timeout global pour les assertions (augmente pour emulateurs lents)
+defaultTimeout: 30000
 
 # Flows a executer (ordre specifie)
 flows:

@@ -82,9 +82,10 @@ tags:
 # -----------------------------------------------------------------------------
 # STEP 4: Ajouter le meme article une deuxieme fois
 # -----------------------------------------------------------------------------
-# Remonter pour trouver le premier article
-- scroll:
-    direction: UP
+# Remonter pour trouver le premier article (swipe down = scroll up)
+- swipe:
+    direction: DOWN
+    duration: 500
 
 - tapOn:
     label: "Ajouter.*panier"
