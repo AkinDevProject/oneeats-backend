@@ -3,7 +3,6 @@
 # =============================================================================
 # Verifie que la navigation entre les onglets principaux fonctionne
 # Tags: smoke, navigation
-# Prerequis: App lancee
 # =============================================================================
 
 appId: com.oneeats.mobile
@@ -21,8 +20,9 @@ tags:
 - launchApp:
     clearState: true
 
+# Attendre que l'app se charge (login ou accueil)
 - extendedWaitUntil:
-    visible: "OneEats"
+    visible: ".*"
     timeout: 15000
 
 # Skip auth si on est sur l'ecran de connexion
@@ -32,10 +32,10 @@ tags:
     commands:
       - tapOn: "Continuer sans compte"
 
-# Attendre l'ecran d'accueil
+# Attendre l'ecran d'accueil (onglet Accueil visible)
 - extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 10000
+    visible: "Accueil"
+    timeout: 15000
 
 # -----------------------------------------------------------------------------
 # TEST 1: Onglet Accueil (par defaut)
@@ -54,8 +54,7 @@ tags:
 - takeScreenshot: "02-tab-cart"
 
 # -----------------------------------------------------------------------------
-# TEST 3: Onglet Compte (anciennement Profil)
-# Note: L'onglet Favoris est masque de la tab bar (accessible depuis Accueil)
+# TEST 3: Onglet Compte
 # -----------------------------------------------------------------------------
 - tapOn: "Compte"
 
@@ -66,12 +65,12 @@ tags:
 - takeScreenshot: "02-tab-compte"
 
 # -----------------------------------------------------------------------------
-# TEST 5: Retour a l'accueil
+# TEST 4: Retour a l'accueil
 # -----------------------------------------------------------------------------
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
+    visible: "Accueil"
     timeout: 5000
 
 - takeScreenshot: "02-tab-home-return"

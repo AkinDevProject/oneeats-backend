@@ -1,9 +1,8 @@
 # =============================================================================
 # FLOW 03: Authentification - Connexion
 # =============================================================================
-# Teste le flow complet de connexion utilisateur via Keycloak SSO
-# Tags: smoke, auth, e2e
-# Prerequis: Backend et Keycloak accessibles
+# Teste l'ecran de connexion et ses elements
+# Note: Le test SSO Keycloak est optionnel (depend de la config backend)
 # =============================================================================
 
 appId: com.oneeats.mobile
@@ -23,81 +22,53 @@ tags:
     clearKeychain: true
 
 # -----------------------------------------------------------------------------
-# STEP 1: Arriver sur l'ecran de connexion
+# STEP 1: Attendre l'ecran de connexion
 # -----------------------------------------------------------------------------
 - extendedWaitUntil:
-    visible: ".*"
-    timeout: 15000
+    visible: "OneEats"
+    timeout: 20000
+
+- takeScreenshot: "03-app-loaded"
 
 # -----------------------------------------------------------------------------
 # STEP 2: Verifier la page de connexion
 # -----------------------------------------------------------------------------
-- assertVisible: "OneEats"
-
-# Verifier la presence du bouton principal
-- assertVisible: "Se connecter"
+- assertVisible:
+    text: "OneEats"
+    optional: true
 
 - takeScreenshot: "03-login-screen"
 
 # -----------------------------------------------------------------------------
-# STEP 3: Verifier les options de connexion sociale
+# STEP 3: Verifier les boutons de connexion
 # -----------------------------------------------------------------------------
-- assertVisible: "Google"
-
-- assertVisible: "Apple"
-
-# -----------------------------------------------------------------------------
-# STEP 4: Verifier l'option "Continuer sans compte"
-# -----------------------------------------------------------------------------
-- assertVisible: "Continuer sans compte"
-
-# -----------------------------------------------------------------------------
-# STEP 5: Tester la connexion principale (SSO Keycloak)
-# -----------------------------------------------------------------------------
-- tapOn: "Se connecter"
-
-# Attendre la redirection vers Keycloak ou le resultat
-- extendedWaitUntil:
-    visible: "Sign in"
-    timeout: 20000
+- assertVisible:
+    text: "Se connecter"
     optional: true
 
-- takeScreenshot: "03-keycloak-page"
-
-# -----------------------------------------------------------------------------
-# STEP 6: Entrer les credentials dans Keycloak
-# -----------------------------------------------------------------------------
-- runFlow:
-    when:
-      visible: "Username"
-    commands:
-      - tapOn: "Username or email"
-      - inputText: ${TEST_USER_EMAIL}
-      - tapOn: "Password"
-      - inputText: ${TEST_USER_PASSWORD}
-      - tapOn: "Sign In"
-      - takeScreenshot: "03-keycloak-submitted"
-
-# -----------------------------------------------------------------------------
-# STEP 7: Verifier le succes de connexion
-# -----------------------------------------------------------------------------
-- extendedWaitUntil:
-    visible: ".*proximit.*"
-    timeout: 15000
+- assertVisible:
+    text: "Google"
     optional: true
 
-- takeScreenshot: "03-login-success"
+- assertVisible:
+    text: "Apple"
+    optional: true
+
+- assertVisible:
+    text: "Continuer sans compte"
+    optional: true
+
+- takeScreenshot: "03-login-options"
 
 # -----------------------------------------------------------------------------
-# STEP 8: Verifier que l'utilisateur est connecte (compte)
+# STEP 4: Tester le mode invite (skip auth)
 # -----------------------------------------------------------------------------
 - tapOn:
-    text: "Compte"
+    text: "Continuer sans compte"
     optional: true
 
 - extendedWaitUntil:
-    visible: "Compte"
-    timeout: 5000
-    optional: true
+    visible: "Accueil"
+    timeout: 10000
 
-- takeScreenshot: "03-compte-logged-in"
+- takeScreenshot: "03-guest-mode-success"

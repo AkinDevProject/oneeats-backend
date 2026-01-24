@@ -2,9 +2,7 @@
 # FLOW 12: Gestion des favoris
 # =============================================================================
 # Note: L'onglet Favoris est MASQUE de la tab bar (href: null dans _layout.tsx)
-# Les favoris sont accessibles depuis:
-# - Section "Vos Favoris" sur l'accueil (si connecte)
-# - Bouton coeur sur chaque carte restaurant (testID="favorite-button")
+# Approche: Utilisation des accessibilityLabel pour le bouton favori
 # =============================================================================
 appId: com.oneeats.mobile
 name: "12 - Favorites Management"
@@ -35,13 +33,13 @@ tags:
 - takeScreenshot: "12-home-for-favorites"
 
 # -----------------------------------------------------------------------------
-# TEST 1: Ajouter un restaurant aux favoris via le bouton coeur
+# TEST 1: Ajouter un restaurant aux favoris via accessibilityLabel
 # -----------------------------------------------------------------------------
 - scroll
 
-# Taper sur le bouton favori (testID="favorite-button")
+# Le bouton favori a l'accessibilityLabel "Ajouter aux favoris" ou "Retirer des favoris"
 - tapOn:
-    id: "favorite-button"
+    label: ".*favoris"
     index: 0
     optional: true
 

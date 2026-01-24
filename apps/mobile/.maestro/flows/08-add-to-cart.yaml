@@ -1,6 +1,8 @@
 # =============================================================================
 # FLOW 08: Ajout d'articles au panier
 # =============================================================================
+# Approche: Utilisation des accessibilityLabel et selecteurs de position
+# =============================================================================
 appId: com.oneeats.mobile
 name: "08 - Add Items to Cart"
 tags:
@@ -24,15 +26,20 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: ".*proximit.*"
+    visible: "Accueil"
     timeout: 15000
 
-# Scroll et ouvrir un restaurant
+# Attendre le chargement des restaurants
+- extendedWaitUntil:
+    visible: ".*proximit.*"
+    timeout: 20000
+    optional: true
+
+# Scroll et ouvrir un restaurant via accessibilityLabel
 - scroll
 
-# Taper sur une carte restaurant (testID="restaurant-card")
 - tapOn:
-    id: "restaurant-card"
+    label: "Restaurant.*"
     index: 0
     optional: true
 
@@ -46,13 +53,20 @@ tags:
 # Scroll jusqu'au menu
 - scroll
 
-# Ajouter un article (testID="add-to-cart-button")
+# Ajouter un article via accessibilityLabel "Ajouter {nom} au panier"
 - tapOn:
-    id: "add-to-cart-button"
+    label: "Ajouter.*panier"
     index: 0
     optional: true
 
 - takeScreenshot: "08-item-added"
+
+# Retour a l'accueil pour voir la tab bar
+- back
+
+- extendedWaitUntil:
+    visible: "Accueil"
+    timeout: 5000
 
 # Aller au panier
 - tapOn: "Panier"
