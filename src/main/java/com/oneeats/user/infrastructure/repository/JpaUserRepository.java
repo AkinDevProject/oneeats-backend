@@ -92,6 +92,48 @@ public class JpaUserRepository implements IUserRepository {
     }
 
     /**
+     * Trouve un utilisateur par son ID (base de donnees) OU son Keycloak ID.
+     * Utile quand l'ID peut provenir du mobile (Keycloak) ou du backend (DB).
+     * Retourne le modele de domaine (avec validation).
+     */
+    public Optional<User> findByIdOrKeycloakId(UUID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        // 1. Chercher par ID de base de donnees
+        Optional<User> user = findById(id);
+        if (user.isPresent()) {
+            return user;
+        }
+
+        // 2. Chercher par Keycloak ID (l'UUID pourrait etre un Keycloak ID)
+        String keycloakId = id.toString();
+        Optional<UserEntity> entityOpt = findByKeycloakId(keycloakId);
+        return entityOpt.map(mapper::toDomain);
+    }
+
+    /**
+     * Trouve un utilisateur par son ID (base de donnees) OU son Keycloak ID.
+     * Retourne l'entite JPA directement (sans validation du domaine).
+     * Utile pour les cas ou les donnees peuvent etre incompletes.
+     */
+    public Optional<UserEntity> findEntityByIdOrKeycloakId(UUID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        // 1. Chercher par ID de base de donnees
+        Optional<UserEntity> entity = UserEntity.find("id", id).firstResultOptional();
+        if (entity.isPresent()) {
+            return entity;
+        }
+
+        // 2. Chercher par Keycloak ID (l'UUID pourrait etre un Keycloak ID)
+        return findByKeycloakId(id.toString());
+    }
+
+    /**
      * Trouve un utilisateur par son email (recherche insensible a la casse).
      * Retourne l'entite JPA directement pour l'AuthService (liaison compte Keycloak).
      */
