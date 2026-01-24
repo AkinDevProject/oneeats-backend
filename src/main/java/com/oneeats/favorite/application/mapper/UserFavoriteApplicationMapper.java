@@ -31,8 +31,8 @@ public class UserFavoriteApplicationMapper {
                 favorite.getUserId(),
                 favorite.getRestaurantId(),
                 restaurant.getName(),
-                restaurant.getCuisineType().toString(),
-                restaurant.getRating(),
+                restaurant.getCuisineType() != null ? restaurant.getCuisineType() : "Non spécifié",
+                restaurant.getRating() != null ? restaurant.getRating() : 0.0,
                 50, // Reviews par défaut (TODO: ajouter le système de reviews)
                 "30-45 min", // Temps de livraison par défaut (TODO: calculer selon la distance)
                 2.99, // Frais de livraison par défaut (TODO: calculer selon la distance)

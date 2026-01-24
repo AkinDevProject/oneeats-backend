@@ -34,6 +34,7 @@ public class UserFavoriteController {
     /**
      * GET /api/users/{userId}/favorites
      * Récupère tous les favoris d'un utilisateur
+     * Note: userId peut etre l'ID de base de données OU le Keycloak ID
      */
     @GET
     public Response getUserFavorites(@PathParam("userId") UUID userId) {
@@ -44,29 +45,28 @@ public class UserFavoriteController {
                     .build();
         }
 
-        System.out.println("DEBUG: Starting getUserFavorites for userId: " + userId);
         try {
-            System.out.println("DEBUG: Calling favoriteService.getUserFavorites()");
-            List<UserFavorite> favorites = favoriteService.getUserFavorites(userId);
-            System.out.println("DEBUG: Got " + favorites.size() + " favorites");
+            // Utiliser l'ID de base de données de l'utilisateur courant
+            // (pas l'ID de l'URL qui peut etre le Keycloak ID)
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId); // Fallback sur userId si admin accede aux favoris d'un autre
 
-            System.out.println("DEBUG: Converting to DTOs");
+            List<UserFavorite> favorites = favoriteService.getUserFavorites(dbUserId);
+
             List<UserFavoriteDTO> favoriteDTOs = favorites.stream()
                     .map(mapper::toDTO)
                     .collect(Collectors.toList());
-            System.out.println("DEBUG: Converted to " + favoriteDTOs.size() + " DTOs");
 
             return Response.ok(favoriteDTOs).build();
         } catch (IllegalArgumentException e) {
-            System.out.println("DEBUG: IllegalArgumentException: " + e.getMessage());
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(new ErrorResponse(e.getMessage()))
                     .build();
         } catch (Exception e) {
-            System.out.println("DEBUG: Exception: " + e.getMessage());
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Internal server error"))
+                    .entity(new ErrorResponse("Internal server error: " + e.getMessage()))
                     .build();
         }
     }
@@ -87,7 +87,12 @@ public class UserFavoriteController {
         }
 
         try {
-            UserFavorite favorite = favoriteService.addFavorite(userId, restaurantId);
+            // Utiliser l'ID de base de données
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId);
+
+            UserFavorite favorite = favoriteService.addFavorite(dbUserId, restaurantId);
             UserFavoriteDTO favoriteDTO = mapper.toDTO(favorite);
 
             return Response.status(Response.Status.CREATED)
@@ -124,7 +129,12 @@ public class UserFavoriteController {
         }
 
         try {
-            favoriteService.removeFavorite(userId, restaurantId);
+            // Utiliser l'ID de base de données
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId);
+
+            favoriteService.removeFavorite(dbUserId, restaurantId);
             return Response.ok(new FavoriteResponse(false, "Restaurant removed from favorites", null))
                     .build();
         } catch (IllegalArgumentException e) {
@@ -154,7 +164,12 @@ public class UserFavoriteController {
         }
 
         try {
-            boolean isFavorite = favoriteService.isFavorite(userId, restaurantId);
+            // Utiliser l'ID de base de données
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId);
+
+            boolean isFavorite = favoriteService.isFavorite(dbUserId, restaurantId);
             return Response.ok(new FavoriteStatusResponse(isFavorite)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -179,7 +194,12 @@ public class UserFavoriteController {
         }
 
         try {
-            boolean added = favoriteService.toggleFavorite(userId, restaurantId);
+            // Utiliser l'ID de base de données
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId);
+
+            boolean added = favoriteService.toggleFavorite(dbUserId, restaurantId);
             String message = added ? "Restaurant added to favorites" : "Restaurant removed from favorites";
             return Response.ok(new FavoriteResponse(added, message, null)).build();
         } catch (IllegalArgumentException e) {
@@ -208,7 +228,12 @@ public class UserFavoriteController {
         }
 
         try {
-            long count = favoriteService.countUserFavorites(userId);
+            // Utiliser l'ID de base de données
+            UUID dbUserId = authService.getCurrentUser()
+                    .map(user -> user.getId())
+                    .orElse(userId);
+
+            long count = favoriteService.countUserFavorites(dbUserId);
             return Response.ok(new FavoriteCountResponse(count)).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
