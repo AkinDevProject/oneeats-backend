@@ -24,15 +24,16 @@ import type { AdminAlert, QuickAction } from '../../components/admin';
 import { useRestaurants } from '../../hooks/data/useRestaurants';
 import { Restaurant } from '../../types';
 import { useKeyboardShortcuts, useShortcutsHelp, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
+import { RestaurantActionModal } from '../../components/modals/RestaurantActionModal';
 
 const RestaurantsManagementPage: React.FC = () => {
-  const { restaurants, loading, error, refetch, updateRestaurantStatus, deleteRestaurant } = useRestaurants();
+  const { restaurants, loading, error, refetch, updateRestaurantStatus, deleteRestaurant, rejectRestaurant, blockRestaurant } = useRestaurants();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showActionModal, setShowActionModal] = useState(false);
-  const [actionType, setActionType] = useState<'approve' | 'block' | 'delete' | null>(null);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'block' | 'delete' | null>(null);
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
   const { isVisible: showShortcuts, toggle: toggleShortcuts, hide: hideShortcuts } = useShortcutsHelp();
@@ -51,6 +52,7 @@ const RestaurantsManagementPage: React.FC = () => {
       total: restaurants.length,
       pending: restaurants.filter(r => r.status === 'PENDING').length,
       approved: restaurants.filter(r => r.status === 'APPROVED').length,
+      rejected: restaurants.filter(r => r.status === 'REJECTED').length,
       blocked: restaurants.filter(r => r.status === 'BLOCKED').length,
     };
 
@@ -96,21 +98,43 @@ const RestaurantsManagementPage: React.FC = () => {
     { key: 'all', label: 'Tous', count: stats.total },
     { key: 'PENDING', label: 'En attente', count: stats.pending },
     { key: 'APPROVED', label: 'Approuvés', count: stats.approved },
+    { key: 'REJECTED', label: 'Rejetés', count: stats.rejected },
     { key: 'BLOCKED', label: 'Bloqués', count: stats.blocked }
   ];
 
   // Handlers
-  const handleAction = useCallback((restaurant: Restaurant, action: 'approve' | 'block' | 'delete') => {
+  const handleAction = useCallback((restaurant: Restaurant, action: 'approve' | 'reject' | 'block' | 'delete') => {
     setSelectedRestaurant(restaurant);
     setActionType(action);
     setShowActionModal(true);
   }, []);
 
+  const handleCloseActionModal = useCallback(() => {
+    setShowActionModal(false);
+    setSelectedRestaurant(null);
+    setActionType(null);
+    refetch();
+  }, [refetch]);
+
+  const handleApprove = useCallback(async () => {
+    if (!selectedRestaurant) return;
+    await updateRestaurantStatus(selectedRestaurant.id, 'APPROVED');
+  }, [selectedRestaurant, updateRestaurantStatus]);
+
+  const handleReject = useCallback(async (reason: string) => {
+    if (!selectedRestaurant) return;
+    await rejectRestaurant(selectedRestaurant.id, reason);
+  }, [selectedRestaurant, rejectRestaurant]);
+
+  const handleBlock = useCallback(async (reason: string) => {
+    if (!selectedRestaurant) return;
+    await blockRestaurant(selectedRestaurant.id, reason, false);
+  }, [selectedRestaurant, blockRestaurant]);
+
   const confirmAction = useCallback(async () => {
     if (!selectedRestaurant || !actionType) return;
     try {
       if (actionType === 'approve') await updateRestaurantStatus(selectedRestaurant.id, 'APPROVED');
-      else if (actionType === 'block') await updateRestaurantStatus(selectedRestaurant.id, 'BLOCKED');
       else if (actionType === 'delete') await deleteRestaurant(selectedRestaurant.id);
       await refetch();
     } catch (e) {
@@ -302,8 +326,9 @@ const RestaurantsManagementPage: React.FC = () => {
           {selectedRestaurant && <RestaurantDetails restaurant={selectedRestaurant} onClose={() => setShowDetailModal(false)} />}
         </Modal>
 
-        <Modal isOpen={showActionModal} onClose={() => setShowActionModal(false)} title="Confirmation">
-          {selectedRestaurant && actionType && (
+        {/* Delete confirmation modal */}
+        <Modal isOpen={showActionModal && actionType === 'delete'} onClose={() => setShowActionModal(false)} title="Confirmation">
+          {selectedRestaurant && actionType === 'delete' && (
             <ActionConfirmation
               restaurant={selectedRestaurant}
               actionType={actionType}
@@ -312,6 +337,19 @@ const RestaurantsManagementPage: React.FC = () => {
             />
           )}
         </Modal>
+
+        {/* Restaurant Action Modal (approve/reject/block) */}
+        {selectedRestaurant && actionType && actionType !== 'delete' && (
+          <RestaurantActionModal
+            isOpen={showActionModal}
+            onClose={handleCloseActionModal}
+            restaurant={selectedRestaurant}
+            actionType={actionType}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onBlock={handleBlock}
+          />
+        )}
       </div>
 
       {/* Quick Actions FAB */}
@@ -332,9 +370,10 @@ function RestaurantCard({ restaurant, index, onViewDetails, onAction }: {
   restaurant: Restaurant;
   index: number;
   onViewDetails: () => void;
-  onAction: (r: Restaurant, action: 'approve' | 'block' | 'delete') => void;
+  onAction: (r: Restaurant, action: 'approve' | 'reject' | 'block' | 'delete') => void;
 }) {
   const cardBg = restaurant.status === 'PENDING' ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100' :
+                 restaurant.status === 'REJECTED' ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' :
                  restaurant.status === 'BLOCKED' ? 'border-red-200 bg-gradient-to-br from-red-50 to-red-100' : 'border-gray-200';
 
   return (
@@ -379,9 +418,34 @@ function RestaurantCard({ restaurant, index, onViewDetails, onAction }: {
               <Button size="sm" onClick={() => onAction(restaurant, 'approve')} className="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs">
                 <CheckCircle className="h-3 w-3 mr-1" />Approuver
               </Button>
-              <Button size="sm" onClick={() => onAction(restaurant, 'block')} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs">
+              <Button size="sm" onClick={() => onAction(restaurant, 'reject')} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs">
                 <XCircle className="h-3 w-3 mr-1" />Rejeter
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Rejection/Blocking reason display */}
+        {restaurant.status === 'REJECTED' && restaurant.rejectionReason && (
+          <div className="bg-red-100 border border-red-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <XCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-medium text-red-800 text-sm block">Rejeté</span>
+                <span className="text-red-700 text-xs">{restaurant.rejectionReason}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {restaurant.status === 'BLOCKED' && restaurant.blockingReason && (
+          <div className="bg-red-100 border border-red-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-medium text-red-800 text-sm block">Bloqué</span>
+                <span className="text-red-700 text-xs">{restaurant.blockingReason}</span>
+              </div>
             </div>
           </div>
         )}
@@ -393,6 +457,11 @@ function RestaurantCard({ restaurant, index, onViewDetails, onAction }: {
           {restaurant.status === 'APPROVED' && (
             <Button size="sm" variant="warning" onClick={() => onAction(restaurant, 'block')} className="flex-1">
               <X className="h-4 w-4 mr-1" />Bloquer
+            </Button>
+          )}
+          {restaurant.status === 'REJECTED' && (
+            <Button size="sm" onClick={() => onAction(restaurant, 'approve')} className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+              <Check className="h-4 w-4 mr-1" />Réexaminer
             </Button>
           )}
           {restaurant.status === 'BLOCKED' && (
@@ -410,6 +479,7 @@ function StatusBadge({ status }: { status: Restaurant['status'] }) {
   const variants: Record<string, { variant: 'warning' | 'success' | 'danger'; label: string }> = {
     PENDING: { variant: 'warning', label: 'En attente' },
     APPROVED: { variant: 'success', label: 'Approuvé' },
+    REJECTED: { variant: 'danger', label: 'Rejeté' },
     BLOCKED: { variant: 'danger', label: 'Bloqué' },
   };
   const { variant, label } = variants[status] || { variant: 'default' as const, label: 'Inconnu' };

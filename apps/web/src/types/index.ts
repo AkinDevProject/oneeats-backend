@@ -58,13 +58,19 @@ export interface Restaurant {
   category: string;                    // Mapping depuis cuisineType
   rating: number;
   imageUrl?: string;
-  status: 'PENDING' | 'APPROVED' | 'BLOCKED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED';
   isOpen: boolean;
   isActive: boolean;
   schedule: Schedule;
   registrationDate: Date;              // Mapping depuis createdAt
   createdAt: Date;
   updatedAt: Date;
+  // Rejection info
+  rejectionReason?: string;
+  rejectedAt?: Date;
+  // Blocking info
+  blockingReason?: string;
+  blockedAt?: Date;
 }
 
 export interface MenuItemOption {

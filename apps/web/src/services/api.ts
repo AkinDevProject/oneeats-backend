@@ -108,6 +108,18 @@ class ApiService {
       this.request(`/api/restaurants/${id}`, {
         method: 'DELETE',
       }),
+
+    reject: (id: string, reason: string): Promise<Restaurant> =>
+      this.request(`/api/restaurants/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      }),
+
+    block: (id: string, reason: string, cancelPendingOrders?: boolean): Promise<Restaurant> =>
+      this.request(`/api/restaurants/${id}/block`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, cancelPendingOrders }),
+      }),
   };
 
   // Menu API

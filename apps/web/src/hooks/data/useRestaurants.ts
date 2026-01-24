@@ -9,6 +9,8 @@ interface UseRestaurantsResult {
   refetch: () => Promise<void>;
   updateRestaurantStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'BLOCKED') => Promise<void>;
   deleteRestaurant: (id: string) => Promise<void>;
+  rejectRestaurant: (id: string, reason: string) => Promise<void>;
+  blockRestaurant: (id: string, reason: string, cancelPendingOrders?: boolean) => Promise<void>;
 }
 
 export const useRestaurants = (): UseRestaurantsResult => {
@@ -58,6 +60,50 @@ export const useRestaurants = (): UseRestaurantsResult => {
     }
   };
 
+  const rejectRestaurant = async (id: string, reason: string) => {
+    try {
+      const updatedRestaurant = await apiService.restaurants.reject(id, reason);
+
+      setRestaurants(prev =>
+        prev.map(restaurant =>
+          restaurant.id === id
+            ? {
+                ...restaurant,
+                status: updatedRestaurant.status,
+                rejectionReason: updatedRestaurant.rejectionReason,
+                rejectedAt: updatedRestaurant.rejectedAt ? new Date(updatedRestaurant.rejectedAt) : undefined
+              }
+            : restaurant
+        )
+      );
+    } catch (err) {
+      console.error('Error rejecting restaurant:', err);
+      throw err;
+    }
+  };
+
+  const blockRestaurant = async (id: string, reason: string, cancelPendingOrders?: boolean) => {
+    try {
+      const result = await apiService.restaurants.block(id, reason, cancelPendingOrders);
+
+      setRestaurants(prev =>
+        prev.map(restaurant =>
+          restaurant.id === id
+            ? {
+                ...restaurant,
+                status: 'BLOCKED' as const,
+                blockingReason: reason,
+                blockedAt: new Date()
+              }
+            : restaurant
+        )
+      );
+    } catch (err) {
+      console.error('Error blocking restaurant:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchRestaurants();
   }, []);
@@ -69,5 +115,7 @@ export const useRestaurants = (): UseRestaurantsResult => {
     refetch: fetchRestaurants,
     updateRestaurantStatus,
     deleteRestaurant,
+    rejectRestaurant,
+    blockRestaurant,
   };
 };
