@@ -31,9 +31,10 @@ import Animated, {
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { MenuItem, Restaurant } from '../../src/types';
+import { MenuItem, Restaurant, AllergenType } from '../../src/types';
 import apiService from '../../src/services/api';
 import { buildRestaurantImageUrl, buildMenuItemImageUrl } from '../../src/utils/imageUtils';
+import { DietaryIndicators } from '../../src/components/DietaryBadges';
 
 const { width } = Dimensions.get('window');
 const HEADER_HEIGHT = 280;
@@ -94,8 +95,13 @@ export default function RestaurantScreen() {
         image: buildMenuItemImageUrl(item.imageUrl),
         category: item.category,
         popular: item.isPopular || false,
-        available: item.available,
-        options: item.options || [], // Les options seront mappées plus tard si nécessaire
+        available: item.available ?? item.isAvailable ?? true,
+        options: item.options || [],
+        // Infos diététiques
+        isVegetarian: item.isVegetarian ?? false,
+        isVegan: item.isVegan ?? false,
+        allergens: (item.allergens || []).map((a: string) => a?.toUpperCase()) as AllergenType[],
+        preparationTimeMinutes: item.preparationTimeMinutes,
       }));
       
       console.log('✅ Mapped menu:', mappedMenu);
@@ -242,10 +248,17 @@ export default function RestaurantScreen() {
           <Card style={[styles.menuItem, { backgroundColor: currentTheme.colors.surface }]}>
             <View style={styles.menuItemContent}>
               <View style={styles.menuItemInfo}>
-                <Text style={[styles.menuItemName, { color: currentTheme.colors.onSurface }]}>
-                  {item.name}
-                </Text>
-                <Text 
+                <View style={styles.menuItemHeader}>
+                  <Text style={[styles.menuItemName, { color: currentTheme.colors.onSurface }]}>
+                    {item.name}
+                  </Text>
+                  <DietaryIndicators
+                    isVegetarian={item.isVegetarian}
+                    isVegan={item.isVegan}
+                    allergenCount={item.allergens?.length || 0}
+                  />
+                </View>
+                <Text
                   style={[styles.menuItemDescription, { color: currentTheme.colors.onSurfaceVariant }]}
                   numberOfLines={2}
                 >
@@ -255,7 +268,7 @@ export default function RestaurantScreen() {
                   <Text style={[styles.menuItemPrice, { color: currentTheme.colors.primary }]}>
                     {item.price.toFixed(2)}€
                   </Text>
-                  {item.isPopular && (
+                  {item.popular && (
                     <Badge
                       size={20}
                       style={[styles.popularBadge, { backgroundColor: currentTheme.colors.tertiaryContainer }]}
@@ -568,10 +581,17 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
   },
+  menuItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   menuItemName: {
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 22,
+    flex: 1,
   },
   menuItemDescription: {
     fontSize: 14,

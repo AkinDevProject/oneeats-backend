@@ -29,6 +29,29 @@ export interface MenuItemChoice {
   price: number;
 }
 
+// Types d'allergènes standards (14 allergènes majeurs EU)
+export type AllergenType =
+  | 'GLUTEN'
+  | 'CRUSTACEANS'
+  | 'EGGS'
+  | 'FISH'
+  | 'PEANUTS'
+  | 'SOY'
+  | 'DAIRY'
+  | 'NUTS'
+  | 'CELERY'
+  | 'MUSTARD'
+  | 'SESAME'
+  | 'SULPHITES'
+  | 'LUPIN'
+  | 'MOLLUSCS';
+
+export interface DietaryInfo {
+  isVegetarian: boolean;
+  isVegan: boolean;
+  allergens: AllergenType[];
+}
+
 export interface MenuItem {
   id: string;
   restaurantId: string;
@@ -40,6 +63,11 @@ export interface MenuItem {
   popular: boolean;
   available: boolean;
   options?: MenuItemOption[];
+  // Infos diététiques
+  isVegetarian?: boolean;
+  isVegan?: boolean;
+  allergens?: AllergenType[];
+  preparationTimeMinutes?: number;
 }
 
 export interface CartItemOption {

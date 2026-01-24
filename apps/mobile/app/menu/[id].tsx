@@ -37,9 +37,10 @@ import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
-import { MenuItemOption, MenuItemChoice } from '../../src/types';
+import { MenuItemOption, MenuItemChoice, AllergenType } from '../../src/types';
 import apiService from '../../src/services/api';
 import { buildMenuItemImageUrl } from '../../src/utils/imageUtils';
+import { DietaryBadges, ALLERGEN_CONFIG } from '../../src/components/DietaryBadges';
 
 const { width } = Dimensions.get('window');
 
@@ -133,6 +134,11 @@ export default function MenuItemDetail() {
           popular: menuItemData.isPopular || false,
           available: menuItemData.isAvailable !== false, // isAvailable -> available
           options: mappedOptions,
+          // Infos diététiques
+          isVegetarian: menuItemData.isVegetarian ?? false,
+          isVegan: menuItemData.isVegan ?? false,
+          allergens: (menuItemData.allergens || []).map((a: string) => a?.toUpperCase()) as AllergenType[],
+          preparationTimeMinutes: menuItemData.preparationTimeMinutes,
         };
 
         setMenuItem(mappedMenuItem);
@@ -523,6 +529,19 @@ export default function MenuItemDetail() {
                     </Chip>
                   )}
                 </View>
+
+                {/* Infos diététiques */}
+                {(menuItem.isVegetarian || menuItem.isVegan || (menuItem.allergens && menuItem.allergens.length > 0)) && (
+                  <View style={styles.dietarySection}>
+                    <DietaryBadges
+                      isVegetarian={menuItem.isVegetarian}
+                      isVegan={menuItem.isVegan}
+                      allergens={menuItem.allergens}
+                      size="medium"
+                      showLabels={true}
+                    />
+                  </View>
+                )}
               </Card.Content>
             </Card>
           </Animated.View>
@@ -719,6 +738,13 @@ const styles = StyleSheet.create({
   itemBadges: {
     flexDirection: 'row',
     gap: 8,
+    flexWrap: 'wrap',
+  },
+  dietarySection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.08)',
   },
   optionsSection: {
     marginBottom: 16,

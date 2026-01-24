@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiService from '../services/api';
 import cacheService from '../services/cacheService';
-import { MenuItem } from '../types';
+import { MenuItem, AllergenType } from '../types';
 
 interface UseMenuItemsResult {
   menuItems: MenuItem[];
@@ -11,11 +11,28 @@ interface UseMenuItemsResult {
   refetch: () => Promise<void>;
 }
 
+// Liste des allergènes valides pour validation
+const VALID_ALLERGENS: AllergenType[] = [
+  'GLUTEN', 'CRUSTACEANS', 'EGGS', 'FISH', 'PEANUTS', 'SOY',
+  'DAIRY', 'NUTS', 'CELERY', 'MUSTARD', 'SESAME', 'SULPHITES',
+  'LUPIN', 'MOLLUSCS'
+];
+
 export const useMenuItems = (restaurantId?: string): UseMenuItemsResult => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
+
+  /**
+   * Mapper les allergènes de l'API vers le type AllergenType
+   */
+  const mapAllergens = useCallback((allergens: any): AllergenType[] => {
+    if (!allergens || !Array.isArray(allergens)) return [];
+    return allergens
+      .map((a: string) => a?.toUpperCase() as AllergenType)
+      .filter((a: AllergenType) => VALID_ALLERGENS.includes(a));
+  }, []);
 
   /**
    * Mapper les données de l'API au format attendu par l'app mobile
@@ -27,13 +44,18 @@ export const useMenuItems = (restaurantId?: string): UseMenuItemsResult => {
       name: item.name,
       description: item.description,
       price: item.price,
-      image: item.image || 'https://via.placeholder.com/300x300',
+      image: item.image || item.imageUrl || 'https://via.placeholder.com/300x300',
       category: item.category,
       popular: item.popular ?? Math.random() > 0.7,
-      available: item.available,
+      available: item.available ?? item.isAvailable ?? true,
       options: item.options || [],
+      // Infos diététiques
+      isVegetarian: item.isVegetarian ?? false,
+      isVegan: item.isVegan ?? false,
+      allergens: mapAllergens(item.allergens),
+      preparationTimeMinutes: item.preparationTimeMinutes,
     }));
-  }, []);
+  }, [mapAllergens]);
 
   /**
    * Charger les données depuis le cache
