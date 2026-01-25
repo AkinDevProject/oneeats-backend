@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -29,64 +29,19 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useFavorites } from '../../src/hooks/useFavorites';
-import { apiService } from '../../src/services/api';
-
-// Interface pour les donnees utilisateur PostgreSQL
-interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  status: string;
-}
+import { useUserProfile } from '../../src/contexts/UserProfileContext';
 
 export default function ProfilePage() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(false);
 
   const { user, logout, isAuthenticated } = useAuth();
   const { currentTheme } = useAppTheme();
   const { orders } = useOrder();
   const { favorites } = useFavorites();
+  const { userProfile, isLoading: profileLoading, fullName } = useUserProfile();
 
-  // Charger les donnees utilisateur depuis PostgreSQL via /api/users/me
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadUserProfile();
-    } else {
-      setUserProfile(null);
-    }
-  }, [isAuthenticated, user]);
-
-  const loadUserProfile = async () => {
-    try {
-      setProfileLoading(true);
-      const profile = await apiService.users.getMe();
-      setUserProfile(profile);
-    } catch (error) {
-      console.error('Erreur chargement profil:', error);
-      // Fallback vers les donnees AuthContext si l'API echoue
-      if (user) {
-        const nameParts = (user.name || '').split(' ');
-        setUserProfile({
-          id: user.id,
-          firstName: nameParts[0] || '',
-          lastName: nameParts.slice(1).join(' ') || '',
-          email: user.email,
-          status: 'ACTIVE',
-        });
-      }
-    } finally {
-      setProfileLoading(false);
-    }
-  };
-
-  // Nom complet depuis PostgreSQL
-  const displayName = userProfile
-    ? `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Utilisateur'
-    : user?.name || 'Utilisateur';
-
+  // Nom complet depuis PostgreSQL (via contexte partage)
+  const displayName = fullName;
   const displayEmail = userProfile?.email || user?.email || '';
 
   // Compteurs

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -28,18 +28,7 @@ import Animated, {
 
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useAuth } from '../../src/contexts/AuthContext';
-import { apiService } from '../../src/services/api';
-
-// Interface pour les données utilisateur (correspond au UserDTO backend)
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useUserProfile } from '../../src/contexts/UserProfileContext';
 
 // Interface pour le champ en édition
 interface EditField {
@@ -51,9 +40,6 @@ interface EditField {
 }
 
 export default function AccountPage() {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editField, setEditField] = useState<EditField>({
@@ -66,31 +52,7 @@ export default function AccountPage() {
 
   const { currentTheme } = useAppTheme();
   const { user: authUser } = useAuth();
-
-  // Charger les donnees utilisateur depuis l'API /users/me
-  // Cet endpoint synchronise automatiquement l'utilisateur Keycloak avec PostgreSQL
-  useEffect(() => {
-    if (authUser) {
-      loadUserData();
-    } else {
-      setError('Utilisateur non connecté');
-      setLoading(false);
-    }
-  }, [authUser]);
-
-  const loadUserData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const userData = await apiService.users.getMe();
-      setUser(userData);
-    } catch (err) {
-      console.error('Erreur lors du chargement des données utilisateur:', err);
-      setError('Impossible de charger les données utilisateur');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { userProfile: user, isLoading: loading, error, refreshProfile, updateProfile: updateUserProfile } = useUserProfile();
 
   const handleEdit = (
     field: string,
@@ -116,19 +78,17 @@ export default function AccountPage() {
         return;
       }
 
-      try {
-        // Preparer les donnees de mise a jour
-        const updateData: { firstName?: string; lastName?: string; email?: string } = {};
-        updateData[editField.key as keyof typeof updateData] = editField.value.trim();
+      // Preparer les donnees de mise a jour
+      const updateData: { firstName?: string; lastName?: string; email?: string } = {};
+      updateData[editField.key as keyof typeof updateData] = editField.value.trim();
 
-        // Sauvegarder via API
-        const updatedUser = await apiService.users.update(user.id, updateData);
-        setUser(updatedUser);
+      // Sauvegarder via le contexte (mise a jour automatique partout)
+      const success = await updateUserProfile(updateData);
+      if (success) {
         setShowEditDialog(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert('Succès', 'Informations mises à jour');
-      } catch (err) {
-        console.error('Erreur lors de la mise à jour:', err);
+      } else {
         Alert.alert('Erreur', 'Impossible de sauvegarder les modifications');
       }
     }
@@ -233,7 +193,7 @@ export default function AccountPage() {
           </Text>
           <TouchableOpacity
             style={[styles.retryButton, { backgroundColor: currentTheme.colors.primary }]}
-            onPress={loadUserData}
+            onPress={refreshProfile}
           >
             <Text style={styles.retryButtonText}>Réessayer</Text>
           </TouchableOpacity>

@@ -37,16 +37,8 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
 import { useRestaurant } from '../../src/hooks/useRestaurant';
+import { useUserProfile } from '../../src/contexts/UserProfileContext';
 import EmptyState from '../../src/components/ui/EmptyState';
-import { apiService } from '../../src/services/api';
-
-// Interface pour les donnees utilisateur PostgreSQL
-interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
 
 // Schéma de validation pour la commande
 const orderSchema = yup.object({
@@ -79,7 +71,6 @@ export default function CartScreen() {
   const [availableSlots] = useState(getAvailableTimeSlots());
   const [selectedPickupTime, setSelectedPickupTime] = useState(availableSlots[2]?.value);
   const [isLoading, setIsLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const scrollViewRef = React.useRef<ScrollView>(null);
 
@@ -87,6 +78,7 @@ export default function CartScreen() {
   const { user, isAuthenticated } = useAuth();
   const { addOrder, orders } = useOrder();
   const { currentTheme } = useAppTheme();
+  const { fullName: customerFullName } = useUserProfile();
 
   // Récupérer le restaurant du panier
   const cartRestaurantId = items.length > 0 ? items[0].menuItem.restaurantId : undefined;
@@ -102,27 +94,6 @@ export default function CartScreen() {
   useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 600 });
   }, [headerOpacity]);
-
-  // Charger les donnees utilisateur depuis PostgreSQL
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      loadUserProfile();
-    }
-  }, [isAuthenticated, user]);
-
-  const loadUserProfile = async () => {
-    try {
-      const profile = await apiService.users.getMe();
-      setUserProfile(profile);
-    } catch (error) {
-      console.error('Erreur chargement profil pour panier:', error);
-    }
-  };
-
-  // Nom complet depuis PostgreSQL (fallback vers Keycloak)
-  const customerFullName = userProfile
-    ? `${userProfile.firstName} ${userProfile.lastName}`.trim()
-    : user?.name || '';
 
   const scrollToInput = (yOffset: number) => {
     scrollViewRef.current?.scrollTo({

@@ -36,6 +36,7 @@ import { ThemeProvider as AppThemeProvider, useAppTheme } from '../src/contexts/
 import { SettingsProvider } from '../src/contexts/SettingsContext';
 import { FavoritesProvider } from '../src/contexts/FavoritesContext';
 import { NetworkProvider } from '../src/contexts/NetworkContext';
+import { UserProfileProvider } from '../src/contexts/UserProfileContext';
 import { OfflineBanner } from '../src/components/OfflineBanner';
 import { PushTokenSyncManager } from '../src/components/PushTokenSyncManager';
 
@@ -62,8 +63,9 @@ function AppContent() {
       <NetworkProvider>
         <SettingsProvider>
           <AuthProvider>
-            <FavoritesProvider>
-              <PushNotificationProvider>
+            <UserProfileProvider>
+              <FavoritesProvider>
+                <PushNotificationProvider>
                 <PushTokenSyncManager>
                   <NotificationProvider>
                     <CartProvider>
@@ -91,7 +93,8 @@ function AppContent() {
                   </NotificationProvider>
                 </PushTokenSyncManager>
               </PushNotificationProvider>
-            </FavoritesProvider>
+              </FavoritesProvider>
+            </UserProfileProvider>
           </AuthProvider>
         </SettingsProvider>
       </NetworkProvider>
