@@ -82,10 +82,10 @@ export default function CartScreen() {
   const cartRestaurantId = items.length > 0 ? items[0].menuItem.restaurantId : undefined;
   const { restaurant: cartRestaurant } = useRestaurant(cartRestaurantId);
 
-  // Nombre de commandes actives
-  const activeOrdersCount = orders.filter(o =>
-    ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)
-  ).length;
+  // Nombre de commandes actives (seulement si connecte)
+  const activeOrdersCount = isAuthenticated
+    ? orders.filter(o => ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)).length
+    : 0;
 
   const headerOpacity = useSharedValue(0);
 
@@ -132,7 +132,7 @@ export default function CartScreen() {
         'Vous devez être connecté pour commander.',
         [
           { text: 'Annuler', style: 'cancel' },
-          { text: 'Se connecter', onPress: () => router.push('/auth/login' as any) },
+          { text: 'Se connecter', onPress: () => router.push('/auth/login?returnTo=cart' as any) },
         ]
       );
       return;

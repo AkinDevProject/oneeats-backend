@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { TouchableRipple, ActivityIndicator } from 'react-native-paper';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeIn,
@@ -35,6 +35,15 @@ export default function AuthScreen() {
   const [loginError, setLoginError] = useState('');
   const { login, loginWithSSO } = useAuth();
   const { currentTheme } = useAppTheme();
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+
+  // Determine ou rediriger apres connexion
+  const getRedirectPath = () => {
+    if (returnTo === 'cart') {
+      return '/(tabs)/cart';
+    }
+    return '/(tabs)';
+  };
 
   // Validation email
   const validateEmail = (value: string): boolean => {
@@ -80,7 +89,7 @@ export default function AuthScreen() {
       const success = await login(email.trim().toLowerCase(), password);
       if (success) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.replace('/(tabs)');
+        router.replace(getRedirectPath() as any);
       } else {
         setLoginError('Connexion échouée. Veuillez réessayer.');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -115,7 +124,7 @@ export default function AuthScreen() {
       const success = await loginWithSSO(provider);
       if (success) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.replace('/(tabs)');
+        router.replace(getRedirectPath() as any);
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }

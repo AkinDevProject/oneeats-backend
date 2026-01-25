@@ -235,16 +235,9 @@ export const OrderProvider: React.FC<OrderProviderProps> = ({ children }) => {
         // Sauvegarder en cache local
         await AsyncStorage.setItem(getOrdersKey(), JSON.stringify(processedOrders));
       } else {
-        // Mode fallback - charger depuis AsyncStorage
-        const ordersData = await AsyncStorage.getItem(getOrdersKey());
-        if (ordersData) {
-          const parsedOrders = JSON.parse(ordersData).map((order: any) => ({
-            ...order,
-            orderTime: new Date(order.orderTime),
-            pickupTime: new Date(order.pickupTime),
-          }));
-          setOrders(parsedOrders);
-        }
+        // Utilisateur non connecte - vider les commandes
+        // (le cache a ete efface au logout, donc on ne devrait rien trouver)
+        setOrders([]);
       }
     } catch (apiError) {
       console.error('Error loading orders from API:', apiError);

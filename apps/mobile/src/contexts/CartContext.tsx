@@ -29,7 +29,29 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    loadCart();
+    // Quand l'utilisateur se connecte, migrer le panier guest vers son panier
+    const migrateAndLoadCart = async () => {
+      if (user) {
+        try {
+          // Verifier s'il y a un panier guest a migrer
+          const guestCartData = await AsyncStorage.getItem('cart_guest');
+          if (guestCartData) {
+            const guestItems = JSON.parse(guestCartData);
+            if (guestItems.length > 0) {
+              // Migrer vers le panier utilisateur
+              console.log('🛒 Migrating guest cart to user cart:', guestItems.length, 'items');
+              await AsyncStorage.setItem(`cart_${user.id}`, guestCartData);
+              // Supprimer le panier guest
+              await AsyncStorage.removeItem('cart_guest');
+            }
+          }
+        } catch (error) {
+          console.error('Error migrating guest cart:', error);
+        }
+      }
+      loadCart();
+    };
+    migrateAndLoadCart();
   }, [user]);
 
   // Optimisation: debounce le save pour éviter trop d'écriture AsyncStorage
@@ -58,9 +80,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const saveCart = async () => {
     try {
-      if (user) {
-        await AsyncStorage.setItem(getCartKey(), JSON.stringify(items));
-      }
+      // Sauvegarder le panier pour tout le monde (guest ou connecte)
+      await AsyncStorage.setItem(getCartKey(), JSON.stringify(items));
     } catch (error) {
       console.error('Error saving cart:', error);
     }

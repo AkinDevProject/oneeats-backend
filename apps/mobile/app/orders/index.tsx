@@ -23,6 +23,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useCart } from '../../src/contexts/CartContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 import { Order } from '../../src/types';
 import EmptyState from '../../src/components/ui/EmptyState';
 
@@ -46,6 +47,50 @@ export default function OrdersScreen() {
   const { orders, refreshOrders } = useOrder();
   const { addItem, clearCart } = useCart();
   const { currentTheme } = useAppTheme();
+  const { user, isLoading: authLoading } = useAuth();
+
+  // Guard d'authentification - rediriger vers login si non connecte
+  if (!authLoading && !user) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: currentTheme.colors.background }}
+        edges={['top', 'bottom']}
+      >
+        <StatusBar style="auto" />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <MaterialIcons name="lock-outline" size={64} color={currentTheme.colors.onSurfaceVariant} />
+          <Text style={{ fontSize: 20, fontWeight: '600', color: currentTheme.colors.onSurface, marginTop: 16, textAlign: 'center' }}>
+            Connexion requise
+          </Text>
+          <Text style={{ fontSize: 14, color: currentTheme.colors.onSurfaceVariant, marginTop: 8, textAlign: 'center' }}>
+            Connectez-vous pour voir vos commandes
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push('/auth/login')}
+            style={{
+              marginTop: 24,
+              backgroundColor: currentTheme.colors.primary,
+              paddingHorizontal: 32,
+              paddingVertical: 14,
+              borderRadius: 12,
+            }}
+          >
+            <Text style={{ color: currentTheme.colors.onPrimary, fontSize: 16, fontWeight: '600' }}>
+              Se connecter
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ marginTop: 16 }}
+          >
+            <Text style={{ color: currentTheme.colors.primary, fontSize: 14 }}>
+              Retour
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Séparer les commandes
   const activeOrders = orders.filter(o =>

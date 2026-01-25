@@ -323,13 +323,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await authService.logout();
       }
 
+      // Effacer les donnees utilisateur et les commandes du cache local
+      const userId = user?.id;
       await AsyncStorage.removeItem('user');
+
+      // Effacer les commandes de l'utilisateur
+      if (userId) {
+        await AsyncStorage.removeItem(`orders_${userId}`);
+        console.log('🧹 Orders cache cleared for user:', userId);
+      }
+      // Effacer aussi les commandes guest au cas ou
+      await AsyncStorage.removeItem('orders_guest');
+
       setUser(null);
       console.log('✅ Logout successful');
     } catch (error) {
       console.error('Logout error:', error);
     }
-  }, []);
+  }, [user]);
 
   const updateProfile = useCallback(async (updates: Partial<User>) => {
     if (!user) return;

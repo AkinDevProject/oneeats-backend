@@ -30,6 +30,7 @@ import Animated, {
 
 import { useOrder } from '../../src/contexts/OrderContext';
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 import { Order } from '../../src/types';
 
 const STATUS_CONFIG = {
@@ -93,6 +94,7 @@ export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getOrderById, updateOrderStatus } = useOrder();
   const { currentTheme } = useAppTheme();
+  const { user, isLoading: authLoading } = useAuth();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -101,7 +103,7 @@ export default function OrderDetailScreen() {
   const progressValue = useSharedValue(0);
 
   useEffect(() => {
-    if (id) {
+    if (id && user) {
       const foundOrder = getOrderById(id);
       if (foundOrder) {
         setOrder(foundOrder);
@@ -110,7 +112,41 @@ export default function OrderDetailScreen() {
         calculateEstimatedTime(foundOrder);
       }
     }
-  }, [id]);
+  }, [id, user]);
+
+  // Guard d'authentification - rediriger vers login si non connecte
+  if (!authLoading && !user) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.colors.background }]}>
+        <StatusBar style="auto" />
+        <View style={styles.errorContainer}>
+          <MaterialIcons name="lock-outline" size={64} color={currentTheme.colors.onSurfaceVariant} />
+          <Text style={[styles.errorText, { color: currentTheme.colors.onSurface, marginTop: 16 }]}>
+            Connexion requise
+          </Text>
+          <Text style={{ fontSize: 14, color: currentTheme.colors.onSurfaceVariant, marginTop: 8, textAlign: 'center' }}>
+            Connectez-vous pour voir vos commandes
+          </Text>
+          <Button
+            mode="contained"
+            onPress={() => router.push('/auth/login')}
+            buttonColor={currentTheme.colors.primary}
+            style={{ marginTop: 24 }}
+          >
+            Se connecter
+          </Button>
+          <Button
+            mode="text"
+            onPress={() => router.back()}
+            textColor={currentTheme.colors.primary}
+            style={{ marginTop: 8 }}
+          >
+            Retour
+          </Button>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const calculateEstimatedTime = (orderData: Order) => {
     const now = new Date();

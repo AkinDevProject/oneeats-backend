@@ -64,8 +64,19 @@ public class OrderController {
     @Path("/{id}")
     @Authenticated
     public Response getOrderById(@PathParam("id") UUID id) {
-        // TODO: Verifier que l'utilisateur est le client, le restaurant ou admin
         OrderDTO order = getOrderQueryHandler.handle(new GetOrderQuery(id));
+
+        // Verifier que l'utilisateur est le client, le restaurant ou admin
+        boolean isClient = authService.isCurrentUser(order.userId());
+        boolean isRestaurant = authService.hasAccessToRestaurant(order.restaurantId());
+        boolean isAdmin = authService.hasRole(Roles.ADMIN);
+
+        if (!isClient && !isRestaurant && !isAdmin) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity("Acces refuse a cette commande")
+                .build();
+        }
+
         return Response.ok(order).build();
     }
 
@@ -128,7 +139,16 @@ public class OrderController {
     @Path("/{id}/status")
     @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
     public Response updateOrderStatus(@PathParam("id") UUID orderId, OrderStatusUpdateRequest request) {
-        // TODO: Verifier que la commande appartient au restaurant de l'utilisateur
+        // Recuperer la commande pour verifier l'acces
+        OrderDTO order = getOrderQueryHandler.handle(new GetOrderQuery(orderId));
+
+        // Verifier que la commande appartient au restaurant de l'utilisateur (sauf admin)
+        if (!authService.hasRole(Roles.ADMIN) && !authService.hasAccessToRestaurant(order.restaurantId())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                .entity("Acces refuse: cette commande n'appartient pas a votre restaurant")
+                .build();
+        }
+
         UpdateOrderStatusCommand command = new UpdateOrderStatusCommand(orderId, request.getNewStatus());
         OrderDTO updatedOrder = updateOrderStatusCommandHandler.handle(command);
         return Response.ok(updatedOrder).build();
