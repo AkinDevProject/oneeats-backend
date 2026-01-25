@@ -183,7 +183,10 @@
       "Bash(npx expo install:*)",
       "Bash(npm.cmd install:*)",
       "Bash(npm view:*)",
-      "Bash(npm.cmd view:*)"
+      "Bash(npm.cmd view:*)",
+      "Bash(npm start --android)",
+      "Bash(/c/Users/akin_/.maestro/bin/maestro/bin/maestro test:*)",
+      "Bash(cmd.exe /c \"cd apps\\\\mobile && maestro test .maestro\\\\flows\\\\ 2>&1\")"
     ],
     "deny": [],
     "ask": []

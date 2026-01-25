@@ -24,7 +24,7 @@ tags:
       - tapOn: "Continuer sans compte"
 
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*proximit.*"
     timeout: 30000
 
 # Test: Panier vide
@@ -40,7 +40,7 @@ tags:
 - tapOn: "Accueil"
 
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*proximit.*"
     timeout: 15000
 
 # Test: Scroll et navigation
@@ -50,7 +50,7 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*proximit.*"
     timeout: 15000
 
 - takeScreenshot: "15-error-handling-complete"

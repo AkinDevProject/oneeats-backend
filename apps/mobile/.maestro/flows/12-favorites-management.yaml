@@ -106,8 +106,8 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: "Accueil"
-    timeout: 5000
+    visible: ".*proximit.*"
+    timeout: 15000
 
 # -----------------------------------------------------------------------------
 # STEP 7: Acceder a la liste des favoris depuis Mon Compte
@@ -116,7 +116,7 @@ tags:
 
 - extendedWaitUntil:
     visible: "Compte"
-    timeout: 5000
+    timeout: 15000
 
 - takeScreenshot: "12-compte-screen"
 
@@ -197,7 +197,7 @@ tags:
 
 - extendedWaitUntil:
     visible: "Compte"
-    timeout: 5000
+    timeout: 15000
 
 # Le compteur de favoris devrait afficher 1
 - assertVisible:

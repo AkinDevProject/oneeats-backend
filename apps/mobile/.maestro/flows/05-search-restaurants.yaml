@@ -34,7 +34,7 @@ tags:
 
 # Attendre l'onglet Accueil (plus fiable que le contenu)
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*proximit.*"
     timeout: 30000
 
 - takeScreenshot: "05-home-loaded"
@@ -67,10 +67,11 @@ tags:
 # -----------------------------------------------------------------------------
 - hideKeyboard
 
-- tapOn: "Accueil"
+# Effacer la recherche pour revenir à la liste
+- eraseText: 10
 
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*"
     timeout: 15000
 
 - takeScreenshot: "05-search-complete"

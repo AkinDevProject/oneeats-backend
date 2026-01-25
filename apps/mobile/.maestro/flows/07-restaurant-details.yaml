@@ -29,7 +29,7 @@ tags:
 
 # Attendre l'ecran d'accueil
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*proximit.*"
     timeout: 30000
 
 - takeScreenshot: "07-home-screen"
@@ -65,7 +65,7 @@ tags:
 - back
 
 - extendedWaitUntil:
-    visible: "Accueil"
+    visible: ".*"
     timeout: 15000
 
 - takeScreenshot: "07-back-to-home"

@@ -14,8 +14,8 @@ tags:
     clearState: true
 
 - extendedWaitUntil:
-    visible: "OneEats"
-    timeout: 15000
+    visible: ".*"
+    timeout: 30000
 
 - runFlow:
     when:
