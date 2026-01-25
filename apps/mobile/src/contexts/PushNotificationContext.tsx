@@ -1,21 +1,36 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Platform, AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 
 // Check if running in Expo Go (no native modules available)
+// In Expo Go, Constants.appOwnership === 'expo'
+// In standalone builds, Constants.appOwnership === 'standalone' or undefined
 const isExpoGo = Constants.appOwnership === 'expo';
 
-// Configuration des notifications en foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Conditionally import expo-notifications only if NOT in Expo Go
+// This avoids the SDK 53 error about notifications not being supported in Expo Go
+let Notifications: typeof import('expo-notifications') | null = null;
+if (!isExpoGo) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    Notifications = require('expo-notifications');
+  } catch (error) {
+    console.log('expo-notifications not available');
+  }
+}
+
+// Configure notification handler only if Notifications is available
+if (Notifications) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 // Types pour les notifications push
 export interface PushNotificationData {
@@ -39,6 +54,7 @@ interface PushNotificationContextType {
   unreadCount: number;
   permissionStatus: 'undetermined' | 'granted' | 'denied';
   isRegistered: boolean;
+  isExpoGo: boolean;
   // Actions
   requestPermissions: () => Promise<boolean>;
   registerForPushNotifications: () => Promise<string | null>;
@@ -72,14 +88,31 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   const [permissionStatus, setPermissionStatus] = useState<'undetermined' | 'granted' | 'denied'>('undetermined');
   const [isRegistered, setIsRegistered] = useState(false);
 
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
   const appState = useRef(AppState.currentState);
 
   // Initialisation
   useEffect(() => {
     loadStoredNotifications();
     loadStoredToken();
+
+    // Skip notification setup in Expo Go
+    if (isExpoGo) {
+      console.log('📱 Mode Expo Go: notifications désactivées (non supportées depuis SDK 53)');
+      // Set a mock token for development
+      if (__DEV__) {
+        setExpoPushToken('ExponentPushToken[EXPO_GO_DEV_MODE]');
+        setIsRegistered(true);
+      }
+      return;
+    }
+
+    if (!Notifications) {
+      console.log('📱 expo-notifications non disponible');
+      return;
+    }
+
     checkPermissions();
     registerForPushNotifications();
 
@@ -99,10 +132,10 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     const subscription = AppState.addEventListener('change', handleAppStateChange);
 
     return () => {
-      if (notificationListener.current) {
+      if (notificationListener.current && Notifications) {
         Notifications.removeNotificationSubscription(notificationListener.current);
       }
-      if (responseListener.current) {
+      if (responseListener.current && Notifications) {
         Notifications.removeNotificationSubscription(responseListener.current);
       }
       subscription.remove();
@@ -112,7 +145,9 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   // Sauvegarder les notifications quand elles changent
   useEffect(() => {
     saveNotifications();
-    updateBadgeCount();
+    if (!isExpoGo) {
+      updateBadgeCount();
+    }
   }, [notifications]);
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
@@ -124,11 +159,13 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   };
 
   const updateBadgeCount = async () => {
+    if (!Notifications || isExpoGo) return;
     const unread = notifications.filter(n => !n.read).length;
     await Notifications.setBadgeCountAsync(unread);
   };
 
   const checkPermissions = async () => {
+    if (!Notifications || isExpoGo) return;
     const { status } = await Notifications.getPermissionsAsync();
     setPermissionStatus(status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined');
   };
@@ -180,20 +217,24 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Enregistrement pour les notifications push
    */
   const registerForPushNotifications = async (): Promise<string | null> => {
-    let token: string | null = null;
-
-    // Vérifier si c'est un appareil physique
-    if (!Device.isDevice) {
-      console.log('⚠️ Les notifications push nécessitent un appareil physique');
-      // En mode simulateur/Expo Go, utiliser un token fictif pour le dev
+    // Skip in Expo Go
+    if (isExpoGo) {
+      console.log('⚠️ Mode Expo Go: notifications push non disponibles');
       if (__DEV__) {
-        token = 'ExponentPushToken[SIMULATOR_DEV_MODE]';
+        const token = 'ExponentPushToken[EXPO_GO_DEV_MODE]';
         setExpoPushToken(token);
         setIsRegistered(true);
         return token;
       }
       return null;
     }
+
+    if (!Notifications) {
+      console.log('⚠️ expo-notifications non disponible');
+      return null;
+    }
+
+    let token: string | null = null;
 
     // Demander les permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -269,8 +310,8 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Demander les permissions
    */
   const requestPermissions = async (): Promise<boolean> => {
-    if (Platform.OS === 'web') {
-      console.log('Notifications non supportées sur web');
+    if (Platform.OS === 'web' || isExpoGo || !Notifications) {
+      console.log('Notifications non supportées dans cet environnement');
       return false;
     }
 
@@ -288,7 +329,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   /**
    * Gérer une notification entrante
    */
-  const handleIncomingNotification = (notification: Notifications.Notification) => {
+  const handleIncomingNotification = (notification: any) => {
     const { title, body, data } = notification.request.content;
 
     addNotification({
@@ -304,7 +345,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   /**
    * Gérer le tap sur une notification
    */
-  const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+  const handleNotificationResponse = (response: any) => {
     const data = response.notification.request.content.data;
 
     // Navigation basée sur le type de notification
@@ -354,6 +395,12 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Envoyer une notification locale
    */
   const sendLocalNotification = async (title: string, body: string, data?: any) => {
+    if (isExpoGo || !Notifications) {
+      console.log('📱 [Mock] Notification locale:', title, body);
+      addNotification({ title, body, data: { type: 'system', ...data } });
+      return;
+    }
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -374,6 +421,11 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     triggerSeconds: number,
     data?: any
   ): Promise<string> => {
+    if (isExpoGo || !Notifications) {
+      console.log('📱 [Mock] Notification programmée:', title, 'dans', triggerSeconds, 's');
+      return 'mock-notification-id';
+    }
+
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -392,6 +444,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Annuler une notification programmée
    */
   const cancelScheduledNotification = async (notificationId: string) => {
+    if (isExpoGo || !Notifications) return;
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   };
 
@@ -433,29 +486,35 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
         return;
     }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `${emoji} ${title}`,
-        body,
-        data: {
-          type: 'order_status',
-          orderId,
-          screen: `/order/${orderId}`,
-        },
-        sound: 'default',
-        ...(Platform.OS === 'android' && { channelId: 'orders' }),
-      },
-      trigger: null,
-    });
+    const fullTitle = `${emoji} ${title}`;
 
+    // Add to local notification history
     addNotification({
-      title: `${emoji} ${title}`,
+      title: fullTitle,
       body,
       data: {
         type: 'order_status',
         orderId,
       },
     });
+
+    // Send actual notification if available
+    if (!isExpoGo && Notifications) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: fullTitle,
+          body,
+          data: {
+            type: 'order_status',
+            orderId,
+            screen: `/order/${orderId}`,
+          },
+          sound: 'default',
+          ...(Platform.OS === 'android' && { channelId: 'orders' }),
+        },
+        trigger: null,
+      });
+    }
 
     console.log(`📱 Notification envoyée: ${title}`);
   };
@@ -464,28 +523,32 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Notification de promotion
    */
   const sendPromotionNotification = async (title: string, message: string, restaurantId?: string) => {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `🎁 ${title}`,
-        body: message,
-        data: {
-          type: 'promotion',
-          restaurantId,
-        },
-        sound: 'default',
-        ...(Platform.OS === 'android' && { channelId: 'promotions' }),
-      },
-      trigger: null,
-    });
+    const fullTitle = `🎁 ${title}`;
 
     addNotification({
-      title: `🎁 ${title}`,
+      title: fullTitle,
       body: message,
       data: {
         type: 'promotion',
         restaurantId,
       },
     });
+
+    if (!isExpoGo && Notifications) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: fullTitle,
+          body: message,
+          data: {
+            type: 'promotion',
+            restaurantId,
+          },
+          sound: 'default',
+          ...(Platform.OS === 'android' && { channelId: 'promotions' }),
+        },
+        trigger: null,
+      });
+    }
 
     console.log(`📢 Promotion notification: ${title}`);
   };
@@ -494,27 +557,31 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
    * Notification de recommandation
    */
   const sendRecommendationNotification = async (title: string, message: string, data?: any) => {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `💡 ${title}`,
-        body: message,
-        data: {
-          type: 'recommendation',
-          ...data,
-        },
-        sound: 'default',
-      },
-      trigger: null,
-    });
+    const fullTitle = `💡 ${title}`;
 
     addNotification({
-      title: `💡 ${title}`,
+      title: fullTitle,
       body: message,
       data: {
         type: 'recommendation',
         ...data,
       },
     });
+
+    if (!isExpoGo && Notifications) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: fullTitle,
+          body: message,
+          data: {
+            type: 'recommendation',
+            ...data,
+          },
+          sound: 'default',
+        },
+        trigger: null,
+      });
+    }
 
     console.log(`💡 Recommendation notification: ${title}`);
   };
@@ -537,7 +604,9 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
 
   const clearNotifications = () => {
     setNotifications([]);
-    Notifications.setBadgeCountAsync(0);
+    if (!isExpoGo && Notifications) {
+      Notifications.setBadgeCountAsync(0);
+    }
   };
 
   const getNotificationHistory = () => {
@@ -545,10 +614,14 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   };
 
   const getBadgeCount = async (): Promise<number> => {
+    if (isExpoGo || !Notifications) {
+      return notifications.filter(n => !n.read).length;
+    }
     return await Notifications.getBadgeCountAsync();
   };
 
   const setBadgeCount = async (count: number) => {
+    if (isExpoGo || !Notifications) return;
     await Notifications.setBadgeCountAsync(count);
   };
 
@@ -560,6 +633,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     unreadCount,
     permissionStatus,
     isRegistered,
+    isExpoGo,
     requestPermissions,
     registerForPushNotifications,
     sendLocalNotification,

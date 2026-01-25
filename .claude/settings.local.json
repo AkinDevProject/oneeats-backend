@@ -186,7 +186,10 @@
       "Bash(npm.cmd view:*)",
       "Bash(npm start --android)",
       "Bash(/c/Users/akin_/.maestro/bin/maestro/bin/maestro test:*)",
-      "Bash(cmd.exe /c \"cd apps\\\\mobile && maestro test .maestro\\\\flows\\\\ 2>&1\")"
+      "Bash(cmd.exe /c \"cd apps\\\\mobile && maestro test .maestro\\\\flows\\\\ 2>&1\")",
+      "Bash(\"$ANDROID_HOME/platform-tools/adb\" devices)",
+      "Bash(\"$HOME/Android/Sdk/platform-tools/adb\" devices)",
+      "Bash(\"/c/Users/akin_/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices)"
     ],
     "deny": [],
     "ask": []

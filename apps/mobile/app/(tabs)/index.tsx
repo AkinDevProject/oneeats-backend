@@ -16,7 +16,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  FadeIn,
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
 
@@ -61,22 +60,30 @@ const createCustomTheme = (currentTheme: any) => ({
 });
 
 // Composant mémoïsé pour les restaurants
-const RestaurantCard = memo(({ restaurant, onPress, theme }: {
+const RestaurantCard = memo(({
+  restaurant,
+  onPress,
+  theme,
+  isFavorite,
+  onToggleFavorite,
+  isTogglingFavorite,
+}: {
   restaurant: Restaurant;
   onPress: (restaurant: Restaurant) => void;
   theme: any;
+  isFavorite: boolean;
+  onToggleFavorite: (restaurantId: string) => void;
+  isTogglingFavorite: boolean;
 }) => {
   const handlePress = useCallback(() => onPress(restaurant), [restaurant, onPress]);
-  const { toggleFavorite, checkFavoriteStatus, isLoading } = useFavorites();
-  const isFavorite = checkFavoriteStatus(restaurant.id);
   const isQuickPickup = parseInt(restaurant.deliveryTime.split('-')[0]) <= 15;
   const isFreePickup = restaurant.deliveryFee === 0;
 
-  const handleFavoriteToggle = useCallback(async (e: any) => {
+  const handleFavoriteToggle = useCallback((e: any) => {
     e.stopPropagation();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await toggleFavorite(restaurant.id);
-  }, [restaurant.id, toggleFavorite]);
+    onToggleFavorite(restaurant.id);
+  }, [restaurant.id, onToggleFavorite]);
 
   return (
     <TouchableRipple
@@ -117,7 +124,7 @@ const RestaurantCard = memo(({ restaurant, onPress, theme }: {
           {/* Bouton favori en haut à droite */}
           <TouchableRipple
             onPress={handleFavoriteToggle}
-            disabled={isLoading}
+            disabled={isTogglingFavorite}
             borderless
             style={cardStyles.favoriteButton}
             accessibilityLabel={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
@@ -343,7 +350,7 @@ function HomeIndex() {
 
   // Auth et favoris pour la section favoris sur l'accueil
   const { isAuthenticated, user } = useAuth();
-  const { favorites } = useFavorites();
+  const { favorites, toggleFavorite, checkFavoriteStatus, isLoading: isFavoritesLoading } = useFavorites();
 
   // Récupérer les restaurants favoris
   const favoriteRestaurants = useMemo(() => {
@@ -604,16 +611,13 @@ function HomeIndex() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={baseStyles.categoriesScrollContent}
       >
-        {cuisineCategories.map((category, index) => {
+        {cuisineCategories.map((category) => {
           const isSelected = selectedCategory === category.id;
           const count = getCategoryCount(category.id);
           const bgColor = categoryColors[category.id] || '#F5F5F5';
 
           return (
-            <Animated.View
-              key={category.id}
-              entering={FadeIn.delay(index * 50).duration(400)}
-            >
+            <View key={category.id}>
               <TouchableRipple
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -686,7 +690,7 @@ function HomeIndex() {
                   )}
                 </View>
               </TouchableRipple>
-            </Animated.View>
+            </View>
           );
         })}
       </ScrollView>
@@ -766,19 +770,27 @@ function HomeIndex() {
     );
   };
 
-  const renderRestaurant = useCallback((restaurant: Restaurant, index: number) => (
-    <Animated.View 
-      key={restaurant.id}
-      entering={FadeIn.delay(index * 100).duration(600)}
-      style={baseStyles.restaurantCard}
-    >
-      <RestaurantCard
-        restaurant={restaurant}
-        onPress={handleRestaurantPress}
-        theme={customTheme}
-      />
-    </Animated.View>
-  ), [handleRestaurantPress, customTheme]);
+  // Mémoriser la fonction toggle pour les cards
+  const handleToggleFavorite = useCallback((restaurantId: string) => {
+    toggleFavorite(restaurantId);
+  }, [toggleFavorite]);
+
+  const renderRestaurant = useCallback((restaurant: Restaurant, index: number) => {
+    const isFavorite = checkFavoriteStatus(restaurant.id);
+
+    return (
+      <View key={restaurant.id}>
+        <RestaurantCard
+          restaurant={restaurant}
+          onPress={handleRestaurantPress}
+          theme={customTheme}
+          isFavorite={isFavorite}
+          onToggleFavorite={handleToggleFavorite}
+          isTogglingFavorite={isFavoritesLoading}
+        />
+      </View>
+    );
+  }, [handleRestaurantPress, customTheme, checkFavoriteStatus, handleToggleFavorite, isFavoritesLoading]);
 
   const renderFilterModal = () => {
     if (!filterVisible) return null;
@@ -830,7 +842,7 @@ function HomeIndex() {
     );
   };
 
-  const dynamicStyles = getDynamicStyles(customTheme);
+  const dynamicStyles = useMemo(() => getDynamicStyles(customTheme), [customTheme]);
   
   return (
     <PaperProvider theme={customTheme} key={selectedTheme}>

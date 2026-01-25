@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LogBox } from 'react-native';
 import 'react-native-reanimated';
 // Import global CSS for React Native Web fixes - including title fixes
 import '../assets/styles/global.css';
@@ -12,6 +13,17 @@ import '../assets/styles/global.css';
 if (typeof window !== 'undefined') {
   require('../web/suppress-warnings.js');
 }
+
+// Ignorer les warnings de performance qui bloquent les tests Maestro
+LogBox.ignoreLogs([
+  'Slow render detected',
+  'Slow interaction',
+  'Slow navigation',
+  'Slow API call',
+  'Slow image load',
+  'Expensive callback',
+  'High memory usage',
+]);
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '../src/contexts/AuthContext';

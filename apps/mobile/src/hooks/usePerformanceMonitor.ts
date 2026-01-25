@@ -91,7 +91,7 @@ export const useRenderTime = (componentName: string, enabled = __DEV__) => {
       metadata: { component: componentName, renderCount: renderCount.current }
     });
 
-    if (duration > 16) { // Plus de 16ms = problème potentiel à 60fps
+    if (duration > 30) { // Plus de 30ms = problème réel de performance (seuil ajusté pour éviter faux positifs)
       console.warn(`⚠️ Slow render detected: ${componentName} took ${duration.toFixed(2)}ms`);
     }
   }); // Pas de dépendances pour mesurer chaque render, mais pas de setState
@@ -275,7 +275,7 @@ export const usePerformanceMetrics = () => {
 
 // Hook pour détecter les problèmes de performance
 export const usePerformanceAlert = (thresholds = {
-  render: 16,
+  render: 30,      // Ajusté de 16ms - évite faux positifs sur rendus complexes
   interaction: 100,
   navigation: 500,
   api: 2000,
@@ -352,7 +352,7 @@ export const useOptimizedCallback = <T extends (...args: any[]) => any>(
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    if (duration > 5) { // Plus de 5ms = callback coûteux
+    if (duration > 50) { // Plus de 50ms = callback coûteux (seuil ajusté - navigation/haptics prennent ~20ms)
       console.warn(`⚠️ Expensive callback: ${callbackName} took ${duration.toFixed(2)}ms`);
     }
 

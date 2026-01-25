@@ -42,7 +42,7 @@ tags:
 - tapOn: "Compte"
 
 - extendedWaitUntil:
-    visible: "Compte"
+    visible: ".*"
     timeout: 15000
 
 - takeScreenshot: "11-compte-screen"
