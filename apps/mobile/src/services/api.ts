@@ -200,6 +200,9 @@ class ApiService {
   // Users
   users = {
     getById: (id: string) => this.request<any>(`/users/${id}`),
+    getMe: () => this.request<any>(`/users/me`),
+    update: (id: string, data: { firstName?: string; lastName?: string; email?: string; phone?: string }) =>
+      this.request<any>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   };
 
   // Favorites

@@ -27,17 +27,15 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppTheme } from '../../src/contexts/ThemeContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 import { apiService } from '../../src/services/api';
-import { ENV } from '../../src/config/env';
 
-// Interface pour les données utilisateur
+// Interface pour les données utilisateur (correspond au UserDTO backend)
 interface UserData {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  address?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -67,17 +65,24 @@ export default function AccountPage() {
   });
 
   const { currentTheme } = useAppTheme();
+  const { user: authUser } = useAuth();
 
-  // Charger les données utilisateur
+  // Charger les donnees utilisateur depuis l'API /users/me
+  // Cet endpoint synchronise automatiquement l'utilisateur Keycloak avec PostgreSQL
   useEffect(() => {
-    loadUserData();
-  }, []);
+    if (authUser) {
+      loadUserData();
+    } else {
+      setError('Utilisateur non connecté');
+      setLoading(false);
+    }
+  }, [authUser]);
 
   const loadUserData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const userData = await apiService.users.getById(ENV.DEV_USER_ID);
+      const userData = await apiService.users.getMe();
       setUser(userData);
     } catch (err) {
       console.error('Erreur lors du chargement des données utilisateur:', err);
@@ -111,14 +116,21 @@ export default function AccountPage() {
         return;
       }
 
-      setUser(prev => prev ? ({
-        ...prev,
-        [editField.key]: editField.value.trim(),
-      }) : null);
-      setShowEditDialog(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Succès', 'Informations mises à jour');
-      // TODO: Sauvegarder via API
+      try {
+        // Preparer les donnees de mise a jour
+        const updateData: { firstName?: string; lastName?: string; email?: string } = {};
+        updateData[editField.key as keyof typeof updateData] = editField.value.trim();
+
+        // Sauvegarder via API
+        const updatedUser = await apiService.users.update(user.id, updateData);
+        setUser(updatedUser);
+        setShowEditDialog(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert('Succès', 'Informations mises à jour');
+      } catch (err) {
+        console.error('Erreur lors de la mise à jour:', err);
+        Alert.alert('Erreur', 'Impossible de sauvegarder les modifications');
+      }
     }
   };
 
@@ -291,16 +303,6 @@ export default function AccountPage() {
             showEdit
             onPress={() => handleEdit('email', 'Email', user.email, 'email-address', 'exemple@email.com')}
             delay={250}
-          />
-          <View style={styles.menuDivider} />
-          <MenuItem
-            icon="📱"
-            label="Téléphone"
-            value={user.phone || 'Non renseigné'}
-            iconBg="#FFF3E0"
-            showEdit
-            onPress={() => handleEdit('phone', 'Téléphone', user.phone || '', 'phone-pad', '06 12 34 56 78')}
-            delay={300}
           />
         </View>
 

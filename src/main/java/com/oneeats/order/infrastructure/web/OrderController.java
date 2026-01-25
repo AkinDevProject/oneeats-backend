@@ -137,20 +137,53 @@ public class OrderController {
 
     @PUT
     @Path("/{id}/status")
-    @RolesAllowed({Roles.RESTAURANT, Roles.ADMIN})
+    @Authenticated
     public Response updateOrderStatus(@PathParam("id") UUID orderId, OrderStatusUpdateRequest request) {
         // Recuperer la commande pour verifier l'acces
         OrderDTO order = getOrderQueryHandler.handle(new GetOrderQuery(orderId));
 
-        // Verifier que la commande appartient au restaurant de l'utilisateur (sauf admin)
-        if (!authService.hasRole(Roles.ADMIN) && !authService.hasAccessToRestaurant(order.restaurantId())) {
-            return Response.status(Response.Status.FORBIDDEN)
-                .entity("Acces refuse: cette commande n'appartient pas a votre restaurant")
-                .build();
+        boolean isAdmin = authService.hasRole(Roles.ADMIN);
+        boolean isRestaurant = authService.hasRole(Roles.RESTAURANT) && authService.hasAccessToRestaurant(order.restaurantId());
+        boolean isClient = authService.isCurrentUser(order.userId());
+        OrderStatus newStatus = request.getNewStatus();
+
+        // Cas 1: Admin peut tout faire
+        if (isAdmin) {
+            UpdateOrderStatusCommand command = new UpdateOrderStatusCommand(orderId, newStatus);
+            OrderDTO updatedOrder = updateOrderStatusCommandHandler.handle(command);
+            return Response.ok(updatedOrder).build();
         }
 
-        UpdateOrderStatusCommand command = new UpdateOrderStatusCommand(orderId, request.getNewStatus());
-        OrderDTO updatedOrder = updateOrderStatusCommandHandler.handle(command);
-        return Response.ok(updatedOrder).build();
+        // Cas 2: Restaurant peut mettre a jour le statut de ses commandes (sauf CANCELLED par le client)
+        if (isRestaurant) {
+            UpdateOrderStatusCommand command = new UpdateOrderStatusCommand(orderId, newStatus);
+            OrderDTO updatedOrder = updateOrderStatusCommandHandler.handle(command);
+            return Response.ok(updatedOrder).build();
+        }
+
+        // Cas 3: Client peut uniquement annuler sa propre commande
+        if (isClient) {
+            if (newStatus == OrderStatus.CANCELLED) {
+                // Verifier que la commande peut encore etre annulee (statut PENDING ou CONFIRMED)
+                if (order.status() == OrderStatus.PENDING || order.status() == OrderStatus.CONFIRMED) {
+                    UpdateOrderStatusCommand command = new UpdateOrderStatusCommand(orderId, newStatus);
+                    OrderDTO updatedOrder = updateOrderStatusCommandHandler.handle(command);
+                    return Response.ok(updatedOrder).build();
+                } else {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Impossible d'annuler une commande en cours de preparation ou deja terminee")
+                        .build();
+                }
+            } else {
+                return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Vous ne pouvez qu'annuler votre commande")
+                    .build();
+            }
+        }
+
+        // Aucun acces
+        return Response.status(Response.Status.FORBIDDEN)
+            .entity("Acces refuse a cette commande")
+            .build();
     }
 }
