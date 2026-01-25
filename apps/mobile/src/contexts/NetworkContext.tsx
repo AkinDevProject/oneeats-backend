@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { AppState, AppStateStatus, Platform } from 'react-native';
 import { ENV } from '../config/env';
 
+// Logger conditionnel - silencieux en production
+const logger = {
+  info: (message: string) => __DEV__ && console.log(message),
+  debug: (message: string) => __DEV__ && ENV.DEBUG_MODE && console.log(message),
+};
+
 interface NetworkContextType {
   isOnline: boolean;
   isChecking: boolean;
@@ -30,7 +36,10 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({ children }) =>
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${ENV.API_URL}/q/health`, {
+      // Le health check Quarkus est à /q/health (pas sous /api)
+      // On extrait la base URL sans le /api
+      const baseUrl = ENV.API_URL.replace(/\/api$/, '');
+      const response = await fetch(`${baseUrl}/q/health`, {
         method: 'HEAD',
         signal: controller.signal,
       });
@@ -41,15 +50,13 @@ export const NetworkProvider: React.FC<NetworkProviderProps> = ({ children }) =>
       setIsOnline(online);
       setLastChecked(new Date());
 
-      if (online) {
-        console.log('🌐 Network: Online');
-      } else {
-        console.log('📴 Network: Server unreachable');
-      }
+      logger.debug(online ? '🌐 Network: Online' : '📴 Network: Server unreachable');
 
       return online;
-    } catch (error) {
-      console.log('📴 Network: Offline or server unreachable');
+    } catch {
+      // Erreur réseau attendue (offline, timeout, serveur inaccessible)
+      // Pas de log d'erreur - c'est un comportement normal géré par l'UI
+      logger.debug('📴 Network: Offline or server unreachable');
       setIsOnline(false);
       setLastChecked(new Date());
       return false;

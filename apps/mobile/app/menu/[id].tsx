@@ -376,9 +376,9 @@ export default function MenuItemDetail() {
           <View style={styles.optionHeader}>
             <Text style={[styles.optionTitle, { color: currentTheme.colors.onSurface }]}>
               {option.name}
-              {option.isRequired && <Text style={{ color: currentTheme.colors.error }}> *</Text>}
+              {option.isRequired ? <Text style={{ color: currentTheme.colors.error }}> *</Text> : null}
             </Text>
-            {option.maxChoices && option.maxChoices > 1 && (
+            {option.maxChoices > 1 ? (
               <Chip
                 compact
                 style={{ backgroundColor: currentTheme.colors.primaryContainer }}
@@ -386,8 +386,8 @@ export default function MenuItemDetail() {
               >
                 Max {option.maxChoices}
               </Chip>
-            )}
-            {option.maxChoices === 0 && isMultiple && (
+            ) : null}
+            {option.maxChoices === 0 && isMultiple ? (
               <Chip
                 compact
                 style={{ backgroundColor: currentTheme.colors.secondaryContainer }}
@@ -395,7 +395,7 @@ export default function MenuItemDetail() {
               >
                 Illimité
               </Chip>
-            )}
+            ) : null}
           </View>
           
           {option.choices.map((choice) => {
@@ -430,7 +430,7 @@ export default function MenuItemDetail() {
                     ]}>
                       {choice.name}
                     </Text>
-                    {choice.price > 0 && (
+                    {choice.price > 0 ? (
                       <Text style={[
                         styles.choicePrice,
                         { color: currentTheme.colors.primary },
@@ -438,7 +438,7 @@ export default function MenuItemDetail() {
                       ]}>
                         +{choice.price.toFixed(2)}€
                       </Text>
-                    )}
+                    ) : null}
                   </View>
                 </View>
               </View>

@@ -172,9 +172,22 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
 
     setItems(currentItems =>
-      currentItems.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
-      )
+      currentItems.map(item => {
+        if (item.id !== itemId) return item;
+
+        // Recalculer le totalPrice avec la nouvelle quantité
+        let unitPrice = item.menuItem.price;
+        if (item.options) {
+          item.options.forEach(option => {
+            option.choices.forEach(choice => {
+              unitPrice += choice.price;
+            });
+          });
+        }
+        const newTotalPrice = unitPrice * quantity;
+
+        return { ...item, quantity, totalPrice: newTotalPrice };
+      })
     );
   };
 

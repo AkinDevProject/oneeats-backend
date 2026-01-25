@@ -452,7 +452,15 @@
 - `PushNotificationContext.tsx` (+50 lignes)
 - `_layout.tsx` (+3 lignes)
 
-**Résultat** : MVP 100% complet ! 🎉
+**3. Tests API validés** ✅
+```
+✅ POST /api/auth/login → Token JWT reçu (client@oneeats.com)
+✅ PUT /api/auth/push-token → {"success":true,"message":"Token push mis a jour avec succes"}
+✅ DELETE /api/auth/push-token → {"success":true,"message":"Token push supprime avec succes"}
+✅ GET /api/auth/me → {"email":"client@oneeats.com","fullName":"Client Mobile","roles":["user"]}
+```
+
+**Résultat** : MVP 100% complet et testé ! 🎉
 
 ---
 

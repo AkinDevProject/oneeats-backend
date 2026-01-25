@@ -189,7 +189,11 @@
       "Bash(cmd.exe /c \"cd apps\\\\mobile && maestro test .maestro\\\\flows\\\\ 2>&1\")",
       "Bash(\"$ANDROID_HOME/platform-tools/adb\" devices)",
       "Bash(\"$HOME/Android/Sdk/platform-tools/adb\" devices)",
-      "Bash(\"/c/Users/akin_/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices)"
+      "Bash(\"/c/Users/akin_/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices)",
+      "Bash(TOKEN=\"eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJOT3JWRnQzN3ZlSExjVmtjSGZJa2ZDQUoxN2tvR0M5OXZDSHhTeUZsTUJZIn0.eyJleHAiOjE3NjkzNTk0OTgsImlhdCI6MTc2OTM1ODU5OCwianRpIjoiYzg2MjE1MGMtNGViYS00M2NmLTg4OTktNjI1NjljYmI5MjYwIiwiaXNzIjoiaHR0cDovLzE5Mi4xNjguMS4xMTE6ODU4MC9yZWFsbXMvb25lZWF0cyIsInN1YiI6IjRmZjQwYTQzLWI5NTYtNDIzYy1iODg2LTEzNWYwMDI4ZWNlOCIsInR5cCI6IkJlYXJlciIsImF6cCI6Im9uZWVhdHMtbW9iaWxlIiwic2Vzc2lvbl9zdGF0ZSI6IjYxMDQ4NGE0LTk2MTYtNGYwMC1hMmYwLTIwZmE1N2Q3MDU3NyIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJ1c2VyIl19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwic2lkIjoiNjEwNDg0YTQtOTYxNi00ZjAwLWEyZjAtMjBmYTU3ZDcwNTc3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJDbGllbnQgTW9iaWxlIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiY2xpZW50QG9uZWVhdHMuY29tIiwiZ2l2ZW5fbmFtZSI6IkNsaWVudCIsImZhbWlseV9uYW1lIjoiTW9iaWxlIiwiZW1haWwiOiJjbGllbnRAb25lZWF0cy5jb20ifQ.WzTEa3UyhqXdpqPzJmKrtWMkSLfdRSLrsvK08KBwwXK9U7UQxjQ926zzlPJ69Ltyi0qiIfJbN4D11tR2m8-jAzGcgEn8Clse71rg6yqzLg9G677BkjJWlN5BQrWc_ewvyRo511r0iePZAGtN7G4bbD79N9SnBeyJRr1_GT8HJrKfk2nlWTyZ4euPme10bAsrlIq-4ccd7yU4h8HWVCsLs1n9iZ00Dine5rWezV8h771I9Dq_Ec8nAA1-3jrBI73tDSMhYE8K8g0XmZ82bHDnRUUcH-Bn2z_LJsmdQsCic_rCZ5vxZ7cEbCQGVIq0eGCXsdnNZU5PsbINrdf7Gaf9Pg\")",
+      "Bash(__NEW_LINE_47d1c019fa336414__ curl -s -X PUT http://localhost:8080/api/auth/push-token -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\"\"pushToken\"\":\"\"ExponentPushToken[test123456789]\"\"}')",
+      "Bash(__NEW_LINE_4f6104fdb196bc31__ curl -s -X DELETE http://localhost:8080/api/auth/push-token -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(__NEW_LINE_cb5c01e40d9bcb57__ curl -s http://localhost:8080/api/auth/me -H \"Authorization: Bearer $TOKEN\")"
     ],
     "deny": [],
     "ask": []

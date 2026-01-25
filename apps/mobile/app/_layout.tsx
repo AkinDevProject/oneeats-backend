@@ -76,7 +76,6 @@ function AppContent() {
                             <Stack.Screen name="auth/login" options={{ headerShown: false }} />
                             <Stack.Screen name="auth/debug" options={{ headerShown: false }} />
                             <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-                            <Stack.Screen name="designs" options={{ headerShown: false }} />
                             <Stack.Screen name="account" options={{ headerShown: false }} />
                             <Stack.Screen name="orders" options={{ headerShown: false }} />
                             <Stack.Screen name="settings" options={{ headerShown: false }} />

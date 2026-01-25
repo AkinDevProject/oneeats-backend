@@ -296,7 +296,7 @@ export default function SettingsScreen() {
             value={themeMetadata[selectedTheme]?.name || 'Clair'}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/designs/design-selector');
+              Alert.alert('Thème', 'Le thème actuel est : ' + (themeMetadata[selectedTheme]?.name || 'Clair'));
             }}
             iconBg="#E8EAF6"
           />
