@@ -30,6 +30,24 @@ Le dashboard restaurant dans `apps/web` contient des fonctionnalités complètem
 - **Headers** : `Authorization: Bearer <token>`
 - **Response** : `UserDto`
 
+#### PUT /api/auth/push-token ✅ IMPLÉMENTÉ (2026-01-25)
+- **Description** : Enregistre le token Expo Push de l'utilisateur pour les notifications mobiles
+- **Headers** : `Authorization: Bearer <token>`
+- **Body** : `{ pushToken: string }` (format: `ExponentPushToken[xxx]`)
+- **Response** : `{ success: boolean, message: string, userId: string }`
+- **Erreurs** :
+  - `400 Bad Request` : Token vide ou invalide
+  - `401 Unauthorized` : Non authentifié
+  - `404 Not Found` : Utilisateur non trouvé
+
+#### DELETE /api/auth/push-token ✅ IMPLÉMENTÉ (2026-01-25)
+- **Description** : Supprime le token push de l'utilisateur (à appeler lors de la déconnexion)
+- **Headers** : `Authorization: Bearer <token>`
+- **Response** : `{ success: boolean, message: string, userId: string }`
+- **Erreurs** :
+  - `401 Unauthorized` : Non authentifié
+  - `404 Not Found` : Utilisateur non trouvé
+
 ### Commands/Queries CQRS
 
 #### Commands

@@ -37,6 +37,7 @@ import { SettingsProvider } from '../src/contexts/SettingsContext';
 import { FavoritesProvider } from '../src/contexts/FavoritesContext';
 import { NetworkProvider } from '../src/contexts/NetworkContext';
 import { OfflineBanner } from '../src/components/OfflineBanner';
+import { PushTokenSyncManager } from '../src/components/PushTokenSyncManager';
 
 // Create a client for React Query - Optimisé pour de meilleures performances
 const queryClient = new QueryClient({
@@ -63,13 +64,14 @@ function AppContent() {
           <AuthProvider>
             <FavoritesProvider>
               <PushNotificationProvider>
-                <NotificationProvider>
-                  <CartProvider>
-                    <OrderProvider>
-                      <WebSocketProvider>
-                        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                          <OfflineBanner position="top" />
-                          <Stack>
+                <PushTokenSyncManager>
+                  <NotificationProvider>
+                    <CartProvider>
+                      <OrderProvider>
+                        <WebSocketProvider>
+                          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                            <OfflineBanner position="top" />
+                            <Stack>
                             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                             <Stack.Screen name="auth/login" options={{ headerShown: false }} />
                             <Stack.Screen name="auth/debug" options={{ headerShown: false }} />
@@ -83,11 +85,12 @@ function AppContent() {
                             <Stack.Screen name="+not-found" />
                           </Stack>
                           <StatusBar style="auto" backgroundColor={currentTheme.colors.background} />
-                        </ThemeProvider>
-                      </WebSocketProvider>
-                    </OrderProvider>
-                  </CartProvider>
-                </NotificationProvider>
+                          </ThemeProvider>
+                        </WebSocketProvider>
+                      </OrderProvider>
+                    </CartProvider>
+                  </NotificationProvider>
+                </PushTokenSyncManager>
               </PushNotificationProvider>
             </FavoritesProvider>
           </AuthProvider>

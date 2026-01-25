@@ -245,6 +245,110 @@ public class AuthController {
         return Response.ok(user.restaurants()).build();
     }
 
+    /**
+     * Met a jour le token push de l'utilisateur connecte.
+     * Permet de recevoir les notifications push sur mobile.
+     *
+     * @param request Token Expo Push (format: ExponentPushToken[xxx])
+     * @return Success ou erreur
+     */
+    @PUT
+    @Path("/push-token")
+    @Authenticated
+    @Transactional
+    public Response updatePushToken(UpdatePushTokenRequest request) {
+        LOG.info("Push token update request received");
+
+        if (request == null || request.pushToken() == null || request.pushToken().trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse("invalid_token", "Le token push est requis"))
+                .build();
+        }
+
+        try {
+            // Recuperer l'utilisateur connecte
+            CurrentUserDTO currentUser = authService.getCurrentUserInfo();
+            if (currentUser == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("not_authenticated", "Utilisateur non authentifie"))
+                    .build();
+            }
+
+            // Trouver l'utilisateur en base
+            var userOpt = userRepository.findEntityByEmail(currentUser.email());
+            if (userOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("user_not_found", "Utilisateur non trouve"))
+                    .build();
+            }
+
+            // Mettre a jour le token push
+            UserEntity user = userOpt.get();
+            user.updatePushToken(request.pushToken().trim());
+            userRepository.persist(user);
+
+            LOG.info("Push token updated for user: " + user.getId());
+
+            return Response.ok(new PushTokenResponse(
+                true,
+                "Token push mis a jour avec succes",
+                user.getId().toString()
+            )).build();
+
+        } catch (Exception e) {
+            LOG.error("Error updating push token", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("server_error", "Erreur lors de la mise a jour du token"))
+                .build();
+        }
+    }
+
+    /**
+     * Supprime le token push de l'utilisateur (deconnexion mobile).
+     */
+    @DELETE
+    @Path("/push-token")
+    @Authenticated
+    @Transactional
+    public Response deletePushToken() {
+        LOG.info("Push token delete request received");
+
+        try {
+            CurrentUserDTO currentUser = authService.getCurrentUserInfo();
+            if (currentUser == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(new ErrorResponse("not_authenticated", "Utilisateur non authentifie"))
+                    .build();
+            }
+
+            var userOpt = userRepository.findEntityByEmail(currentUser.email());
+            if (userOpt.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("user_not_found", "Utilisateur non trouve"))
+                    .build();
+            }
+
+            UserEntity user = userOpt.get();
+            user.setPushToken(null);
+            user.setPushTokenUpdatedAt(null);
+            userRepository.persist(user);
+
+            LOG.info("Push token deleted for user: " + user.getId());
+
+            return Response.ok(new PushTokenResponse(
+                true,
+                "Token push supprime avec succes",
+                user.getId().toString()
+            )).build();
+
+        } catch (Exception e) {
+            LOG.error("Error deleting push token", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("server_error", "Erreur lors de la suppression du token"))
+                .build();
+        }
+    }
+
     // DTOs pour les reponses
 
     public record ErrorResponse(String error, String message) {
@@ -262,4 +366,8 @@ public class AuthController {
         boolean hasAccess,
         String role
     ) {}
+
+    public record UpdatePushTokenRequest(String pushToken) {}
+
+    public record PushTokenResponse(boolean success, String message, String userId) {}
 }

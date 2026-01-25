@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { Platform, AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
+import authService from '../services/authService';
 
 // Check if running in Expo Go (no native modules available)
 // In Expo Go, Constants.appOwnership === 'expo'
@@ -55,9 +56,11 @@ interface PushNotificationContextType {
   permissionStatus: 'undetermined' | 'granted' | 'denied';
   isRegistered: boolean;
   isExpoGo: boolean;
+  isTokenSynced: boolean;
   // Actions
   requestPermissions: () => Promise<boolean>;
   registerForPushNotifications: () => Promise<string | null>;
+  syncTokenWithBackend: () => Promise<boolean>;
   sendLocalNotification: (title: string, body: string, data?: any) => Promise<void>;
   sendOrderStatusNotification: (orderId: string, status: string, restaurantName: string) => Promise<void>;
   sendPromotionNotification: (title: string, message: string, restaurantId?: string) => Promise<void>;
@@ -67,6 +70,7 @@ interface PushNotificationContextType {
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
+  clearTokenSync: () => void;
   // Utilitaires
   getNotificationHistory: () => PushNotificationData[];
   getBadgeCount: () => Promise<number>;
@@ -77,6 +81,7 @@ const PushNotificationContext = createContext<PushNotificationContextType | unde
 
 const NOTIFICATIONS_KEY = '@OneEats:Notifications';
 const PUSH_TOKEN_KEY = '@OneEats:PushToken';
+const TOKEN_SYNCED_KEY = '@OneEats:PushTokenSynced';
 
 interface PushNotificationProviderProps {
   children: ReactNode;
@@ -87,6 +92,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   const [notifications, setNotifications] = useState<PushNotificationData[]>([]);
   const [permissionStatus, setPermissionStatus] = useState<'undetermined' | 'granted' | 'denied'>('undetermined');
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isTokenSynced, setIsTokenSynced] = useState(false);
 
   const notificationListener = useRef<any>();
   const responseListener = useRef<any>();
@@ -96,6 +102,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
   useEffect(() => {
     loadStoredNotifications();
     loadStoredToken();
+    loadSyncStatus();
 
     // Skip notification setup in Expo Go
     if (isExpoGo) {
@@ -205,6 +212,15 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     }
   };
 
+  const loadSyncStatus = async () => {
+    try {
+      const synced = await AsyncStorage.getItem(TOKEN_SYNCED_KEY);
+      setIsTokenSynced(synced === 'true');
+    } catch (error) {
+      console.error('Erreur lors du chargement du statut de sync:', error);
+    }
+  };
+
   const saveToken = async (token: string) => {
     try {
       await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
@@ -212,6 +228,55 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
       console.error('Erreur lors de la sauvegarde du token:', error);
     }
   };
+
+  /**
+   * Synchronise le token push avec le backend
+   * Doit etre appele apres authentification reussie
+   */
+  const syncTokenWithBackend = useCallback(async (): Promise<boolean> => {
+    if (!expoPushToken) {
+      console.log('⚠️ Pas de token push a synchroniser');
+      return false;
+    }
+
+    // Ne pas resynchroniser si deja fait (sauf si le token change)
+    if (isTokenSynced) {
+      console.log('✅ Token deja synchronise avec le backend');
+      return true;
+    }
+
+    try {
+      console.log('🔄 Synchronisation du token push avec le backend...');
+      const success = await authService.syncPushToken(expoPushToken);
+
+      if (success) {
+        setIsTokenSynced(true);
+        await AsyncStorage.setItem(TOKEN_SYNCED_KEY, 'true');
+        console.log('✅ Token push synchronise avec le backend');
+      }
+
+      return success;
+    } catch (error) {
+      console.error('❌ Erreur de synchronisation du token:', error);
+      return false;
+    }
+  }, [expoPushToken, isTokenSynced]);
+
+  /**
+   * Reset le statut de synchronisation (a appeler lors de la deconnexion)
+   */
+  const clearTokenSync = useCallback(async () => {
+    try {
+      // Supprimer le token du backend
+      await authService.deletePushToken();
+      // Reset le statut local
+      setIsTokenSynced(false);
+      await AsyncStorage.removeItem(TOKEN_SYNCED_KEY);
+      console.log('🗑️ Statut de synchronisation reinitialise');
+    } catch (error) {
+      console.error('Erreur lors de la reinitialisation du sync:', error);
+    }
+  }, []);
 
   /**
    * Enregistrement pour les notifications push
@@ -634,8 +699,10 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     permissionStatus,
     isRegistered,
     isExpoGo,
+    isTokenSynced,
     requestPermissions,
     registerForPushNotifications,
+    syncTokenWithBackend,
     sendLocalNotification,
     sendOrderStatusNotification,
     sendPromotionNotification,
@@ -645,6 +712,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     markAsRead,
     markAllAsRead,
     clearNotifications,
+    clearTokenSync,
     getNotificationHistory,
     getBadgeCount,
     setBadgeCount,

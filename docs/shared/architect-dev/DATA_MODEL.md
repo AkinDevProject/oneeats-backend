@@ -52,32 +52,42 @@
 
 ## 📋 Détail des Tables
 
-### 👤 Table : `users`
+### 👤 Table : `user_account`
 
 Table des utilisateurs clients de la plateforme.
 
-| Colonne        | Type           | Contraintes                    | Description                          |
-|----------------|----------------|--------------------------------|--------------------------------------|
-| id             | UUID           | PK, DEFAULT uuid_generate_v4() | Identifiant unique                   |
-| email          | VARCHAR(255)   | UNIQUE, NOT NULL               | Email de connexion                   |
-| password_hash  | VARCHAR(255)   | NOT NULL                       | Mot de passe hashé (BCrypt)          |
-| first_name     | VARCHAR(100)   | NOT NULL                       | Prénom                               |
-| last_name      | VARCHAR(100)   | NOT NULL                       | Nom de famille                       |
-| phone          | VARCHAR(20)    | NULL                           | Numéro de téléphone                  |
-| address        | TEXT           | NULL                           | Adresse complète                     |
-| is_active      | BOOLEAN        | DEFAULT true                   | Compte actif/désactivé               |
-| created_at     | TIMESTAMP      | DEFAULT NOW()                  | Date de création                     |
-| updated_at     | TIMESTAMP      | DEFAULT NOW()                  | Date de dernière modification        |
+| Colonne              | Type           | Contraintes                    | Description                          |
+|----------------------|----------------|--------------------------------|--------------------------------------|
+| id                   | UUID           | PK, DEFAULT uuid_generate_v4() | Identifiant unique                   |
+| email                | VARCHAR(255)   | UNIQUE, NOT NULL               | Email de connexion                   |
+| password_hash        | VARCHAR(255)   | NOT NULL                       | Mot de passe hashé (ou "keycloak_managed") |
+| first_name           | VARCHAR(100)   | NOT NULL                       | Prénom                               |
+| last_name            | VARCHAR(100)   | NOT NULL                       | Nom de famille                       |
+| phone                | VARCHAR(20)    | NULL                           | Numéro de téléphone                  |
+| address              | TEXT           | NULL                           | Adresse complète                     |
+| keycloak_id          | VARCHAR(255)   | UNIQUE, NULL                   | ID Keycloak (si auth via SSO)        |
+| status               | VARCHAR(50)    | NOT NULL, DEFAULT 'ACTIVE'     | Statut (ACTIVE, INACTIVE, SUSPENDED) |
+| suspension_reason    | VARCHAR(1000)  | NULL                           | Raison de suspension (V6)            |
+| suspended_at         | TIMESTAMP      | NULL                           | Date de suspension (V6)              |
+| suspended_until      | TIMESTAMP      | NULL                           | Date de fin de suspension (V6)       |
+| push_token           | VARCHAR(500)   | NULL                           | Token Expo Push (V7) ✅ NOUVEAU       |
+| push_token_updated_at| TIMESTAMP      | NULL                           | Date MAJ token push (V7) ✅ NOUVEAU   |
+| version              | INTEGER        | DEFAULT 0                      | Version pour optimistic locking      |
+| created_at           | TIMESTAMP      | DEFAULT NOW()                  | Date de création                     |
+| updated_at           | TIMESTAMP      | DEFAULT NOW()                  | Date de dernière modification        |
 
 **Index** :
-- `idx_users_email` sur `email` (recherche rapide par email)
-- `idx_users_active` sur `is_active` (filtrage utilisateurs actifs)
+- `idx_user_account_email` sur `email` (recherche rapide par email)
+- `idx_user_account_status` sur `status` (filtrage par statut)
+- `idx_user_account_keycloak_id` sur `keycloak_id` (recherche par SSO)
+- `idx_user_account_push_token` sur `push_token` WHERE NOT NULL (notifications push)
 
 **Règles métier** :
 - Email doit être unique et valide (format email)
-- Mot de passe stocké uniquement hashé (jamais en clair)
+- Mot de passe géré par Keycloak (password_hash = "keycloak_managed")
 - Phone et address optionnels lors de l'inscription
-- is_active permet désactivation sans suppression (soft delete)
+- status permet désactivation/suspension sans suppression (soft delete)
+- push_token au format ExponentPushToken[xxx] pour les notifications mobiles
 
 ---
 

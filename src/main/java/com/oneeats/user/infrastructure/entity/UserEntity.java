@@ -59,6 +59,13 @@ public class UserEntity extends PanacheEntityBase {
     @Column(name = "suspended_until")
     private LocalDateTime suspendedUntil;
 
+    // Push notification fields
+    @Column(name = "push_token", length = 500)
+    private String pushToken;
+
+    @Column(name = "push_token_updated_at")
+    private LocalDateTime pushTokenUpdatedAt;
+
     public UserEntity() {}
 
     public UserEntity(UUID id, String firstName, String lastName, String email, String passwordHash, UserStatus status, String phone, String address, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -193,5 +200,30 @@ public class UserEntity extends PanacheEntityBase {
 
     public void setSuspendedUntil(LocalDateTime suspendedUntil) {
         this.suspendedUntil = suspendedUntil;
+    }
+
+    // Push token getters and setters
+    public String getPushToken() {
+        return pushToken;
+    }
+
+    public void setPushToken(String pushToken) {
+        this.pushToken = pushToken;
+    }
+
+    public LocalDateTime getPushTokenUpdatedAt() {
+        return pushTokenUpdatedAt;
+    }
+
+    public void setPushTokenUpdatedAt(LocalDateTime pushTokenUpdatedAt) {
+        this.pushTokenUpdatedAt = pushTokenUpdatedAt;
+    }
+
+    /**
+     * Met a jour le token push et la date de mise a jour
+     */
+    public void updatePushToken(String newToken) {
+        this.pushToken = newToken;
+        this.pushTokenUpdatedAt = LocalDateTime.now();
     }
 }

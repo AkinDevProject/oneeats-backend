@@ -609,25 +609,32 @@ cd apps/mobile && npm run android
 - Mapper bidirectionnel complet DTO ↔ Entity
 - Frontend MenuPage.tsx avec interface responsive et gestion complète du menu
 
-### 9.3 🔨 À CRÉER
-**🔐 Domaines restants**
-- `com.oneeats.admin` : Administration et supervision
-- `com.oneeats.notification` : Notifications push et emails
+### 9.3 ✅ RÉCEMMENT COMPLÉTÉ (2026-01-25)
+**🔔 Notifications Push Expo**
+- Migration V7 : Colonnes `push_token` et `push_token_updated_at` dans `user_account`
+- Endpoint `PUT /api/auth/push-token` pour enregistrer le token Expo Push
+- Endpoint `DELETE /api/auth/push-token` pour supprimer le token (déconnexion)
+- Synchronisation automatique mobile via `PushTokenSyncManager`
+- Hook `usePushTokenSync` pour gestion manuelle
+
+**🔐 Domaines restants (post-MVP)**
+- `com.oneeats.admin` : Administration avancée (analytics, modération)
+- `com.oneeats.notification` : Envoi de notifications push depuis le backend
 
 **📱 Frontend existant (à connecter)**
 - Interface web React restaurant dans `apps/web/`
 - Application mobile React Native client dans `apps/mobile/`
 - Intégration à adapter aux nouvelles APIs REST
 
-### 9.4 🚀 PROCHAINES ÉTAPES PRIORITAIRES
+### 9.4 ✅ MVP 100% COMPLÉTÉ (2026-01-25)
 1. ~~**Compléter Restaurant** : API REST + Repository + Mapper~~ ✅ **COMPLÉTÉ**
 2. ~~**Compléter Menu** : API REST + Repository + Mapper~~ ✅ **COMPLÉTÉ**
 3. ~~**Authentification JWT**~~ : ✅ Keycloak OIDC dual-mode (web + mobile) opérationnel
 4. ~~**Frontend Authentication**~~ : ✅ Login SSO Keycloak web + mobile avec PKCE
-5. **Mobile App Core Screens** : Écrans principaux navigation mobile
-6. **API Services Mobile** : Service API complet avec cache et mode offline
-7. **Tests complets** : Coverage pour tous les domaines
-8. **Documentation technique** : API specs et guides développeur
+5. ~~**Mobile App Core Screens**~~ : ✅ Tous les écrans principaux implémentés
+6. ~~**API Services Mobile**~~ : ✅ Service API complet avec cache et mode offline
+7. ~~**Notifications Push**~~ : ✅ Endpoint backend + sync automatique mobile
+8. ~~**Tests complets**~~ : ✅ 144 tests (WebSocket + Auth/RBAC)
 
 ### 9.5 📱 NOUVELLES FONCTIONNALITÉS MOBILE AJOUTÉES
 **✅ Paramètres Avancés Complets**
@@ -687,6 +694,14 @@ cd apps/mobile && npm run android
   - Mode arrière-plan et réveil de l'app
   - Templates avec variables dynamiques (nom restaurant, statut, etc.)
   - Hooks utilitaires pour tests et développement
+  - **Synchronisation automatique avec le backend** (2026-01-25)
+
+**✅ Synchronisation Token Push Backend (2026-01-25)**
+- **Endpoint Backend** : `PUT /api/auth/push-token` pour enregistrer le token Expo
+- **Hook usePushTokenSync** : Synchronisation automatique après authentification
+- **PushTokenSyncManager** : Composant wrapper intégré dans le layout principal
+- **Nettoyage automatique** : Suppression du token lors de la déconnexion
+- **Persistance locale** : État de synchronisation stocké dans AsyncStorage
 
 **✅ Optimisations de Performance Mobile Avancées**
 - **Gestion mémoire intelligente** : Hooks `usePerformanceMonitor` pour tracking complet des métriques

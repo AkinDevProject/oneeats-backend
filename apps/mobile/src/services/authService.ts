@@ -531,6 +531,86 @@ class AuthService {
   async saveTokensPublic(tokens: KeycloakTokens): Promise<void> {
     await this.saveTokens(tokens);
   }
+
+  /**
+   * Synchronise le token push Expo avec le backend
+   * Doit etre appele apres authentification reussie
+   * @param pushToken - Token Expo Push (format: ExponentPushToken[xxx])
+   * @returns true si la synchronisation a reussi, false sinon
+   */
+  async syncPushToken(pushToken: string): Promise<boolean> {
+    try {
+      const accessToken = await this.getAccessToken();
+      if (!accessToken) {
+        console.log('⚠️ Cannot sync push token: not authenticated');
+        return false;
+      }
+
+      if (!pushToken || pushToken.trim() === '') {
+        console.log('⚠️ Cannot sync push token: empty token');
+        return false;
+      }
+
+      console.log('🔄 Syncing push token with backend...');
+
+      const response = await fetch(`${ENV.API_URL}/auth/push-token`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ pushToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Push token sync failed:', response.status, errorData);
+        return false;
+      }
+
+      const result = await response.json();
+      console.log('✅ Push token synced successfully:', result);
+      return true;
+    } catch (error) {
+      console.error('❌ Push token sync error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Supprime le token push du backend (appeler lors de la deconnexion)
+   * @returns true si la suppression a reussi, false sinon
+   */
+  async deletePushToken(): Promise<boolean> {
+    try {
+      const accessToken = await this.getAccessToken();
+      if (!accessToken) {
+        console.log('⚠️ Cannot delete push token: not authenticated');
+        return false;
+      }
+
+      console.log('🗑️ Deleting push token from backend...');
+
+      const response = await fetch(`${ENV.API_URL}/auth/push-token`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Push token delete failed:', response.status, errorData);
+        return false;
+      }
+
+      console.log('✅ Push token deleted from backend');
+      return true;
+    } catch (error) {
+      console.error('❌ Push token delete error:', error);
+      return false;
+    }
+  }
 }
 
 // Export singleton
